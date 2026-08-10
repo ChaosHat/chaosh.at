@@ -1,5 +1,21 @@
 ---
 layout: base.njk
 ---
-<h1>{{ site.title }}</h1>
-<p>{{ site.description }}</p>
+<ul class="post-list">
+  {% for post in collections.dailies | limit(5) %}
+  {% set body = post.content | homeBody %}
+  <li>
+    <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
+    <div class="post-body">{{ body.html | safe }}</div>
+    {% if body.truncated %}
+    <a class="more" href="{{ post.url }}">read the rest →</a>
+    {% endif %}
+  </li>
+  {% else %}
+  <li class="empty">Nothing here yet.</li>
+  {% endfor %}
+</ul>
+
+{% if collections.dailies | length > 5 %}
+<p class="all-link"><a href="/archive/">all posts →</a></p>
+{% endif %}
