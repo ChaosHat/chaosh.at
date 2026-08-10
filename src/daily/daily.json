@@ -1,6 +1,0 @@
-{
-  "layout": "post.njk",
-  "tags": "dailies",
-  "isDaily": true,
-  "permalink": "/daily/{{ page.date | dateSlug }}/"
-}

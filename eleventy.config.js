@@ -70,11 +70,20 @@ export default function (eleventyConfig) {
       .sort((a, b) => b.essayDate - a.essayDate),
   );
 
+  // Posts missing a usable date are held out of the site entirely rather than
+  // published under an invented one. Reported after the build, never fatal.
+  const undated = new Set();
+  const publishable = (posts) =>
+    posts.filter((p) => {
+      if (!p.data.datedProperly) {
+        undated.add(p.inputPath);
+        return false;
+      }
+      return !p.data.hold;
+    });
+
   eleventyConfig.addCollection("dailies", (api) =>
-    api
-      .getFilteredByTag("dailies")
-      .filter((p) => !p.data.hold)
-      .sort((a, b) => b.date - a.date),
+    publishable(api.getFilteredByTag("dailies")).sort((a, b) => b.date - a.date),
   );
 
   // ---------------------------------------------------------------- fan-out
@@ -121,10 +130,9 @@ export default function (eleventyConfig) {
   const unmatched = new Map(); // normalised heading -> {label, firstSeen}
 
   eleventyConfig.addCollection("subjectPages", (api) => {
-    const dailies = api
-      .getFilteredByTag("dailies")
-      .filter((p) => !p.data.hold)
-      .sort((a, b) => a.date - b.date); // oldest-first, per spec
+    const dailies = publishable(api.getFilteredByTag("dailies")).sort(
+      (a, b) => a.date - b.date, // oldest-first, per spec
+    );
 
     const essays = new Map();
     for (const e of api.getFilteredByTag("essays")) {
@@ -194,6 +202,16 @@ export default function (eleventyConfig) {
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.
   eleventyConfig.on("eleventy.after", () => {
+    if (undated.size > 0) {
+      console.warn(
+        `\n[chaosh.at] ${undated.size} post(s) NOT PUBLISHED — no usable date:`,
+      );
+      for (const file of undated) console.warn(`  · ${file}`);
+      console.warn(
+        `  Rename to YYYY-MM-DD.md, or add "date: YYYY-MM-DD" to the frontmatter.\n`,
+      );
+    }
+
     if (unmatched.size === 0) return;
     console.warn(
       `\n[chaosh.at] ${unmatched.size} unclassified heading(s) — not on any subject page:`,
