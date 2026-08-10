@@ -2,6 +2,13 @@
 layout: base.njk
 ---
 <article class="post">
-  <h1 class="post-date">{{ page.date | readableDate }}</h1>
+  <header class="post-head">
+    {% if title %}
+    <h1 class="post-title">{{ title }}</h1>
+    <p class="post-subdate">{{ page.date | readableDate }}</p>
+    {% else %}
+    <h1 class="post-date">{{ page.date | readableDate }}</h1>
+    {% endif %}
+  </header>
   {{ content | linkSubjects | safe }}
 </article>

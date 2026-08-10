@@ -138,6 +138,70 @@ img { max-width: 100%; height: auto; }
 
 .empty { color: var(--muted); }
 
+/* home: pinned writing above the stream */
+
+.section-head {
+  font-size: 0.78rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.writing { margin-bottom: 3rem; }
+
+.essay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.essay-list > li + li { margin-top: 1.1rem; }
+
+.essay-title {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.essay-blurb {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stream .section-head { margin-top: 0; }
+
+/* titled days */
+
+.post-title { margin: 0; font-size: 1.5rem; }
+
+.post-subdate,
+.post-list-subdate {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.post-head { margin-bottom: 1.5rem; }
+
+.post-list-title {
+  display: block;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.post-list-subdate { margin-bottom: 0.5rem; }
+
+.archive-note {
+  float: right;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 /* subject pages */
 
 .subject-head { margin-bottom: 2rem; }

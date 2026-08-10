@@ -61,6 +61,15 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
 
+  // Standing essays are pinned above the daily stream rather than interleaved
+  // into it: an essay is written long after the game it covers, so its date
+  // would bury it under dailies that have nothing to do with it.
+  eleventyConfig.addFilter("withEssays", (subjects) =>
+    (subjects ?? [])
+      .filter((s) => s.hasEssay)
+      .sort((a, b) => b.essayDate - a.essayDate),
+  );
+
   eleventyConfig.addCollection("dailies", (api) =>
     api
       .getFilteredByTag("dailies")
@@ -164,6 +173,7 @@ export default function (eleventyConfig) {
         essayHtml: essay ? md.render(essay.rawInput) : null,
         essayDate: essay ? essay.date : null,
         hasEssay: Boolean(essay),
+        description: essay?.data?.description ?? meta.description ?? null,
       };
     });
   });
