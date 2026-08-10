@@ -3,5 +3,5 @@ layout: base.njk
 ---
 <article class="post">
   <h1 class="post-date">{{ page.date | readableDate }}</h1>
-  {{ content | safe }}
+  {{ content | linkSubjects | safe }}
 </article>

@@ -1,0 +1,14 @@
+---
+title: Final Fantasy VI
+date: 2026-07-27
+publish: true
+tags:
+  - final-fantasy-vi
+description: The drama seems totally unearned. Playing it 30 years late makes me less sympathetic to the argument that VI is the best in the series.
+---
+
+The drama seems totally unearned here. It has a lot of emotional whiplash and there's a lot of build up out of nowhere. It's also silly which really undercuts it. The cast is too big and the cuts from person to person prevent you from building any kind of relationship with anyone.
+
+The game is really easy and the combat is pretty boring so far (I think mostly because it's too easy for any amount of nuance or strategy to matter.)
+
+I think a lot of these gripes are absolutely me playing it 30 years after release, the genre and games in general have evolved significantly. Still though, it makes me less sympathetic to a lot of arguments I've seen that VI is actually the best in the series and VII is overrated. I think setting quality of story aside (whatever that means, I guess some measure of plot without considering execution of it), VII is a much more emotionally resonant story.

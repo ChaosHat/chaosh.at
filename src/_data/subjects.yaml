@@ -1,0 +1,49 @@
+# The site's database. One entry per subject written about.
+#
+# key      -> the URL slug: /s/<key>/ , and the essay filename in games/<key>.md
+# title    -> display name
+# category -> list; drives shelf membership only. Soft: edit freely, URLs don't move.
+# status   -> active | completed | abandoned. "active" also drives Now Playing.
+# rating   -> optional
+# cover    -> optional; omit and the shelf falls back to a text list
+# aliases  -> headings that resolve here. The title always matches automatically.
+#
+# A "## heading" in a daily post that matches nothing gets a build warning and
+# stays only in that post. Nothing is ever auto-created.
+
+dragon-quest-xi-s:
+  title: Dragon Quest XI S
+  category: [games]
+  status: active
+  aliases: [dqxis, dqxi s, dq11s, dragon quest 11 s]
+
+final-fantasy-vii-remake:
+  title: Final Fantasy VII Remake
+  category: [games]
+  status: active
+  aliases: [ff7r, ffviir, final fantasy 7 remake]
+
+castlevania-symphony-of-the-night:
+  title: "Castlevania: Symphony of the Night"
+  category: [games]
+  status: active
+  aliases: [sotn, castlevania sotn, symphony of the night, castlevania - sotn]
+
+persona-5-royal:
+  title: Persona 5 Royal
+  category: [games]
+  status: completed
+  aliases: [p5r, persona5 royal]
+
+final-fantasy-vi:
+  title: Final Fantasy VI
+  category: [games]
+  status: active
+  aliases: [ffvi, ff6, final fantasy 6]
+
+fields-of-mistria:
+  title: Fields of Mistria
+  category: [games]
+  status: abandoned
+  rating: 4
+  aliases: [mistria, fom]

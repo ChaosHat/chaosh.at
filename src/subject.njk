@@ -1,0 +1,37 @@
+---
+layout: base.njk
+pagination:
+  data: collections.subjectPages
+  size: 1
+  alias: subject
+permalink: "/s/{{ subject.slug }}/"
+eleventyComputed:
+  title: "{{ subject.title }}"
+---
+<article class="subject">
+  <header class="subject-head">
+    <h1>{{ subject.title }}</h1>
+    <p class="subject-meta">
+      <span class="status status-{{ subject.status }}">{{ subject.status }}</span>
+      {% if subject.rating %}<span class="rating">{{ subject.rating }}/5</span>{% endif %}
+    </p>
+  </header>
+
+  {% if subject.essayHtml %}
+  <div class="essay">{{ subject.essayHtml | safe }}</div>
+  {% endif %}
+
+  {% if subject.fragments | length %}
+  <section class="timeline">
+    {% if subject.essayHtml %}<h2 class="timeline-head">Along the way</h2>{% endif %}
+    {% for fragment in subject.fragments %}
+    <div class="fragment">
+      <a class="fragment-date" href="{{ fragment.sourceUrl }}">{{ fragment.date | readableDate }}</a>
+      {{ fragment.html | safe }}
+    </div>
+    {% endfor %}
+  </section>
+  {% elif not subject.essayHtml %}
+  <p class="empty">Nothing written about this yet.</p>
+  {% endif %}
+</article>
