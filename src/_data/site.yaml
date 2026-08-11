@@ -1,0 +1,16 @@
+# The site's own copy. Carried to the repo by publish.py on every run, same as
+# subjects.yaml and tagviews.yaml — edit here, never in the repo.
+title: chaosh.at
+url: https://chaosh.at
+author: Hat
+description: Games, books, shows, and whatever else.
+
+# Standing line under the masthead saying what the auroras are. Leave empty and
+# nothing renders — no placeholder, no empty box.
+#
+# Worth knowing before writing it: hue means nothing. Each subject's colour is a
+# hash on a ladder, picked so registering a subject needs no assets. The axes
+# that DO carry meaning are how much aurora is in the sky (status) and how
+# brightly it burns (how recently you wrote about it). Copy that explains the
+# colours would be explaining something that isn't there.
+intro: ""

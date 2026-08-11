@@ -24,9 +24,13 @@
       </nav>
     </header>
 
-    {#- Says what the auroras mean. Empty in site.json until it is written;
-        an unwritten intro renders nothing rather than a placeholder. -#}
-    {% if site.intro %}<p class="site-intro">{{ site.intro }}</p>{% endif %}
+    {#- Says what the auroras mean. Written in the vault's site.yaml; empty
+        renders nothing rather than a placeholder. Home page only — it is an
+        introduction, and repeating it above every subject page would nag a
+        returning reader. It sits here rather than in index.njk so it stays
+        above Now Playing: what the site is, then what is current. Drop the
+        url test to show it everywhere. -#}
+    {% if site.intro and page.url == "/" %}<p class="site-intro">{{ site.intro }}</p>{% endif %}
 
     {% set playing = collections.subjectPages | nowPlaying %}
     {% if playing | length %}
