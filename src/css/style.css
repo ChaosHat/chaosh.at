@@ -138,7 +138,107 @@ img { max-width: 100%; height: auto; }
 
 .empty { color: var(--muted); }
 
-/* home: pinned writing above the stream */
+/* navigation */
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+
+.now-playing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.55rem;
+  margin: -1rem 0 2rem;
+  font-size: 0.9rem;
+}
+
+.now-label {
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.now-playing a { text-decoration: none; }
+
+/* shelves */
+
+.shelf-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shelf-list > li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.shelf-list a { text-decoration: none; }
+
+.shelf-status {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.shelf-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 1.5rem 1rem;
+}
+
+.shelf-item a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.shelf-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.shelf-noart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 4;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--muted);
+}
+
+.shelf-caption {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+
+/* a finished or dropped thing sits back visually; what's active stays bright */
+.shelf-item.status-completed img,
+.shelf-item.status-shelved img,
+.shelf-item.status-abandoned img { opacity: 0.72; }
 
 .section-head {
   font-size: 0.78rem;

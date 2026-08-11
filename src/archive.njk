@@ -9,20 +9,6 @@ permalink: "{% if pagination.pageNumber == 0 %}/archive/{% else %}/archive/page-
 ---
 <h1>Archive</h1>
 
-{% set essays = collections.subjectPages | withEssays %}
-{% if pagination.pageNumber == 0 and essays | length %}
-<h2 class="section-head">Writing</h2>
-<ul class="archive-list">
-  {% for essay in essays %}
-  <li>
-    <a href="/s/{{ essay.slug }}/">{{ essay.title }}</a>
-    <span class="archive-note">essay</span>
-  </li>
-  {% endfor %}
-</ul>
-<h2 class="section-head">Daily posts</h2>
-{% endif %}
-
 <ul class="archive-list">
   {% for post in posts %}
   <li>

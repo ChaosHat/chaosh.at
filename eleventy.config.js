@@ -25,18 +25,29 @@ export default function (eleventyConfig) {
 
   // Dates are always parsed from the YYYY-MM-DD filename, never from mtime,
   // which resets on CI. Format in UTC so the day never shifts.
-  const utc = { timeZone: "UTC" };
+  //
+  // One shared formatter, memoised by timestamp: this runs once per fragment on
+  // every subject page plus every archive row, so it is the hottest filter in
+  // the build by a wide margin.
+  const dateFormat = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const dateCache = new Map();
 
   eleventyConfig.addFilter("dateSlug", (d) => d.toISOString().slice(0, 10));
 
-  eleventyConfig.addFilter("readableDate", (d) =>
-    d.toLocaleDateString("en-GB", {
-      ...utc,
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
-  );
+  eleventyConfig.addFilter("readableDate", (d) => {
+    const key = d.getTime();
+    let out = dateCache.get(key);
+    if (out === undefined) {
+      out = dateFormat.format(d);
+      dateCache.set(key, out);
+    }
+    return out;
+  });
 
   // Dailies render in full on the home page — an excerpt hides the fact that a
   // post covers several subjects. Long days are cut at an H2 boundary so a
@@ -61,13 +72,24 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
 
-  // Standing essays are pinned above the daily stream rather than interleaved
-  // into it: an essay is written long after the game it covers, so its date
-  // would bury it under dailies that have nothing to do with it.
-  eleventyConfig.addFilter("withEssays", (subjects) =>
-    (subjects ?? [])
-      .filter((s) => s.hasEssay)
-      .sort((a, b) => b.essayDate - a.essayDate),
+  // Now Playing is derived, never curated — it is the same `status: active`
+  // that groups the shelves, so the two cannot drift apart.
+  eleventyConfig.addFilter("nowPlaying", (subjects) =>
+    (subjects ?? []).filter((s) => s.status === "active" && !s.hide_from_now),
+  );
+
+  // Shelf order: what he's on now first, then finished, then the two kinds of
+  // stopped. Within a group, alphabetical.
+  const STATUS_ORDER = ["active", "completed", "shelved", "abandoned"];
+  eleventyConfig.addFilter("shelveSort", (subjects) =>
+    (subjects ?? []).slice().sort((a, b) => {
+      const s = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
+      return s !== 0 ? s : String(a.title).localeCompare(String(b.title));
+    }),
+  );
+
+  eleventyConfig.addFilter("inCategory", (subjects, category) =>
+    (subjects ?? []).filter((s) => (s.category ?? []).includes(category)),
   );
 
   // Posts missing a usable date are held out of the site entirely rather than
@@ -84,6 +106,14 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addCollection("dailies", (api) =>
     publishable(api.getFilteredByTag("dailies")).sort((a, b) => b.date - a.date),
+  );
+
+  // "Best of" is zero-length until Hat marks a post `featured: true`. Supporting
+  // the flag now costs nothing; the page and its nav link stay hidden until then.
+  eleventyConfig.addCollection("featured", (api) =>
+    publishable(api.getFilteredByTag("dailies"))
+      .filter((p) => p.data.featured === true)
+      .sort((a, b) => b.date - a.date),
   );
 
   // ---------------------------------------------------------------- fan-out
@@ -193,6 +223,33 @@ export default function (eleventyConfig) {
         blurb,
       };
     });
+  });
+
+  // One shelf per category actually in use. Categories are a soft field, so a
+  // shelf appears the moment a subject claims it and disappears when none do —
+  // no separate list of shelves to keep in step.
+  const SHELF_LABELS = {
+    games: "Games",
+    boardgames: "Board games",
+    books: "Books",
+    shows: "Shows",
+    life: "Life",
+  };
+
+  eleventyConfig.addCollection("shelves", (api) => {
+    const counts = new Map();
+    for (const meta of Object.values(subjects)) {
+      for (const cat of meta.category ?? []) {
+        counts.set(cat, (counts.get(cat) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .map(([category, count]) => ({
+        category,
+        label: SHELF_LABELS[category] ?? category,
+        count,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   });
 
   // A subject heading in a daily post becomes a link to its subject page, and is

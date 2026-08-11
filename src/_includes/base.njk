@@ -10,10 +10,23 @@
   <body>
     <header class="site-header">
       <a class="site-title" href="/">{{ site.title }}</a>
-      <nav>
+      <nav class="site-nav">
+        {% for shelf in collections.shelves %}
+        <a href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
+        {% endfor %}
         <a href="/archive/">archive</a>
+        {% if collections.featured | length %}<a href="/best/">best of</a>{% endif %}
       </nav>
     </header>
+
+    {% set playing = collections.subjectPages | nowPlaying %}
+    {% if playing | length %}
+    <p class="now-playing">
+      <span class="now-label">Now playing</span>
+      {% for item in playing %}<a href="/s/{{ item.slug }}/">{{ item.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+
     <main>
       {{ content | safe }}
     </main>

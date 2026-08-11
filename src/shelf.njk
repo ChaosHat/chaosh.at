@@ -1,0 +1,44 @@
+---
+layout: base.njk
+pagination:
+  data: collections.shelves
+  size: 1
+  alias: shelf
+permalink: "/shelf/{{ shelf.category }}/"
+eleventyComputed:
+  title: "{{ shelf.label }}"
+---
+{% set items = collections.subjectPages | inCategory(shelf.category) | shelveSort %}
+{% set withArt = items | selectattr("cover") | list %}
+
+<h1>{{ shelf.label }}</h1>
+
+{% if withArt | length %}
+{# Cover grid. Any subject without art still appears, as a titled tile. #}
+<ul class="shelf-grid">
+  {% for item in items %}
+  <li class="shelf-item status-{{ item.status }}">
+    <a href="/s/{{ item.slug }}/">
+      {% if item.cover %}
+      <img src="/covers/{{ item.cover }}" alt="" loading="lazy" width="264" height="352">
+      {% else %}
+      <span class="shelf-noart">{{ item.title }}</span>
+      {% endif %}
+      <span class="shelf-caption">{{ item.title }}</span>
+    </a>
+    <span class="shelf-status">{{ item.status }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+{# No art anywhere in this category — fall back to a text list, so a shelf like
+   slice-of-life or books is never unreachable just for lacking covers. #}
+<ul class="shelf-list">
+  {% for item in items %}
+  <li>
+    <a href="/s/{{ item.slug }}/">{{ item.title }}</a>
+    <span class="shelf-status">{{ item.status }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}

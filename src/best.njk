@@ -1,0 +1,20 @@
+---
+layout: base.njk
+title: Best of
+pagination:
+  data: collections.featured
+  size: 100
+  alias: picks
+  addAllPagesToCollections: false
+permalink: "{% if picks | length %}/best/{% else %}false{% endif %}"
+---
+<h1>Best of</h1>
+
+<ul class="archive-list">
+  {% for post in picks %}
+  <li>
+    <a href="{{ post.url }}">{{ post.data.title or (post.date | readableDate) }}</a>
+    {% if post.data.title %}<span class="archive-note">{{ post.date | readableDate }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>

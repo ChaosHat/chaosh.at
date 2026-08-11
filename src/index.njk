@@ -1,44 +1,26 @@
 ---
 layout: base.njk
 ---
-{% set essays = collections.subjectPages | withEssays %}
-{% if essays | length %}
-<section class="writing">
-  <h2 class="section-head">Writing</h2>
-  <ul class="essay-list">
-    {% for essay in essays %}
-    <li>
-      <a class="essay-title" href="/s/{{ essay.slug }}/">{{ essay.title }}</a>
-      {% if essay.blurb %}<p class="essay-blurb">{{ essay.blurb }}</p>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-</section>
-{% endif %}
-
-<section class="stream">
-  {% if essays | length %}<h2 class="section-head">Lately</h2>{% endif %}
-  <ul class="post-list">
-    {% for post in collections.dailies | limit(5) %}
-    {% set body = post.content | homeBody %}
-    <li>
-      {% if post.data.title %}
-      <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
-      <p class="post-list-subdate">{{ post.date | readableDate }}</p>
-      {% else %}
-      <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
-      {% endif %}
-      <div class="post-body">{{ body.html | linkSubjects | safe }}</div>
-      {% if body.truncated %}
-      <a class="more" href="{{ post.url }}">read the rest →</a>
-      {% endif %}
-    </li>
+<ul class="post-list">
+  {% for post in collections.dailies | limit(5) %}
+  {% set body = post.content | homeBody %}
+  <li>
+    {% if post.data.title %}
+    <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
+    <p class="post-list-subdate">{{ post.date | readableDate }}</p>
     {% else %}
-    <li class="empty">Nothing here yet.</li>
-    {% endfor %}
-  </ul>
+    <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
+    {% endif %}
+    <div class="post-body">{{ body.html | linkSubjects | safe }}</div>
+    {% if body.truncated %}
+    <a class="more" href="{{ post.url }}">read the rest →</a>
+    {% endif %}
+  </li>
+  {% else %}
+  <li class="empty">Nothing here yet.</li>
+  {% endfor %}
+</ul>
 
-  {% if collections.dailies | length > 5 %}
-  <p class="all-link"><a href="/archive/">all posts →</a></p>
-  {% endif %}
-</section>
+{% if collections.dailies | length > 5 %}
+<p class="all-link"><a href="/archive/">all posts →</a></p>
+{% endif %}
