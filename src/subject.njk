@@ -14,6 +14,14 @@ eleventyComputed:
     <p class="subject-meta">
       <span class="status status-{{ subject.status }}">{{ subject.status }}</span>
       {% if subject.rating %}<span class="rating">{{ subject.rating }}/5</span>{% endif %}
+      {#- Sidestepping to the franchise or the genre is the natural next move
+          for a reader who arrived by following a title, so the tags sit in the
+          meta row rather than at the foot of a long timeline. -#}
+      {% if subject.tags | length %}
+      <span class="tag-list">
+        {% for tag in subject.tags %}<a class="tag-link" href="/t/{{ tag.slug }}/">#{{ tag.slug }}</a>{% endfor %}
+      </span>
+      {% endif %}
     </p>
   </header>
 

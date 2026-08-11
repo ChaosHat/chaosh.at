@@ -1,0 +1,50 @@
+---
+layout: base.njk
+pagination:
+  data: collections.tagPages
+  size: 1
+  alias: tag
+permalink: "/t/{{ tag.slug }}/"
+eleventyComputed:
+  title: "{{ tag.title }}"
+  description: "{{ tag.description }}"
+---
+<article class="tag">
+  <header class="tag-head">
+    <h1>{{ tag.title }}</h1>
+    {% if tag.description %}<p class="tag-desc">{{ tag.description }}</p>{% endif %}
+    {#- Membership is authored, so the list of games IS the definition of the
+        tag. It goes at the top rather than being inferred from the timeline. -#}
+    {% if tag.members | length %}
+    <p class="tag-members">
+      {% for member in tag.members %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+  </header>
+
+  {% if tag.entries | length %}
+  <section class="timeline">
+    {% for entry in tag.entries %}
+    <div class="fragment">
+      <p class="fragment-meta">
+        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
+        <a class="fragment-subject" href="/s/{{ entry.subject.slug }}/">{{ entry.subject.title }}</a>
+      </p>
+      {#- An essay shows its lede and links out. The full text lives on the
+          subject page; inlining several would bury the fragments. -#}
+      {% if entry.kind == "essay" %}
+      <p class="tag-essay">{{ entry.blurb }}
+        <a class="more" href="/s/{{ entry.subject.slug }}/">read the post-mortem →</a>
+      </p>
+      {% else %}
+      {{ entry.html | safe }}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </section>
+  {% elif tag.members | length %}
+  <p class="empty">Nothing written about these yet.</p>
+  {% else %}
+  <p class="empty">No games on this tag yet.</p>
+  {% endif %}
+</article>

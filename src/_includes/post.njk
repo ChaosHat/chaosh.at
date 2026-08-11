@@ -11,4 +11,13 @@ layout: base.njk
     {% endif %}
   </header>
   {{ content | linkSubjects | spoilers | safe }}
+  {#- Day-scoped: the union of the tags of every subject this post files to.
+      Only on the full post — the home page shows truncated bodies, where a
+      footer covering sections that were cut would be a lie. -#}
+  {% set dayTags = content | postTags %}
+  {% if dayTags | length %}
+  <p class="tag-list post-tags">
+    {% for tag in dayTags %}<a class="tag-link" href="/t/{{ tag.slug }}/">#{{ tag.slug }}</a>{% endfor %}
+  </p>
+  {% endif %}
 </article>

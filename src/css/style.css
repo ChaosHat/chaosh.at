@@ -338,6 +338,88 @@ img { max-width: 100%; height: auto; }
 
 .essay { margin-bottom: 3rem; }
 
+/* tags
+   The hash carries the meaning, so the links stay muted and undecorated at the
+   weight of the status and rating beside them. A tag is a way out of a page,
+   never the reason anyone is on it. */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+/* In the meta row the size and lowercasing are already set; the tags only need
+   to not stretch that flex line. */
+.subject-meta .tag-list {
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+.tag-link {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.tag-link:hover,
+.tag-link:focus { color: var(--accent); }
+
+.post-tags {
+  margin-top: 2.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* tag pages */
+
+.tag-head { margin-bottom: 2rem; }
+
+.tag-head h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+}
+
+.tag-desc {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+}
+
+.tag-members {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.tag-members a { text-decoration: none; }
+
+/* Unlike a subject page, a tag page mixes games — so every entry has to say
+   which one it came from, and the date alone stops being enough. */
+.fragment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.3rem;
+}
+
+.fragment-meta .fragment-date { margin-bottom: 0; }
+
+.fragment-subject {
+  font-size: 0.8rem;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.fragment-subject:hover,
+.fragment-subject:focus { color: var(--accent); }
+
+.tag-essay { margin: 0; }
+
 .timeline-head {
   font-size: 0.8rem;
   font-variant: small-caps;
