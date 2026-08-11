@@ -21,17 +21,20 @@
   --pixel: "Silkscreen", ui-monospace, monospace;
   --serif: ui-serif, Georgia, "Times New Roman", serif;
 
-  --night: #171614;
-  --deep: #201d19;
-  --edge: #2f2b26;
-  --ink: #e6e2db;
-  --muted: #98918a;
-  --sun: #d99a6c;
+  /* Chrome is pulled off the sky engine's own bands at 285deg, so the page
+     reads as the top of the same sky the covers look into. */
+  --header: #0b081e;
+  --night: #131226;
+  --deep: #1f1d33;
+  --edge: #34324b;
+  --ink: #ede7de;
+  --muted: #9795ad;
+  --sun: #fe9d4a;
 
-  --st-active: #e0a34a;
-  --st-shelved: #a892c4;
-  --st-abandoned: #cf6152;
-  --st-completed: #77a3bd;
+  --st-active: #f5ae39;
+  --st-shelved: #af95df;
+  --st-abandoned: #e3645e;
+  --st-completed: #73b7df;
 
   --measure: 34rem;
   --wide: 47rem;
@@ -40,14 +43,15 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --night: #fdfcfa;
-    --deep: #f4f1ea;
-    --edge: #e2ddd6;
-    --ink: #1f1d1a;
-    --muted: #6b6560;
-    --sun: #8a4b2a;
+    --header: #ece5ee;
+    --night: #fbf7f4;
+    --deep: #f2ece9;
+    --edge: #ddd3d8;
+    --ink: #1f1b26;
+    --muted: #6b6472;
+    --sun: #a34a17;
 
-    --st-active: #9c6510;
+    --st-active: #94620c;
     --st-shelved: #6b4a99;
     --st-abandoned: #a83a2c;
     --st-completed: #2e6d8c;
@@ -56,11 +60,19 @@
 
 * { box-sizing: border-box; }
 
+/* The page is the top of a sky: deepest overhead, easing to --night by the
+   time you have scrolled past the masthead. On html, not body, so it spans
+   the viewport rather than the 47rem column. */
+html {
+  background: var(--night) linear-gradient(var(--header), transparent) no-repeat;
+  background-size: 100% 30rem;
+}
+
 body {
   margin: 0 auto;
   padding: 0 1.25rem 3.5rem;
   max-width: var(--wide);
-  background: var(--night);
+  background: transparent;
   color: var(--ink);
   font: 1rem/1.68 var(--serif);
   -webkit-text-size-adjust: 100%;
