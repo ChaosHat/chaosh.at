@@ -310,7 +310,13 @@ h1, h2, h3 { line-height: 1.25; }
 a.post-list-date:hover { color: var(--accent); }
 
 /* Markup shape comes from linkSubjects() in eleventy.config.js. */
-.frag { display: flex; gap: 1rem; }
+/* flex-start is load-bearing, not tidiness. A flex row defaults to
+   align-items: stretch, which gives .sky a definite height equal to the whole
+   fragment — and aspect-ratio only applies to an auto height, so it silently
+   stops governing. With preserveAspectRatio='none' on the SVG the curtain then
+   smears vertically down the length of the post: a long entry got a tall
+   stretched aurora, a one-liner got a correct tile. */
+.frag { display: flex; gap: 1rem; align-items: flex-start; }
 .frag + .frag { margin-top: 1.9rem; }
 .frag > .sky { width: 3rem; margin-top: 0.2rem; }
 
