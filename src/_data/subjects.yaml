@@ -1,5 +1,5 @@
 castlevania-symphony-of-the-night:
-  title: 'Castlevania: Symphony of the Night'
+  title: "Castlevania: Symphony of the Night"
   category:
     - games
   status: active
@@ -49,7 +49,7 @@ metaphor-refantazio:
   title: Metaphor ReFantazio
   category:
     - games
-  status: active
+  status: completed
   rating: 4
   aliases:
     - metaphor refantazio
