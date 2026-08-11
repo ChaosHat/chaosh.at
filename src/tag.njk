@@ -29,7 +29,7 @@ eleventyComputed:
       {#- The sky repeats here because this is the one timeline that MIXES
           subjects: the hue says which game before the label has been read. -#}
       <p class="fragment-meta">
-        <span class="sky t-{{ entry.subject.status }}" style="--h:{{ entry.subject.hue }}deg" aria-hidden="true"></span>
+        <span class="sky" style="background-image:url({{ entry.subject.chipUrl }})" aria-hidden="true"></span>
         <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
         <a class="fragment-subject" href="/s/{{ entry.subject.slug }}/">{{ entry.subject.title }}</a>
       </p>

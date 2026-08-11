@@ -1,0 +1,240 @@
+// The aurora engine. Design rationale: vault, 90_Reference/91_Documentation/
+// "chaosh.at Design System". Everything here is deterministic: a subject's sky
+// is a pure function of (slug, status, recency tier), and the header's of the
+// build date — same inputs, byte-identical SVG, forever.
+
+// ---------------------------------------------------------------- color
+
+// OKLCH -> sRGB hex at build time, so the SVGs carry plain hex and owe the
+// browser nothing. Perceptual lightness is what lets one value ramp hold at
+// every hue on the arc.
+const oklch = (L, C, Hdeg) => {
+  const h = (Hdeg * Math.PI) / 180;
+  const a = C * Math.cos(h);
+  const b = C * Math.sin(h);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const lin = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+  return (
+    "#" +
+    lin
+      .map((c) => {
+        const g = c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
+        return Math.round(Math.min(1, Math.max(0, g)) * 255)
+          .toString(16)
+          .padStart(2, "0");
+      })
+      .join("")
+  );
+};
+
+// The ladder still spreads subjects over 0-360, but the paint maps that onto a
+// curated 240-degree arc — green through teal, blue, violet, magenta, to red —
+// skipping the olive-brown quarter where a saturated aurora reads as sick sky.
+const ARC_START = 140;
+const ARC_SPAN = 240;
+const arcHue = (ladderHue) => ARC_START + (ladderHue / 360) * ARC_SPAN;
+
+const palette = (ladderHue) => {
+  const H = arcHue(ladderHue);
+  return {
+    edge: oklch(0.9, 0.13, H),
+    mid: oklch(0.74, 0.15, H),
+    deep: oklch(0.55, 0.11, H + 8),
+    glow: oklch(0.78, 0.13, H),
+  };
+};
+
+const GREY = { edge: "#8d93a8", mid: "#5c6273", deep: "#3a3f4e", glow: "#6a7082" };
+
+// Night base and furniture. Neutral for every subject: identity lives in the
+// curtains, the ground stays out of the argument.
+const NIGHT = ["#14152e", "#1a1c38", "#202544"];
+const NIGHT_DONE = ["#0e0f20", "#111227", "#14162e"];
+const STAR = "#eef2ff";
+const MOON = "#ecf0fb";
+
+// ---------------------------------------------------------------- random
+
+export const hashOf = (str) => {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i += 1) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  h ^= h >>> 16;
+  h = Math.imul(h, 2246822507);
+  h ^= h >>> 13;
+  h = Math.imul(h, 3266489909);
+  h ^= h >>> 16;
+  return h >>> 0;
+};
+
+const mulberry32 = (seed) => {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const range = (rand, lo, hi) => lo + rand() * (hi - lo);
+
+// ---------------------------------------------------------------- drawing
+
+const smooth = (pts) => {
+  let d = `M${pts[0][0].toFixed(0)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < pts.length - 1; i += 1) {
+    const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+    const my = (pts[i][1] + pts[i + 1][1]) / 2;
+    d += ` Q${pts[i][0].toFixed(0)} ${pts[i][1].toFixed(1)} ${mx.toFixed(0)} ${my.toFixed(1)}`;
+  }
+  return d;
+};
+
+// A curtain: bright lower edge, vertical rays of jittered heights fading
+// upward, brightness pulsing along the length. The per-column jitter is what
+// keeps it from ever reading as a banded stripe.
+const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96, shimmer = 0, sway = false }) => {
+  const y0 = range(rand, yMin, yMax);
+  const amp = range(rand, 5, 9);
+  const ph = range(rand, 0, 6.28);
+  const f1 = range(rand, 0.55, 0.95);
+  const f2 = range(rand, 1.6, 2.6);
+  const drift = range(rand, -8, 8);
+
+  const edge = [];
+  let rects = "";
+  for (let x = -4; x <= w + 4; x += 4) {
+    const t = x / w;
+    const y =
+      y0 +
+      drift * t +
+      amp * Math.sin(ph + t * f1 * 2 * Math.PI) +
+      amp * 0.5 * Math.sin(t * f2 * 2 * Math.PI + ph * 1.7) +
+      (sway ? 2.5 * Math.sin(t * 8 + shimmer * 1.3) : 0);
+    const yb = Math.round(y / 3) * 3;
+    edge.push([x, y]);
+    const n =
+      0.5 +
+      0.5 *
+        Math.sin(x * 1.7 + ph * 3 + shimmer * 2.2) *
+        Math.sin(x * 0.53 + ph * 5 + shimmer * 1.1);
+    const b = 0.62 + 0.38 * Math.sin(x * 0.9 + ph * 1.3 + shimmer * 2.8);
+    const ray = hBase * (0.9 + 1.5 * n);
+    rects +=
+      `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${(0.32 * b).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${(yb - ray * 0.5).toFixed(0)}' width='4' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${(0.58 * b).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${yb - 5}' width='4' height='7' fill='${pal.edge}' fill-opacity='${(0.95 * b).toFixed(2)}'/>`;
+  }
+  const glow = `<path d='${smooth(edge)}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='${(hBase * 1.8).toFixed(0)}' stroke-linecap='round' filter='url(#b)'/>`;
+  return `<g opacity='${op}'>${glow}${rects}</g>`;
+};
+
+const stars = (rand, count, box) =>
+  Array.from({ length: count }, () => {
+    const x = (rand() * box.w).toFixed(0);
+    const y = (rand() * box.h).toFixed(0);
+    const r = range(rand, 0.5, 1.1).toFixed(1);
+    return `<rect x='${x}' y='${y}' width='${r}' height='${r}' fill='${STAR}' fill-opacity='${range(rand, 0.5, 0.95).toFixed(2)}'/>`;
+  }).join("");
+
+const nightBase = (colors, w, h) =>
+  `<defs><linearGradient id='n' x1='0' y1='0' x2='0' y2='1'>` +
+  `<stop offset='0' stop-color='${colors[0]}'/>` +
+  `<stop offset='0.55' stop-color='${colors[1]}'/>` +
+  `<stop offset='1' stop-color='${colors[2]}'/></linearGradient>` +
+  `<filter id='b' x='-80%' y='-80%' width='260%' height='260%'>` +
+  `<feGaussianBlur stdDeviation='9'/></filter></defs>` +
+  `<rect width='${w}' height='${h}' fill='url(#n)'/>`;
+
+const svgWrap = (w, h, body) =>
+  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}' preserveAspectRatio='none'>${body}</svg>`;
+
+// ---------------------------------------------------------------- scenes
+
+// Status decides how much aurora is left in the sky; the recency tier decides
+// how bright what remains burns. Completed skies trade the aurora for the
+// moon: finished, not extinguished.
+export const subjectSvg = (slug, ladderHue, status, tier) => {
+  const rand = mulberry32(hashOf(slug));
+  const pal = palette(ladderHue);
+  const W = 96;
+  const H = 128;
+
+  let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
+  body += stars(rand, 11, { w: W, h: H });
+
+  if (status === "completed") {
+    body +=
+      `<circle cx='65' cy='32' r='17' fill='${MOON}' fill-opacity='0.16'/>` +
+      `<circle cx='65' cy='32' r='10' fill='${MOON}'/>`;
+  } else if (status === "abandoned") {
+    body += curtain(rand, GREY, { yMin: 42, yMax: 58, hBase: 14, op: 0.3 });
+  } else if (status === "shelved") {
+    body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.25 });
+    body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 10, op: 0.35 });
+  } else {
+    body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 7, op: 0.4 * tier });
+    body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 16, op: 0.8 * tier });
+    body += curtain(rand, pal, { yMin: 84, yMax: 98, hBase: 11, op: 0.55 * tier });
+  }
+  return svgWrap(W, H, body);
+};
+
+// The chip: what a sky becomes below ~32px, where three curtains would be
+// noise. Night, the main curtain's bright edge alone, two stars.
+export const chipSvg = (slug, ladderHue, status, tier) => {
+  const rand = mulberry32(hashOf(slug));
+  const pal = status === "abandoned" ? GREY : palette(ladderHue);
+  const W = 24;
+  const H = 32;
+  const op =
+    status === "completed" ? 0 : status === "abandoned" ? 0.5 : status === "shelved" ? 0.45 : Math.max(tier, 0.5);
+
+  let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
+  const y0 = range(rand, 12, 18);
+  const ph = range(rand, 0, 6.28);
+  if (op > 0) {
+    let line = "";
+    for (let x = 0; x < W; x += 2) {
+      const y = Math.round((y0 + 2.5 * Math.sin(ph + (x / W) * 4.5)) / 2) * 2;
+      line +=
+        `<rect x='${x}' y='${y - 3}' width='2' height='3' fill='${pal.mid}' fill-opacity='0.55'/>` +
+        `<rect x='${x}' y='${y}' width='2' height='2' fill='${pal.edge}' fill-opacity='0.95'/>`;
+    }
+    body += `<g opacity='${op}'>${line}</g>`;
+  }
+  if (status === "completed") {
+    body += `<circle cx='16' cy='9' r='4' fill='${MOON}'/>`;
+  }
+  body += `<rect x='${(rand() * W).toFixed(0)}' y='${(rand() * 8).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
+  body += `<rect x='${(rand() * W).toFixed(0)}' y='${(20 + rand() * 10).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
+  return svgWrap(W, H, body);
+};
+
+// The header: one wide curtain, edge to edge, in that night's hue — the date
+// seeds the color, so the sky over the masthead changes at each 2am publish
+// and holds all day. Three frames of the same curtain, shimmered, cycled by
+// CSS like an SNES palette animation.
+export const headerSvgs = (dateStr) => {
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const pal = palette(hue);
+  return [0, 2, 4].map((shimmer) => {
+    const rand = mulberry32(hashOf("masthead"));
+    const W = 480;
+    const H = 64;
+    let body =
+      `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
+      `<feGaussianBlur stdDeviation='7'/></filter></defs>`;
+    body += curtain(rand, pal, { yMin: 40, yMax: 48, hBase: 22, op: 0.45, w: W, shimmer, sway: true });
+    return svgWrap(W, H, body);
+  });
+};

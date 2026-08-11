@@ -30,7 +30,7 @@
       <span class="now-label">now playing</span>
       <div class="now-items">
         {% for item in playing %}
-        <a class="now-item" href="/s/{{ item.slug }}/"><span class="sky t-{{ item.status }}" style="--h:{{ item.hue }}deg" aria-hidden="true"></span>{{ item.title }}</a>
+        <a class="now-item" href="/s/{{ item.slug }}/"><span class="sky" style="background-image:url({{ item.chipUrl }})" aria-hidden="true"></span>{{ item.title }}</a>
         {% endfor %}
       </div>
     </div>

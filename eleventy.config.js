@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
+import { subjectSvg, chipSvg, headerSvgs } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -172,10 +173,11 @@ export default function (eleventyConfig) {
 
   // ------------------------------------------------------------------- sky
   //
-  // Generated cover art: status picks the time of day, the slug picks the hue.
-  // Written up in the vault at 90_Reference/91_Documentation/"chaosh.at Design
-  // System" — including why hues sit on a ladder rather than hashing straight
-  // to a degree, and what recency would cost if it ever drives this instead.
+  // Generated cover art: the slug picks the hue and seeds the aurora's path,
+  // status picks how much aurora is left in the sky, recency picks how bright
+  // it burns. Written up in the vault at 90_Reference/91_Documentation/
+  // "chaosh.at Design System" — including why hues sit on a ladder rather
+  // than hashing straight to a degree.
   const SLOT_BASE = 24;
 
   const hashOf = (slug) => {
@@ -246,14 +248,42 @@ export default function (eleventyConfig) {
 
   const subjectHues = assignHues();
 
-  const skyOf = (slug, meta) => ({
-    status: meta?.status ?? "active",
-    hue: subjectHues.get(slug) ?? 0,
-  });
+  // Recency tiers, not a continuous scale: bitmap-era art likes discrete
+  // states, and a subject visibly changing tier at a 2am publish is an event.
+  // Days since the LAST fragment, not post counts — the axis tracks whether
+  // the fire is lit, and must not reward binge weeks over steady writing.
+  const TIERS = [
+    [7, 1.0], // wrote about it this week: full burn
+    [28, 0.6], // this month: dimmed
+    [Infinity, 0.32], // drifting off
+  ];
+  const tierOf = (lastDate) => {
+    if (!lastDate) return 0.32;
+    const days = (Date.now() - lastDate.getTime()) / 86400000;
+    return TIERS.find(([limit]) => days <= limit)[1];
+  };
 
-  const skyTag = (slug, meta) => {
-    const { status, hue } = skyOf(slug, meta);
-    return `<span class="sky t-${status}" style="--h:${hue}deg" aria-hidden="true"></span>`;
+  // slug -> generated art, filled during the fan-out (recency needs the
+  // fragments), written to the output in eleventy.after.
+  const skyFiles = new Map();
+
+  const registerSky = (slug, meta, tier) => {
+    const hue = subjectHues.get(slug) ?? 0;
+    const status = meta?.status ?? "active";
+    skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier));
+    skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier));
+    return {
+      skyUrl: `/img/sky/${slug}.svg`,
+      chipUrl: `/img/sky/${slug}-chip.svg`,
+    };
+  };
+
+  const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
+
+  const skyTag = (slug) => {
+    const art = skyUrls.get(slug);
+    if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
+    return `<span class="sky" style="background-image:url(${art.skyUrl})" aria-hidden="true"></span>`;
   };
 
   // normalised heading -> slug
@@ -357,12 +387,18 @@ export default function (eleventyConfig) {
         ? firstPara[1].replace(/<[^>]+>/g, "").trim()
         : null;
 
+      const fragments = collected.get(slug) ?? [];
+      const tier = tierOf(fragments.at(-1)?.date ?? null);
+      const art = registerSky(slug, meta, tier);
+      skyUrls.set(slug, art);
+
       return {
         slug,
         ...meta,
-        ...skyOf(slug, meta),
+        status: meta?.status ?? "active",
+        ...art,
         tags: tagLinks(tagsOfSubject.get(slug)),
-        fragments: collected.get(slug) ?? [],
+        fragments,
         essayHtml,
         essayDate: essay ? essay.date : null,
         hasEssay: Boolean(essay),
@@ -510,7 +546,7 @@ export default function (eleventyConfig) {
         `<span class="badge b-${status}">${status}</span>` +
         `</h2>`;
 
-      out.push(wrapFragment(skyTag(slug, meta), head + rest));
+      out.push(wrapFragment(skyTag(slug), head + rest));
     }
     return out.join("");
   };
@@ -629,9 +665,22 @@ export default function (eleventyConfig) {
     return entries.sort((a, b) => b.date - a.date);
   });
 
+  // The masthead's sky rolls its hue at each build — a different aurora every
+  // day, held all day, zero JavaScript. Three shimmer frames of one curtain,
+  // cycled by CSS.
+  headerSvgs(new Date().toISOString().slice(0, 10)).forEach((svg, i) => {
+    skyFiles.set(`img/aurora/h${i + 1}.svg`, svg);
+  });
+
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.
   eleventyConfig.on("eleventy.after", () => {
+    for (const [rel, svg] of skyFiles) {
+      const dest = path.join("_site", rel);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, svg);
+    }
+
     if (undated.size > 0) {
       console.warn(
         `\n[chaosh.at] ${undated.size} post(s) NOT PUBLISHED — no usable date:`,

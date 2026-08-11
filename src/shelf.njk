@@ -16,15 +16,15 @@ eleventyComputed:
     so there is no coverless fallback list any more, and no shelf that is
     unreachable for want of images. The grid IS the shelf.
 
-    It also reads as a sky: four subjects at golden hour, one at moonrise, one
-    bisected by the horizon. You can take in the state of the whole category
-    without reading a single badge — the badges stay for anyone who cannot
-    separate the hues. -#}
+    It also reads as a night sky: playing burns bright, drifting fades,
+    abandoned is a grey ghost, finished is moonrise. You can take in the state
+    of the whole category without reading a single badge — the badges stay
+    for anyone who cannot separate the scenes. -#}
 <ul class="shelf-grid">
   {% for item in items %}
   <li class="shelf-item">
     <a href="/s/{{ item.slug }}/">
-      <span class="sky t-{{ item.status }}" style="--h:{{ item.hue }}deg" aria-hidden="true"></span>
+      <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
       <span class="shelf-caption">{{ item.title }}</span>
       <span class="badge b-{{ item.status }}">{{ item.status }}</span>
       {% if item.rating %}<span class="rating">{{ item.rating }}/5</span>{% endif %}

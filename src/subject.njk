@@ -10,10 +10,9 @@ eleventyComputed:
 ---
 <article class="subject">
   <header class="subject-head">
-    {#- The subject's sky at the one size where the time of day is properly
-        legible. In the stream it renders at 48px, where it reads as an identity
-        chip and little else. -#}
-    <span class="sky t-{{ subject.status }}" style="--h:{{ subject.hue }}deg" aria-hidden="true"></span>
+    {#- The subject's sky at the one size where the full three-curtain scene
+        is properly legible. Small renders elsewhere use the chip variant. -#}
+    <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
     <div>
       <h1>{{ subject.title }}</h1>
       <p class="subject-meta">
