@@ -38,6 +38,11 @@
 
   --measure: 34rem;
   --wide: 47rem;
+
+  /* How tall a fragment sky may grow before it stops tracking entry length,
+     and where its lower edge starts dissolving into the page. */
+  --sky-cap: 20rem;
+  --sky-fade: 70%;
 }
 
 * { box-sizing: border-box; }
@@ -310,15 +315,33 @@ h1, h2, h3 { line-height: 1.25; }
 a.post-list-date:hover { color: var(--accent); }
 
 /* Markup shape comes from linkSubjects() in eleventy.config.js. */
-/* flex-start is load-bearing, not tidiness. A flex row defaults to
-   align-items: stretch, which gives .sky a definite height equal to the whole
-   fragment — and aspect-ratio only applies to an auto height, so it silently
-   stops governing. With preserveAspectRatio='none' on the SVG the curtain then
-   smears vertically down the length of the post: a long entry got a tall
-   stretched aurora, a one-liner got a correct tile. */
-.frag { display: flex; gap: 1rem; align-items: flex-start; }
+/* The fragment sky grows with its entry, between a floor and a ceiling.
+   Stretch is the default flex behaviour and this rule keeps it deliberately:
+   a definite height means aspect-ratio stops governing, and with
+   preserveAspectRatio='none' the curtain elongates rather than crops — the
+   rays stretch and it reads as a taller aurora, not a distorted one.
+
+   Unbounded it was a bug: a long post got a streak running its whole length.
+   The floor is the natural 3:4 tile, so a one-line entry looks exactly as it
+   did before; the ceiling stops any entry becoming a stripe. Between them the
+   art tracks how much was written, which is the same thing recency does with
+   brightness — length is the one axis the daily stream already has and never
+   used. This is the one place pixel squares are knowingly non-square. */
+.frag { display: flex; gap: 1rem; align-items: stretch; }
 .frag + .frag { margin-top: 1.9rem; }
-.frag > .sky { width: 3rem; margin-top: 0.2rem; }
+/* The sky stops partway down its entry, so its lower edge is dissolved rather
+   than cut: an unmasked bottom leaves a hard line and a boxed border sitting
+   in the middle of the prose, which reads as a clipped image instead of a sky.
+   The mask takes the border and the dither with it — everything fades, so the
+   column ends in night rather than in an edge. */
+.frag > .sky {
+  width: 3rem;
+  margin-top: 0.2rem;
+  min-height: 4rem;  /* 3:4 at 3rem wide — the untouched tile */
+  max-height: var(--sky-cap);
+  -webkit-mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
+  mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
+}
 
 /* Prose keeps its measure while the shell stays wide enough for art. */
 .frag-body { min-width: 0; max-width: var(--measure); }
@@ -557,7 +580,7 @@ a.post-list-date:hover { color: var(--accent); }
    which are the only genuinely tertiary text on the site.
    Below 34rem only the art shrinks. */
 @media (max-width: 34rem) {
-  .frag > .sky { width: 2.25rem; }
+  .frag > .sky { width: 2.25rem; min-height: 3rem; }
   .subject-head { gap: 1rem; }
   .subject-head > .sky { width: 5.5rem; }
 }
