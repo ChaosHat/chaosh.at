@@ -240,7 +240,11 @@ export const headerSheet = (dateStr) => {
   const FH = HEADER_FH;
   const N = HEADER_FRAMES;
 
+  // Each frame is clipped to its own band: the tallest rays reach ~34px above
+  // the frame, and without the clip a frame's ray tips render into the bottom
+  // of the frame above it — visible on the site as cut-off repeats.
   let frames = "";
+  let clips = "";
   for (let k = 0; k < N; k += 1) {
     const theta = (k / N) * TAU;
     const F = k / N;
@@ -276,13 +280,14 @@ export const headerSheet = (dateStr) => {
       `M${edge[0][0]} ${edge[0][1].toFixed(1)}` +
       edge.slice(1).map(([px, py]) => ` L${px} ${py.toFixed(1)}`).join("");
     const glow = `<path d='${d}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='55' stroke-linecap='round' filter='url(#b)'/>`;
-    frames += `<g opacity='${(0.45 * ebb).toFixed(3)}'>${glow}${rects}</g>`;
+    clips += `<clipPath id='f${k}'><rect x='0' y='${yoff}' width='${W}' height='${FH}'/></clipPath>`;
+    frames += `<g clip-path='url(#f${k})' opacity='${(0.45 * ebb).toFixed(3)}'>${glow}${rects}</g>`;
   }
 
   return (
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${FH * N}' ` +
     `width='${W}' height='${FH * N}' preserveAspectRatio='none'>` +
     `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
-    `<feGaussianBlur stdDeviation='7'/></filter></defs>${frames}</svg>`
+    `<feGaussianBlur stdDeviation='7'/></filter>${clips}</defs>${frames}</svg>`
   );
 };
