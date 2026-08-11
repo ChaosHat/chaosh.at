@@ -199,7 +199,7 @@ export default function (eleventyConfig) {
         collected.get(slug).push({
           date: post.date,
           sourceUrl: post.url,
-          html: md.render(text),
+          html: revealSpoilers(md.render(text)),
         });
       }
     }
@@ -207,11 +207,17 @@ export default function (eleventyConfig) {
     // A subject exists because it is registered, not because it has fragments.
     return Object.entries(subjects).map(([slug, meta]) => {
       const essay = essays.get(slug);
-      const essayHtml = essay ? md.render(essay.rawInput) : null;
+      const essayRaw = essay ? md.render(essay.rawInput) : null;
+      const essayHtml = essayRaw === null ? null : revealSpoilers(essayRaw);
 
       // The blurb is Hat's own opening paragraph, not a frontmatter summary —
-      // he writes the lede, nothing paraphrases it for him.
-      const firstPara = essayHtml?.match(/<p>([\s\S]*?)<\/p>/i);
+      // he writes the lede, nothing paraphrases it for him. Taken off the
+      // REDACTED render: a blurb is plain text on a shelf, with no span to blur
+      // and nothing to click.
+      const firstPara =
+        essayRaw === null
+          ? null
+          : stripSpoilers(essayRaw).match(/<p>([\s\S]*?)<\/p>/i);
       const blurb = firstPara
         ? firstPara[1].replace(/<[^>]+>/g, "").trim()
         : null;
@@ -272,6 +278,52 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("linkSubjects", linkSubjectsHtml);
 
+  // --------------------------------------------------------------- spoilers
+  //
+  // ||like this|| — Discord syntax, because it is already in Hat's fingers and
+  // survives a phone keyboard. Obsidian shows it as literal text, which is
+  // fine: the author is not the one being protected.
+  //
+  // A pass over rendered HTML rather than a markdown-it inline rule, because
+  // markdown-it does not treat "|" as a text terminator: its text rule swallows
+  // "a ||spoiler|| b" whole, so an inline rule would only ever fire on a
+  // spoiler that started a line. The pass skips <code>/<pre>, so a shell
+  // "a || b" is left alone; table pipes never survive into HTML as a literal
+  // "||" and need no handling.
+  //
+  // Two renderings of one markup, and the difference between them is the whole
+  // point:
+  //   site — a blurred span, revealed by focus
+  //   feed — cut out entirely. A feed reader applies none of this site's CSS,
+  //          and every reader sanitises unknown markup differently — several
+  //          strip a wrapper and keep its contents, which fails OPEN and does
+  //          it silently. Anything left in <content> is readable, so the only
+  //          honest move is to not ship the words. Fixed-width, because a
+  //          redaction that preserved length would leak it.
+  const CODE_REGION = /(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>)/gi;
+  const SPOILER = /\|\|([\s\S]+?)\|\|/g;
+
+  const outsideCode = (html, fn) =>
+    String(html ?? "")
+      .split(CODE_REGION)
+      .map((part, i) => (i % 2 ? part : fn(part)))
+      .join("");
+
+  // tabindex is what makes the span focusable, and focus is what reveals it —
+  // click or tab, and the site stays at zero JavaScript.
+  const revealSpoilers = (html) =>
+    outsideCode(html, (s) =>
+      s.replace(
+        SPOILER,
+        (_m, inner) => `<span class="spoiler" tabindex="0">${inner}</span>`,
+      ),
+    );
+
+  const stripSpoilers = (html) =>
+    outsideCode(html, (s) => s.replace(SPOILER, "[spoiler]"));
+
+  eleventyConfig.addFilter("spoilers", revealSpoilers);
+
   // Feed readers resolve relative links against the feed URL, not the site, so
   // every href in feed content has to be absolute or it breaks in the reader.
   eleventyConfig.addFilter("absoluteUrls", (html, base) =>
@@ -295,7 +347,7 @@ export default function (eleventyConfig) {
       url: p.url,
       date: p.date,
       title: p.data.title || dateFormat.format(p.date),
-      html: linkSubjectsHtml(md.render(p.rawInput)),
+      html: stripSpoilers(linkSubjectsHtml(md.render(p.rawInput))),
     }));
 
     for (const e of api.getFilteredByTag("essays")) {
@@ -305,7 +357,7 @@ export default function (eleventyConfig) {
         url: `/s/${e.fileSlug}/`,
         date: e.date,
         title: subjects[e.fileSlug].title ?? e.data.title ?? e.fileSlug,
-        html: md.render(e.rawInput),
+        html: stripSpoilers(md.render(e.rawInput)),
       });
     }
 

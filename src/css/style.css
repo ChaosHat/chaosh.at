@@ -372,6 +372,33 @@ img { max-width: 100%; height: auto; }
 
 .post h2 a:hover { border-bottom-color: var(--accent); }
 
+/* spoilers */
+
+/* ||inline spoilers||. Focus is the reveal — click or tab — which keeps the
+   site at zero JavaScript. Blurred rather than blacked out: it should read as
+   a courtesy marker, not a lock. Anyone who works hard enough to squint past a
+   blur could have just clicked it. */
+.spoiler {
+  background: var(--rule);
+  border-radius: 2px;
+  filter: blur(0.3em);
+  cursor: pointer;
+  transition: filter 0.12s ease, background-color 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.spoiler:focus {
+  background: none;
+  filter: none;
+  outline: none;
+}
+
+/* Paper has no focus state, so a blurred spoiler would print permanently
+   unreadable. Printing is a deliberate act by someone already reading. */
+@media print {
+  .spoiler { background: none; filter: none; }
+}
+
 .site-footer {
   margin-top: 4rem;
   padding-top: 1rem;

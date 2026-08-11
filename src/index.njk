@@ -3,7 +3,9 @@ layout: base.njk
 ---
 <ul class="post-list">
   {% for post in collections.dailies | limit(5) %}
-  {% set body = post.content | homeBody %}
+  {#- Spoilers resolve BEFORE the cut: truncating first could strip a closing
+      "||" and leave the opening one unpaired, which renders the words plainly. -#}
+  {% set body = post.content | spoilers | homeBody %}
   <li>
     {% if post.data.title %}
     <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>

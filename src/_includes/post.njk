@@ -10,5 +10,5 @@ layout: base.njk
     <h1 class="post-date">{{ page.date | readableDate }}</h1>
     {% endif %}
   </header>
-  {{ content | linkSubjects | safe }}
+  {{ content | linkSubjects | spoilers | safe }}
 </article>
