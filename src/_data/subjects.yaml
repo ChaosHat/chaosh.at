@@ -1,58 +1,71 @@
-# The site's database. One entry per subject written about.
-#
-# key      -> the URL slug: /s/<key>/ , and the essay filename in games/<key>.md
-# title    -> display name
-# category -> list; drives shelf membership only. Soft: edit freely, URLs don't move.
-# status   -> active    | on the go now. This is what drives Now Playing.
-#             completed | finished it
-#             shelved   | paused, might come back
-#             abandoned | done with it, not coming back
-# rating   -> optional
-# cover    -> optional; omit and the shelf falls back to a text list
-# aliases  -> headings that resolve here. The title always matches automatically.
-#
-# A "## heading" in a daily post that matches nothing gets a build warning and
-# stays only in that post. Nothing is ever auto-created.
-
+castlevania-symphony-of-the-night:
+  title: 'Castlevania: Symphony of the Night'
+  category:
+    - games
+  status: active
+  aliases:
+    - sotn
+    - castlevania sotn
+    - symphony of the night
+    - castlevania - sotn
 dragon-quest-xi-s:
   title: Dragon Quest XI S
-  category: [games]
+  category:
+    - games
   status: active
-  aliases: [dqxis, dqxi s, dq11s, dragon quest 11 s]
-
-final-fantasy-vii-remake:
-  title: Final Fantasy VII Remake
-  category: [games]
-  status: active
-  aliases: [ff7r, ffviir, final fantasy 7 remake]
-
-castlevania-symphony-of-the-night:
-  title: "Castlevania: Symphony of the Night"
-  category: [games]
-  status: active
-  aliases: [sotn, castlevania sotn, symphony of the night, castlevania - sotn]
-
-persona-5-royal:
-  title: Persona 5 Royal
-  category: [games]
-  status: completed
-  aliases: [p5r, persona5 royal]
-
-final-fantasy-vi:
-  title: Final Fantasy VI
-  category: [games]
-  status: abandoned
-  aliases: [ffvi, ff6, final fantasy 6]
-
+  aliases:
+    - dqxis
+    - dqxi s
+    - dq11s
+    - dragon quest 11 s
 fields-of-mistria:
   title: Fields of Mistria
-  category: [games]
+  category:
+    - games
   status: shelved
   rating: 4
-  aliases: [mistria, fom]
-
+  aliases:
+    - mistria
+    - fom
+final-fantasy-vi:
+  title: Final Fantasy VI
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - ffvi
+    - ff6
+    - final fantasy 6
+final-fantasy-vii-remake:
+  title: Final Fantasy VII Remake
+  category:
+    - games
+  status: active
+  aliases:
+    - ff7r
+    - ffviir
+    - final fantasy 7 remake
+metaphor-refantazio:
+  title: Metaphor ReFantazio
+  category:
+    - games
+  status: active
+  rating: 4
+  aliases:
+    - metaphor refantazio
+persona-5-royal:
+  title: Persona 5 Royal
+  category:
+    - games
+  status: completed
+  aliases:
+    - p5r
+    - persona5 royal
+    - persona 5 royal
 flamecraft-duals:
   title: Flamecraft Duals
-  category: [boardgames]
+  category:
+    - boardgames
   status: active
-  aliases: [flamecraft duals]
+  aliases:
+    - flamecraft duals
