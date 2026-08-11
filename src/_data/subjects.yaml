@@ -3,7 +3,10 @@
 # key      -> the URL slug: /s/<key>/ , and the essay filename in games/<key>.md
 # title    -> display name
 # category -> list; drives shelf membership only. Soft: edit freely, URLs don't move.
-# status   -> active | completed | abandoned. "active" also drives Now Playing.
+# status   -> active    | on the go now. This is what drives Now Playing.
+#             completed | finished it
+#             shelved   | paused, might come back
+#             abandoned | done with it, not coming back
 # rating   -> optional
 # cover    -> optional; omit and the shelf falls back to a text list
 # aliases  -> headings that resolve here. The title always matches automatically.
@@ -38,12 +41,12 @@ persona-5-royal:
 final-fantasy-vi:
   title: Final Fantasy VI
   category: [games]
-  status: active
+  status: abandoned
   aliases: [ffvi, ff6, final fantasy 6]
 
 fields-of-mistria:
   title: Fields of Mistria
   category: [games]
-  status: abandoned
+  status: shelved
   rating: 4
   aliases: [mistria, fom]
