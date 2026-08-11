@@ -9,36 +9,26 @@ eleventyComputed:
   title: "{{ shelf.label }}"
 ---
 {% set items = collections.subjectPages | inCategory(shelf.category) | shelveSort %}
-{% set withArt = items | selectattr("cover") | list %}
 
 <h1>{{ shelf.label }}</h1>
 
-{% if withArt | length %}
-{# Cover grid. Any subject without art still appears, as a titled tile. #}
+{#- Every subject has art, because the art is generated rather than sourced —
+    so there is no coverless fallback list any more, and no shelf that is
+    unreachable for want of images. The grid IS the shelf.
+
+    It also reads as a sky: four subjects at golden hour, one at moonrise, one
+    bisected by the horizon. You can take in the state of the whole category
+    without reading a single badge — the badges stay for anyone who cannot
+    separate the hues. -#}
 <ul class="shelf-grid">
   {% for item in items %}
-  <li class="shelf-item status-{{ item.status }}">
+  <li class="shelf-item">
     <a href="/s/{{ item.slug }}/">
-      {% if item.cover %}
-      <img src="/covers/{{ item.cover }}" alt="" loading="lazy" width="264" height="352">
-      {% else %}
-      <span class="shelf-noart">{{ item.title }}</span>
-      {% endif %}
+      <span class="sky t-{{ item.status }}" style="--h:{{ item.hue }}deg" aria-hidden="true"></span>
       <span class="shelf-caption">{{ item.title }}</span>
+      <span class="badge b-{{ item.status }}">{{ item.status }}</span>
+      {% if item.rating %}<span class="rating">{{ item.rating }}/5</span>{% endif %}
     </a>
-    <span class="shelf-status">{{ item.status }}</span>
   </li>
   {% endfor %}
 </ul>
-{% else %}
-{# No art anywhere in this category — fall back to a text list, so a shelf like
-   slice-of-life or books is never unreachable just for lacking covers. #}
-<ul class="shelf-list">
-  {% for item in items %}
-  <li>
-    <a href="/s/{{ item.slug }}/">{{ item.title }}</a>
-    <span class="shelf-status">{{ item.status }}</span>
-  </li>
-  {% endfor %}
-</ul>
-{% endif %}

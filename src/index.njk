@@ -7,12 +7,14 @@ layout: base.njk
       "||" and leave the opening one unpaired, which renders the words plainly. -#}
   {% set body = post.content | spoilers | homeBody %}
   <li>
-    {% if post.data.title %}
-    <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
-    <p class="post-list-subdate">{{ post.date | readableDate }}</p>
-    {% else %}
-    <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
-    {% endif %}
+    <div class="entry-head">
+      {% if post.data.title %}
+      <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
+      <p class="post-list-subdate">{{ post.date | readableDate }}</p>
+      {% else %}
+      <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
+      {% endif %}
+    </div>
     <div class="post-body">{{ body.html | linkSubjects | safe }}</div>
     {% if body.truncated %}
     <a class="more" href="{{ post.url }}">read the rest →</a>

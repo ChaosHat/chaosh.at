@@ -18,6 +18,7 @@ const normalise = (s) =>
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
+  eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
   eleventyConfig.addPassthroughCopy({ "src/CNAME": "CNAME" });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
@@ -169,6 +170,92 @@ export default function (eleventyConfig) {
   const tagLinks = (slugs) =>
     (slugs ?? []).map((t) => ({ slug: t, title: tags[t]?.title ?? t }));
 
+  // ------------------------------------------------------------------- sky
+  //
+  // Generated cover art: status picks the time of day, the slug picks the hue.
+  // Written up in the vault at 90_Reference/91_Documentation/"chaosh.at Design
+  // System" — including why hues sit on a ladder rather than hashing straight
+  // to a degree, and what recency would cost if it ever drives this instead.
+  const SLOT_BASE = 24;
+
+  const hashOf = (slug) => {
+    let h = 2166136261;
+    for (let i = 0; i < slug.length; i += 1) {
+      h ^= slug.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h ^= h >>> 16;
+    h = Math.imul(h, 2246822507);
+    h ^= h >>> 13;
+    h = Math.imul(h, 3266489909);
+    h ^= h >>> 16;
+    return h >>> 0;
+  };
+
+  const displacedHues = [];
+
+  const assignHues = () => {
+    const slugs = Object.keys(subjects).sort();
+    let slots = SLOT_BASE;
+    while (slugs.length > slots) slots *= 2;
+    const step = 360 / slots;
+
+    const hues = new Map();
+    const used = new Set();
+
+    for (const slug of slugs) {
+      const want = subjects[slug]?.hue;
+      if (!Number.isFinite(want)) continue;
+      const hue = ((want % 360) + 360) % 360;
+      hues.set(slug, hue);
+      used.add(Math.round(hue / step) % slots);
+    }
+
+    for (const slug of slugs) {
+      if (hues.has(slug)) continue;
+
+      const want = hashOf(slug) % slots;
+      if (!used.has(want)) {
+        used.add(want);
+        hues.set(slug, Math.round(want * step));
+        continue;
+      }
+
+      let best = null;
+      let bestGap = -1;
+      for (let i = 0; i < slots; i += 1) {
+        if (used.has(i)) continue;
+        let gap = Infinity;
+        for (const taken of used) {
+          const raw = Math.abs(i - taken);
+          gap = Math.min(gap, Math.min(raw, slots - raw));
+        }
+        if (gap > bestGap) {
+          bestGap = gap;
+          best = i;
+        }
+      }
+
+      used.add(best);
+      hues.set(slug, Math.round(best * step));
+      displacedHues.push(slug);
+    }
+
+    return hues;
+  };
+
+  const subjectHues = assignHues();
+
+  const skyOf = (slug, meta) => ({
+    status: meta?.status ?? "active",
+    hue: subjectHues.get(slug) ?? 0,
+  });
+
+  const skyTag = (slug, meta) => {
+    const { status, hue } = skyOf(slug, meta);
+    return `<span class="sky t-${status}" style="--h:${hue}deg" aria-hidden="true"></span>`;
+  };
+
   // normalised heading -> slug
   const aliasMap = new Map();
   for (const [slug, meta] of Object.entries(subjects)) {
@@ -273,6 +360,7 @@ export default function (eleventyConfig) {
       return {
         slug,
         ...meta,
+        ...skyOf(slug, meta),
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments: collected.get(slug) ?? [],
         essayHtml,
@@ -379,7 +467,55 @@ export default function (eleventyConfig) {
       },
     );
 
-  eleventyConfig.addFilter("linkSubjects", linkSubjectsHtml);
+  // The feed keeps the plain form above — a reader has none of this stylesheet,
+  // so the fragment scaffolding would arrive as dead markup. On the site each
+  // section is wrapped instead, so a heading brings its sky with it.
+  //
+  // Safe to split on homeBody's lookahead because homeBody runs BEFORE this
+  // filter: truncation still sees flat sections and still cuts on an H2.
+  const FRAG_LOOSE = '<span class="sky sky-blank" aria-hidden="true"></span>';
+
+  const wrapFragment = (sky, body) =>
+    `<div class="frag">${sky}<div class="frag-body">${body}</div></div>`;
+
+  const linkSubjectsFragments = (html) => {
+    const src = String(html ?? "");
+    if (!src.trim()) return src;
+
+    const out = [];
+    for (const part of src.split(/(?=<h2[\s>])/i)) {
+      if (!part.trim()) continue;
+
+      const m = /^<h2([^>]*)>([\s\S]*?)<\/h2>([\s\S]*)$/i.exec(part);
+      if (!m) {
+        out.push(wrapFragment(FRAG_LOOSE, part));
+        continue;
+      }
+
+      const [, attrs, inner, rest] = m;
+      const slug = aliasMap.get(normalise(inner.replace(/<[^>]+>/g, "")));
+
+      // Unregistered headings stay exactly as written, but keep the column.
+      if (!slug) {
+        out.push(wrapFragment(FRAG_LOOSE, `<h2${attrs}>${inner}</h2>${rest}`));
+        continue;
+      }
+
+      const meta = subjects[slug] ?? {};
+      const title = meta.title ?? inner;
+      const status = meta.status ?? "active";
+      const head =
+        `<h2 class="frag-head"${attrs}>` +
+        `<a class="frag-subject" href="/s/${slug}/">${title}</a>` +
+        `<span class="badge b-${status}">${status}</span>` +
+        `</h2>`;
+
+      out.push(wrapFragment(skyTag(slug, meta), head + rest));
+    }
+    return out.join("");
+  };
+
+  eleventyConfig.addFilter("linkSubjects", linkSubjectsFragments);
 
   // The tag footer on a daily post: the union of the tags of every subject that
   // post files to. Read off the rendered HTML rather than the raw markdown so
@@ -520,6 +656,18 @@ export default function (eleventyConfig) {
       );
       for (const stray of strays) console.warn(`  · ${stray}`);
       console.warn(`  That subject is missing from its tag page. Check tagviews.yaml.\n`);
+    }
+
+    // Not a fault; reported because that subject's colour was decided by
+    // another subject existing, and `hue:` is how to take it back.
+    if (displacedHues.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${displacedHues.length} subject(s) moved off their preferred hue:`,
+      );
+      for (const slug of displacedHues) {
+        console.warn(`  · ${slug} → ${subjectHues.get(slug)}deg`);
+      }
+      console.warn(`  Set "hue: <0-359>" in subjects.yaml to pin one.\n`);
     }
 
     if (unmatched.size === 0) return;

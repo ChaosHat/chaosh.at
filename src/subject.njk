@@ -10,19 +10,25 @@ eleventyComputed:
 ---
 <article class="subject">
   <header class="subject-head">
-    <h1>{{ subject.title }}</h1>
-    <p class="subject-meta">
-      <span class="status status-{{ subject.status }}">{{ subject.status }}</span>
-      {% if subject.rating %}<span class="rating">{{ subject.rating }}/5</span>{% endif %}
-      {#- Sidestepping to the franchise or the genre is the natural next move
-          for a reader who arrived by following a title, so the tags sit in the
-          meta row rather than at the foot of a long timeline. -#}
-      {% if subject.tags | length %}
-      <span class="tag-list">
-        {% for tag in subject.tags %}<a class="tag-link" href="/t/{{ tag.slug }}/">#{{ tag.slug }}</a>{% endfor %}
-      </span>
-      {% endif %}
-    </p>
+    {#- The subject's sky at the one size where the time of day is properly
+        legible. In the stream it renders at 48px, where it reads as an identity
+        chip and little else. -#}
+    <span class="sky t-{{ subject.status }}" style="--h:{{ subject.hue }}deg" aria-hidden="true"></span>
+    <div>
+      <h1>{{ subject.title }}</h1>
+      <p class="subject-meta">
+        <span class="badge b-{{ subject.status }}">{{ subject.status }}</span>
+        {% if subject.rating %}<span class="rating">{{ subject.rating }}/5</span>{% endif %}
+        {#- Sidestepping to the franchise or the genre is the natural next move
+            for a reader who arrived by following a title, so the tags sit in the
+            meta row rather than at the foot of a long timeline. -#}
+        {% if subject.tags | length %}
+        <span class="tag-list">
+          {% for tag in subject.tags %}<a class="tag-link" href="/t/{{ tag.slug }}/">#{{ tag.slug }}</a>{% endfor %}
+        </span>
+        {% endif %}
+      </p>
+    </div>
   </header>
 
   {% if subject.essayHtml %}

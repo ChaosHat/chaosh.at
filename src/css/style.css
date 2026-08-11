@@ -1,19 +1,56 @@
-:root {
-  --bg: #fdfcfa;
-  --fg: #1f1d1a;
-  --muted: #6b6560;
-  --accent: #8a4b2a;
-  --rule: #e2ddd6;
-  --measure: 34rem;
+/* chaosh.at
+   Design notes and rationale: vault, 90_Reference/91_Documentation/
+   "chaosh.at Design System". Keep this file terse; the why lives there. */
+
+@font-face {
+  font-family: "Silkscreen";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/silkscreen-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Silkscreen";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/silkscreen-700.woff2") format("woff2");
 }
 
-@media (prefers-color-scheme: dark) {
+:root {
+  --pixel: "Silkscreen", ui-monospace, monospace;
+  --serif: ui-serif, Georgia, "Times New Roman", serif;
+
+  --night: #171614;
+  --deep: #201d19;
+  --edge: #2f2b26;
+  --ink: #e6e2db;
+  --muted: #98918a;
+  --sun: #d99a6c;
+
+  --st-active: #e0a34a;
+  --st-shelved: #a892c4;
+  --st-abandoned: #cf6152;
+  --st-completed: #77a3bd;
+
+  --measure: 34rem;
+  --wide: 47rem;
+  --damp: 1;
+}
+
+@media (prefers-color-scheme: light) {
   :root {
-    --bg: #171614;
-    --fg: #e6e2db;
-    --muted: #98918a;
-    --accent: #d99a6c;
-    --rule: #2e2b27;
+    --night: #fdfcfa;
+    --deep: #f4f1ea;
+    --edge: #e2ddd6;
+    --ink: #1f1d1a;
+    --muted: #6b6560;
+    --sun: #8a4b2a;
+
+    --st-active: #9c6510;
+    --st-shelved: #6b4a99;
+    --st-abandoned: #a83a2c;
+    --st-completed: #2e6d8c;
   }
 }
 
@@ -21,470 +58,539 @@
 
 body {
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 4rem;
-  max-width: calc(var(--measure) + 2.5rem);
-  background: var(--bg);
-  color: var(--fg);
-  font: 1rem/1.65 ui-serif, Georgia, "Times New Roman", serif;
+  padding: 0 1.25rem 3.5rem;
+  max-width: var(--wide);
+  background: var(--night);
+  color: var(--ink);
+  font: 1rem/1.68 var(--serif);
   -webkit-text-size-adjust: 100%;
 }
 
-a { color: var(--accent); }
+a { color: var(--sun); }
+
+img { max-width: 100%; height: auto; }
+
+h1, h2, h3 { line-height: 1.25; }
+
+/* ---------------------------------------------------------------- the sky
+   Generated cover art. Status picks the time of day, the slug picks the hue.
+   Ground is painted ABOVE the disc, which is what makes setting work. */
+
+.sky {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  border: 1px solid var(--edge);
+  background:
+    linear-gradient(
+      transparent 0 68%,
+      oklch(var(--gl1) 0.05 calc(300deg + var(--h))) 68% 82%,
+      oklch(var(--gl2) 0.05 calc(296deg + var(--h))) 82% 100%),
+    radial-gradient(circle at 50% var(--body-y),
+      oklch(var(--body-l) var(--body-c) calc(65deg + var(--h) * var(--damp)))
+        0 var(--body-r),
+      transparent calc(var(--body-r) + 0.5%)),
+    radial-gradient(circle at 17% 21%, var(--star) 0 1.1%, transparent 1.2%),
+    radial-gradient(circle at 72% 13%, var(--star) 0 0.9%, transparent 1%),
+    radial-gradient(circle at 33% 41%, var(--star) 0 0.8%, transparent 0.9%),
+    radial-gradient(circle at 85% 34%, var(--star) 0 1%, transparent 1.1%),
+    radial-gradient(circle at 58% 47%, var(--star) 0 0.7%, transparent 0.8%),
+    radial-gradient(circle at 8% 52%, var(--star) 0 0.9%, transparent 1%),
+    radial-gradient(circle at 44% 9%, var(--star) 0 0.8%, transparent 0.9%),
+    linear-gradient(
+      oklch(var(--l1) var(--c1) calc(285deg + var(--h))) 0 20%,
+      oklch(var(--l2) var(--c2) calc(320deg + var(--h))) 20% 40%,
+      oklch(var(--l3) var(--c3) calc(355deg + var(--h))) 40% 57%,
+      oklch(var(--l4) var(--c4) calc(65deg + var(--h) * var(--damp))) 57% 68%,
+      oklch(var(--gl1) 0.05 calc(300deg + var(--h))) 68% 100%);
+}
+
+/* dither */
+.sky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(rgba(0, 0, 0, 0.17) 0% 25%, transparent 0% 50%);
+  background-size: 4px 4px;
+}
+
+.sky::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 68%;
+  height: 2px;
+  background: oklch(var(--l4) var(--c4) calc(65deg + var(--h) * var(--damp)));
+  opacity: var(--horizon);
+}
+
+/* Holds the fragment column open for prose that belongs to no subject. */
+.sky-blank { visibility: hidden; border-color: transparent; background: none; }
+.sky-blank::before, .sky-blank::after { content: none; }
+
+/* OKLCH, not HSL: L .78 has to mean the same brightness at every hue or the
+   value ramp comes apart when the hue rotates. */
+
+.t-active {
+  --l1: .30; --l2: .39; --l3: .51; --l4: .78;
+  --c1: .09; --c2: .13; --c3: .16; --c4: .18;
+  --body-y: 58%; --body-r: 15%;
+  --body-l: .90; --body-c: .17;
+  --gl1: .24; --gl2: .16;
+  --star: transparent;
+  --horizon: .95;
+}
+.t-shelved {
+  --l1: .25; --l2: .32; --l3: .43; --l4: .68;
+  --c1: .07; --c2: .11; --c3: .14; --c4: .16;
+  --body-y: 67%; --body-r: 14%;
+  --body-l: .82; --body-c: .16;
+  --gl1: .20; --gl2: .13;
+  --star: transparent;
+  --horizon: .8;
+}
+.t-abandoned {
+  --l1: .19; --l2: .24; --l3: .32; --l4: .50;
+  --c1: .04; --c2: .05; --c3: .07; --c4: .09;
+  --body-y: 79%; --body-r: 13%;
+  --body-l: .60; --body-c: .11;
+  --gl1: .16; --gl2: .10;
+  --star: transparent;
+  --horizon: .45;
+}
+.t-completed {
+  --l1: .16; --l2: .20; --l3: .25; --l4: .34;
+  --c1: .05; --c2: .07; --c3: .08; --c4: .08;
+  --body-y: 26%; --body-r: 10%;
+  --body-l: .95; --body-c: .03;
+  --gl1: .14; --gl2: .09;
+  --star: #e8e0f0;
+  --horizon: .4;
+}
+
+@supports not (color: oklch(0.5 0.1 180deg)) {
+  .sky { background: var(--deep); }
+  .sky::after { background: var(--sun); }
+}
+
+/* ---------------------------------------------------------------- header */
 
 .site-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem 1.25rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 2rem;
+  padding: 1.75rem 0 1rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--edge);
 }
 
 .site-title {
-  font-weight: 600;
-  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font: 400 16px/1 var(--pixel);
   text-decoration: none;
-  color: var(--fg);
+  color: var(--ink);
 }
 
-.site-header nav {
+.site-title::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  image-rendering: pixelated;
+  background: linear-gradient(
+    var(--st-active) 0 22%, transparent 22% 32%,
+    var(--sun) 32% 54%, transparent 54% 64%,
+    var(--st-abandoned) 64% 100%);
+  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+}
+
+.site-nav {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.3rem;
   margin-left: auto;
-  font-size: 0.9rem;
+  font: 10px/1 var(--pixel);
 }
 
-h1, h2, h3 { line-height: 1.25; }
-
-img { max-width: 100%; height: auto; }
-
-/* post lists */
-
-.post-list, .archive-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.post-list > li {
-  padding-bottom: 2rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.post-list > li:last-child {
-  border-bottom: 0;
-}
-
-.post-list-date {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+.site-nav a {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid transparent;
   text-decoration: none;
-  color: var(--fg);
-}
-
-.post-body > :first-child { margin-top: 0; }
-.post-body > :last-child { margin-bottom: 0; }
-
-/* Subject headings inside a home-page entry sit below the date, so they step
-   down from it rather than competing with it. */
-.post-list .post-body h2 {
-  margin: 1.5rem 0 0.4rem;
-  font-size: 1rem;
-  font-variant: small-caps;
-  letter-spacing: 0.03em;
   color: var(--muted);
 }
 
-.more, .all-link a {
+.site-nav a:hover,
+.site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
+
+/* ----------------------------------------------------------- now playing */
+
+.now {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 2.5rem;
+  background: var(--deep);
+  border: 1px solid var(--edge);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanlines here only. Over prose they would be vandalism. */
+.now::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+}
+
+.now-label {
+  flex-shrink: 0;
+  font: 10px/1 var(--pixel);
+  color: var(--st-active);
+}
+
+.now-items { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.now-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 10px/1.2 var(--pixel);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.now-item:hover { color: var(--sun); }
+.now-item .sky { width: 18px; }
+
+/* ------------------------------------------------------- badges and tags */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.45rem;
+  font: 10px/1 var(--pixel);
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
+}
+
+.badge::before { content: ""; width: 4px; height: 4px; background: currentColor; }
+
+.b-active { --c: var(--st-active); }
+.b-shelved { --c: var(--st-shelved); }
+.b-abandoned { --c: var(--st-abandoned); }
+.b-completed { --c: var(--st-completed); }
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-link {
   display: inline-block;
-  margin-top: 0.6rem;
-  font-size: 0.875rem;
+  padding: 0.3rem 0.45rem;
+  background: var(--deep);
+  border: 1px solid var(--edge);
+  font: 10px/1 var(--pixel);
+  color: var(--muted);
   text-decoration: none;
 }
 
-.archive-list > li {
-  padding: 0.35rem 0;
-  border-bottom: 1px solid var(--rule);
+.tag-link:hover,
+.tag-link:focus-visible { color: var(--sun); border-color: var(--sun); }
+
+/* --------------------------------------------------------- daily stream */
+
+.post-list { list-style: none; margin: 0; padding: 0; }
+
+.post-list > li + li {
+  margin-top: 2.75rem;
+  padding-top: 2.75rem;
+  border-top: 1px solid var(--edge);
 }
 
-.archive-list a { text-decoration: none; }
+.entry-head { margin-bottom: 1.3rem; }
+
+.post-list-title {
+  display: block;
+  margin-bottom: 0.4rem;
+  font: 600 1.4rem/1.25 var(--serif);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.post-list-title:hover { color: var(--sun); }
+
+.post-list-date,
+.post-list-subdate {
+  display: block;
+  margin: 0;
+  font: 10px/1.4 var(--pixel);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+a.post-list-date:hover { color: var(--sun); }
+
+/* Markup shape comes from linkSubjects() in eleventy.config.js. */
+.frag { display: flex; gap: 1rem; }
+.frag + .frag { margin-top: 1.9rem; }
+.frag > .sky { width: 3rem; margin-top: 0.2rem; }
+
+/* Prose keeps its measure while the shell stays wide enough for art. */
+.frag-body { min-width: 0; max-width: var(--measure); }
+.frag-body > :first-child { margin-top: 0; }
+.frag-body > :last-child { margin-bottom: 0; }
+
+.frag-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.5rem;
+  font-weight: 400;
+}
+
+.frag-subject {
+  padding-bottom: 2px;
+  font: 11px/1.3 var(--pixel);
+  text-decoration: none;
+  color: var(--ink);
+  border-bottom: 1px solid var(--edge);
+}
+
+.frag-subject:hover,
+.frag-subject:focus-visible { color: var(--sun); border-color: var(--sun); }
+
+.more,
+.all-link a {
+  display: inline-block;
+  margin-top: 1.1rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--edge);
+  font: 10px/1 var(--pixel);
+  text-decoration: none;
+}
+
+.more:hover,
+.all-link a:hover { border-color: var(--sun); background: var(--deep); }
+
+/* ------------------------------------------------------------ post page */
+
+.post-head { margin-bottom: 2rem; }
+.post-title { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
+.post-date { margin: 0; font: 400 1.4rem/1.2 var(--serif); }
+.post-subdate { margin: 0; font: 10px/1.4 var(--pixel); color: var(--muted); }
+
+.post-tags {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--edge);
+}
+
+/* --------------------------------------------------- archive / best of */
+
+.archive-list { list-style: none; margin: 0; padding: 0; }
+
+.archive-list > li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--edge);
+}
+
+.archive-list a { font: 11px/1.5 var(--pixel); text-decoration: none; }
+
+.archive-note {
+  margin-left: auto;
+  font: 10px/1.5 var(--pixel);
+  color: var(--muted);
+}
 
 .pagination {
   display: flex;
   align-items: baseline;
   gap: 1rem;
   margin-top: 2rem;
-  font-size: 0.9rem;
+  font: 10px/1 var(--pixel);
 }
 
-.pagination span {
-  color: var(--muted);
-  margin-left: auto;
-}
+.pagination a { text-decoration: none; }
+.pagination span { margin-left: auto; color: var(--muted); }
 
-.post-date {
-  font-size: 1.35rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.post h2 {
-  margin-top: 2.25rem;
-  font-size: 1.1rem;
-}
-
-.empty { color: var(--muted); }
-
-/* navigation */
-
-.site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-left: auto;
-  font-size: 0.9rem;
-}
-
-.now-playing {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.4rem 0.55rem;
-  margin: -1rem 0 2rem;
-  font-size: 0.9rem;
-}
-
-.now-label {
-  font-size: 0.72rem;
-  font-variant: small-caps;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.now-playing a { text-decoration: none; }
-
-/* shelves */
-
-.shelf-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.shelf-list > li {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.shelf-list a { text-decoration: none; }
-
-.shelf-status {
-  margin-left: auto;
-  font-size: 0.75rem;
-  font-variant: small-caps;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-}
+/* ----------------------------------------------------------- shelf page */
 
 .shelf-grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 1.5rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 1.75rem 1.1rem;
 }
 
-.shelf-item a {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
+.shelf-item a { display: block; text-decoration: none; color: inherit; }
 
-.shelf-item img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: 2px;
-}
+.shelf-item .sky { transition: transform 0.1s steps(3); }
+.shelf-item a:hover .sky { transform: translateY(-4px); }
 
-.shelf-noart {
+.shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 10px/1.5 var(--pixel); }
+
+.shelf-list { list-style: none; margin: 0; padding: 0; }
+
+.shelf-list > li {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 3 / 4;
-  padding: 0.75rem;
-  text-align: center;
-  font-size: 0.85rem;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  color: var(--muted);
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--edge);
 }
 
-.shelf-caption {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
+.shelf-list a { font: 11px/1.5 var(--pixel); text-decoration: none; }
+
+/* --------------------------------------------------------- subject page */
+
+.subject-head {
+  display: flex;
+  gap: 1.4rem;
+  align-items: flex-start;
+  padding-bottom: 1.75rem;
+  margin-bottom: 2.25rem;
+  border-bottom: 1px solid var(--edge);
 }
 
-/* a finished or dropped thing sits back visually; what's active stays bright */
-.shelf-item.status-completed img,
-.shelf-item.status-shelved img,
-.shelf-item.status-abandoned img { opacity: 0.72; }
-
-.section-head {
-  font-size: 0.78rem;
-  font-variant: small-caps;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin: 0 0 1rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.writing { margin-bottom: 3rem; }
-
-.essay-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.essay-list > li + li { margin-top: 1.1rem; }
-
-.essay-title {
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.essay-blurb {
-  margin: 0.2rem 0 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.stream .section-head { margin-top: 0; }
-
-/* titled days */
-
-.post-title { margin: 0; font-size: 1.5rem; }
-
-.post-subdate,
-.post-list-subdate {
-  margin: 0.2rem 0 0;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.post-head { margin-bottom: 1.5rem; }
-
-.post-list-title {
-  display: block;
-  font-weight: 600;
-  font-size: 1.1rem;
-  text-decoration: none;
-  color: var(--fg);
-}
-
-.post-list-subdate { margin-bottom: 0.5rem; }
-
-.archive-note {
-  float: right;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-/* subject pages */
-
-.subject-head { margin-bottom: 2rem; }
-
-.subject-head h1 {
-  margin: 0 0 0.35rem;
-  font-size: 1.6rem;
-}
+.subject-head > .sky { width: 8rem; }
+.subject-head h1 { margin: 0 0 0.7rem; font: 600 1.75rem/1.15 var(--serif); }
 
 .subject-meta {
   display: flex;
-  gap: 0.75rem;
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--muted);
-  text-transform: lowercase;
-  letter-spacing: 0.04em;
-}
-
-.status::before {
-  content: "";
-  display: inline-block;
-  width: 0.45em;
-  height: 0.45em;
-  margin-right: 0.45em;
-  border-radius: 50%;
-  background: currentColor;
-  vertical-align: 0.1em;
-}
-
-.status-active { color: var(--accent); }
-
-.rating { font-variant-numeric: tabular-nums; }
-
-.essay { margin-bottom: 3rem; }
-
-/* tags
-   The hash carries the meaning, so the links stay muted and undecorated at the
-   weight of the status and rating beside them. A tag is a way out of a page,
-   never the reason anyone is on it. */
-
-.tag-list {
-  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
   margin: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
 }
 
-/* In the meta row the size and lowercasing are already set; the tags only need
-   to not stretch that flex line. */
-.subject-meta .tag-list {
-  font-size: inherit;
-  letter-spacing: inherit;
+.rating { font: 10px/1 var(--pixel); color: var(--st-active); }
+
+.essay { max-width: var(--measure); margin-bottom: 3rem; }
+
+.timeline-head {
+  margin: 0 0 1.75rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--edge);
+  font: 400 10px/1 var(--pixel);
+  color: var(--muted);
 }
 
-.tag-link {
+.fragment { max-width: var(--measure); }
+.fragment + .fragment { margin-top: 2rem; }
+.fragment > :last-child { margin-bottom: 0; }
+
+.fragment-date {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+  font: 10px/1.4 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
 
-.tag-link:hover,
-.tag-link:focus { color: var(--accent); }
+.fragment-date:hover { color: var(--sun); }
 
-.post-tags {
-  margin-top: 2.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--rule);
-}
+/* ------------------------------------------------------------- tag page */
 
-/* tag pages */
-
-.tag-head { margin-bottom: 2rem; }
-
-.tag-head h1 {
-  margin: 0 0 0.35rem;
-  font-size: 1.6rem;
-}
-
-.tag-desc {
-  margin: 0 0 0.5rem;
-  color: var(--muted);
-}
-
-.tag-members {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
+.tag-head { margin-bottom: 2.25rem; }
+.tag-head h1 { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
+.tag-desc { margin: 0 0 0.6rem; max-width: var(--measure); color: var(--muted); }
+.tag-members { margin: 0; font: 10px/1.8 var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
 
-/* Unlike a subject page, a tag page mixes games — so every entry has to say
-   which one it came from, and the date alone stops being enough. */
+/* This timeline mixes subjects, so each entry carries its own sky. */
 .fragment-meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.6rem;
-  margin: 0 0 0.3rem;
+  margin: 0 0 0.4rem;
 }
 
 .fragment-meta .fragment-date { margin-bottom: 0; }
+.fragment-meta .sky { width: 16px; }
 
 .fragment-subject {
-  font-size: 0.8rem;
-  font-variant: small-caps;
-  letter-spacing: 0.05em;
+  font: 10px/1.3 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
 
-.fragment-subject:hover,
-.fragment-subject:focus { color: var(--accent); }
+.fragment-subject:hover { color: var(--sun); }
 
 .tag-essay { margin: 0; }
 
-.timeline-head {
-  font-size: 0.8rem;
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 1.5rem;
-}
+/* ------------------------------------------------------------- spoilers */
 
-.fragment + .fragment { margin-top: 2rem; }
-
-.fragment-date {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.8rem;
-  color: var(--muted);
-  text-decoration: none;
-  letter-spacing: 0.02em;
-}
-
-.fragment-date:hover { color: var(--accent); }
-
-.fragment > :last-child { margin-bottom: 0; }
-
-/* subject links on the H2s of a daily post */
-.post h2 a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule);
-}
-
-.post h2 a:hover { border-bottom-color: var(--accent); }
-
-/* spoilers */
-
-/* ||inline spoilers||. Focus is the reveal — click or tab — which keeps the
-   site at zero JavaScript. Blurred rather than blacked out: it should read as
-   a courtesy marker, not a lock. Anyone who works hard enough to squint past a
-   blur could have just clicked it. */
+/* ||inline spoilers||. Focus is the reveal, which keeps the site at zero JS.
+   Blurred rather than blacked out: anyone who squints past a blur could have
+   just clicked it. */
 .spoiler {
-  background: var(--rule);
-  border-radius: 2px;
+  background: var(--edge);
   filter: blur(0.3em);
   cursor: pointer;
   transition: filter 0.12s ease, background-color 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.spoiler:focus {
-  background: none;
-  filter: none;
-  outline: none;
-}
+.spoiler:focus { background: none; filter: none; outline: none; }
 
-/* Paper has no focus state, so a blurred spoiler would print permanently
-   unreadable. Printing is a deliberate act by someone already reading. */
+/* Paper has no focus state, so a blurred spoiler would print unreadable. */
 @media print {
   .spoiler { background: none; filter: none; }
 }
 
+.empty { color: var(--muted); }
+
+/* --------------------------------------------------------------- footer */
+
 .site-footer {
   margin-top: 4rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--rule);
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--edge);
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font: 10px/1.6 var(--pixel);
   color: var(--muted);
-  font-size: 0.875rem;
+}
+
+.site-footer p { margin: 0; }
+.site-footer a { color: var(--muted); text-decoration: none; }
+.site-footer a:hover { color: var(--sun); }
+
+/* Silkscreen is a bitmap face and wants whole-pixel sizes, so nothing above
+   scales it with rem. Below 34rem only the art shrinks. */
+@media (max-width: 34rem) {
+  .frag > .sky { width: 2.25rem; }
+  .subject-head { gap: 1rem; }
+  .subject-head > .sky { width: 5.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf-item .sky, .spoiler { transition: none; }
 }
