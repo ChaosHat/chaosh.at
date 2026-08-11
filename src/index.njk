@@ -9,7 +9,7 @@ layout: base.njk
     {% for essay in essays %}
     <li>
       <a class="essay-title" href="/s/{{ essay.slug }}/">{{ essay.title }}</a>
-      {% if essay.description %}<p class="essay-blurb">{{ essay.description }}</p>{% endif %}
+      {% if essay.blurb %}<p class="essay-blurb">{{ essay.blurb }}</p>{% endif %}
     </li>
     {% endfor %}
   </ul>

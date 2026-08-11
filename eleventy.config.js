@@ -174,27 +174,39 @@ export default function (eleventyConfig) {
     // A subject exists because it is registered, not because it has fragments.
     return Object.entries(subjects).map(([slug, meta]) => {
       const essay = essays.get(slug);
+      const essayHtml = essay ? md.render(essay.rawInput) : null;
+
+      // The blurb is Hat's own opening paragraph, not a frontmatter summary —
+      // he writes the lede, nothing paraphrases it for him.
+      const firstPara = essayHtml?.match(/<p>([\s\S]*?)<\/p>/i);
+      const blurb = firstPara
+        ? firstPara[1].replace(/<[^>]+>/g, "").trim()
+        : null;
+
       return {
         slug,
         ...meta,
         fragments: collected.get(slug) ?? [],
-        essayHtml: essay ? md.render(essay.rawInput) : null,
+        essayHtml,
         essayDate: essay ? essay.date : null,
         hasEssay: Boolean(essay),
-        description: essay?.data?.description ?? meta.description ?? null,
+        blurb,
       };
     });
   });
 
-  // Turn "## Dragon Quest XI S" in a daily post into a link to its subject page.
+  // A subject heading in a daily post becomes a link to its subject page, and is
+  // rewritten to the canonical title from subjects.yaml — so "## dqxis" can be
+  // typed on a phone and still reads "Dragon Quest XI S" on the site. An
+  // unrecognised heading is left exactly as written.
   eleventyConfig.addFilter("linkSubjects", (html) =>
     String(html ?? "").replace(
       /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
       (whole, attrs, inner) => {
         const slug = aliasMap.get(normalise(inner.replace(/<[^>]+>/g, "")));
-        return slug
-          ? `<h2${attrs}><a href="/s/${slug}/">${inner}</a></h2>`
-          : whole;
+        if (!slug) return whole;
+        const title = subjects[slug]?.title ?? inner;
+        return `<h2${attrs}><a href="/s/${slug}/">${title}</a></h2>`;
       },
     ),
   );
