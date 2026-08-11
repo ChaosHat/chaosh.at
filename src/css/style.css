@@ -58,8 +58,12 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* The masthead aurora, edge to edge across the viewport. Three frames of one
-   curtain in the day's hue, cycled like an SNES palette animation. */
+/* The masthead aurora, edge to edge across the viewport, in the day's hue.
+   One 16-frame sprite sheet stepped through by background-position — sprite
+   animation, one decode, no flicker. The tile is periodic and rendered at a
+   fixed 480px width with repeat-x, so pixel density never changes with the
+   viewport; the height is px, not rem, because the frame window must match
+   the sheet's 112px frame exactly or neighbouring frames bleed through. */
 body::before {
   content: "";
   position: absolute;
@@ -67,17 +71,16 @@ body::before {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 7rem;
+  height: 112px;
   z-index: -1;
   pointer-events: none;
-  background: url("/img/aurora/h1.svg") center / 100% 100% no-repeat;
-  animation: aurora-cycle 7s infinite;
+  background: url("/img/aurora/sheet.svg") repeat-x;
+  background-size: 480px 1792px;
+  animation: aurora-roll 11.2s steps(16) infinite;
 }
 
-@keyframes aurora-cycle {
-  0%, 100% { background-image: url("/img/aurora/h1.svg"); }
-  33% { background-image: url("/img/aurora/h2.svg"); }
-  66% { background-image: url("/img/aurora/h3.svg"); }
+@keyframes aurora-roll {
+  to { background-position: 0 -1792px; }
 }
 
 a { color: var(--accent); }

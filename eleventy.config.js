@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, headerSvgs } from "./aurora.js";
+import { subjectSvg, chipSvg, headerSheet } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -666,11 +666,9 @@ export default function (eleventyConfig) {
   });
 
   // The masthead's sky rolls its hue at each build — a different aurora every
-  // day, held all day, zero JavaScript. Three shimmer frames of one curtain,
-  // cycled by CSS.
-  headerSvgs(new Date().toISOString().slice(0, 10)).forEach((svg, i) => {
-    skyFiles.set(`img/aurora/h${i + 1}.svg`, svg);
-  });
+  // day, held all day, zero JavaScript. One 16-frame sprite sheet, stepped
+  // through by CSS.
+  skyFiles.set("img/aurora/sheet.svg", headerSheet(new Date().toISOString().slice(0, 10)));
 
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.

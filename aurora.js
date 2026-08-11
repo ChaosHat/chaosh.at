@@ -102,7 +102,7 @@ const smooth = (pts) => {
 // A curtain: bright lower edge, vertical rays of jittered heights fading
 // upward, brightness pulsing along the length. The per-column jitter is what
 // keeps it from ever reading as a banded stripe.
-const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96, shimmer = 0, sway = false }) => {
+const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96 }) => {
   const y0 = range(rand, yMin, yMax);
   const amp = range(rand, 5, 9);
   const ph = range(rand, 0, 6.28);
@@ -118,16 +118,12 @@ const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96, shimmer = 0, sway =
       y0 +
       drift * t +
       amp * Math.sin(ph + t * f1 * 2 * Math.PI) +
-      amp * 0.5 * Math.sin(t * f2 * 2 * Math.PI + ph * 1.7) +
-      (sway ? 2.5 * Math.sin(t * 8 + shimmer * 1.3) : 0);
+      amp * 0.5 * Math.sin(t * f2 * 2 * Math.PI + ph * 1.7);
     const yb = Math.round(y / 3) * 3;
     edge.push([x, y]);
     const n =
-      0.5 +
-      0.5 *
-        Math.sin(x * 1.7 + ph * 3 + shimmer * 2.2) *
-        Math.sin(x * 0.53 + ph * 5 + shimmer * 1.1);
-    const b = 0.62 + 0.38 * Math.sin(x * 0.9 + ph * 1.3 + shimmer * 2.8);
+      0.5 + 0.5 * Math.sin(x * 1.7 + ph * 3) * Math.sin(x * 0.53 + ph * 5);
+    const b = 0.62 + 0.38 * Math.sin(x * 0.9 + ph * 1.3);
     const ray = hBase * (0.9 + 1.5 * n);
     rects +=
       `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${(0.32 * b).toFixed(2)}'/>` +
@@ -222,19 +218,71 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
 
 // The header: one wide curtain, edge to edge, in that night's hue — the date
 // seeds the color, so the sky over the masthead changes at each 2am publish
-// and holds all day. Three frames of the same curtain, shimmered, cycled by
-// CSS like an SNES palette animation.
-export const headerSvgs = (dateStr) => {
+// and holds all day. One SVG holds all 16 frames stacked as a sprite sheet;
+// CSS steps background-position through them — no per-frame decode, no
+// first-cycle flicker. The curtain is strictly periodic (every x-term is an
+// integer number of cycles over the tile) so it repeats seamlessly at a fixed
+// 480px width: pixel density never changes with the viewport. Every animated
+// term advances a whole number of cycles across the 16 frames, so the loop
+// closes. Motion is two layers: the geometry drifts gently (sway + ray
+// drift), while brightness runs on standing waves — three pulse patterns at
+// different scales plus a slow whole-curtain ebb — so patches glow and dim in
+// place instead of marching along the curtain.
+export const HEADER_W = 480;
+export const HEADER_FH = 112;
+export const HEADER_FRAMES = 16;
+
+export const headerSheet = (dateStr) => {
   const hue = (hashOf(dateStr) % 360000) / 1000;
   const pal = palette(hue);
-  return [0, 2, 4].map((shimmer) => {
-    const rand = mulberry32(hashOf("masthead"));
-    const W = 480;
-    const H = 64;
-    let body =
-      `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
-      `<feGaussianBlur stdDeviation='7'/></filter></defs>`;
-    body += curtain(rand, pal, { yMin: 40, yMax: 48, hBase: 22, op: 0.45, w: W, shimmer, sway: true });
-    return svgWrap(W, H, body);
-  });
+  const TAU = 2 * Math.PI;
+  const W = HEADER_W;
+  const FH = HEADER_FH;
+  const N = HEADER_FRAMES;
+
+  let frames = "";
+  for (let k = 0; k < N; k += 1) {
+    const theta = (k / N) * TAU;
+    const F = k / N;
+    const yoff = k * FH;
+    const ebb = 1 + 0.08 * Math.sin(TAU * F + 1.9);
+    const edge = [];
+    let rects = "";
+    for (let x = 0; x <= W; x += 4) {
+      const t = x / W;
+      const y =
+        62 +
+        9 * Math.sin(TAU * 1 * t + 1.3) +
+        4.5 * Math.sin(TAU * 3 * t + 4.1) +
+        1.6 * Math.sin(TAU * 3 * t + theta);
+      const yb = Math.round(y / 3) * 3;
+      edge.push([x, y + yoff]);
+      const n =
+        0.5 +
+        0.5 * Math.sin(TAU * 7 * t + 2.6 + theta) * Math.sin(TAU * 11 * t + 1.3 + theta);
+      const pulse =
+        0.55 * Math.sin(TAU * 3 * t + 1.1) * Math.sin(TAU * 1 * F + 0.7) +
+        0.35 * Math.sin(TAU * 7 * t + 4.2) * Math.sin(TAU * 2 * F + 2.9) +
+        0.28 * Math.sin(TAU * 12 * t + 2.0) * Math.sin(TAU * 3 * F + 5.0);
+      const b = Math.min(1, Math.max(0.18, 0.6 + 0.36 * pulse));
+      const flick = 0.85 + 0.15 * Math.sin(TAU * 9 * t + 0.5) * Math.sin(TAU * 2 * F + 4.0);
+      const ray = 34 * (0.9 + 1.5 * n);
+      rects +=
+        `<rect x='${x}' y='${(yoff + yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${Math.max(0.08, 0.32 * b).toFixed(2)}'/>` +
+        `<rect x='${x}' y='${(yoff + yb - ray * 0.5).toFixed(0)}' width='4' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${Math.max(0.07, 0.58 * b * flick).toFixed(2)}'/>` +
+        `<rect x='${x}' y='${yoff + yb - 7}' width='4' height='9' fill='${pal.edge}' fill-opacity='${Math.max(0.1, 0.95 * b * flick).toFixed(2)}'/>`;
+    }
+    const d =
+      `M${edge[0][0]} ${edge[0][1].toFixed(1)}` +
+      edge.slice(1).map(([px, py]) => ` L${px} ${py.toFixed(1)}`).join("");
+    const glow = `<path d='${d}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='55' stroke-linecap='round' filter='url(#b)'/>`;
+    frames += `<g opacity='${(0.45 * ebb).toFixed(3)}'>${glow}${rects}</g>`;
+  }
+
+  return (
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${FH * N}' ` +
+    `width='${W}' height='${FH * N}' preserveAspectRatio='none'>` +
+    `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
+    `<feGaussianBlur stdDeviation='7'/></filter></defs>${frames}</svg>`
+  );
 };
