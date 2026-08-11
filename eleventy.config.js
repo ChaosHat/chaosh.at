@@ -60,19 +60,43 @@ export default function (eleventyConfig) {
   const HOME_LIMIT = 1500; // visible characters
   const visibleLength = (s) => s.replace(/<[^>]+>/g, "").trim().length;
 
+  const isSubject = (s) => /^<h2[\s>]/i.test(s.trim());
+
   eleventyConfig.addFilter("homeBody", (html) => {
     if (!html) return { html: "", truncated: false };
     if (visibleLength(html) <= HOME_LIMIT) return { html, truncated: false };
 
     const sections = html.split(/(?=<h2[\s>])/i).filter((s) => s.trim());
     let kept = "";
-    for (const section of sections) {
-      // Always keep the first section, even if it alone exceeds the limit —
-      // better a long home page than a sentence cut in half.
-      if (kept && visibleLength(kept + section) > HOME_LIMIT) break;
-      kept += section;
+    let i = 0;
+
+    // A day may open with prose belonging to no subject. That preamble rides
+    // along with the first subject instead of competing with it for the
+    // budget. Guaranteeing "the first section" instead spends the guarantee on
+    // throat-clearing: a 267-char intro ahead of a 1489-char subject blew the
+    // limit on the pair, so the home page showed the intro alone and hid every
+    // subject on the day — the exact thing this filter exists to prevent.
+    if (sections.length && !isSubject(sections[0])) {
+      kept = sections[0];
+      i = 1;
     }
-    return { html: kept, truncated: kept.length < html.length };
+
+    // Always keep one subject whole, even if it alone exceeds the limit —
+    // better a long home page than a subject shown half-finished.
+    if (i < sections.length) {
+      kept += sections[i];
+      i += 1;
+    }
+
+    for (; i < sections.length; i += 1) {
+      if (visibleLength(kept + sections[i]) > HOME_LIMIT) break;
+      kept += sections[i];
+    }
+
+    // Counted, not measured by string length: `sections` drops whitespace-only
+    // splits, so a kept-everything body can be shorter than the input and
+    // would otherwise offer "read the rest" of nothing.
+    return { html: kept, truncated: i < sections.length };
   });
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
