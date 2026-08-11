@@ -50,3 +50,9 @@ fields-of-mistria:
   status: shelved
   rating: 4
   aliases: [mistria, fom]
+
+flamecraft-duals:
+  title: Flamecraft Duals
+  category: [boardgames]
+  status: active
+  aliases: [flamecraft duals]
