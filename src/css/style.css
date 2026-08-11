@@ -54,7 +54,7 @@ body {
   max-width: var(--wide);
   background: transparent;
   color: var(--ink);
-  font: 1rem/1.68 var(--serif);
+  font: 1.125rem/1.62 var(--serif);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -158,7 +158,7 @@ h1, h2, h3 { line-height: 1.25; }
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-left: auto;
-  font: 10px/1 var(--pixel);
+  font: 12px/1 var(--pixel);
 }
 
 .site-nav a {
@@ -170,6 +170,20 @@ h1, h2, h3 { line-height: 1.25; }
 
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
+
+/* ----------------------------------------------------------------- intro
+   Standing line under the masthead saying what the auroras are. The art
+   encodes status and recency and nothing on the page decoded it, so a first
+   visitor read the covers as arbitrary coloured lines. Prose, not chrome:
+   it is the one sentence a stranger actually needs to read. Renders only
+   when site.intro is set. */
+
+.site-intro {
+  max-width: var(--measure);
+  margin: -0.5rem 0 2rem;
+  color: var(--muted);
+  font-style: italic;
+}
 
 /* ----------------------------------------------------------- now playing */
 
@@ -198,7 +212,7 @@ h1, h2, h3 { line-height: 1.25; }
 
 .now-label {
   flex-shrink: 0;
-  font: 10px/1 var(--pixel);
+  font: 12px/1 var(--pixel);
   color: var(--st-active);
 }
 
@@ -208,13 +222,17 @@ h1, h2, h3 { line-height: 1.25; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font: 10px/1.2 var(--pixel);
+  font: 12px/1.2 var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
 
 .now-item:hover { color: var(--accent); }
-.now-item .sky { width: 18px; }
+
+/* 32px, not smaller. Below this a chip's curtain renders under 2px per column
+   and reads as coloured lines, not sky — and this strip is where a stranger
+   meets the art first, so it has to survive the encounter. */
+.now-item .sky { width: 32px; }
 
 /* ------------------------------------------------------- badges and tags */
 
@@ -223,7 +241,7 @@ h1, h2, h3 { line-height: 1.25; }
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.45rem;
-  font: 10px/1 var(--pixel);
+  font: 12px/1 var(--pixel);
   color: var(--c);
   background: color-mix(in srgb, var(--c) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
@@ -250,7 +268,7 @@ h1, h2, h3 { line-height: 1.25; }
   padding: 0.3rem 0.45rem;
   background: var(--deep);
   border: 1px solid var(--edge);
-  font: 10px/1 var(--pixel);
+  font: 12px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -284,7 +302,7 @@ h1, h2, h3 { line-height: 1.25; }
 .post-list-subdate {
   display: block;
   margin: 0;
-  font: 10px/1.4 var(--pixel);
+  font: 12px/1.4 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -312,7 +330,7 @@ a.post-list-date:hover { color: var(--accent); }
 
 .frag-subject {
   padding-bottom: 2px;
-  font: 11px/1.3 var(--pixel);
+  font: 12px/1.3 var(--pixel);
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--edge);
@@ -327,7 +345,7 @@ a.post-list-date:hover { color: var(--accent); }
   margin-top: 1.1rem;
   padding: 0.5rem 0.7rem;
   border: 1px solid var(--edge);
-  font: 10px/1 var(--pixel);
+  font: 12px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -339,7 +357,7 @@ a.post-list-date:hover { color: var(--accent); }
 .post-head { margin-bottom: 2rem; }
 .post-title { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
 .post-date { margin: 0; font: 400 1.4rem/1.2 var(--serif); }
-.post-subdate { margin: 0; font: 10px/1.4 var(--pixel); color: var(--muted); }
+.post-subdate { margin: 0; font: 12px/1.4 var(--pixel); color: var(--muted); }
 
 .post-tags {
   margin-top: 2.5rem;
@@ -359,11 +377,11 @@ a.post-list-date:hover { color: var(--accent); }
   border-bottom: 1px solid var(--edge);
 }
 
-.archive-list a { font: 11px/1.5 var(--pixel); text-decoration: none; }
+.archive-list a { font: 12px/1.5 var(--pixel); text-decoration: none; }
 
 .archive-note {
   margin-left: auto;
-  font: 10px/1.5 var(--pixel);
+  font: 12px/1.5 var(--pixel);
   color: var(--muted);
 }
 
@@ -394,7 +412,7 @@ a.post-list-date:hover { color: var(--accent); }
 .shelf-item .sky { transition: transform 0.1s steps(3); }
 .shelf-item a:hover .sky { transform: translateY(-4px); }
 
-.shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 10px/1.5 var(--pixel); }
+.shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 12px/1.5 var(--pixel); }
 
 .shelf-list { list-style: none; margin: 0; padding: 0; }
 
@@ -406,7 +424,7 @@ a.post-list-date:hover { color: var(--accent); }
   border-bottom: 1px solid var(--edge);
 }
 
-.shelf-list a { font: 11px/1.5 var(--pixel); text-decoration: none; }
+.shelf-list a { font: 12px/1.5 var(--pixel); text-decoration: none; }
 
 /* --------------------------------------------------------- subject page */
 
@@ -430,7 +448,7 @@ a.post-list-date:hover { color: var(--accent); }
   margin: 0;
 }
 
-.rating { font: 10px/1 var(--pixel); color: var(--st-active); }
+.rating { font: 12px/1 var(--pixel); color: var(--st-active); }
 
 .essay { max-width: var(--measure); margin-bottom: 3rem; }
 
@@ -438,7 +456,7 @@ a.post-list-date:hover { color: var(--accent); }
   margin: 0 0 1.75rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--edge);
-  font: 400 10px/1 var(--pixel);
+  font: 400 12px/1 var(--pixel);
   color: var(--muted);
 }
 
@@ -449,7 +467,7 @@ a.post-list-date:hover { color: var(--accent); }
 .fragment-date {
   display: inline-block;
   margin-bottom: 0.45rem;
-  font: 10px/1.4 var(--pixel);
+  font: 12px/1.4 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -461,7 +479,7 @@ a.post-list-date:hover { color: var(--accent); }
 .tag-head { margin-bottom: 2.25rem; }
 .tag-head h1 { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
 .tag-desc { margin: 0 0 0.6rem; max-width: var(--measure); color: var(--muted); }
-.tag-members { margin: 0; font: 10px/1.8 var(--pixel); color: var(--muted); }
+.tag-members { margin: 0; font: 12px/1.8 var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
 
 /* This timeline mixes subjects, so each entry carries its own sky. */
@@ -474,10 +492,10 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 .fragment-meta .fragment-date { margin-bottom: 0; }
-.fragment-meta .sky { width: 16px; }
+.fragment-meta .sky { width: 24px; }
 
 .fragment-subject {
-  font: 10px/1.3 var(--pixel);
+  font: 12px/1.3 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -526,8 +544,12 @@ a.post-list-date:hover { color: var(--accent); }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent); }
 
-/* Silkscreen is a bitmap face and wants whole-pixel sizes, so nothing above
-   scales it with rem. Below 34rem only the art shrinks. */
+/* Silkscreen is set in px, never rem, so it never lands on a fractional size.
+   Its x-height is 0.5em — half the em, against roughly 0.48 for the body
+   serif — so a nominally matching px size reads far smaller beside prose.
+   Chrome is 12px; 10px is reserved for the footer and pagination counts,
+   which are the only genuinely tertiary text on the site.
+   Below 34rem only the art shrinks. */
 @media (max-width: 34rem) {
   .frag > .sky { width: 2.25rem; }
   .subject-head { gap: 1rem; }

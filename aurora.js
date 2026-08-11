@@ -186,7 +186,19 @@ export const subjectSvg = (slug, ladderHue, status, tier) => {
 };
 
 // The chip: what a sky becomes below ~32px, where three curtains would be
-// noise. Night, the main curtain's bright edge alone, two stars.
+// noise. Night, a curtain's bright edge with a faint body under it, two stars.
+//
+// Two bands, not one. A single band across a small dark tile reads as a line
+// chart — reported by the first outsider to see the site. The fix is not just
+// "add another": two PARALLEL bands read as a graph harder than one does. The
+// second band is deliberately unlike the first — higher, thinner, dimmer, and
+// on a different spatial frequency — so the pair diverges across the tile and
+// resolves as depth in a sky rather than two series on an axis. It mirrors the
+// faint high curtain of the full scene, so the chip stays a reduction of the
+// real thing and not a different picture.
+//
+// Band count still tracks status: abandoned keeps its single grey ghost (the
+// doc's "one curtain, desaturated"), completed keeps none and gets the moon.
 export const chipSvg = (slug, ladderHue, status, tier) => {
   const rand = mulberry32(hashOf(slug));
   const pal = status === "abandoned" ? GREY : palette(ladderHue);
@@ -194,19 +206,45 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
   const H = 32;
   const op =
     status === "completed" ? 0 : status === "abandoned" ? 0.5 : status === "shelved" ? 0.45 : Math.max(tier, 0.5);
+  const twoBands = status !== "abandoned" && status !== "completed";
+
+  // Quantised to the 2-unit column grid, same as the full scene's rays.
+  const band = ({ y0, ph, freq, amp, bodyH, edgeH, dim }) => {
+    let out = "";
+    for (let x = 0; x < W; x += 2) {
+      const y = Math.round((y0 + amp * Math.sin(ph + (x / W) * freq)) / 2) * 2;
+      out +=
+        `<rect x='${x}' y='${y - bodyH}' width='2' height='${bodyH}' fill='${pal.mid}' fill-opacity='${(0.55 * dim).toFixed(2)}'/>` +
+        `<rect x='${x}' y='${y}' width='2' height='${edgeH}' fill='${pal.edge}' fill-opacity='${(0.95 * dim).toFixed(2)}'/>`;
+    }
+    return out;
+  };
 
   let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
+  // Main band is drawn from the seed first, so adding the high one below did
+  // not move any chip's existing curtain.
   const y0 = range(rand, 12, 18);
   const ph = range(rand, 0, 6.28);
   if (op > 0) {
-    let line = "";
-    for (let x = 0; x < W; x += 2) {
-      const y = Math.round((y0 + 2.5 * Math.sin(ph + (x / W) * 4.5)) / 2) * 2;
-      line +=
-        `<rect x='${x}' y='${y - 3}' width='2' height='3' fill='${pal.mid}' fill-opacity='0.55'/>` +
-        `<rect x='${x}' y='${y}' width='2' height='2' fill='${pal.edge}' fill-opacity='0.95'/>`;
+    const main = band({ y0, ph, freq: 4.5, amp: 2.5, bodyH: 3, edgeH: 2, dim: 1 });
+    let high = "";
+    if (twoBands) {
+      // amp must clear the 2-unit quantisation by enough to produce three
+      // steps, not two: at amp 1.6 this band snapped to a near-flat line, and
+      // a straight horizontal rule is the single most graph-like mark
+      // available. It may clip off the top of the tile, which is what a real
+      // curtain running out of frame does anyway.
+      high = band({
+        y0: range(rand, 4, 7),
+        ph: range(rand, 0, 6.28),
+        freq: 6.5,
+        amp: 2.4,
+        bodyH: 2,
+        edgeH: 1,
+        dim: 0.5,
+      });
     }
-    body += `<g opacity='${op}'>${line}</g>`;
+    body += `<g opacity='${op}'>${high}${main}</g>`;
   }
   if (status === "completed") {
     body += `<circle cx='16' cy='9' r='4' fill='${MOON}'/>`;

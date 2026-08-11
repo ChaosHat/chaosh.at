@@ -24,6 +24,10 @@
       </nav>
     </header>
 
+    {#- Says what the auroras mean. Empty in site.json until it is written;
+        an unwritten intro renders nothing rather than a placeholder. -#}
+    {% if site.intro %}<p class="site-intro">{{ site.intro }}</p>{% endif %}
+
     {% set playing = collections.subjectPages | nowPlaying %}
     {% if playing | length %}
     <div class="now">
