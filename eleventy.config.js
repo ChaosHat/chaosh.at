@@ -39,6 +39,9 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("dateSlug", (d) => d.toISOString().slice(0, 10));
 
+  // RFC 3339, which Atom requires.
+  eleventyConfig.addFilter("atomDate", (d) => d.toISOString());
+
   eleventyConfig.addFilter("readableDate", (d) => {
     const key = d.getTime();
     let out = dateCache.get(key);
@@ -256,7 +259,7 @@ export default function (eleventyConfig) {
   // rewritten to the canonical title from subjects.yaml — so "## dqxis" can be
   // typed on a phone and still reads "Dragon Quest XI S" on the site. An
   // unrecognised heading is left exactly as written.
-  eleventyConfig.addFilter("linkSubjects", (html) =>
+  const linkSubjectsHtml = (html) =>
     String(html ?? "").replace(
       /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
       (whole, attrs, inner) => {
@@ -265,8 +268,49 @@ export default function (eleventyConfig) {
         const title = subjects[slug]?.title ?? inner;
         return `<h2${attrs}><a href="/s/${slug}/">${title}</a></h2>`;
       },
+    );
+
+  eleventyConfig.addFilter("linkSubjects", linkSubjectsHtml);
+
+  // Feed readers resolve relative links against the feed URL, not the site, so
+  // every href in feed content has to be absolute or it breaks in the reader.
+  eleventyConfig.addFilter("absoluteUrls", (html, base) =>
+    String(html ?? "").replace(
+      /(href|src)="\/([^"]*)"/g,
+      (_m, attr, rest) => `${attr}="${String(base).replace(/\/$/, "")}/${rest}"`,
     ),
   );
+
+  // ------------------------------------------------------------------- feed
+  //
+  // Dated posts plus standing essays. A bare fragment-collector subject page
+  // never enters the feed — that is what lets a finished essay announce itself
+  // while a page that merely accumulates fragments stays quiet.
+  //
+  // Every entry's date is the post's OWN date and is never advanced on edit, so
+  // appending to yesterday's post cannot re-notify anyone. That property is what
+  // makes 2am automation safe, and it is verified by test — see the changelog.
+  eleventyConfig.addCollection("feed", (api) => {
+    const entries = publishable(api.getFilteredByTag("dailies")).map((p) => ({
+      url: p.url,
+      date: p.date,
+      title: p.data.title || dateFormat.format(p.date),
+      html: linkSubjectsHtml(md.render(p.rawInput)),
+    }));
+
+    for (const e of api.getFilteredByTag("essays")) {
+      if (e.data.publish !== true) continue;
+      if (!subjects[e.fileSlug]) continue; // no subject page => no URL to point at
+      entries.push({
+        url: `/s/${e.fileSlug}/`,
+        date: e.date,
+        title: subjects[e.fileSlug].title ?? e.data.title ?? e.fileSlug,
+        html: md.render(e.rawInput),
+      });
+    }
+
+    return entries.sort((a, b) => b.date - a.date);
+  });
 
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.

@@ -6,6 +6,7 @@
     <title>{% if title %}{{ title }} — {{ site.title }}{% elif isDaily %}{{ page.date | readableDate }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
     <meta name="description" content="{{ description or site.description }}">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>
   <body>
     <header class="site-header">
@@ -15,6 +16,7 @@
         <a href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
         {% endfor %}
         <a href="/archive/">archive</a>
+        <a href="/feed.xml">feed</a>
         {% if collections.featured | length %}<a href="/best/">best of</a>{% endif %}
       </nav>
     </header>

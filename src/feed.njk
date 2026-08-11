@@ -1,0 +1,33 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+{%- set entries = collections.feed -%}
+{%- set newest = entries[0].date if entries | length else site.built -%}
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ site.title }}</title>
+  <subtitle>{{ site.description }}</subtitle>
+  <link href="{{ site.url }}/feed.xml" rel="self" type="application/atom+xml"/>
+  <link href="{{ site.url }}/" rel="alternate" type="text/html"/>
+  <id>{{ site.url }}/</id>
+  <author><name>{{ site.author }}</name></author>
+  {#- Feed-level updated is the newest ENTRY date, never the build time: a
+      build-time value would churn the file on every deploy for no reason. -#}
+  <updated>{{ newest | atomDate }}</updated>
+  {%- for entry in entries %}
+  <entry>
+    <title>{{ entry.title }}</title>
+    <link href="{{ site.url }}{{ entry.url }}" rel="alternate" type="text/html"/>
+    {#- A permanent, opaque identifier. Readers dedupe on this, so it must never
+        change once published — not if the title changes, not if the post is
+        edited. Built from the date and path, both of which are fixed. -#}
+    <id>tag:chaosh.at,{{ entry.date | dateSlug }}:{{ entry.url }}</id>
+    {#- Both pinned to the post's own date. NEVER the edit or build time —
+        advancing these is exactly what re-surfaces a post in every reader. -#}
+    <published>{{ entry.date | atomDate }}</published>
+    <updated>{{ entry.date | atomDate }}</updated>
+    <content type="html">{{ entry.html | absoluteUrls(site.url) | escape }}</content>
+  </entry>
+  {%- endfor %}
+</feed>
