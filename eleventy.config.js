@@ -93,10 +93,22 @@ export default function (eleventyConfig) {
       kept += sections[i];
     }
 
+    // The cut sections' names ride along so "read the rest" can say what it
+    // is the rest OF. Canonical titles, not tags: every cut section is a
+    // subject, so the preview is never empty when content is hidden —
+    // tagviews are curated and sparse, and would advertise nothing at all
+    // for an untagged subject.
+    const cut = sections.slice(i).map((section) => {
+      const m = /^<h2[^>]*>([\s\S]*?)<\/h2>/i.exec(section.trim());
+      const heading = m ? m[1].replace(/<[^>]+>/g, "").trim() : "";
+      const slug = aliasMap.get(normalise(heading));
+      return subjects[slug]?.title ?? heading;
+    });
+
     // Counted, not measured by string length: `sections` drops whitespace-only
     // splits, so a kept-everything body can be shorter than the input and
     // would otherwise offer "read the rest" of nothing.
-    return { html: kept, truncated: i < sections.length };
+    return { html: kept, truncated: i < sections.length, cut };
   });
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));

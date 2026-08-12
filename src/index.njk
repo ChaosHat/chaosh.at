@@ -17,7 +17,7 @@ layout: base.njk
     </div>
     <div class="post-body">{{ body.html | linkSubjects | safe }}</div>
     {% if body.truncated %}
-    <a class="more" href="{{ post.url }}">read the rest →</a>
+    <a class="more" href="{{ post.url }}">read the rest → <span class="more-cut">{{ body.cut | join(", ") }}</span></a>
     {% endif %}
   </li>
   {% else %}

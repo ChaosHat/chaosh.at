@@ -386,6 +386,8 @@ a.post-list-date:hover { color: var(--accent); }
 .more:hover,
 .all-link a:hover { border-color: var(--accent); background: var(--deep); }
 
+.more-cut { color: var(--muted); }
+
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
