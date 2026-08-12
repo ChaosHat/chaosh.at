@@ -177,11 +177,13 @@ h1, h2, h3 { line-height: 1.25; }
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
 
 /* ----------------------------------------------------------------- intro
-   Standing line under the masthead saying what the auroras are. The art
+   Standing lines under the masthead saying what the auroras are. The art
    encodes status and recency and nothing on the page decoded it, so a first
    visitor read the covers as arbitrary coloured lines. Prose, not chrome:
-   it is the one sentence a stranger actually needs to read. Renders only
-   when site.intro is set. */
+   it is the one thing a stranger actually needs to read. Renders only when
+   site.intro is set. Each line is a span; the last gets a breath of space
+   above it so the punchline lands on its own beat — the sibling selector
+   keeps a single-line intro unaffected. */
 
 .site-intro {
   max-width: var(--measure);
@@ -189,6 +191,9 @@ h1, h2, h3 { line-height: 1.25; }
   color: var(--muted);
   font-style: italic;
 }
+
+.site-intro span { display: block; }
+.site-intro span + span:last-child { margin-top: 0.5em; }
 
 /* ----------------------------------------------------------- now playing */
 

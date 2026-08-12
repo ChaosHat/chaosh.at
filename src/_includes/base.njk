@@ -29,8 +29,9 @@
         introduction, and repeating it above every subject page would nag a
         returning reader. It sits here rather than in index.njk so it stays
         above Now Playing: what the site is, then what is current. Drop the
-        url test to show it everywhere. -#}
-    {% if site.intro and page.url == "/" %}<p class="site-intro">{{ site.intro }}</p>{% endif %}
+        url test to show it everywhere. Each line of the yaml block becomes
+        its own span so the copy's line breaks survive into HTML. -#}
+    {% if site.intro and page.url == "/" %}<p class="site-intro">{% for line in site.intro.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
 
     {% set playing = collections.subjectPages | nowPlaying %}
     {% if playing | length %}
