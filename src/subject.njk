@@ -30,44 +30,29 @@ eleventyComputed:
     </div>
   </header>
 
-  {% if subject.essayHtml %}
-  <div class="essay">{{ subject.essayHtml | safe }}{% if (subject.cites | length) or (subject.citedTags | length) %}
-    {#- The essay-shaped mirror of a daily's tag footer: cited subjects first
-        (about-list order), then the union of their tags. Reuses tag-list/
-        tag-link rather than inventing a look for a row that is the same idea. -#}
-    <p class="tag-list">
-      {% for c in subject.cites %}<a class="tag-link" href="/s/{{ c.slug }}/">{{ c.title }}</a>{% endfor %}
-      {% for t in subject.citedTags %}<a class="tag-link" href="/t/{{ t.slug }}/">#{{ t.slug }}</a>{% endfor %}
-    </p>
-  {% endif %}</div>
-  {% endif %}
-
-  {%- if subject.citedBy | length %}
-
-  {#- Essays that cite THIS subject via about: without being about it
-      themselves. Lede + link only — full text lives on the essay's own page,
-      mirroring how an essay appears on a tag page. -#}
-  <section class="cited-by">
-    <h2 class="timeline-head">Essays that mention this</h2>
-    {% for entry in subject.citedBy %}
-    <p class="tag-essay">{{ entry.blurb }}
-      <a class="more" href="{{ entry.url }}">read →</a>
-    </p>
-    {% endfor %}
-  </section>
-  {% endif %}
-
-  {% if subject.fragments | length %}
+  {#- One chronological stream: everything written about this thing, in order.
+      Fragments render in full; an essay appears at its date as lede + link,
+      because its full text has exactly one home — its own /e/ page. -#}
+  {% if subject.entries | length %}
   <section class="timeline">
-    {% if subject.essayHtml %}<h2 class="timeline-head">Along the way</h2>{% endif %}
-    {% for fragment in subject.fragments %}
+    {% for entry in subject.entries %}
     <div class="fragment">
-      <a class="fragment-date" href="{{ fragment.sourceUrl }}">{{ fragment.date | readableDate }}</a>
-      {{ fragment.html | safe }}
+      {% if entry.kind == "essay" %}
+      <p class="fragment-meta">
+        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
+        <a class="fragment-subject" href="{{ entry.url }}">{{ entry.title }}</a>
+      </p>
+      <p class="tag-essay">{{ entry.blurb }}
+        <a class="more" href="{{ entry.url }}">read →</a>
+      </p>
+      {% else %}
+      <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
+      {{ entry.html | safe }}
+      {% endif %}
     </div>
     {% endfor %}
   </section>
-  {% elif not subject.essayHtml and not (subject.citedBy | length) %}
+  {% else %}
   <p class="empty">Nothing written about this yet.</p>
   {% endif %}
 </article>

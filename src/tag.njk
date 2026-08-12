@@ -27,19 +27,24 @@ eleventyComputed:
     {% for entry in tag.entries %}
     <div class="fragment">
       {#- The sky repeats here because this is the one timeline that MIXES
-          subjects: the hue says which game before the label has been read. -#}
+          subjects: the hue says which game before the label has been read.
+          An essay is its own thing, not a subject — its row carries its
+          title instead of a chip, and its lede links to its /e/ page, the
+          full text's one home. -#}
+      {% if entry.kind == "essay" %}
+      <p class="fragment-meta">
+        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
+        <a class="fragment-subject" href="{{ entry.url }}">{{ entry.title }}</a>
+      </p>
+      <p class="tag-essay">{{ entry.blurb }}
+        <a class="more" href="{{ entry.url }}">read →</a>
+      </p>
+      {% else %}
       <p class="fragment-meta">
         <span class="sky" style="background-image:url({{ entry.subject.chipUrl }})" aria-hidden="true"></span>
         <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
         <a class="fragment-subject" href="/s/{{ entry.subject.slug }}/">{{ entry.subject.title }}</a>
       </p>
-      {#- An essay shows its lede and links out. The full text lives on the
-          subject page; inlining several would bury the fragments. -#}
-      {% if entry.kind == "essay" %}
-      <p class="tag-essay">{{ entry.blurb }}
-        <a class="more" href="/s/{{ entry.subject.slug }}/">read the post-mortem →</a>
-      </p>
-      {% else %}
       {{ entry.html | safe }}
       {% endif %}
     </div>

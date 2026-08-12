@@ -1,0 +1,26 @@
+---
+layout: base.njk
+pagination:
+  data: collections.essayPages
+  size: 1
+  alias: essay
+permalink: "/e/{{ essay.slug }}/"
+eleventyComputed:
+  title: "{{ essay.title }}"
+---
+<article class="post essay-page">
+  <header class="post-head">
+    <h1 class="post-title">{{ essay.title }}</h1>
+    <p class="post-subdate">{{ essay.date | readableDate }}</p>
+  </header>
+  {{ essay.html | safe }}
+  {#- The essay mirror of a daily's tag footer: the subjects it's about
+      (about-list order), then the union of their tags plus any tag cited
+      directly (tagviews order). Every view this essay appears in, linked. -#}
+  {% if (essay.cites | length) or (essay.citedTags | length) %}
+  <p class="tag-list post-tags">
+    {% for c in essay.cites %}<a class="tag-link" href="/s/{{ c.slug }}/">{{ c.title }}</a>{% endfor %}
+    {% for t in essay.citedTags %}<a class="tag-link" href="/t/{{ t.slug }}/">#{{ t.slug }}</a>{% endfor %}
+  </p>
+  {% endif %}
+</article>

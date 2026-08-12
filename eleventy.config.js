@@ -52,6 +52,11 @@ const normalise = (s) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
+// An essay's filename is a working label, not plumbing: "Atlus Narrative
+// Issues.md" publishes at /e/atlus-narrative-issues/ without being renamed.
+// Mirrors essay_slug() in chaosh_subjects.py — if one changes, change both.
+const essaySlug = (stem) => normalise(stem).replace(/ /g, "-");
+
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
@@ -210,19 +215,12 @@ export default function (eleventyConfig) {
       (p) => p.data.featured === true,
     );
 
-    // Essays carry `permalink: false` — the /s/ page built by buildSubjectPages
-    // is their only URL — so best.njk's page object is synthesized rather than
-    // passed through raw. `subjects` (below) isn't assigned yet at this point in
-    // the config function, but this callback only runs once Eleventy builds the
-    // collection, by which time it is — same closure trick buildSubjectPages
-    // relies on for `tags`/`aliasMap`.
-    const essays = publishedEssays(api)
-      .filter((e) => e.data.featured === true)
-      .map((e) => ({
-        url: `/s/${e.fileSlug}/`,
-        date: e.date,
-        data: { title: subjects[e.fileSlug]?.title ?? e.data.title ?? e.fileSlug },
-      }));
+    // Essays carry `permalink: false` — the /e/ page built by buildEssayList
+    // is their only URL — so best.njk's page object is synthesized to match
+    // the daily entries' shape.
+    const essays = buildEssayList(api)
+      .filter((e) => e.featured)
+      .map((e) => ({ url: e.url, date: e.date, data: { title: e.title } }));
 
     return [...dailies, ...essays].sort((a, b) => b.date - a.date);
   });
@@ -445,8 +443,8 @@ export default function (eleventyConfig) {
   // slug is typed as its literal YAML key, never fuzzed the way a heading is.
   // A slug hitting both is a naming collision: the subject wins (consistent
   // with "subjects first") but the collision itself is worth a warning.
-  const resolveAbout = (file, rawAbout, ownSlug) => {
-    const citedSubjects = []; // deduped, self-citation dropped
+  const resolveAbout = (file, rawAbout) => {
+    const citedSubjects = []; // deduped
     const citedTagsDirect = []; // deduped
     const seenSubjects = new Set();
     const seenTags = new Set();
@@ -462,7 +460,6 @@ export default function (eleventyConfig) {
       }
 
       if (subjSlug) {
-        if (subjSlug === ownSlug) continue; // citing its own page — it IS this page
         if (!seenSubjects.has(subjSlug)) {
           seenSubjects.add(subjSlug);
           citedSubjects.push(subjSlug);
@@ -484,6 +481,69 @@ export default function (eleventyConfig) {
     return { citedSubjects, citedTagsDirect };
   };
 
+  // ----------------------------------------------------------------- essays
+  //
+  // An essay is its own thing, not a pseudo-subject: the filename is a unique
+  // label (slugified for the URL), `title:` is the display title, and `about:`
+  // says which views it belongs to — aliases resolve, so `about: [p5r]` works.
+  // Nothing is registered in subjects.yaml for an essay to exist.
+  //
+  // Its own page at /e/<slug>/ is the full text's ONE home, and where the feed
+  // points. In every view it's about — cited subjects' pages, their tag views,
+  // tags cited directly — it appears in the chrono stream at its date as
+  // lede + link. Full text in one place; everywhere else points (decided
+  // 2026-08-12, superseding the pinned-essay-atop-a-subject-page model).
+  let essayList = null;
+  const essayCollisions = [];
+  const homelessEssays = [];
+  const buildEssayList = (api) => {
+    if (essayList) return essayList;
+    const bySlug = new Map(); // collision check: two stems, one slug
+
+    essayList = publishedEssays(api).map((e) => {
+      const slug = essaySlug(e.fileSlug);
+      if (bySlug.has(slug)) {
+        essayCollisions.push(`${bySlug.get(slug)} and ${e.inputPath} → /e/${slug}/`);
+      }
+      bySlug.set(slug, e.inputPath);
+
+      const raw = md.render(e.rawInput);
+      // The blurb is the essay's own opening paragraph — the author writes the
+      // lede, nothing paraphrases it. Off the REDACTED render: a blurb is
+      // plain text in a stream, with no span to blur and nothing to click.
+      const firstPara = stripSpoilers(raw).match(/<p>([\s\S]*?)<\/p>/i);
+      const blurb = firstPara ? firstPara[1].replace(/<[^>]+>/g, "").trim() : null;
+
+      const { citedSubjects, citedTagsDirect } = resolveAbout(e.inputPath, e.data.about);
+      if (!citedSubjects.length && !citedTagsDirect.length) {
+        homelessEssays.push(e.inputPath);
+      }
+      // Citation is transitive: citing a subject also lands the essay on that
+      // subject's tag views. Ordered by tagviews.yaml, same as every tag row.
+      const citedTagSlugs = new Set(citedTagsDirect);
+      for (const s of citedSubjects) {
+        for (const t of tagsOfSubject.get(s) ?? []) citedTagSlugs.add(t);
+      }
+
+      return {
+        slug,
+        url: `/e/${slug}/`,
+        title: e.data.title || e.fileSlug,
+        date: e.date,
+        featured: e.data.featured === true,
+        html: revealSpoilers(raw),
+        feedHtml: stripSpoilers(raw),
+        blurb,
+        citedSubjects,
+        cites: subjectLinks(citedSubjects),
+        citedTags: tagLinks(tagOrder.filter((t) => citedTagSlugs.has(t))),
+      };
+    });
+    return essayList;
+  };
+
+  eleventyConfig.addCollection("essayPages", buildEssayList);
+
   // The fan-out is memoised because the tag pages are built from exactly the
   // same slicing — a tag page is a union of subject timelines, not a second
   // pass over the posts. Cleared before every build so --serve cannot hand back
@@ -491,6 +551,7 @@ export default function (eleventyConfig) {
   let fanOut = null;
   eleventyConfig.on("eleventy.before", () => {
     fanOut = null;
+    essayList = null;
   });
 
   const buildSubjectPages = (api) => {
@@ -499,48 +560,12 @@ export default function (eleventyConfig) {
       (a, b) => a.date - b.date, // oldest-first, per spec
     );
 
-    const essays = new Map();
-    for (const e of publishedEssays(api)) {
-      essays.set(e.fileSlug, e);
-    }
-
-    // Rendered once per essay, up front: a citedBy entry on another subject's
-    // page needs the SAME essayHtml/blurb/date as the essay's own page, and
-    // the fanOut loop below builds subjects (not essays) in subjects.yaml
-    // order — an essay's cited subject can come before or after it in that
-    // order, so this can't be computed lazily inside that loop.
-    const essayRenders = new Map(); // slug -> {essayHtml, blurb, essayDate}
-    const essayAbout = new Map(); // slug -> {citedSubjects, citedTagsDirect}
-    for (const [slug, essay] of essays) {
-      const essayRaw = md.render(essay.rawInput);
-      const essayHtml = revealSpoilers(essayRaw);
-
-      // The blurb is Hat's own opening paragraph, not a frontmatter summary —
-      // he writes the lede, nothing paraphrases it for him. Taken off the
-      // REDACTED render: a blurb is plain text on a shelf, with no span to blur
-      // and nothing to click.
-      const firstPara = stripSpoilers(essayRaw).match(/<p>([\s\S]*?)<\/p>/i);
-      const blurb = firstPara ? firstPara[1].replace(/<[^>]+>/g, "").trim() : null;
-
-      essayRenders.set(slug, { essayHtml, blurb, essayDate: essay.date });
-      essayAbout.set(slug, resolveAbout(essay.inputPath, essay.data.about, slug));
-    }
-
-    // subject -> citedBy[]: which essays' about: cited this subject. Built
-    // from essayAbout rather than walked again per-subject below, so a
-    // subject with no citations just gets an empty array from `?? []`.
-    const citedByMap = new Map();
-    for (const [essaySlug, { citedSubjects }] of essayAbout) {
-      const render = essayRenders.get(essaySlug);
-      for (const subjSlug of citedSubjects) {
-        if (!citedByMap.has(subjSlug)) citedByMap.set(subjSlug, []);
-        citedByMap.get(subjSlug).push({
-          slug: essaySlug,
-          title: subjects[essaySlug]?.title ?? essaySlug,
-          blurb: render.blurb,
-          url: `/s/${essaySlug}/`,
-          date: render.essayDate,
-        });
+    // subject -> essays citing it, for the chrono stream below.
+    const essaysBySubject = new Map();
+    for (const essay of buildEssayList(api)) {
+      for (const subjSlug of essay.citedSubjects) {
+        if (!essaysBySubject.has(subjSlug)) essaysBySubject.set(subjSlug, []);
+        essaysBySubject.get(subjSlug).push(essay);
       }
     }
 
@@ -581,25 +606,29 @@ export default function (eleventyConfig) {
     }
 
     // A subject exists because it is registered, not because it has fragments.
+    // Its page is a single chrono stream — fragments in full, essays as
+    // lede + link at their date (full text lives at the essay's own /e/ page).
     fanOut = Object.entries(subjects).map(([slug, meta]) => {
-      const essay = essays.get(slug);
-      const render = essayRenders.get(slug);
-      const about = essayAbout.get(slug);
-
-      // citedTags mirrors postTags' "union of tags, tagviews order" rule but
-      // for an essay's own citations: the tags of every subject it cites,
-      // plus any tag it names directly.
-      let citedTags = [];
-      if (about) {
-        const citedTagSlugs = new Set(about.citedTagsDirect);
-        for (const s of about.citedSubjects) {
-          for (const t of tagsOfSubject.get(s) ?? []) citedTagSlugs.add(t);
-        }
-        citedTags = tagLinks(tagOrder.filter((t) => citedTagSlugs.has(t)));
-      }
-
       const fragments = collected.get(slug) ?? [];
-      const tier = tierOf(fragments.at(-1)?.date ?? null);
+      const entries = [
+        ...fragments.map((f) => ({
+          kind: "fragment",
+          date: f.date,
+          url: f.sourceUrl,
+          html: f.html,
+        })),
+        ...(essaysBySubject.get(slug) ?? []).map((essay) => ({
+          kind: "essay",
+          date: essay.date,
+          url: essay.url,
+          title: essay.title,
+          blurb: essay.blurb,
+        })),
+      ].sort((a, b) => a.date - b.date);
+
+      // Recency counts essays too: publishing a post-mortem IS writing about
+      // the thing, and the sky should burn for it.
+      const tier = tierOf(entries.at(-1)?.date ?? null);
       const art = registerSky(slug, meta, tier);
       skyUrls.set(slug, art);
 
@@ -610,13 +639,7 @@ export default function (eleventyConfig) {
         ...art,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
-        essayHtml: render?.essayHtml ?? null,
-        essayDate: essay ? essay.date : null,
-        hasEssay: Boolean(essay),
-        blurb: render?.blurb ?? null,
-        citedBy: citedByMap.get(slug) ?? [],
-        cites: about ? subjectLinks(about.citedSubjects) : [],
-        citedTags,
+        entries,
       };
     });
     return fanOut;
@@ -642,7 +665,6 @@ export default function (eleventyConfig) {
       const members = (meta?.members ?? [])
         .map((m) => bySlug.get(m))
         .filter(Boolean);
-      const memberSlugs = new Set(members.map((m) => m.slug));
 
       const entries = [];
       for (const subject of members) {
@@ -655,33 +677,20 @@ export default function (eleventyConfig) {
             html: fragment.html,
           });
         }
-        if (subject.hasEssay) {
-          entries.push({
-            kind: "essay",
-            date: subject.essayDate,
-            url: `/s/${subject.slug}/`,
-            subject,
-            blurb: subject.blurb,
-          });
-        }
       }
 
-      // An essay can reach this tag without its own subject joining as a
-      // member — directly (about: naming this tag) or transitively through a
-      // cited subject that IS a member. citedTags already carries both cases
-      // (see buildSubjectPages), so this is a filter over every essay, not a
-      // second walk of about:. The member-slug skip is the "once per view"
-      // rule: a member essay was already pushed above.
-      for (const essaySubject of allFanOut) {
-        if (!essaySubject.hasEssay) continue;
-        if (memberSlugs.has(essaySubject.slug)) continue;
-        if (!essaySubject.citedTags.some((t) => t.slug === slug)) continue;
+      // An essay reaches this tag directly (about: naming the tag) or
+      // transitively (about: citing a subject this tag lists) — citedTags
+      // carries both cases, computed once in buildEssayList. One entry per
+      // essay per view, however many paths lead here.
+      for (const essay of buildEssayList(api)) {
+        if (!essay.citedTags.some((t) => t.slug === slug)) continue;
         entries.push({
           kind: "essay",
-          date: essaySubject.essayDate,
-          url: `/s/${essaySubject.slug}/`,
-          subject: essaySubject,
-          blurb: essaySubject.blurb,
+          date: essay.date,
+          url: essay.url,
+          title: essay.title,
+          blurb: essay.blurb,
         });
       }
 
@@ -887,14 +896,8 @@ export default function (eleventyConfig) {
       html: stripSpoilers(linkSubjectsHtml(md.render(p.rawInput))),
     }));
 
-    for (const e of publishedEssays(api)) {
-      if (!subjects[e.fileSlug]) continue; // no subject page => no URL to point at
-      entries.push({
-        url: `/s/${e.fileSlug}/`,
-        date: e.date,
-        title: subjects[e.fileSlug].title ?? e.data.title ?? e.fileSlug,
-        html: stripSpoilers(md.render(e.rawInput)),
-      });
+    for (const e of buildEssayList(api)) {
+      entries.push({ url: e.url, date: e.date, title: e.title, html: e.feedHtml });
     }
 
     return entries.sort((a, b) => b.date - a.date);
@@ -1003,6 +1006,22 @@ export default function (eleventyConfig) {
       );
       for (const file of dailyAbout) console.warn(`  · ${file}`);
       console.warn(`  Dailies file by ## heading; about: is essay-only.\n`);
+    }
+
+    if (essayCollisions.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${essayCollisions.length} essay filename collision(s) — one page overwrote the other:`,
+      );
+      for (const c of essayCollisions) console.warn(`  · ${c}`);
+      console.warn(`  Rename one file; the slugified names must differ.\n`);
+    }
+
+    if (homelessEssays.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${homelessEssays.length} essay(s) with no resolvable about: — on no view:`,
+      );
+      for (const file of homelessEssays) console.warn(`  · ${file}`);
+      console.warn(`  The essay has its page and feed entry, but nothing points to it.\n`);
     }
   });
 
