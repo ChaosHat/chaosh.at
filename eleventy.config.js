@@ -9,6 +9,41 @@ import { subjectSvg, chipSvg, headerSheet } from "./aurora.js";
 // subject page is byte-identical to the same text on its daily post.
 const md = new MarkdownIt({ html: true, linkify: true });
 
+// Obsidian image embeds: ![[foo.png]], ![[foo.png|alt text]], ![[foo.png|640]]
+// (digits = width, like Obsidian). publish.py copies the referenced file to
+// src/img/posts/<safe name> and REFUSES any post whose image it can't find, so
+// a rendered embed never 404s. The safe-name transform and extension list
+// mirror image_safe_name()/IMAGE_EXTS in chaosh_subjects.py — if one changes,
+// change both. Non-image embeds (![[Some Note]] transclusion) are left as
+// literal text here; publish.py refuses those posts before they get this far.
+const IMAGE_EMBED = /^!\[\[([^\]]+?)\]\]/;
+const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
+const imageSafeName = (name) => name.replace(/[^A-Za-z0-9._-]+/g, "-");
+
+md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
+  const m = IMAGE_EMBED.exec(state.src.slice(state.pos));
+  if (!m) return false;
+  const parts = m[1].split("|").map((p) => p.trim());
+  const name = parts[0].split("/").pop();
+  if (!IMAGE_EXT.test(name)) return false;
+  if (!silent) {
+    const width = parts.slice(1).map((p) => /^(\d+)(?:x\d+)?$/.exec(p)).find(Boolean);
+    const alt = parts.slice(1).find((p) => p && !/^\d+(x\d+)?$/.test(p)) ?? "";
+    const token = state.push("image", "img", 0);
+    token.attrs = [["src", `/img/posts/${imageSafeName(name)}`], ["alt", alt]];
+    if (width) token.attrs.push(["width", width[1]]);
+    token.children = [];
+    if (alt) {
+      const text = new state.Token("text", "", 0);
+      text.content = alt;
+      token.children.push(text);
+    }
+    token.content = alt;
+  }
+  state.pos += m[0].length;
+  return true;
+});
+
 // Headings are matched loosely so "DQXIS", "dqxi s" and "Dragon Quest XI S"
 // all land on the same subject.
 const normalise = (s) =>
@@ -21,6 +56,9 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
   eleventyConfig.addPassthroughCopy({ "src/CNAME": "CNAME" });
+  // Post images only — src/img/manifest.json is publish.py book-keeping and
+  // deliberately not copied.
+  eleventyConfig.addPassthroughCopy({ "src/img/posts": "img/posts" });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
   eleventyConfig.setLibrary("md", md);
@@ -145,6 +183,22 @@ export default function (eleventyConfig) {
       return !p.data.hold;
     });
 
+  // The essay-side twin of datedProperly: an essay with no explicit `date:`
+  // would fall back to file-creation time, which the CI checkout resets on
+  // every deploy — it would re-date itself nightly and re-surface in every
+  // feed reader forever (the feed entry's <id> embeds the date). publish.py
+  // refuses these before they reach the repo; this is the backstop.
+  const undatedEssays = new Set();
+  const publishedEssays = (api) =>
+    api.getFilteredByTag("essays").filter((e) => {
+      if (e.data.publish !== true) return false;
+      if (!e.data.date) {
+        undatedEssays.add(e.inputPath);
+        return false;
+      }
+      return true;
+    });
+
   eleventyConfig.addCollection("dailies", (api) =>
     publishable(api.getFilteredByTag("dailies")).sort((a, b) => b.date - a.date),
   );
@@ -162,9 +216,8 @@ export default function (eleventyConfig) {
     // the config function, but this callback only runs once Eleventy builds the
     // collection, by which time it is — same closure trick buildSubjectPages
     // relies on for `tags`/`aliasMap`.
-    const essays = api
-      .getFilteredByTag("essays")
-      .filter((e) => e.data.publish === true && e.data.featured === true)
+    const essays = publishedEssays(api)
+      .filter((e) => e.data.featured === true)
       .map((e) => ({
         url: `/s/${e.fileSlug}/`,
         date: e.date,
@@ -447,8 +500,8 @@ export default function (eleventyConfig) {
     );
 
     const essays = new Map();
-    for (const e of api.getFilteredByTag("essays")) {
-      if (e.data.publish === true) essays.set(e.fileSlug, e);
+    for (const e of publishedEssays(api)) {
+      essays.set(e.fileSlug, e);
     }
 
     // Rendered once per essay, up front: a citedBy entry on another subject's
@@ -834,8 +887,7 @@ export default function (eleventyConfig) {
       html: stripSpoilers(linkSubjectsHtml(md.render(p.rawInput))),
     }));
 
-    for (const e of api.getFilteredByTag("essays")) {
-      if (e.data.publish !== true) continue;
+    for (const e of publishedEssays(api)) {
       if (!subjects[e.fileSlug]) continue; // no subject page => no URL to point at
       entries.push({
         url: `/s/${e.fileSlug}/`,
@@ -869,6 +921,16 @@ export default function (eleventyConfig) {
       for (const file of undated) console.warn(`  · ${file}`);
       console.warn(
         `  Rename to YYYY-MM-DD.md, or add "date: YYYY-MM-DD" to the frontmatter.\n`,
+      );
+    }
+
+    if (undatedEssays.size > 0) {
+      console.warn(
+        `\n[chaosh.at] ${undatedEssays.size} essay(s) NOT PUBLISHED — no explicit date:`,
+      );
+      for (const file of undatedEssays) console.warn(`  · ${file}`);
+      console.warn(
+        `  Add "date: YYYY-MM-DD" — without it the essay re-dates itself on every deploy.\n`,
       );
     }
 
