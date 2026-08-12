@@ -30,29 +30,37 @@ eleventyComputed:
     </div>
   </header>
 
-  {#- One chronological stream: everything written about this thing, in order.
-      Fragments render in full; an essay appears at its date as lede + link,
-      because its full text has exactly one home — its own /e/ page. -#}
-  {% if subject.entries | length %}
-  <section class="timeline">
-    {% for entry in subject.entries %}
+  {#- Essays pinned first: the most considered writing on the page shouldn't
+      sit buried under a replay's fragments. Lede + link only — full text has
+      exactly one home, the essay's own /e/ page. Subject pages pin; tag views
+      keep essays inline in the stream instead. -#}
+  {% if subject.essays | length %}
+  <section class="essays">
+    {% for essay in subject.essays %}
     <div class="fragment">
-      {% if entry.kind == "essay" %}
       <p class="fragment-meta">
-        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-        <a class="fragment-subject" href="{{ entry.url }}">{{ entry.title }}</a>
+        <a class="fragment-date" href="{{ essay.url }}">{{ essay.date | readableDate }}</a>
+        <a class="fragment-subject" href="{{ essay.url }}">{{ essay.title }}</a>
       </p>
-      <p class="tag-essay">{{ entry.blurb }}
-        <a class="more" href="{{ entry.url }}">read →</a>
+      <p class="tag-essay">{{ essay.blurb }}
+        <a class="more" href="{{ essay.url }}">read →</a>
       </p>
-      {% else %}
-      <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-      {{ entry.html | safe }}
-      {% endif %}
     </div>
     {% endfor %}
   </section>
-  {% else %}
+  {% endif %}
+
+  {% if subject.fragments | length %}
+  <section class="timeline">
+    {% if subject.essays | length %}<h2 class="timeline-head">Along the way</h2>{% endif %}
+    {% for fragment in subject.fragments %}
+    <div class="fragment">
+      <a class="fragment-date" href="{{ fragment.sourceUrl }}">{{ fragment.date | readableDate }}</a>
+      {{ fragment.html | safe }}
+    </div>
+    {% endfor %}
+  </section>
+  {% elif not (subject.essays | length) %}
   <p class="empty">Nothing written about this yet.</p>
   {% endif %}
 </article>

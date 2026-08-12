@@ -606,29 +606,24 @@ export default function (eleventyConfig) {
     }
 
     // A subject exists because it is registered, not because it has fragments.
-    // Its page is a single chrono stream — fragments in full, essays as
-    // lede + link at their date (full text lives at the essay's own /e/ page).
+    // Its page: essays about it PINNED at the top as lede cards — usually the
+    // most considered writing on the page, so it doesn't get buried under a
+    // replay's fragments (Hat's call, 2026-08-12) — then the fragment timeline
+    // in chrono order. The pin is subject-page-only; tag views keep essays
+    // inline in the stream.
     fanOut = Object.entries(subjects).map(([slug, meta]) => {
       const fragments = collected.get(slug) ?? [];
-      const entries = [
-        ...fragments.map((f) => ({
-          kind: "fragment",
-          date: f.date,
-          url: f.sourceUrl,
-          html: f.html,
-        })),
-        ...(essaysBySubject.get(slug) ?? []).map((essay) => ({
-          kind: "essay",
-          date: essay.date,
-          url: essay.url,
-          title: essay.title,
-          blurb: essay.blurb,
-        })),
-      ].sort((a, b) => a.date - b.date);
+      const essays = (essaysBySubject.get(slug) ?? [])
+        .slice()
+        .sort((a, b) => a.date - b.date);
 
       // Recency counts essays too: publishing a post-mortem IS writing about
       // the thing, and the sky should burn for it.
-      const tier = tierOf(entries.at(-1)?.date ?? null);
+      const lastWrote = [fragments.at(-1)?.date, essays.at(-1)?.date]
+        .filter(Boolean)
+        .sort((a, b) => a - b)
+        .at(-1);
+      const tier = tierOf(lastWrote ?? null);
       const art = registerSky(slug, meta, tier);
       skyUrls.set(slug, art);
 
@@ -639,7 +634,7 @@ export default function (eleventyConfig) {
         ...art,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
-        entries,
+        essays,
       };
     });
     return fanOut;
