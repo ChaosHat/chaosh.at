@@ -151,11 +151,28 @@ export default function (eleventyConfig) {
 
   // "Best of" is zero-length until Hat marks a post `featured: true`. Supporting
   // the flag now costs nothing; the page and its nav link stay hidden until then.
-  eleventyConfig.addCollection("featured", (api) =>
-    publishable(api.getFilteredByTag("dailies"))
-      .filter((p) => p.data.featured === true)
-      .sort((a, b) => b.date - a.date),
-  );
+  eleventyConfig.addCollection("featured", (api) => {
+    const dailies = publishable(api.getFilteredByTag("dailies")).filter(
+      (p) => p.data.featured === true,
+    );
+
+    // Essays carry `permalink: false` — the /s/ page built by buildSubjectPages
+    // is their only URL — so best.njk's page object is synthesized rather than
+    // passed through raw. `subjects` (below) isn't assigned yet at this point in
+    // the config function, but this callback only runs once Eleventy builds the
+    // collection, by which time it is — same closure trick buildSubjectPages
+    // relies on for `tags`/`aliasMap`.
+    const essays = api
+      .getFilteredByTag("essays")
+      .filter((e) => e.data.publish === true && e.data.featured === true)
+      .map((e) => ({
+        url: `/s/${e.fileSlug}/`,
+        date: e.date,
+        data: { title: subjects[e.fileSlug]?.title ?? e.data.title ?? e.fileSlug },
+      }));
+
+    return [...dailies, ...essays].sort((a, b) => b.date - a.date);
+  });
 
   // ---------------------------------------------------------------- fan-out
   //
@@ -192,6 +209,11 @@ export default function (eleventyConfig) {
   const tags = fs.existsSync(tagsFile)
     ? parseYaml(fs.readFileSync(tagsFile, "utf8")) || {}
     : {};
+
+  // Declaration order for postTags' footer, and reused by an essay's own
+  // citedTags — both want "in tagviews.yaml order", not "in about:/heading
+  // order", so the same pair of games reads identically everywhere.
+  const tagOrder = Object.keys(tags);
 
   // Authored one way, needed both ways: tag -> members builds /t/<slug>/, and
   // subject -> tags prints the tag line on a subject page and the daily footer.
@@ -353,6 +375,62 @@ export default function (eleventyConfig) {
 
   const unmatched = new Map(); // normalised heading -> {label, firstSeen}
 
+  // about: issues, reported alongside unmatched headings in eleventy.after —
+  // same "warn, never fail" contract, since this is 2am automation too.
+  const aboutIssues = []; // {file, slug, reason: "unresolved" | "collision"}
+  const dailyAbout = []; // file paths where about: showed up on a daily
+
+  const subjectLinks = (slugs) =>
+    (slugs ?? []).map((s) => ({ slug: s, title: subjects[s]?.title ?? s }));
+
+  // Frontmatter arrives as a list, but a one-item `about: foo` parses as a
+  // bare string — normalise both to a list before resolving.
+  const asList = (value) => (value == null ? [] : [].concat(value));
+
+  // Mirrors ## heading resolution: subjects first (through aliasMap, so
+  // aliases work the same way headings do), then tag keys, exact — a tag
+  // slug is typed as its literal YAML key, never fuzzed the way a heading is.
+  // A slug hitting both is a naming collision: the subject wins (consistent
+  // with "subjects first") but the collision itself is worth a warning.
+  const resolveAbout = (file, rawAbout, ownSlug) => {
+    const citedSubjects = []; // deduped, self-citation dropped
+    const citedTagsDirect = []; // deduped
+    const seenSubjects = new Set();
+    const seenTags = new Set();
+
+    for (const raw of asList(rawAbout)) {
+      const value = String(raw).trim();
+      if (!value) continue;
+
+      const subjSlug = aliasMap.get(normalise(value));
+      const tagSlug = Object.hasOwn(tags, value) ? value : null;
+      if (subjSlug && tagSlug) {
+        aboutIssues.push({ file, slug: value, reason: "collision" });
+      }
+
+      if (subjSlug) {
+        if (subjSlug === ownSlug) continue; // citing its own page — it IS this page
+        if (!seenSubjects.has(subjSlug)) {
+          seenSubjects.add(subjSlug);
+          citedSubjects.push(subjSlug);
+        }
+        continue;
+      }
+
+      if (tagSlug) {
+        if (!seenTags.has(tagSlug)) {
+          seenTags.add(tagSlug);
+          citedTagsDirect.push(tagSlug);
+        }
+        continue;
+      }
+
+      aboutIssues.push({ file, slug: value, reason: "unresolved" });
+    }
+
+    return { citedSubjects, citedTagsDirect };
+  };
+
   // The fan-out is memoised because the tag pages are built from exactly the
   // same slicing — a tag page is a union of subject timelines, not a second
   // pass over the posts. Cleared before every build so --serve cannot hand back
@@ -373,9 +451,53 @@ export default function (eleventyConfig) {
       if (e.data.publish === true) essays.set(e.fileSlug, e);
     }
 
+    // Rendered once per essay, up front: a citedBy entry on another subject's
+    // page needs the SAME essayHtml/blurb/date as the essay's own page, and
+    // the fanOut loop below builds subjects (not essays) in subjects.yaml
+    // order — an essay's cited subject can come before or after it in that
+    // order, so this can't be computed lazily inside that loop.
+    const essayRenders = new Map(); // slug -> {essayHtml, blurb, essayDate}
+    const essayAbout = new Map(); // slug -> {citedSubjects, citedTagsDirect}
+    for (const [slug, essay] of essays) {
+      const essayRaw = md.render(essay.rawInput);
+      const essayHtml = revealSpoilers(essayRaw);
+
+      // The blurb is Hat's own opening paragraph, not a frontmatter summary —
+      // he writes the lede, nothing paraphrases it for him. Taken off the
+      // REDACTED render: a blurb is plain text on a shelf, with no span to blur
+      // and nothing to click.
+      const firstPara = stripSpoilers(essayRaw).match(/<p>([\s\S]*?)<\/p>/i);
+      const blurb = firstPara ? firstPara[1].replace(/<[^>]+>/g, "").trim() : null;
+
+      essayRenders.set(slug, { essayHtml, blurb, essayDate: essay.date });
+      essayAbout.set(slug, resolveAbout(essay.inputPath, essay.data.about, slug));
+    }
+
+    // subject -> citedBy[]: which essays' about: cited this subject. Built
+    // from essayAbout rather than walked again per-subject below, so a
+    // subject with no citations just gets an empty array from `?? []`.
+    const citedByMap = new Map();
+    for (const [essaySlug, { citedSubjects }] of essayAbout) {
+      const render = essayRenders.get(essaySlug);
+      for (const subjSlug of citedSubjects) {
+        if (!citedByMap.has(subjSlug)) citedByMap.set(subjSlug, []);
+        citedByMap.get(subjSlug).push({
+          slug: essaySlug,
+          title: subjects[essaySlug]?.title ?? essaySlug,
+          blurb: render.blurb,
+          url: `/s/${essaySlug}/`,
+          date: render.essayDate,
+        });
+      }
+    }
+
     const collected = new Map(); // slug -> fragments[]
 
     for (const post of dailies) {
+      // about: is essay-only — a daily is filed by ## heading, not by
+      // frontmatter, so this is a warning, not a second attribution path.
+      if (post.data.about != null) dailyAbout.push(post.inputPath);
+
       // Two headings resolving to the same subject in one post merge into a
       // single dated fragment rather than appearing twice under one date.
       const perPost = new Map();
@@ -408,20 +530,20 @@ export default function (eleventyConfig) {
     // A subject exists because it is registered, not because it has fragments.
     fanOut = Object.entries(subjects).map(([slug, meta]) => {
       const essay = essays.get(slug);
-      const essayRaw = essay ? md.render(essay.rawInput) : null;
-      const essayHtml = essayRaw === null ? null : revealSpoilers(essayRaw);
+      const render = essayRenders.get(slug);
+      const about = essayAbout.get(slug);
 
-      // The blurb is Hat's own opening paragraph, not a frontmatter summary —
-      // he writes the lede, nothing paraphrases it for him. Taken off the
-      // REDACTED render: a blurb is plain text on a shelf, with no span to blur
-      // and nothing to click.
-      const firstPara =
-        essayRaw === null
-          ? null
-          : stripSpoilers(essayRaw).match(/<p>([\s\S]*?)<\/p>/i);
-      const blurb = firstPara
-        ? firstPara[1].replace(/<[^>]+>/g, "").trim()
-        : null;
+      // citedTags mirrors postTags' "union of tags, tagviews order" rule but
+      // for an essay's own citations: the tags of every subject it cites,
+      // plus any tag it names directly.
+      let citedTags = [];
+      if (about) {
+        const citedTagSlugs = new Set(about.citedTagsDirect);
+        for (const s of about.citedSubjects) {
+          for (const t of tagsOfSubject.get(s) ?? []) citedTagSlugs.add(t);
+        }
+        citedTags = tagLinks(tagOrder.filter((t) => citedTagSlugs.has(t)));
+      }
 
       const fragments = collected.get(slug) ?? [];
       const tier = tierOf(fragments.at(-1)?.date ?? null);
@@ -435,10 +557,13 @@ export default function (eleventyConfig) {
         ...art,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
-        essayHtml,
+        essayHtml: render?.essayHtml ?? null,
         essayDate: essay ? essay.date : null,
         hasEssay: Boolean(essay),
-        blurb,
+        blurb: render?.blurb ?? null,
+        citedBy: citedByMap.get(slug) ?? [],
+        cites: about ? subjectLinks(about.citedSubjects) : [],
+        citedTags,
       };
     });
     return fanOut;
@@ -457,12 +582,14 @@ export default function (eleventyConfig) {
   // A tag with no members still builds. That is the same courtesy subjects get:
   // register it now, add games as you write them, and the page fills in.
   eleventyConfig.addCollection("tagPages", (api) => {
-    const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
+    const allFanOut = buildSubjectPages(api);
+    const bySlug = new Map(allFanOut.map((s) => [s.slug, s]));
 
     return Object.entries(tags).map(([slug, meta]) => {
       const members = (meta?.members ?? [])
         .map((m) => bySlug.get(m))
         .filter(Boolean);
+      const memberSlugs = new Set(members.map((m) => m.slug));
 
       const entries = [];
       for (const subject of members) {
@@ -485,6 +612,26 @@ export default function (eleventyConfig) {
           });
         }
       }
+
+      // An essay can reach this tag without its own subject joining as a
+      // member — directly (about: naming this tag) or transitively through a
+      // cited subject that IS a member. citedTags already carries both cases
+      // (see buildSubjectPages), so this is a filter over every essay, not a
+      // second walk of about:. The member-slug skip is the "once per view"
+      // rule: a member essay was already pushed above.
+      for (const essaySubject of allFanOut) {
+        if (!essaySubject.hasEssay) continue;
+        if (memberSlugs.has(essaySubject.slug)) continue;
+        if (!essaySubject.citedTags.some((t) => t.slug === slug)) continue;
+        entries.push({
+          kind: "essay",
+          date: essaySubject.essayDate,
+          url: `/s/${essaySubject.slug}/`,
+          subject: essaySubject,
+          blurb: essaySubject.blurb,
+        });
+      }
+
       entries.sort((a, b) => a.date - b.date);
 
       return {
@@ -602,8 +749,8 @@ export default function (eleventyConfig) {
   // what belongs.
   //
   // Ordered by tagviews.yaml, not by heading order, so the same pair of games
-  // footers identically in every post that mentions them.
-  const tagOrder = Object.keys(tags);
+  // footers identically in every post that mentions them. (tagOrder is
+  // declared up by `tags` — an essay's citedTags wants the same ordering.)
   eleventyConfig.addFilter("postTags", (html) => {
     const found = new Set();
     for (const [, inner] of String(html ?? "").matchAll(
@@ -753,14 +900,48 @@ export default function (eleventyConfig) {
       console.warn(`  Set "hue: <0-359>" in subjects.yaml to pin one.\n`);
     }
 
-    if (unmatched.size === 0) return;
-    console.warn(
-      `\n[chaosh.at] ${unmatched.size} unclassified heading(s) — not on any subject page:`,
-    );
-    for (const { label } of unmatched.values()) {
-      console.warn(`  · ${label}`);
+    if (unmatched.size > 0) {
+      console.warn(
+        `\n[chaosh.at] ${unmatched.size} unclassified heading(s) — not on any subject page:`,
+      );
+      for (const { label } of unmatched.values()) {
+        console.warn(`  · ${label}`);
+      }
+      console.warn(`  Add them to subjects.yaml to collect them retroactively.\n`);
     }
-    console.warn(`  Add them to subjects.yaml to collect them retroactively.\n`);
+
+    // Declare-first: an about: slug must already be a subjects.yaml key/alias
+    // or a tagviews.yaml key. Nothing is ever minted from a typo — same
+    // "warn, never fail" contract as unmatched headings above.
+    const unresolvedAbout = aboutIssues.filter((i) => i.reason === "unresolved");
+    if (unresolvedAbout.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${unresolvedAbout.length} about: slug(s) match no subject or tag:`,
+      );
+      for (const { file, slug } of unresolvedAbout) {
+        console.warn(`  · ${file} → ${slug}`);
+      }
+      console.warn(`  Declare it in subjects.yaml/tagviews.yaml, or fix the typo.\n`);
+    }
+
+    const collisions = aboutIssues.filter((i) => i.reason === "collision");
+    if (collisions.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${collisions.length} about: slug(s) name both a subject and a tag:`,
+      );
+      for (const { file, slug } of collisions) {
+        console.warn(`  · ${file} → ${slug} (subject wins)`);
+      }
+      console.warn(`  Rename one so about: resolution isn't guessing.\n`);
+    }
+
+    if (dailyAbout.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${dailyAbout.length} daily post(s) carry about: — ignored:`,
+      );
+      for (const file of dailyAbout) console.warn(`  · ${file}`);
+      console.warn(`  Dailies file by ## heading; about: is essay-only.\n`);
+    }
   });
 
   return {
