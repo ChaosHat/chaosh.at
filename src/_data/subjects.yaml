@@ -67,5 +67,6 @@ flamecraft-duals:
   category:
     - boardgames
   status: active
+  hide_from_now: true
   aliases:
     - flamecraft duals
