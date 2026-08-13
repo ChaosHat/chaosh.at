@@ -97,6 +97,16 @@ export default function (eleventyConfig) {
     return out;
   });
 
+  // "12 aug" — lowercase like the rest of the strip chrome. Yearless: the
+  // essays strip shows two entries at most, and the ambiguity resets long
+  // before it matters.
+  const shortDateFormat = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "short",
+  });
+  eleventyConfig.addFilter("shortDate", (d) => shortDateFormat.format(d).toLowerCase());
+
   // Dailies render in full on the home page — an excerpt hides the fact that a
   // post covers several subjects. Long days are cut at an H2 boundary so a
   // subject is never shown half-finished; "read more" appears only if cut.

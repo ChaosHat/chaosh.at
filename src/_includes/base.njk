@@ -18,6 +18,7 @@
         {% for shelf in collections.shelves %}
         <a href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
         {% endfor %}
+        {% if collections.essayPages | length %}<a href="/essays/">essays</a>{% endif %}
         <a href="/archive/">archive</a>
         <a href="/feed.xml">feed</a>
         {% if collections.featured | length %}<a href="/best/">best of</a>{% endif %}
@@ -33,13 +34,38 @@
         its own span so the copy's line breaks survive into HTML. -#}
     {% if site.intro and page.url == "/" %}<p class="site-intro">{% for line in site.intro.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
 
+    {#- Both strips share one explicit shape — label row, items row — rather
+        than trusting flex-wrap to land the label above the items, which it
+        only did at some widths. -#}
     {% set playing = collections.subjectPages | nowPlaying %}
     {% if playing | length %}
     <div class="now">
-      <span class="now-label">now playing</span>
+      <div class="now-head">
+        <span class="now-label">now playing</span>
+      </div>
       <div class="now-items">
         {% for item in playing %}
         <a class="now-item" href="/s/{{ item.slug }}/"><span class="sky" style="background-image:url({{ item.chipUrl }})" aria-hidden="true"></span>{{ item.title }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {#- The essays signpost. Essays are rare, so recency is the wrong axis —
+        the strip exists so a visitor learns the second body of writing is
+        there at all, and it is furniture, so it does not go stale between
+        essays. The chip is the first cited subject's; an essay that cites
+        only tags goes chipless. -#}
+    {% set essays = collections.essayPages | sort(true, false, "date") %}
+    {% if essays | length %}
+    <div class="now essays">
+      <div class="now-head">
+        <span class="now-label">latest essays</span>
+        <a class="essays-all" href="/essays/">all →</a>
+      </div>
+      <div class="now-items">
+        {% for e in essays | limit(2) %}
+        <a class="now-item" href="{{ e.url }}">{% if e.citedSubjects | length %}<span class="sky" style="background-image:url(/img/sky/{{ e.citedSubjects[0] }}-chip.svg)" aria-hidden="true"></span>{% endif %}{{ e.title }}<span class="essay-when">{{ e.date | shortDate }}</span></a>
         {% endfor %}
       </div>
     </div>
