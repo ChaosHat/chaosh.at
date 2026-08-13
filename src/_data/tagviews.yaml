@@ -1,3 +1,25 @@
+# tagviews, not tags: `tags` is reserved in Eleventy's data cascade and a file
+# of that name kills the build before a page renders. Don't tidy the filename.
+#
+# Tags are curated views, not shelves. A tag collects the fragments of several
+# subjects onto one page at /t/<slug>/ — "everything I've written about Final
+# Fantasy" — without inventing a nav link or a thing to have opinions about.
+#
+# Membership lives HERE, not on the subject, so inventing a tag is one edit in
+# one place and the whole grouping is readable at a glance. That also keeps a
+# tag honestly editorial: `atlus` means "same DNA and lineage", not "everything
+# this studio published". Nothing obliges a tag to be exhaustive.
+#
+# Flat vocabulary — franchise, genre, studio, whatever is useful. No hierarchy:
+# final-fantasy does not imply jrpg, so list a game under both if it belongs to
+# both. A members entry naming an unknown subject is reported, never guessed at.
+#
+#   <slug>:                      # the URL: /t/<slug>/
+#     title: Display Name        # how it renders as a heading
+#     description: one line      # optional — why these belong together
+#     members:                   # subjects.yaml keys
+#       - some-subject-slug
+
 final-fantasy:
   title: Final Fantasy
   members:

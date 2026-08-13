@@ -1,10 +1,13 @@
-super-metroid:
-  title: Super Metroid
+castlevania-symphony-of-the-night:
+  title: "Castlevania: Symphony of the Night"
   category:
     - games
   status: active
   aliases:
-    - super metroid
+    - sotn
+    - castlevania sotn
+    - symphony of the night
+    - castlevania - sotn
 dragon-quest-xi-s:
   title: Dragon Quest XI S
   category:
@@ -42,6 +45,15 @@ final-fantasy-vii-remake:
     - ff7r
     - ffviir
     - final fantasy 7 remake
+fire-emblem-fortunes-weave:
+  title: "Fire Emblem: Fortune's Weave"
+  category:
+    - games
+  status: backlog
+  aliases:
+    - fortunes weave
+    - fortune's weave
+    - fe fortunes weave
 metaphor-refantazio:
   title: Metaphor ReFantazio
   category:
@@ -59,6 +71,13 @@ persona-5-royal:
     - p5r
     - persona5 royal
     - persona 5 royal
+super-metroid:
+  title: Super Metroid
+  category:
+    - games
+  status: active
+  aliases:
+    - super metroid
 flamecraft-duals:
   title: Flamecraft Duals
   category:
