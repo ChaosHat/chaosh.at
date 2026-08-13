@@ -172,9 +172,9 @@ export default function (eleventyConfig) {
     (subjects ?? []).filter((s) => s.status === "active" && !s.hide_from_now),
   );
 
-  // Shelf order: what he's on now first, then finished, then the two kinds of
-  // stopped. Within a group, alphabetical.
-  const STATUS_ORDER = ["active", "completed", "shelved", "abandoned"];
+  // Shelf order: what he's on now first, then what's queued up, then finished,
+  // then the two kinds of stopped. Within a group, alphabetical.
+  const STATUS_ORDER = ["active", "backlog", "completed", "shelved", "abandoned"];
   eleventyConfig.addFilter("shelveSort", (subjects) =>
     (subjects ?? []).slice().sort((a, b) => {
       const s = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
