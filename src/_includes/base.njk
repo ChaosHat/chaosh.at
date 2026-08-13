@@ -18,7 +18,7 @@
         {% for shelf in collections.shelves %}
         <a href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
         {% endfor %}
-        {% if collections.essayPages | length %}<a href="/essays/">essays</a>{% endif %}
+        {% if collections.essayPages | length %}<a href="/essays/">deep thoughts</a>{% endif %}
         <a href="/archive/">archive</a>
         <a href="/feed.xml">feed</a>
         {% if collections.featured | length %}<a href="/best/">best of</a>{% endif %}
@@ -60,7 +60,7 @@
     {% if essays | length %}
     <div class="now essays">
       <div class="now-head">
-        <span class="now-label">latest essays</span>
+        <span class="now-label">latest deep thoughts</span>
         <a class="essays-all" href="/essays/">all →</a>
       </div>
       <div class="now-items">
