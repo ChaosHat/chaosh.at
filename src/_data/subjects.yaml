@@ -1,13 +1,10 @@
-castlevania-symphony-of-the-night:
-  title: "Castlevania: Symphony of the Night"
+super-metroid:
+  title: Super Metroid
   category:
     - games
   status: active
   aliases:
-    - sotn
-    - castlevania sotn
-    - symphony of the night
-    - castlevania - sotn
+    - super metroid
 dragon-quest-xi-s:
   title: Dragon Quest XI S
   category:

@@ -356,18 +356,29 @@ a.post-list-date:hover { color: var(--accent); }
 .frag-head {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
   font-weight: 400;
 }
 
+/* The one heading in a daily, and it shipped at chrome scale — 12px, the same
+   size as the date stamp and the badge beside it, so the section title read as
+   metadata rather than as the thing the section is about. 16px bold is the
+   smallest step that reads as a heading and still leaves a long title
+   ("Castlevania: Symphony of the Night") on one line with its badge; 18px bold
+   wraps the badge. Chrome elsewhere stays 12px — this is a heading wearing the
+   chrome typeface, not chrome.
+   The underline is the link cue and was --edge, which is 1.3:1 on night and
+   effectively invisible, so the site's most important link was the only one
+   with no affordance at all. --muted is visible without pulling accent green
+   into every heading, where it would collide with the active badge. */
 .frag-subject {
   padding-bottom: 2px;
-  font: 12px/1.3 var(--pixel);
+  font: 700 16px/1.3 var(--pixel);
   text-decoration: none;
   color: var(--ink);
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 1px solid var(--muted);
 }
 
 .frag-subject:hover,

@@ -48,8 +48,12 @@
     <main>
       {{ content | safe }}
     </main>
+    {#- The handle is the domain, so the link doubles as identity: rel="me"
+        lets the Bluesky profile verify back to here. Written in the vault's
+        site.yaml; empty renders no link rather than a dead one. -#}
     <footer class="site-footer">
       <p>{{ site.author }}</p>
+      {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
     </footer>
   </body>
 </html>

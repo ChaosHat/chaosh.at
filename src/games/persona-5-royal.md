@@ -2,9 +2,9 @@
 title: Persona 5 Royal
 date: 2026-07-04
 publish: true
-tags:
+about:
   - persona-5-royal
-description: 90-odd hours, and the epilogue commits the exact failure the third semester is about. A very conservative story wearing a punk jacket.
+description:
 ---
 
 The thoughts I have about Persona 5 Royal could probably fill a gigantic book. I sit here, typing before the final boss fight with Maruki, as good a time as any to start reflecting on it.
