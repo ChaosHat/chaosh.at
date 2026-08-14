@@ -27,6 +27,14 @@ fields-of-mistria:
   aliases:
     - mistria
     - fom
+final-fantasy-resonance:
+  title: Final Fantasy Resonance
+  category:
+    - games
+  status: backlog
+  aliases:
+    - ffr
+    - ffresonance
 final-fantasy-vi:
   title: Final Fantasy VI
   category:
@@ -69,7 +77,6 @@ persona-5-royal:
   status: completed
   aliases:
     - p5r
-    - persona5 royal
     - persona 5 royal
 super-metroid:
   title: Super Metroid
@@ -86,3 +93,11 @@ flamecraft-duals:
   hide_from_now: true
   aliases:
     - flamecraft duals
+star-wars-jedi-fallen-order:
+  title: "STAR WARS Jedi: Fallen Order"
+  category:
+    - games
+  status: active
+  aliases:
+    - swjfo
+    - fallen order
