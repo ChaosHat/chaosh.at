@@ -93,6 +93,23 @@ a { color: var(--accent); }
 
 img { max-width: 100%; height: auto; }
 
+/* Scene break: pixel dashes masking an aurora gradient, dissolving both ends.
+   Spectrum runs the status palette but reads as sky, not semantics. */
+hr {
+  border: 0;
+  height: 2px;
+  margin: 2.2rem 0;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--st-active) 18%,
+    var(--st-completed) 42%,
+    var(--st-shelved) 62%,
+    var(--st-abandoned) 82%,
+    transparent);
+  -webkit-mask: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
+  mask: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
+}
+
 h1, h2, h3 { line-height: 1.25; }
 
 /* ---------------------------------------------------------------- the sky
