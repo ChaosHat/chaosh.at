@@ -2,7 +2,7 @@ castlevania-symphony-of-the-night:
   title: "Castlevania: Symphony of the Night"
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - sotn
     - castlevania sotn
@@ -48,7 +48,7 @@ final-fantasy-vii-remake:
   title: Final Fantasy VII Remake
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - ff7r
     - ffviir
@@ -78,21 +78,6 @@ persona-5-royal:
   aliases:
     - p5r
     - persona 5 royal
-super-metroid:
-  title: Super Metroid
-  category:
-    - games
-  status: active
-  aliases:
-    - super metroid
-flamecraft-duals:
-  title: Flamecraft Duals
-  category:
-    - boardgames
-  status: active
-  hide_from_now: true
-  aliases:
-    - flamecraft duals
 star-wars-jedi-fallen-order:
   title: "STAR WARS Jedi: Fallen Order"
   category:
@@ -101,3 +86,28 @@ star-wars-jedi-fallen-order:
   aliases:
     - swjfo
     - fallen order
+super-metroid:
+  title: Super Metroid
+  category:
+    - games
+  status: active
+  aliases:
+    - super metroid
+world-of-warcraft-playerbots:
+  title: World of Warcraft Playerbots
+  category:
+    - games
+  status: active
+  aliases:
+    - wow
+    - wow playerbots
+    - wotlk
+    - world of warcraft
+flamecraft-duals:
+  title: Flamecraft Duals
+  category:
+    - boardgames
+  status: active
+  hide_from_now: true
+  aliases:
+    - flamecraft duals
