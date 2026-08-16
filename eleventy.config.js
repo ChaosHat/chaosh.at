@@ -399,10 +399,11 @@ export default function (eleventyConfig) {
 
   const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
 
-  const skyTag = (slug) => {
+  const skyTag = (slug, status) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
-    return `<span class="sky" style="background-image:url(${art.skyUrl})" aria-hidden="true"></span>`;
+    const cls = status === "completed" ? "sky sky-done" : "sky";
+    return `<span class="${cls}" style="background-image:url(${art.skyUrl})" aria-hidden="true"></span>`;
   };
 
   // normalised heading -> slug
@@ -796,7 +797,7 @@ export default function (eleventyConfig) {
         `<span class="badge b-${status}">${status}</span>` +
         `</h2>`;
 
-      out.push(wrapFragment(skyTag(slug), head + rest));
+      out.push(wrapFragment(skyTag(slug, status), head + rest));
     }
     return out.join("");
   };

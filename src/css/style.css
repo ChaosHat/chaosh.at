@@ -385,6 +385,11 @@ a.post-list-date:hover { color: var(--accent); }
   -webkit-mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
   mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
 }
+/* A completed sky never grows with its entry: there's no curtain to lengthen,
+   only the moon, and non-uniform stretch turns a circle into an egg. Opting
+   out of the flex stretch hands control back to aspect-ratio — the finished
+   sky stays the natural tile however long the entry runs. */
+.frag > .sky-done { align-self: flex-start; }
 
 /* Prose keeps its measure while the shell stays wide enough for art. */
 .frag-body { min-width: 0; max-width: var(--measure); }
