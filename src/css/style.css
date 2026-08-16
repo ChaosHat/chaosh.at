@@ -143,6 +143,7 @@ h1, h2, h3 { line-height: 1.25; }
 .sky-blank { visibility: hidden; border-color: transparent; background: none; }
 .sky-blank::before { content: none; }
 
+
 /* ---------------------------------------------------------------- header */
 
 .site-header {
@@ -385,11 +386,12 @@ a.post-list-date:hover { color: var(--accent); }
   -webkit-mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
   mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
 }
-/* A completed sky never grows with its entry: there's no curtain to lengthen,
-   only the moon, and non-uniform stretch turns a circle into an egg. Opting
-   out of the flex stretch hands control back to aspect-ratio — the finished
-   sky stays the natural tile however long the entry runs. */
-.frag > .sky-done { align-self: flex-start; }
+/* A completed sky still grows with its entry, but by revealing rather than
+   stretching: the scene is genuinely tall (96x320, crescent in the top third)
+   and cover-crops itself top-anchored via its preserveAspectRatio, so night
+   is cut off the bottom instead of the moon deforming. Capped at half the
+   aurora ceiling — a finished sky doesn't burn as long as a live one. */
+.frag > .sky-done { max-height: 10rem; }
 
 /* Prose keeps its measure while the shell stays wide enough for art. */
 .frag-body { min-width: 0; max-width: var(--measure); }

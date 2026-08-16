@@ -151,27 +151,44 @@ const nightBase = (colors, w, h) =>
   `<feGaussianBlur stdDeviation='9'/></filter></defs>` +
   `<rect width='${w}' height='${h}' fill='url(#n)'/>`;
 
-const svgWrap = (w, h, body) =>
-  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}' preserveAspectRatio='none'>${body}</svg>`;
+// preserveAspectRatio='none' lets the fragment stretch lengthen a curtain's
+// rays. Completed scenes pass 'xMidYMin slice' instead: uniform scale,
+// top-anchored, overflow cropped — the SVG cover-crops itself in any box, so
+// the crescent never deforms. (CSS background-size:cover can't do this here:
+// Chromium treats pAR='none' SVGs as ratio-less and degrades cover to fill.)
+const svgWrap = (w, h, body, pAR = "none") =>
+  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}' preserveAspectRatio='${pAR}'>${body}</svg>`;
 
 // ---------------------------------------------------------------- scenes
 
 // Status decides how much aurora is left in the sky; the recency tier decides
 // how bright what remains burns. Completed skies trade the aurora for the
 // moon: finished, not extinguished.
+//
+// The completed scene is TALL — 96x320 (3:10), not the 96x128 tile — and it
+// cover-crops itself via preserveAspectRatio (see svgWrap) instead of
+// stretching. The crescent lives entirely in the top 128 units, so a 3:4 box
+// (subject head, shelf) and the shortest fragment all show the whole moon;
+// taller fragments reveal more night below it, square pixels throughout.
 export const subjectSvg = (slug, ladderHue, status, tier) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
   const W = 96;
-  const H = 128;
+  const H = status === "completed" ? 320 : 128;
 
   let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
-  body += stars(rand, 11, { w: W, h: H });
+  body += stars(rand, status === "completed" ? 27 : 11, { w: W, h: H });
 
   if (status === "completed") {
+    // Waning crescent: the lit disc with the night-side disc masked out of it.
+    // The halo is carved by the same mask so it follows the phase.
     body +=
-      `<circle cx='65' cy='32' r='17' fill='${MOON}' fill-opacity='0.16'/>` +
-      `<circle cx='65' cy='32' r='10' fill='${MOON}'/>`;
+      `<mask id='m'><circle cx='48' cy='56' r='54' fill='#fff'/>` +
+      `<circle cx='63' cy='48' r='28' fill='#000'/></mask>` +
+      `<g mask='url(#m)'>` +
+      `<circle cx='48' cy='56' r='51' fill='${MOON}' fill-opacity='0.16'/>` +
+      `<circle cx='48' cy='56' r='30' fill='${MOON}'/>` +
+      `</g>`;
   } else if (status === "abandoned") {
     body += curtain(rand, GREY, { yMin: 42, yMax: 58, hBase: 14, op: 0.3 });
   } else if (status === "shelved") {
@@ -182,7 +199,7 @@ export const subjectSvg = (slug, ladderHue, status, tier) => {
     body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 16, op: 0.8 * tier });
     body += curtain(rand, pal, { yMin: 84, yMax: 98, hBase: 11, op: 0.55 * tier });
   }
-  return svgWrap(W, H, body);
+  return svgWrap(W, H, body, status === "completed" ? "xMidYMin slice" : "none");
 };
 
 // The chip: what a sky becomes below ~32px, where three curtains would be
