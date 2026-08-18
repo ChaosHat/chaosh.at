@@ -12,19 +12,35 @@ eleventyComputed:
 
 <h1>{{ shelf.label }}</h1>
 
-{#- Every subject has art, because the art is generated rather than sourced —
-    so there is no coverless fallback list any more, and no shelf that is
-    unreachable for want of images. The grid IS the shelf.
+{#- Two jobs, split across two pieces of art. The COVER identifies: a reader
+    hunting for one game scans box art far faster than titles, and faster still
+    than a dozen abstract night scenes that deliberately encode no identity.
+    The BANNER above it is that subject's own sky cropped to a strip, and it
+    keeps both axes the tile always carried — how much aurora is left says
+    status, how brightly it burns says how recently it was written about. The
+    shelf still reads as a state-of-the-category at a glance; you just no longer
+    have to decode which scene is which game to use it.
 
-    It also reads as a night sky: playing burns bright, drifting fades,
-    abandoned is a grey ghost, finished is moonrise. You can take in the state
-    of the whole category without reading a single badge — the badges stay
-    for anyone who cannot separate the scenes. -#}
+    Covers are SOURCED, and sourced means sometimes absent. A subject without
+    one falls back to the whole generated tile, stretched by CSS to the exact
+    height the banner-and-cover stack comes to — so the original guarantee holds
+    (no shelf goes blank waiting on an image) and a half-covered shelf still
+    lays out as one even grid rather than a ragged one. -#}
 <ul class="shelf-grid">
   {% for item in items %}
   <li class="shelf-item">
     <a href="/s/{{ item.slug }}/">
-      <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
+      <span class="shelf-art">
+        {% if item.coverUrl %}
+        <span class="sky sky-banner" style="background-image:url({{ item.bannerUrl }})" aria-hidden="true"></span>
+        {#- A real <img>, unlike every sky on the site: the generated art is
+            decoration and belongs in CSS, but a cover is content, it wants an
+            alt, and a shelf that keeps growing wants lazy loading. -#}
+        <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" loading="lazy" decoding="async">
+        {% else %}
+        <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
+        {% endif %}
+      </span>
       <span class="shelf-caption">{{ item.title }}</span>
       <span class="badge b-{{ item.status }}">{{ item.status }}</span>
       {% if item.rating %}<span class="rating">{{ item.rating }}/5</span>{% endif %}

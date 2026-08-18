@@ -102,13 +102,26 @@ const smooth = (pts) => {
 // A curtain: bright lower edge, vertical rays of jittered heights fading
 // upward, brightness pulsing along the length. The per-column jitter is what
 // keeps it from ever reading as a banded stripe.
-const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96 }) => {
+//
+// `sway` scales the vertical wander (wave amplitude and end-to-end drift),
+// `edgeH` the thickness of the bright edge, and `quant` the y grid the edge
+// snaps to. All three exist for the banner, whose box is a fifth the height of
+// the tile these numbers were tuned against: there, an unscaled curtain wanders
+// clean out of frame, while a scaled-down one snapped to the tile's 3-unit grid
+// crosses one step and lies flat like a rule. Defaults reproduce the tile
+// exactly, and the rand() call order is fixed regardless, so no existing sky
+// moves by a pixel.
+const curtain = (
+  rand,
+  pal,
+  { yMin, yMax, hBase, op, w = 96, sway = 1, edgeH = 7, quant = 3 },
+) => {
   const y0 = range(rand, yMin, yMax);
-  const amp = range(rand, 5, 9);
+  const amp = range(rand, 5, 9) * sway;
   const ph = range(rand, 0, 6.28);
   const f1 = range(rand, 0.55, 0.95);
   const f2 = range(rand, 1.6, 2.6);
-  const drift = range(rand, -8, 8);
+  const drift = range(rand, -8, 8) * sway;
 
   const edge = [];
   let rects = "";
@@ -119,7 +132,7 @@ const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96 }) => {
       drift * t +
       amp * Math.sin(ph + t * f1 * 2 * Math.PI) +
       amp * 0.5 * Math.sin(t * f2 * 2 * Math.PI + ph * 1.7);
-    const yb = Math.round(y / 3) * 3;
+    const yb = Math.round(y / quant) * quant;
     edge.push([x, y]);
     const n =
       0.5 + 0.5 * Math.sin(x * 1.7 + ph * 3) * Math.sin(x * 0.53 + ph * 5);
@@ -128,7 +141,7 @@ const curtain = (rand, pal, { yMin, yMax, hBase, op, w = 96 }) => {
     rects +=
       `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${(0.32 * b).toFixed(2)}'/>` +
       `<rect x='${x}' y='${(yb - ray * 0.5).toFixed(0)}' width='4' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${(0.58 * b).toFixed(2)}'/>` +
-      `<rect x='${x}' y='${yb - 5}' width='4' height='7' fill='${pal.edge}' fill-opacity='${(0.95 * b).toFixed(2)}'/>`;
+      `<rect x='${x}' y='${yb - (edgeH - 2)}' width='4' height='${edgeH}' fill='${pal.edge}' fill-opacity='${(0.95 * b).toFixed(2)}'/>`;
   }
   const glow = `<path d='${smooth(edge)}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='${(hBase * 1.8).toFixed(0)}' stroke-linecap='round' filter='url(#b)'/>`;
   return `<g opacity='${op}'>${glow}${rects}</g>`;
@@ -268,6 +281,74 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
   }
   body += `<rect x='${(rand() * W).toFixed(0)}' y='${(rand() * 8).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
   body += `<rect x='${(rand() * W).toFixed(0)}' y='${(20 + rand() * 10).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
+  return svgWrap(W, H, body);
+};
+
+// The banner: what a sky becomes when a shelf tile is carrying SOURCED cover
+// art and the generated art steps back to being a status light. Not the tile
+// squashed — squashing flattens the curtains into the graph-line failure the
+// chip was invented to dodge. It is the same night through a WIDE window: two
+// curtains at tile scale, cropped by a short frame, rays running off the top
+// the way a real curtain running out of frame does.
+//
+// Same seed as the tile, so a subject's banner and its tile are the same sky
+// and not two pictures. Both meaning axes survive the crop: status still says
+// how much aurora is left (three-then-two curtains, grey ghost, moon), recency
+// still says how brightly it burns. Only the identifying job moves — that's the
+// cover's now, which is the point of the whole arrangement.
+//
+// 96 wide is not a free choice — it is the TILE's width, and the banner has to
+// keep it. curtain()'s per-column ray jitter is a function of raw x, so its
+// spatial frequency is fixed per unit of width: at 192 the rays came out twice
+// as fine, and a wide strip of high-frequency rays is precisely the "banded
+// stripe" this drawing was built to avoid. Same width, same chunk. Height is
+// then the only free number, and 28 is where the curtain still has room to
+// wander like a curtain instead of lying flat like a rule.
+export const BANNER_W = 96;
+export const BANNER_H = 28;
+
+export const bannerSvg = (slug, ladderHue, status, tier) => {
+  const rand = mulberry32(hashOf(slug));
+  const pal = palette(ladderHue);
+  const W = BANNER_W;
+  const H = BANNER_H;
+  // Halved wander so the curtain stays in a frame this short, on a 2-unit grid
+  // rather than the tile's 3 so what wander is left still crosses several
+  // steps and reads as a wave rather than a rule.
+  const shape = { sway: 0.45, edgeH: 4, quant: 2 };
+
+  let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
+  body += stars(rand, status === "completed" ? 7 : 5, { w: W, h: H });
+
+  if (status === "completed") {
+    // The tile's waning crescent, same construction — lit disc with the
+    // night-side disc masked out, halo carved by the same mask — hung left so
+    // the rest of the strip stays open night. Sized so the HALO fits inside 28
+    // with a couple of units to spare: clipped, its soft edge becomes a hard
+    // chord and the whole thing stops reading as a moon and starts reading as
+    // a grey badge stuck in the corner.
+    body +=
+      `<mask id='m'><circle cx='17' cy='14' r='13' fill='#fff'/>` +
+      `<circle cx='20.5' cy='12.1' r='6.5' fill='#000'/></mask>` +
+      `<g mask='url(#m)'>` +
+      `<circle cx='17' cy='14' r='12' fill='${MOON}' fill-opacity='0.16'/>` +
+      `<circle cx='17' cy='14' r='7' fill='${MOON}'/>` +
+      `</g>`;
+  } else if (status === "abandoned") {
+    body += curtain(rand, GREY, { ...shape, yMin: 18, yMax: 20, hBase: 7, op: 0.3 });
+  } else if (status === "shelved") {
+    body += curtain(rand, pal, { ...shape, yMin: 7, yMax: 9, hBase: 3, op: 0.25 });
+    body += curtain(rand, pal, { ...shape, yMin: 18, yMax: 20, hBase: 5, op: 0.35 });
+  } else {
+    // Two curtains, not the tile's three — the same reduction the chip makes,
+    // and for the same reason: a third band in a frame this short stops
+    // reading as depth and starts reading as stacked lines.
+    body += curtain(rand, pal, { ...shape, yMin: 7, yMax: 9, hBase: 3, op: 0.4 * tier });
+    body += curtain(rand, pal, { ...shape, yMin: 18, yMax: 20, hBase: 8, op: 0.8 * tier });
+  }
+  // The main curtain rides low on purpose: the strip's bottom edge IS the top
+  // of the cover, so a curtain sitting near it reads as aurora over a horizon
+  // rather than a band floating above a dark gap.
   return svgWrap(W, H, body);
 };
 

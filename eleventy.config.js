@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, headerSheet } from "./aurora.js";
+import { subjectSvg, chipSvg, bannerSvg, headerSheet } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -64,6 +64,7 @@ export default function (eleventyConfig) {
   // Post images only — src/img/manifest.json is publish.py book-keeping and
   // deliberately not copied.
   eleventyConfig.addPassthroughCopy({ "src/img/posts": "img/posts" });
+  eleventyConfig.addPassthroughCopy({ "src/img/covers": "img/covers" });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
   eleventyConfig.setLibrary("md", md);
@@ -391,13 +392,33 @@ export default function (eleventyConfig) {
     const status = meta?.status ?? "active";
     skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier));
     skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier));
+    skyFiles.set(`img/sky/${slug}-banner.svg`, bannerSvg(slug, hue, status, tier));
     return {
       skyUrl: `/img/sky/${slug}.svg`,
       chipUrl: `/img/sky/${slug}-chip.svg`,
+      bannerUrl: `/img/sky/${slug}-banner.svg`,
     };
   };
 
-  const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
+  // Cover art is the one asset on this site that is SOURCED rather than
+  // generated: an image named for the subject slug, fetched from SteamGridDB by
+  // .claude/scripts/covers.py and committed. Absence is a normal state, not an
+  // error — a subject without one keeps the full generated tile, so the
+  // original invariant holds and no shelf is ever unreachable for want of an
+  // image. Rescanned per build so dropping a file in during --serve takes.
+  const COVER_DIR = path.join("src", "img", "covers");
+  const COVER_EXT = /^(.+)\.(jpe?g|png|webp|avif)$/i;
+  const coverUrls = new Map(); // slug -> /img/covers/<file>
+  eleventyConfig.on("eleventy.before", () => {
+    coverUrls.clear();
+    if (!fs.existsSync(COVER_DIR)) return;
+    for (const name of fs.readdirSync(COVER_DIR)) {
+      const m = COVER_EXT.exec(name);
+      if (m) coverUrls.set(m[1], `/img/covers/${name}`);
+    }
+  });
+
+  const skyUrls = new Map(); // slug -> {skyUrl, chipUrl, bannerUrl}, for linkSubjects
 
   const skyTag = (slug, status) => {
     const art = skyUrls.get(slug);
@@ -643,6 +664,7 @@ export default function (eleventyConfig) {
         ...meta,
         status: meta?.status ?? "active",
         ...art,
+        coverUrl: coverUrls.get(slug) ?? null,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
         essays,

@@ -516,8 +516,39 @@ a.post-list-date:hover { color: var(--accent); }
 
 .shelf-item a { display: block; text-decoration: none; color: inherit; }
 
-.shelf-item .sky { transition: transform 0.1s steps(3); }
-.shelf-item a:hover .sky { transform: translateY(-4px); }
+/* The lift takes the whole art stack. Banner and cover are one object — moving
+   only the strip would peel it off the box it labels. */
+.shelf-art { display: block; transition: transform 0.1s steps(3); }
+.shelf-item a:hover .shelf-art { transform: translateY(-4px); }
+
+/* The strip hung above a sourced cover: aurora.js's BANNER_W/BANNER_H, keep
+   the two in step. No bottom border — one edge between strip and cover, not
+   two, so the pair reads as a single card with a lit header. */
+.sky-banner { aspect-ratio: 96 / 28; border-bottom: 0; }
+
+/* 2:3 is SteamGridDB's portrait grid size (600x900), so a fetched cover lands
+   unscaled. cover-sizing catches the other dimensions the API serves. No
+   dither over this one: the texture belongs to the generated art, and laid
+   over real box art it only reads as a dirty screen. */
+.shelf-cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--edge);
+  border-top: 0;
+  /* Night showing through until a lazy cover arrives, so the grid never
+     flashes a white or empty box against the dark page. */
+  background: var(--deep);
+  object-fit: cover;
+}
+
+/* Covered and coverless tiles are held to the same height so a partly-covered
+   shelf lays out as one clean grid rather than a ragged one: banner (96/28)
+   over cover (2/3) comes to 1.792 column-widths, and the fallback sky stretches
+   to match. Stretching is what these SVGs are for — pAR='none' just lengthens
+   the rays, and a completed scene cover-crops from its tall 3:10 canvas, so the
+   crescent never deforms. */
+.shelf-item .sky:not(.sky-banner) { aspect-ratio: 96 / 172; }
 
 .shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 12px/1.5 var(--pixel); }
 
@@ -664,6 +695,6 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shelf-item .sky, .spoiler { transition: none; }
+  .shelf-art, .spoiler { transition: none; }
   body::before { animation: none; }
 }
