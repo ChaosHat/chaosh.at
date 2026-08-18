@@ -37,13 +37,15 @@
   --st-abandoned: #f0aec2;
   --st-completed: #a9d0f6;
 
-  /* --wide is now the only width that does anything: the shell, the furniture
-     and the prose all run to it, so every right edge on a page agrees.
-     --measure is retained unused and deliberately — it is the reading measure
-     the prose was capped at until 2026-08-18, and re-capping any block is a
-     one-line change back. Shrinking --wide is the way to shorten lines now;
-     re-capping prose would break the alignment that replaced it. */
+  /* Retained, unused: the per-block prose cap used until 2026-08-18. Capping
+     blocks individually is what stranded headings and datelines at the shell
+     edge; --read below replaced it by narrowing the whole reading column. */
   --measure: 34rem;
+  /* The reading column, centred inside --wide. The furniture strips and the
+     header keep the full shell so nothing changes width as you navigate; only
+     the text column narrows, and it narrows on BOTH sides so it reads as
+     centred under the furniture rather than as prose that ran out early. */
+  --read: 38rem;
   --wide: 58rem;
 
   /* How tall a fragment sky may grow before it stops tracking entry length,
@@ -94,6 +96,15 @@ body::before {
 @keyframes aurora-roll {
   to { background-position: 0 -1792px; }
 }
+
+/* The reading column. Everything that is prose lives in <main>, so centring
+   main centres headings, dates and body together — capping each block instead
+   left h1s and datelines stranded at the shell's left edge while the paragraph
+   under them sat inset, which looked like a bug. Grid pages opt out with
+   `wide: true` in their front matter and take the whole shell; the furniture
+   above main never changes width either way. */
+main { max-width: var(--read); margin-inline: auto; }
+body.wide main { max-width: none; }
 
 a { color: var(--accent); }
 
@@ -399,16 +410,9 @@ a.post-list-date:hover { color: var(--accent); }
    aurora ceiling — a finished sky doesn't burn as long as a live one. */
 .frag > .sky-done { max-height: 10rem; }
 
-/* Prose runs to the shell's edge, not to a measure. The furniture boxes (Now
-   Playing, Deep Thoughts) span the full shell, and they are the heaviest marks
-   on the page — a narrower prose column under them left every right edge
-   disagreeing, with a dead zone inside each box. The furniture edge is the
-   guiding line and text matches it (Hat's call, 2026-08-18).
-
-   The cost is real and known: this puts body text near 100 characters a line,
-   against the 65-75 that is comfortable. If it reads long, the fix is to bring
-   --wide in rather than to re-cap the prose, so the alignment survives.
-   min-width:0 stays — it is what lets a flex child shrink below its content. */
+/* No cap here any more — `main` is the reading column now, so a fragment's
+   prose simply fills what is left after the sky. min-width:0 stays: it is what
+   lets a flex child shrink below its content width. */
 .frag-body { min-width: 0; }
 .frag-body > :first-child { margin-top: 0; }
 .frag-body > :last-child { margin-bottom: 0; }
@@ -620,6 +624,7 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 .fragment { max-width: none; }
+
 .fragment + .fragment { margin-top: 2rem; }
 .fragment > :last-child { margin-bottom: 0; }
 

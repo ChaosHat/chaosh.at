@@ -11,7 +11,11 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>
-  <body>
+  {#- Grid pages set `wide: true` in their front matter and let <main> take the
+      whole shell; everything else gets the narrower, centred reading column.
+      The header and the furniture strips are outside main either way, so they
+      never change width as you navigate between the two kinds of page. -#}
+  <body{% if wide %} class="wide"{% endif %}>
     <header class="site-header">
       <a class="site-title" href="/">{{ site.title }}</a>
       <nav class="site-nav">
