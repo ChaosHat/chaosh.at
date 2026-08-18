@@ -38,7 +38,7 @@
   --st-completed: #a9d0f6;
 
   --measure: 34rem;
-  --wide: 47rem;
+  --wide: 58rem;
 
   /* How tall a fragment sky may grow before it stops tracking entry length,
      and where its lower edge starts dissolving into the page. */
@@ -205,7 +205,7 @@ h1, h2, h3 { line-height: 1.25; }
    keeps a single-line intro unaffected. */
 
 .site-intro {
-  max-width: var(--measure);
+  max-width: var(--wide);
   margin: -0.5rem 0 2rem;
   color: var(--muted);
   font-style: italic;

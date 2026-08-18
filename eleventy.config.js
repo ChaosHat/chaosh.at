@@ -737,13 +737,22 @@ export default function (eleventyConfig) {
   // One shelf per category actually in use. Categories are a soft field, so a
   // shelf appears the moment a subject claims it and disappears when none do —
   // no separate list of shelves to keep in step.
+  // Insertion order IS the nav order — games first because it is what the site
+  // is mostly about, and alphabetical put "Board games" in front of it. A
+  // category with no entry here still gets a shelf (categories are a soft
+  // field); it just sorts to the end, alphabetically, among its own kind.
+  //
+  // The key is the URL and lives in subjects.yaml; the label is only what the
+  // nav says. "Tabletop" over "Board games" is a label change alone, so
+  // /shelf/boardgames/ keeps working and nothing in subjects.yaml moves.
   const SHELF_LABELS = {
     games: "Games",
-    boardgames: "Board games",
+    boardgames: "Tabletop",
     books: "Books",
     shows: "Shows",
     life: "Life",
   };
+  const SHELF_ORDER = Object.keys(SHELF_LABELS);
 
   eleventyConfig.addCollection("shelves", (api) => {
     const counts = new Map();
@@ -758,7 +767,12 @@ export default function (eleventyConfig) {
         label: SHELF_LABELS[category] ?? category,
         count,
       }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+      .sort((a, b) => {
+        const ai = SHELF_ORDER.indexOf(a.category);
+        const bi = SHELF_ORDER.indexOf(b.category);
+        if (ai !== bi) return (ai < 0 ? Infinity : ai) - (bi < 0 ? Infinity : bi);
+        return a.label.localeCompare(b.label);
+      });
   });
 
   // A subject heading in a daily post becomes a link to its subject page, and is
