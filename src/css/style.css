@@ -37,6 +37,12 @@
   --st-abandoned: #f0aec2;
   --st-completed: #a9d0f6;
 
+  /* --wide is now the only width that does anything: the shell, the furniture
+     and the prose all run to it, so every right edge on a page agrees.
+     --measure is retained unused and deliberately — it is the reading measure
+     the prose was capped at until 2026-08-18, and re-capping any block is a
+     one-line change back. Shrinking --wide is the way to shorten lines now;
+     re-capping prose would break the alignment that replaced it. */
   --measure: 34rem;
   --wide: 58rem;
 
@@ -393,8 +399,17 @@ a.post-list-date:hover { color: var(--accent); }
    aurora ceiling — a finished sky doesn't burn as long as a live one. */
 .frag > .sky-done { max-height: 10rem; }
 
-/* Prose keeps its measure while the shell stays wide enough for art. */
-.frag-body { min-width: 0; max-width: var(--measure); }
+/* Prose runs to the shell's edge, not to a measure. The furniture boxes (Now
+   Playing, Deep Thoughts) span the full shell, and they are the heaviest marks
+   on the page — a narrower prose column under them left every right edge
+   disagreeing, with a dead zone inside each box. The furniture edge is the
+   guiding line and text matches it (Hat's call, 2026-08-18).
+
+   The cost is real and known: this puts body text near 100 characters a line,
+   against the 65-75 that is comfortable. If it reads long, the fix is to bring
+   --wide in rather than to re-cap the prose, so the alignment survives.
+   min-width:0 stays — it is what lets a flex child shrink below its content. */
+.frag-body { min-width: 0; }
 .frag-body > :first-child { margin-top: 0; }
 .frag-body > :last-child { margin-bottom: 0; }
 
@@ -594,7 +609,7 @@ a.post-list-date:hover { color: var(--accent); }
 
 .rating { font: 12px/1 var(--pixel); color: var(--st-active); }
 
-.essay { max-width: var(--measure); margin-bottom: 3rem; }
+.essay { margin-bottom: 3rem; }
 
 .timeline-head {
   margin: 0 0 1.75rem;
@@ -604,7 +619,7 @@ a.post-list-date:hover { color: var(--accent); }
   color: var(--muted);
 }
 
-.fragment { max-width: var(--measure); }
+.fragment { max-width: none; }
 .fragment + .fragment { margin-top: 2rem; }
 .fragment > :last-child { margin-bottom: 0; }
 
@@ -622,7 +637,7 @@ a.post-list-date:hover { color: var(--accent); }
 
 .tag-head { margin-bottom: 2.25rem; }
 .tag-head h1 { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
-.tag-desc { margin: 0 0 0.6rem; max-width: var(--measure); color: var(--muted); }
+.tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
 .tag-members { margin: 0; font: 12px/1.8 var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
 
