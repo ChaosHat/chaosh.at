@@ -45,7 +45,7 @@
      header keep the full shell so nothing changes width as you navigate; only
      the text column narrows, and it narrows on BOTH sides so it reads as
      centred under the furniture rather than as prose that ran out early. */
-  --read: 38rem;
+  --read: 47rem;
   --wide: 58rem;
 
   /* How tall a fragment sky may grow before it stops tracking entry length,
