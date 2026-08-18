@@ -104,17 +104,24 @@ const smooth = (pts) => {
 // keeps it from ever reading as a banded stripe.
 //
 // `sway` scales the vertical wander (wave amplitude and end-to-end drift),
-// `edgeH` the thickness of the bright edge, and `quant` the y grid the edge
-// snaps to. All three exist for the banner, whose box is a fifth the height of
-// the tile these numbers were tuned against: there, an unscaled curtain wanders
-// clean out of frame, while a scaled-down one snapped to the tile's 3-unit grid
-// crosses one step and lies flat like a rule. Defaults reproduce the tile
-// exactly, and the rand() call order is fixed regardless, so no existing sky
-// moves by a pixel.
+// `edgeH` the thickness of the bright edge, `quant` the y grid the edge snaps
+// to, and `step` the column width. All four exist for the banner, whose box is
+// an eighth the height of the tile these numbers were tuned against: there, an
+// unscaled curtain wanders clean out of frame, one snapped to the tile's 3-unit
+// grid crosses a single step and lies flat like a rule, and 4-wide columns are
+// coarse enough to read as noise.
+//
+// That last one is aliasing, not taste. The ray-height jitter `n` has a term of
+// period ~3.7 units, so sampling it every 4 units is below Nyquist — the tile
+// gets away with it because 24 chunky columns over 128px of height IS the pixel
+// look, but in a strip a fifth as tall the same aliasing is all you see.
+//
+// Defaults reproduce the tile exactly, and the rand() call order is fixed
+// regardless of any of them, so no existing sky moves by a pixel.
 const curtain = (
   rand,
   pal,
-  { yMin, yMax, hBase, op, w = 96, sway = 1, edgeH = 7, quant = 3 },
+  { yMin, yMax, hBase, op, w = 96, sway = 1, edgeH = 7, quant = 3, step = 4 },
 ) => {
   const y0 = range(rand, yMin, yMax);
   const amp = range(rand, 5, 9) * sway;
@@ -125,7 +132,7 @@ const curtain = (
 
   const edge = [];
   let rects = "";
-  for (let x = -4; x <= w + 4; x += 4) {
+  for (let x = -step; x <= w + step; x += step) {
     const t = x / w;
     const y =
       y0 +
@@ -139,9 +146,9 @@ const curtain = (
     const b = 0.62 + 0.38 * Math.sin(x * 0.9 + ph * 1.3);
     const ray = hBase * (0.9 + 1.5 * n);
     rects +=
-      `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${(0.32 * b).toFixed(2)}'/>` +
-      `<rect x='${x}' y='${(yb - ray * 0.5).toFixed(0)}' width='4' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${(0.58 * b).toFixed(2)}'/>` +
-      `<rect x='${x}' y='${yb - (edgeH - 2)}' width='4' height='${edgeH}' fill='${pal.edge}' fill-opacity='${(0.95 * b).toFixed(2)}'/>`;
+      `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='${step}' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${(0.32 * b).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${(yb - ray * 0.5).toFixed(0)}' width='${step}' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${(0.58 * b).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${yb - (edgeH - 2)}' width='${step}' height='${edgeH}' fill='${pal.edge}' fill-opacity='${(0.95 * b).toFixed(2)}'/>`;
   }
   const glow = `<path d='${smooth(edge)}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='${(hBase * 1.8).toFixed(0)}' stroke-linecap='round' filter='url(#b)'/>`;
   return `<g opacity='${op}'>${glow}${rects}</g>`;
@@ -301,54 +308,71 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
 // keep it. curtain()'s per-column ray jitter is a function of raw x, so its
 // spatial frequency is fixed per unit of width: at 192 the rays came out twice
 // as fine, and a wide strip of high-frequency rays is precisely the "banded
-// stripe" this drawing was built to avoid. Same width, same chunk. Height is
-// then the only free number, and 28 is where the curtain still has room to
-// wander like a curtain instead of lying flat like a rule.
+// stripe" this drawing was built to avoid. Same width, same hue, same chunk.
+//
+// Height is the one knob, and every other number below is derived from it as a
+// fraction. Tuning this by hand once produced a strip that only looked right at
+// one height; expressed as fractions, changing BANNER_H alone re-tunes the
+// wander, the ray length, the edge weight and the moon together, and the strip
+// stays a strip at any size worth using. Sane range is roughly 10–20.
 export const BANNER_W = 96;
-export const BANNER_H = 28;
+export const BANNER_H = 17;
 
-export const bannerSvg = (slug, ladderHue, status, tier) => {
+export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
   const W = BANNER_W;
-  const H = BANNER_H;
-  // Halved wander so the curtain stays in a frame this short, on a 2-unit grid
-  // rather than the tile's 3 so what wander is left still crosses several
-  // steps and reads as a wave rather than a rule.
-  const shape = { sway: 0.45, edgeH: 4, quant: 2 };
+  const H = h;
+
+  // The main curtain rides low on purpose: the strip's bottom edge IS the top
+  // of the cover, so an edge sitting near it reads as aurora over a horizon
+  // rather than a band floating above a dark gap.
+  const lowY = 0.68 * H;
+  const highY = 0.3 * H;
+  // sway is calibrated so the wave amplitude lands near an eighth of the frame
+  // whatever the frame is: range(5,9) averages 7, so 0.018*H puts amp ≈ 0.125*H.
+  // quant 1 because at these heights the tile's 3-unit grid is a quarter of the
+  // whole box — it would step the edge in visible jumps instead of a wave.
+  const shape = {
+    sway: 0.018 * H,
+    edgeH: Math.max(2, Math.round(0.14 * H)),
+    quant: 1,
+    step: 2, // finer than the tile's 4 — see the aliasing note on curtain()
+  };
+  const band = (y) => ({ yMin: y - 0.05 * H, yMax: y + 0.05 * H });
 
   let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
-  body += stars(rand, status === "completed" ? 7 : 5, { w: W, h: H });
+  body += stars(rand, Math.round((status === "completed" ? 0.5 : 0.35) * H), { w: W, h: H });
 
   if (status === "completed") {
     // The tile's waning crescent, same construction — lit disc with the
     // night-side disc masked out, halo carved by the same mask — hung left so
-    // the rest of the strip stays open night. Sized so the HALO fits inside 28
-    // with a couple of units to spare: clipped, its soft edge becomes a hard
-    // chord and the whole thing stops reading as a moon and starts reading as
-    // a grey badge stuck in the corner.
+    // the rest of the strip stays open night. The HALO is what has to fit
+    // inside H, not the disc: clipped, its soft edge becomes a hard chord and
+    // the thing stops reading as a moon and starts reading as a grey badge.
+    const r = 0.28 * H; // lit disc
+    const cx = 1.2 * H;
+    const cy = 0.5 * H;
+    const f = (n) => n.toFixed(2);
     body +=
-      `<mask id='m'><circle cx='17' cy='14' r='13' fill='#fff'/>` +
-      `<circle cx='20.5' cy='12.1' r='6.5' fill='#000'/></mask>` +
+      `<mask id='m'><circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.86)}' fill='#fff'/>` +
+      `<circle cx='${f(cx + r * 0.5)}' cy='${f(cy - r * 0.27)}' r='${f(r * 0.93)}' fill='#000'/></mask>` +
       `<g mask='url(#m)'>` +
-      `<circle cx='17' cy='14' r='12' fill='${MOON}' fill-opacity='0.16'/>` +
-      `<circle cx='17' cy='14' r='7' fill='${MOON}'/>` +
+      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.7)}' fill='${MOON}' fill-opacity='0.16'/>` +
+      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r)}' fill='${MOON}'/>` +
       `</g>`;
   } else if (status === "abandoned") {
-    body += curtain(rand, GREY, { ...shape, yMin: 18, yMax: 20, hBase: 7, op: 0.3 });
+    body += curtain(rand, GREY, { ...shape, ...band(lowY), hBase: 0.5 * H, op: 0.3 });
   } else if (status === "shelved") {
-    body += curtain(rand, pal, { ...shape, yMin: 7, yMax: 9, hBase: 3, op: 0.25 });
-    body += curtain(rand, pal, { ...shape, yMin: 18, yMax: 20, hBase: 5, op: 0.35 });
+    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.25 });
+    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.36 * H, op: 0.35 });
   } else {
-    // Two curtains, not the tile's three — the same reduction the chip makes,
-    // and for the same reason: a third band in a frame this short stops
-    // reading as depth and starts reading as stacked lines.
-    body += curtain(rand, pal, { ...shape, yMin: 7, yMax: 9, hBase: 3, op: 0.4 * tier });
-    body += curtain(rand, pal, { ...shape, yMin: 18, yMax: 20, hBase: 8, op: 0.8 * tier });
+    // A second curtain only when there is room for one. Below ~16 the two
+    // overlap into a single smear, which reads as less sky rather than more —
+    // the same reduction the chip makes, for the same reason.
+    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.4 * tier });
+    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.57 * H, op: 0.8 * tier });
   }
-  // The main curtain rides low on purpose: the strip's bottom edge IS the top
-  // of the cover, so a curtain sitting near it reads as aurora over a horizon
-  // rather than a band floating above a dark gap.
   return svgWrap(W, H, body);
 };
 

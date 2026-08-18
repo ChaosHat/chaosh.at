@@ -521,10 +521,13 @@ a.post-list-date:hover { color: var(--accent); }
 .shelf-art { display: block; transition: transform 0.1s steps(3); }
 .shelf-item a:hover .shelf-art { transform: translateY(-4px); }
 
-/* The strip hung above a sourced cover: aurora.js's BANNER_W/BANNER_H, keep
-   the two in step. No bottom border — one edge between strip and cover, not
-   two, so the pair reads as a single card with a lit header. */
-.sky-banner { aspect-ratio: 96 / 28; border-bottom: 0; }
+/* The strip hung above a sourced cover. --banner-h must match aurora.js's
+   BANNER_H, and it is the only number to change: the fallback tile's height
+   below is derived from it, so the grid stays even automatically. No bottom
+   border — one edge between strip and cover, not two, so the pair reads as a
+   single card with a lit header. */
+.shelf-grid { --banner-w: 96; --banner-h: 17; }
+.sky-banner { aspect-ratio: var(--banner-w) / var(--banner-h); border-bottom: 0; }
 
 /* 2:3 is SteamGridDB's portrait grid size (600x900), so a fetched cover lands
    unscaled. cover-sizing catches the other dimensions the API serves. No
@@ -543,12 +546,15 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 /* Covered and coverless tiles are held to the same height so a partly-covered
-   shelf lays out as one clean grid rather than a ragged one: banner (96/28)
-   over cover (2/3) comes to 1.792 column-widths, and the fallback sky stretches
-   to match. Stretching is what these SVGs are for — pAR='none' just lengthens
-   the rays, and a completed scene cover-crops from its tall 3:10 canvas, so the
-   crescent never deforms. */
-.shelf-item .sky:not(.sky-banner) { aspect-ratio: 96 / 172; }
+   shelf lays out as one clean grid rather than a ragged one: the banner plus a
+   2:3 cover comes to (banner-h/banner-w + 1.5) column-widths, and the fallback
+   sky stretches to exactly that. Derived, not hardcoded, so retuning the banner
+   height cannot silently leave the two forms mismatched. Stretching is what
+   these SVGs are for — pAR='none' just lengthens the rays, and a completed
+   scene cover-crops from its tall 3:10 canvas, so the crescent never deforms. */
+.shelf-item .sky:not(.sky-banner) {
+  aspect-ratio: 1 / calc(var(--banner-h) / var(--banner-w) + 1.5);
+}
 
 .shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 12px/1.5 var(--pixel); }
 
