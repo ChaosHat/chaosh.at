@@ -7,7 +7,7 @@ layout: base.njk
       "||" and leave the opening one unpaired, which renders the words plainly. -#}
   {% set body = post.content | spoilers | homeBody %}
   <li>
-    <div class="entry-head">
+    <div class="entry-head" style="background-image:url({{ post.date | daySky }})">
       {% if post.data.title %}
       <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
       <p class="post-list-subdate">{{ post.date | readableDate }}</p>

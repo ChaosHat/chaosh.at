@@ -2,7 +2,7 @@
 layout: base.njk
 ---
 <article class="post">
-  <header class="post-head">
+  <header class="post-head" style="background-image:url({{ page.date | daySky }})">
     {% if title %}
     <h1 class="post-title">{{ title }}</h1>
     <p class="post-subdate">{{ page.date | readableDate }}</p>

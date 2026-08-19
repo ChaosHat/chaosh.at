@@ -376,6 +376,86 @@ export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H) => {
   return svgWrap(W, H, body);
 };
 
+// MOCK — the day band: the sky the night a post was written.
+//
+// Deliberately the masthead's geometry, held still and seeded on the POST's
+// date rather than the build's. The masthead is tonight; a post header is the
+// night it was written, and scrolling the page scrolls through nights. That is
+// the axis this art can actually carry: status barely varies in the stream and
+// needs a legend, recency has no on-screen reference to compare against, but
+// every post has a different date by construction and nobody has to decode
+// anything for it to be true.
+//
+// Static, not animated. Five of these breathing on the home page is the same
+// mistake as thirty shimmering shelf cards.
+//
+// 480 wide and repeated, exactly like the masthead, so pixel density never
+// changes with the viewport. Proportions are scaled off the masthead's 112px
+// frame so the two read as the same weather at different sizes.
+export const DAY_W = 480;
+export const DAY_H = 96;
+
+export const daySky = (dateStr, h = DAY_H) => {
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const pal = palette(hue);
+  const TAU = 2 * Math.PI;
+  const W = DAY_W;
+  const H = h;
+  const k = H / 112; // the masthead frame these numbers were tuned against
+
+  const edge = [];
+  let rects = "";
+  for (let x = 0; x <= W; x += 4) {
+    const t = x / W;
+    // The lit edge rides at 70% of the frame rather than the masthead's 55%.
+    // The band is anchored to the bottom of a post header, so the edge is the
+    // horizon under the dateline while the rays reach up behind the title —
+    // put it mid-frame and the date lands squarely on the brightest pixels on
+    // the page, where 12px muted type is unreadable.
+    const y =
+      0.7 * H +
+      (9 * Math.sin(TAU * t + 1.3) +
+        4.5 * Math.sin(TAU * 3 * t + 4.1) +
+        1.6 * Math.sin(TAU * 3 * t)) *
+        k;
+    const yb = Math.round(y / 3) * 3;
+    edge.push([x, y]);
+    const n =
+      0.5 + 0.5 * Math.sin(TAU * 7 * t + 2.6) * Math.sin(TAU * 11 * t + 1.3);
+    // The masthead's standing-wave brightness, frozen at frame 0.
+    const pulse =
+      0.55 * Math.sin(TAU * 3 * t + 1.1) * Math.sin(0.7) +
+      0.35 * Math.sin(TAU * 7 * t + 4.2) * Math.sin(2.9) +
+      0.28 * Math.sin(TAU * 12 * t + 2.0) * Math.sin(5.0);
+    const b = Math.min(1, Math.max(0.18, 0.6 + 0.36 * pulse));
+    const flick = 0.85 + 0.15 * Math.sin(TAU * 9 * t + 0.5) * Math.sin(4.0);
+    const ray = 34 * k * (0.9 + 1.5 * n);
+    rects +=
+      `<rect x='${x}' y='${(yb - ray).toFixed(0)}' width='4' height='${(ray * 0.7).toFixed(0)}' fill='${pal.deep}' fill-opacity='${Math.max(0.08, 0.32 * b).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${(yb - ray * 0.5).toFixed(0)}' width='4' height='${(ray * 0.5).toFixed(0)}' fill='${pal.mid}' fill-opacity='${Math.max(0.07, 0.58 * b * flick).toFixed(2)}'/>` +
+      `<rect x='${x}' y='${(yb - 4 * k).toFixed(0)}' width='4' height='${(9 * k).toFixed(0)}' fill='${pal.edge}' fill-opacity='${Math.max(0.1, 0.95 * b * flick).toFixed(2)}'/>`;
+  }
+  const d =
+    `M${edge[0][0]} ${edge[0][1].toFixed(1)}` +
+    edge.slice(1).map(([px, py]) => ` L${px} ${py.toFixed(1)}`).join("");
+  const glow = `<path d='${d}' fill='none' stroke='${pal.glow}' stroke-opacity='0.15' stroke-width='${(55 * k).toFixed(0)}' stroke-linecap='round' filter='url(#b)'/>`;
+
+  return (
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' ` +
+    `width='${W}' height='${H}' preserveAspectRatio='none'>` +
+    `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
+    `<feGaussianBlur stdDeviation='${(7 * k).toFixed(1)}'/></filter>` +
+    // Rays fade toward the top: that is what an aurora does anyway, and it is
+    // where the title and dateline sit. Full strength is kept at the horizon,
+    // so the band still carries its hue at the one place nothing overlaps it.
+    `<linearGradient id='f' x1='0' y1='0' x2='0' y2='1'>` +
+    `<stop offset='0' stop-color='#8f8f8f'/><stop offset='0.55' stop-color='#fff'/>` +
+    `</linearGradient>` +
+    `<mask id='m'><rect width='${W}' height='${H}' fill='url(#f)'/></mask></defs>` +
+    `<g mask='url(#m)' opacity='0.85'>${glow}${rects}</g></svg>`
+  );
+};
+
 // The header: one wide curtain, edge to edge, in that night's hue — the date
 // seeds the color, so the sky over the masthead changes at each 2am publish
 // and holds all day. One SVG holds all 16 frames stacked as a sprite sheet;

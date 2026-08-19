@@ -724,3 +724,64 @@ a.post-list-date:hover { color: var(--accent); }
   .shelf-art, .spoiler { transition: none; }
   body::before { animation: none; }
 }
+
+
+/* The fragment art column. 7rem because that is the smallest width at which a
+   cover is recognisable; the aurora fallback matches it so a subject without
+   one does not shift the heading and prose left of everything around it. On
+   the shelf a missing cover was cosmetic — here it would break the reading
+   column, so the two forms must agree. */
+.frag > .sky {
+  width: 7rem;
+  /* aspect-ratio: auto is load-bearing. .sky sets 3/4, which was invisible at
+     3rem wide (4rem tall, the same as min-height) but at 7rem forces a 149px
+     box — so a short entry, and every loose-prose column, got a tall empty
+     gap. Here the height must come from the entry, never from the art. */
+  aspect-ratio: auto;
+}
+
+/* Sourced cover in the fragment column. It inherits the sky's stretch, mask
+   and bounds, so it still grows with entry length — but it CROPS to fit rather
+   than stretching, and crops from the top because box art puts its logo there.
+   No dither: the 4px checker belongs to generated art and over real box art it
+   just reads as a dirty screen. */
+.sky-cover { background-size: cover; background-position: top center; }
+.sky-cover::before { content: none; }
+
+/* ------------------------------------------------------- the day band */
+.entry-head, .post-head {
+  position: relative;
+  /* 480px fixed tile, repeated — same rule as the masthead, so pixel density
+     never changes with the viewport. Anchored to the BOTTOM, which is what
+     lets the curtain's horizon fall under the dateline. */
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 480px 96px;
+  /* The curtain's bright edge sits 29px up from the band's bottom. Anything
+     less than that in bottom padding puts the dateline directly on the lit
+     edge, where muted 12px pixel type is genuinely hard to read — the title
+     survives it because it is large and bright, the date does not. 2.2rem
+     drops the edge clear below the text and leaves night under it, which
+     reads as a horizon rather than as a cut-off image. */
+  padding: 1.1rem 0.9rem 1.3rem;
+  margin-left: -0.9rem;
+  margin-right: -0.9rem;
+}
+.post-head { margin-bottom: 2rem; }
+.entry-head { margin-bottom: 1.3rem; }
+
+/* The dateline sits on the aurora, so it gets a hard 1px outline rather than a
+   blur — a bitmap face wants bitmap treatment, and this is exactly how
+   SNES-era UI put small type over a busy field. Lets the curtain come back up
+   behind the title instead of being pushed out of the way to stay readable.
+   Titles are left clean: they are large and bright enough already, and an
+   outline on a serif reads as a cheap effect rather than as a period one. */
+.entry-head .post-list-subdate,
+.entry-head .post-list-date,
+.post-head .post-subdate {
+  color: var(--ink);
+  text-shadow:
+     1px 1px 0 var(--night), -1px  1px 0 var(--night),
+     1px -1px 0 var(--night), -1px -1px 0 var(--night),
+     0 2px 0 var(--night);
+}

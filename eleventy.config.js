@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, bannerSvg, headerSheet } from "./aurora.js";
+import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -418,11 +418,33 @@ export default function (eleventyConfig) {
     }
   });
 
+  // One static band per post date — the sky the night it was written —
+  // generated on demand from the filter and written out with the rest of the
+  // art in eleventy.after.
+  eleventyConfig.addFilter("daySky", (d) => {
+    const key = d.toISOString().slice(0, 10);
+    const rel = `img/aurora/day-${key}.svg`;
+    if (!skyFiles.has(rel)) skyFiles.set(rel, daySky(key));
+    return `/${rel}`;
+  });
+
   const skyUrls = new Map(); // slug -> {skyUrl, chipUrl, bannerUrl}, for linkSubjects
 
   const skyTag = (slug, status) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
+    // A covered subject shows its cover here instead of its sky. No banner:
+    // on the shelf the banner carries status because nothing else does, but a
+    // fragment already has a status badge sitting beside its heading, and at
+    // this width the strip is a 20px sliver restating it.
+    //
+    // Background image, not <img>, for the same reason the sky is one: an img
+    // carries intrinsic height and would drive the row instead of being driven
+    // by it, which is what keeps the art tracking entry length.
+    const cover = coverUrls.get(slug);
+    if (cover) {
+      return `<span class="sky sky-cover" style="background-image:url(${cover})" aria-hidden="true"></span>`;
+    }
     const cls = status === "completed" ? "sky sky-done" : "sky";
     return `<span class="${cls}" style="background-image:url(${art.skyUrl})" aria-hidden="true"></span>`;
   };
