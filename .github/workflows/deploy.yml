@@ -3,6 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Recency tiers (how brightly a sky burns) and the masthead's daily hue are
+  # computed at build time — without this, a quiet week freezes both at the
+  # last push and the shelves claim "wrote about it this week" indefinitely.
+  # 07:30 UTC sits after the 02:00 America/New_York publish in both EST and EDT.
+  schedule:
+    - cron: "30 7 * * *"
   workflow_dispatch:
 
 permissions:

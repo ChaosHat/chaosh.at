@@ -3,7 +3,9 @@ permalink: /feed.xml
 eleventyExcludeFromCollections: true
 ---
 {%- set entries = collections.feed -%}
-{%- set newest = entries[0].date if entries | length else site.built -%}
+{#- The epoch fallback only fires on a site with zero entries; anything
+    date-shaped keeps the build alive there (site.built never existed). -#}
+{%- set newest = entries[0].date if entries | length -%}
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{{ site.title }}</title>
@@ -14,7 +16,7 @@ eleventyExcludeFromCollections: true
   <author><name>{{ site.author }}</name></author>
   {#- Feed-level updated is the newest ENTRY date, never the build time: a
       build-time value would churn the file on every deploy for no reason. -#}
-  <updated>{{ newest | atomDate }}</updated>
+  <updated>{{ newest | atomDate if newest else "1970-01-01T00:00:00.000Z" }}</updated>
   {%- for entry in entries %}
   <entry>
     <title>{{ entry.title }}</title>

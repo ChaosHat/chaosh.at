@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet } from "./aurora.js";
+import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet, hashOf } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -16,9 +16,11 @@ const md = new MarkdownIt({ html: true, linkify: true });
 // mirror image_safe_name()/IMAGE_EXTS in chaosh_subjects.py — if one changes,
 // change both. Non-image embeds (![[Some Note]] transclusion) are left as
 // literal text here; publish.py refuses those posts before they get this far.
+// Exported (with normalise/essaySlug/splitSections below) for parity.mjs,
+// which diffs these against their Python mirrors in chaosh_subjects.py.
 const IMAGE_EMBED = /^!\[\[([^\]]+?)\]\]/;
-const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
-const imageSafeName = (name) => name.replace(/[^A-Za-z0-9._-]+/g, "-");
+export const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
+export const imageSafeName = (name) => name.replace(/[^A-Za-z0-9._-]+/g, "-");
 
 md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
   const m = IMAGE_EMBED.exec(state.src.slice(state.pos));
@@ -46,7 +48,7 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
 
 // Headings are matched loosely so "DQXIS", "dqxi s" and "Dragon Quest XI S"
 // all land on the same subject.
-const normalise = (s) =>
+export const normalise = (s) =>
   String(s)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
@@ -55,7 +57,26 @@ const normalise = (s) =>
 // An essay's filename is a working label, not plumbing: "Atlus Narrative
 // Issues.md" publishes at /e/atlus-narrative-issues/ without being renamed.
 // Mirrors essay_slug() in chaosh_subjects.py — if one changes, change both.
-const essaySlug = (stem) => normalise(stem).replace(/ /g, "-");
+export const essaySlug = (stem) => normalise(stem).replace(/ /g, "-");
+
+// Split raw markdown on "## " only. H3+ travels with its parent section, and
+// prose above the first H2 belongs to the day, not to any subject. Module
+// scope (it closes over nothing) so parity.mjs can diff it against the
+// Python side's H2_RE scan.
+export const splitSections = (raw) => {
+  const sections = [];
+  let current = null;
+  for (const line of String(raw).split("\n")) {
+    const m = /^##(?!#)\s*(.*)$/.exec(line);
+    if (m) {
+      current = { heading: m[1].trim(), body: [] };
+      sections.push(current);
+    } else if (current) {
+      current.body.push(line);
+    }
+  }
+  return sections;
+};
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
@@ -300,20 +321,6 @@ export default function (eleventyConfig) {
   // than hashing straight to a degree.
   const SLOT_BASE = 24;
 
-  const hashOf = (slug) => {
-    let h = 2166136261;
-    for (let i = 0; i < slug.length; i += 1) {
-      h ^= slug.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    h ^= h >>> 16;
-    h = Math.imul(h, 2246822507);
-    h ^= h >>> 13;
-    h = Math.imul(h, 3266489909);
-    h ^= h >>> 16;
-    return h >>> 0;
-  };
-
   const displacedHues = [];
 
   const assignHues = () => {
@@ -467,23 +474,6 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter("resolveSubject", (heading) =>
     aliasMap.get(normalise(heading)) ?? null,
   );
-
-  // Split raw markdown on "## " only. H3+ travels with its parent section, and
-  // prose above the first H2 belongs to the day, not to any subject.
-  const splitSections = (raw) => {
-    const sections = [];
-    let current = null;
-    for (const line of String(raw).split("\n")) {
-      const m = /^##(?!#)\s*(.*)$/.exec(line);
-      if (m) {
-        current = { heading: m[1].trim(), body: [] };
-        sections.push(current);
-      } else if (current) {
-        current.body.push(line);
-      }
-    }
-    return sections;
-  };
 
   const unmatched = new Map(); // normalised heading -> {label, firstSeen}
 
