@@ -443,7 +443,14 @@ export default function (eleventyConfig) {
     // by it, which is what keeps the art tracking entry length.
     const cover = coverUrls.get(slug);
     if (cover) {
-      return `<span class="sky sky-cover" style="background-image:url(${cover})" aria-hidden="true"></span>`;
+      // A link, but deliberately not a second tab stop or a second thing to
+      // announce: the heading beside it already links to the same page, so
+      // this is the redundant-image-link case — hidden from assistive tech and
+      // skipped by the keyboard, present for the mouse.
+      return (
+        `<a class="sky sky-cover" href="/s/${slug}/" ` +
+        `style="background-image:url(${cover})" aria-hidden="true" tabindex="-1"></a>`
+      );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
     return `<span class="${cls}" style="background-image:url(${art.skyUrl})" aria-hidden="true"></span>`;

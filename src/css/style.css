@@ -755,17 +755,30 @@ a.post-list-date:hover { color: var(--accent); }
    The cost is the one the stretch existed to avoid: beside a short entry the
    cover is taller than the text. Accepted — a whole cover with space under it
    beats a legible-length sliver of one. */
+/* Cover behaviour shared by every surface that shows one: 2:3 like the source
+   grid, cropped not stretched, and no dither — the 4px checker belongs to
+   generated art and over a photograph it is just a dirty screen. */
+.sky-cover {
+  aspect-ratio: 2 / 3;
+  background-size: cover;
+  background-position: center;
+}
+.sky-cover::before { content: none; }
+
+/* As a link it must not look like one: no underline, and the border warms on
+   hover instead of the whole tile moving, which in a column of running prose
+   would be a twitch rather than an affordance. */
+a.sky-cover { text-decoration: none; transition: border-color 0.1s steps(2); }
+a.sky-cover:hover { border-color: var(--accent); }
+
 .frag > .sky-cover {
   aspect-ratio: 2 / 3;
   align-self: flex-start;
   min-height: 0;
   max-height: none;
-  background-size: cover;
-  background-position: center;
   -webkit-mask-image: none;
   mask-image: none;
 }
-.sky-cover::before { content: none; }
 
 /* ------------------------------------------------------- the day band
    The sky the night a post was written, seeded on the post's date. Drawn on a

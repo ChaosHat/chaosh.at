@@ -12,7 +12,11 @@ eleventyComputed:
   <header class="subject-head">
     {#- The subject's sky at the one size where the full three-curtain scene
         is properly legible. Small renders elsewhere use the chip variant. -#}
+    {%- if subject.coverUrl %}
+    <span class="sky sky-cover" style="background-image:url({{ subject.coverUrl }})" aria-hidden="true"></span>
+    {%- else %}
     <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
+    {%- endif %}
     <div>
       <h1>{{ subject.title }}</h1>
       <p class="subject-meta">
