@@ -732,7 +732,7 @@ a.post-list-date:hover { color: var(--accent); }
    the shelf a missing cover was cosmetic — here it would break the reading
    column, so the two forms must agree. */
 .frag > .sky {
-  width: 7rem;
+  width: 6rem;
   /* aspect-ratio: auto is load-bearing. .sky sets 3/4, which was invisible at
      3rem wide (4rem tall, the same as min-height) but at 7rem forces a 149px
      box — so a short entry, and every loose-prose column, got a tall empty
@@ -740,42 +740,78 @@ a.post-list-date:hover { color: var(--accent); }
   aspect-ratio: auto;
 }
 
-/* Sourced cover in the fragment column. It inherits the sky's stretch, mask
-   and bounds, so it still grows with entry length — but it CROPS to fit rather
-   than stretching, and crops from the top because box art puts its logo there.
-   No dither: the 4px checker belongs to generated art and over real box art it
-   just reads as a dirty screen. */
-.sky-cover { background-size: cover; background-position: top center; }
+/* Sourced cover in the fragment column. It opts OUT of three things the sky
+   does, because all three are behaviours that read as sky and misread as
+   photograph:
+
+   - the length stretch. Cropping a cover to the entry's height showed the top
+     third of the box art and nothing else, which reads as a cut-off image, not
+     a cover. Fixed 2:3, whole art, always.
+   - the bottom mask. A sky dissolving into the page reads as sky running out;
+     box art doing it reads as broken.
+   - the dither. The 4px checker belongs to generated art; over a photograph it
+     is just a dirty screen.
+
+   The cost is the one the stretch existed to avoid: beside a short entry the
+   cover is taller than the text. Accepted — a whole cover with space under it
+   beats a legible-length sliver of one. */
+.frag > .sky-cover {
+  aspect-ratio: 2 / 3;
+  align-self: flex-start;
+  min-height: 0;
+  max-height: none;
+  background-size: cover;
+  background-position: center;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
 .sky-cover::before { content: none; }
 
-/* ------------------------------------------------------- the day band */
-.entry-head, .post-head {
-  position: relative;
-  /* 480px fixed tile, repeated — same rule as the masthead, so pixel density
-     never changes with the viewport. Anchored to the BOTTOM, which is what
-     lets the curtain's horizon fall under the dateline. */
+/* ------------------------------------------------------- the day band
+   The sky the night a post was written, seeded on the post's date. Drawn on a
+   pseudo-element rather than the header itself for one reason: the band needs a
+   horizontal fade at both ends, and a mask on the header would eat the title
+   with it. The art arrives as a custom property so the pseudo-element can read
+   it — background-image does not inherit usefully here.
+
+   Both ends dissolve rather than stopping square, the same argument the scene
+   break already makes: a hard edge mid-page reads as a clipped image. It also
+   runs wider than the reading column, so the sky is behind the text rather
+   than boxed around it. */
+.entry-head, .post-head { position: relative; }
+.entry-head > *, .post-head > * { position: relative; }
+
+.entry-head::before, .post-head::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  /* Reaches the viewport edge on a phone (body padding is 1.25rem) and bleeds
+     out of the reading column on a desktop, where main leaves 5.5rem of slack
+     inside the shell — so it never causes a horizontal scrollbar. */
+  inset: 0 -1.25rem;
+  background-image: var(--day-sky);
   background-repeat: repeat-x;
   background-position: left bottom;
+  /* 480px fixed tile, same rule as the masthead: pixel density never varies
+     with the viewport. */
   background-size: 480px 96px;
-  /* The curtain's bright edge sits 29px up from the band's bottom. Anything
-     less than that in bottom padding puts the dateline directly on the lit
-     edge, where muted 12px pixel type is genuinely hard to read — the title
-     survives it because it is large and bright, the date does not. 2.2rem
-     drops the edge clear below the text and leaves night under it, which
-     reads as a horizon rather than as a cut-off image. */
-  padding: 1.1rem 0.9rem 1.3rem;
-  margin-left: -0.9rem;
-  margin-right: -0.9rem;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
 }
-.post-head { margin-bottom: 2rem; }
-.entry-head { margin-bottom: 1.3rem; }
+
+@media (min-width: 48rem) {
+  .entry-head::before, .post-head::before { inset: 0 -3.5rem; }
+}
+
+.post-head { margin-bottom: 2rem; padding: 1.1rem 0 1.3rem; }
+.entry-head { margin-bottom: 1.3rem; padding: 1.1rem 0 1.3rem; }
 
 /* The dateline sits on the aurora, so it gets a hard 1px outline rather than a
-   blur — a bitmap face wants bitmap treatment, and this is exactly how
-   SNES-era UI put small type over a busy field. Lets the curtain come back up
-   behind the title instead of being pushed out of the way to stay readable.
-   Titles are left clean: they are large and bright enough already, and an
-   outline on a serif reads as a cheap effect rather than as a period one. */
+   blur — a bitmap face wants bitmap treatment, and this is how SNES-era UI put
+   small type over a busy field. It lets the curtain come up behind the title
+   instead of being pushed out of the way to stay readable. Titles stay clean:
+   they are large and bright already, and an outline on a serif reads as a cheap
+   effect rather than a period one. */
 .entry-head .post-list-subdate,
 .entry-head .post-list-date,
 .post-head .post-subdate {
