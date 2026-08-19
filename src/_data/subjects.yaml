@@ -70,6 +70,15 @@ metaphor-refantazio:
   rating: 4
   aliases:
     - metaphor refantazio
+metroid-zero-mission:
+  title: "Metroid: Zero Mission"
+  category:
+    - games
+  status: active
+  aliases:
+    - zero mission
+    - metroid zero mission
+    - mzm
 persona-5-royal:
   title: Persona 5 Royal
   category:
@@ -90,7 +99,7 @@ super-metroid:
   title: Super Metroid
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - super metroid
 world-of-warcraft-playerbots:
