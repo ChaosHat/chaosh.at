@@ -74,11 +74,19 @@ metroid-zero-mission:
   title: "Metroid: Zero Mission"
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - zero mission
     - metroid zero mission
     - mzm
+metroid-samus-returns:
+  title: "Metroid: Samus Returns"
+  category:
+    - games
+  status: active
+  aliases:
+    - samus returns
+    - msr
 persona-5-royal:
   title: Persona 5 Royal
   category:
