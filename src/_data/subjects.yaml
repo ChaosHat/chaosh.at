@@ -99,7 +99,7 @@ star-wars-jedi-fallen-order:
   title: "STAR WARS Jedi: Fallen Order"
   category:
     - games
-  status: active
+  status: shelved
   aliases:
     - swjfo
     - fallen order
@@ -114,7 +114,7 @@ world-of-warcraft-playerbots:
   title: World of Warcraft Playerbots
   category:
     - games
-  status: active
+  status: dabbling
   aliases:
     - wow
     - wow playerbots
