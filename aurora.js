@@ -214,6 +214,11 @@ export const subjectSvg = (slug, ladderHue, status, tier) => {
   } else if (status === "shelved") {
     body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.25 });
     body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 10, op: 0.35 });
+  } else if (status === "dabbling") {
+    // Between active and shelved: two curtains like a dying display, but
+    // still tier-scaled — noodling breathes with recency, shelved doesn't.
+    body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.3 * tier });
+    body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 12, op: 0.55 * tier });
   } else {
     body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 7, op: 0.4 * tier });
     body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 16, op: 0.8 * tier });
@@ -242,7 +247,11 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
   const W = 24;
   const H = 32;
   const op =
-    status === "completed" ? 0 : status === "abandoned" ? 0.5 : status === "shelved" ? 0.45 : Math.max(tier, 0.5);
+    status === "completed" ? 0
+    : status === "abandoned" ? 0.5
+    : status === "shelved" ? 0.45
+    : status === "dabbling" ? 0.65 * Math.max(tier, 0.5)
+    : Math.max(tier, 0.5);
   const twoBands = status !== "abandoned" && status !== "completed";
 
   // Quantised to the 2-unit column grid, same as the full scene's rays.
@@ -366,6 +375,10 @@ export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H) => {
   } else if (status === "shelved") {
     if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.25 });
     body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.36 * H, op: 0.35 });
+  } else if (status === "dabbling") {
+    // Same middle ground as the tile: shelved's thinner pair, active's tier.
+    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.3 * tier });
+    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.45 * H, op: 0.55 * tier });
   } else {
     // A second curtain only when there is room for one. Below ~16 the two
     // overlap into a single smear, which reads as less sky rather than more —

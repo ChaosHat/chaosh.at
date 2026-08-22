@@ -32,6 +32,7 @@
   --accent: #8ce8cc;
 
   --st-active: #8ce8cc;
+  --st-dabbling: #b9e8a0;
   --st-backlog: #f0dda0;
   --st-shelved: #cab5f5;
   --st-abandoned: #f0aec2;
@@ -315,6 +316,7 @@ h1, h2, h3 { line-height: 1.25; }
 .badge::before { content: ""; width: 4px; height: 4px; background: currentColor; }
 
 .b-active { --c: var(--st-active); }
+.b-dabbling { --c: var(--st-dabbling); }
 .b-backlog { --c: var(--st-backlog); }
 .b-shelved { --c: var(--st-shelved); }
 .b-abandoned { --c: var(--st-abandoned); }
