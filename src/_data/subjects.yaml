@@ -18,6 +18,14 @@ dragon-quest-xi-s:
     - dqxi s
     - dq11s
     - dragon quest 11 s
+esoteric-ebb:
+  title: Esoteric Ebb
+  category:
+    - games
+  status: completed
+  aliases:
+    - ebb
+    - esoteric ebb
 fields-of-mistria:
   title: Fields of Mistria
   category:
