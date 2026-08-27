@@ -1,0 +1,1 @@
+Played this, beat it pretty quickly overall. It was a fun Metroidvania. Art style's great.

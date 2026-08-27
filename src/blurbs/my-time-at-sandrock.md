@@ -1,0 +1,1 @@
+This game consumed my life for a period of a few weeks. It's fun and there's a lot here to do and it was an excellent fire hose to drink from for a while. 

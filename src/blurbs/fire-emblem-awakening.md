@@ -1,0 +1,1 @@
+One of my favorite games of all time. I love kids mechanic and wish a modern Fire Emblem would bring it back. Love Chrom, Lucina, so many characters here. 

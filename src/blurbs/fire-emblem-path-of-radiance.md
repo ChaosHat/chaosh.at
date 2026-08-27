@@ -1,0 +1,1 @@
+I really wanted to like this but it's kind of boring to play. The maps are too big and too easy and it feels like I just spend half the time moving units without doing anything just so everyone can catch up. 

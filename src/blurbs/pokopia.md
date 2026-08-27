@@ -1,0 +1,1 @@
+Life-consuming fantastic. When I heard about this I thought it was a crazy idea. Turned out to be excellent, a better Animal Crossing than Animal Crossing. Really looking forward to revisiting when more of the new content has come out.

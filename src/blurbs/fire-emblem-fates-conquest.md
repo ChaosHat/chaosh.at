@@ -1,0 +1,1 @@
+Possibly the best mechanics and maps of any Fire Emblem while also having possibly The. Worst. Plot. EVER. God it's so bad. 

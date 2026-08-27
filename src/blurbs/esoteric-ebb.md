@@ -1,0 +1,1 @@
+I loved this game. Funny, not too long. Feels like playing D&D with your friends. 

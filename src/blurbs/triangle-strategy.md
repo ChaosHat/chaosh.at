@@ -1,0 +1,1 @@
+Really wanted to like this a lot and I do like it a good amount. I think I put about 30 hours in. It's just too in love with its own story, which is fine. It's just not so good and I feel like the combat mechanics didn't keep evolving in a way that made me want to go through 30 minutes of cutscenes for another battle. 

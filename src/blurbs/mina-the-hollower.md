@@ -1,0 +1,1 @@
+Excellent throwback and nostalgia bait. I was initially afraid of the Souls like DNA but this really wasn't that bad difficulty wise. Rewarding and fun mechanically, excellent design. Fell off after beating the last boss and then finding out I had to backtrack to all the mirrors. I might go back and do that just to check the box but I think I get it. 

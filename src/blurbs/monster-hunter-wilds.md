@@ -1,0 +1,1 @@
+I really like this. It was just really hard to play at launch due to the myriad PC issues. I've tried to get back into it but I've just fallen off and I think restarting it whenever an expansion releases will be the time to get back into it. 
