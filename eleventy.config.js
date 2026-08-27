@@ -195,9 +195,14 @@ export default function (eleventyConfig) {
   );
 
   // Shelf order: what he's on now first (committed, then noodling), then
-  // what's queued up, then finished, then the two kinds of stopped. Within a
-  // group, alphabetical.
-  const STATUS_ORDER = ["active", "dabbling", "backlog", "completed", "shelved", "abandoned"];
+  // what's queued up, then finished, then the three kinds of stopped —
+  // `sampled` last because it is the one that carries no verdict, so it is the
+  // least worth a reader's eye. Within a group, alphabetical.
+  //
+  // Anything missing from this list sorts to indexOf -1, i.e. AHEAD of active
+  // and straight to the top of the shelf. A new status must be added here or
+  // it silently takes over the front page.
+  const STATUS_ORDER = ["active", "dabbling", "backlog", "completed", "shelved", "abandoned", "sampled"];
   eleventyConfig.addFilter("shelveSort", (subjects) =>
     (subjects ?? []).slice().sort((a, b) => {
       const s = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);

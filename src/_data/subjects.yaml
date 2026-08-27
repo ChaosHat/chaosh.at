@@ -1,5 +1,5 @@
 castlevania-symphony-of-the-night:
-  title: "Castlevania: Symphony of the Night"
+  title: 'Castlevania: Symphony of the Night'
   category:
     - games
   status: completed
@@ -61,8 +61,26 @@ final-fantasy-vii-remake:
     - ff7r
     - ffviir
     - final fantasy 7 remake
+fire-emblem-awakening:
+  title: 'Fire Emblem: Awakening'
+  category:
+    - games
+  status: completed
+  aliases:
+    - awakening
+    - fe awakening
+    - fea
+fire-emblem-fates-conquest:
+  title: 'Fire Emblem Fates: Conquest'
+  category:
+    - games
+  status: completed
+  aliases:
+    - conquest
+    - fates conquest
+    - fe conquest
 fire-emblem-fortunes-weave:
-  title: "Fire Emblem: Fortune's Weave"
+  title: 'Fire Emblem: Fortune''s Weave'
   category:
     - games
   status: backlog
@@ -70,6 +88,24 @@ fire-emblem-fortunes-weave:
     - fortunes weave
     - fortune's weave
     - fe fortunes weave
+fire-emblem-path-of-radiance:
+  title: 'Fire Emblem: Path of Radiance'
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - path of radiance
+    - por
+    - fe por
+fire-emblem-three-houses:
+  title: 'Fire Emblem: Three Houses'
+  category:
+    - games
+  status: completed
+  aliases:
+    - three houses
+    - fe3h
+    - 3h
 metaphor-refantazio:
   title: Metaphor ReFantazio
   category:
@@ -78,8 +114,16 @@ metaphor-refantazio:
   rating: 4
   aliases:
     - metaphor refantazio
+metroid-samus-returns:
+  title: 'Metroid: Samus Returns'
+  category:
+    - games
+  status: active
+  aliases:
+    - samus returns
+    - msr
 metroid-zero-mission:
-  title: "Metroid: Zero Mission"
+  title: 'Metroid: Zero Mission'
   category:
     - games
   status: completed
@@ -87,14 +131,55 @@ metroid-zero-mission:
     - zero mission
     - metroid zero mission
     - mzm
-metroid-samus-returns:
-  title: "Metroid: Samus Returns"
+mina-the-hollower:
+  title: Mina the Hollower
   category:
     - games
-  status: active
+  status: abandoned
   aliases:
-    - samus returns
-    - msr
+    - mina
+monster-hunter-stories-3:
+  title: Monster Hunter Stories 3
+  category:
+    - games
+  status: backlog
+  aliases:
+    - mhs3
+    - stories 3
+    - mh stories 3
+monster-hunter-wilds:
+  title: Monster Hunter Wilds
+  category:
+    - games
+  status: shelved
+  aliases:
+    - wilds
+    - mh wilds
+my-time-at-sandrock:
+  title: My Time at Sandrock
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - sandrock
+    - mtas
+ori-and-the-blind-forest:
+  title: Ori and the Blind Forest
+  category:
+    - games
+  status: completed
+  aliases:
+    - blind forest
+    - ori blind forest
+ori-and-the-will-of-the-wisps:
+  title: Ori and the Will of the Wisps
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - will of the wisps
+    - wotw
+    - ori wotw
 persona-5-royal:
   title: Persona 5 Royal
   category:
@@ -103,14 +188,48 @@ persona-5-royal:
   aliases:
     - p5r
     - persona 5 royal
+pokopia:
+  title: Pokopia
+  category:
+    - games
+  status: shelved
+slay-the-spire-2:
+  title: Slay the Spire 2
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - sts2
+    - slay the spire ii
+split-fiction:
+  title: Split Fiction
+  category:
+    - games
+  status: sampled
 star-wars-jedi-fallen-order:
-  title: "STAR WARS Jedi: Fallen Order"
+  title: 'STAR WARS Jedi: Fallen Order'
   category:
     - games
   status: shelved
   aliases:
     - swjfo
     - fallen order
+star-wars-zero-company:
+  title: STAR WARS Zero Company
+  category:
+    - games
+  status: active
+  aliases:
+    - zero company
+    - swzc
+    - zc
+super-mariomon:
+  title: Super Mariomon
+  category:
+    - games
+  status: sampled
+  aliases:
+    - mariomon
 super-metroid:
   title: Super Metroid
   category:
@@ -118,6 +237,13 @@ super-metroid:
   status: completed
   aliases:
     - super metroid
+triangle-strategy:
+  title: Triangle Strategy
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - triangle strat
 world-of-warcraft-playerbots:
   title: World of Warcraft Playerbots
   category:

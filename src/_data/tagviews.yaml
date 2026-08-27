@@ -21,9 +21,35 @@ atlus:
   members:
     - metaphor-refantazio
     - persona-5-royal
+fire-emblem:
+  title: Fire Emblem
+  members:
+    - fire-emblem-path-of-radiance
+    - fire-emblem-awakening
+    - fire-emblem-fates-conquest
+    - fire-emblem-three-houses
+    - fire-emblem-fortunes-weave
+tactics:
+  title: Tactics
+  description: Turn-based, grid-based, one bad move away from a reset.
+  members:
+    - fire-emblem-path-of-radiance
+    - fire-emblem-awakening
+    - fire-emblem-fates-conquest
+    - fire-emblem-three-houses
+    - fire-emblem-fortunes-weave
+    - triangle-strategy
+    - star-wars-zero-company
+star-wars:
+  title: Star Wars
+  members:
+    - star-wars-jedi-fallen-order
+    - star-wars-zero-company
 metroidvania:
   title: Metroidvanias
   members:
     - super-metroid
     - metroid-zero-mission
     - castlevania-symphony-of-the-night
+    - ori-and-the-blind-forest
+    - ori-and-the-will-of-the-wisps
