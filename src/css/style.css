@@ -618,6 +618,12 @@ a.post-list-date:hover { color: var(--accent); }
 
 .rating { font: 12px/1 var(--pixel); color: var(--st-active); }
 
+/* The standing blurb: the subject's one revisable paragraph, in the header's
+   text column beside the cover — it just flows there, no layout of its own. */
+.subject-blurb { margin-top: 0.9rem; }
+.subject-blurb p { margin: 0 0 0.6em; }
+.subject-blurb > :last-child { margin-bottom: 0; }
+
 .essay { margin-bottom: 3rem; }
 
 .timeline-head {
@@ -672,6 +678,9 @@ a.post-list-date:hover { color: var(--accent); }
 .fragment-subject:hover { color: var(--accent); }
 
 .tag-essay { margin: 0; }
+
+/* Members' standing blurbs, between the tag head and the timeline. */
+.blurbs { margin-bottom: 2.5rem; }
 
 /* ------------------------------------------------------------- spoilers */
 

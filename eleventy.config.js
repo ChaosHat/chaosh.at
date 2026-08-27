@@ -431,6 +431,28 @@ export default function (eleventyConfig) {
     }
   });
 
+  // A blurb is the third content type: an undated, revisable paragraph that
+  // stands for a subject whose thoughts never took the form of a ## heading.
+  // One markdown file per subject at src/blurbs/<slug>.md — the filename IS
+  // the slug, same contract as covers, so nothing is registered and nothing
+  // can drift. It publishes because it exists and retracts by deletion
+  // (publish.py carries both directions). Rescanned per build for the same
+  // reason covers are.
+  const BLURB_DIR = path.join("src", "blurbs");
+  const blurbTexts = new Map(); // slug -> markdown source
+  eleventyConfig.on("eleventy.before", () => {
+    blurbTexts.clear();
+    if (!fs.existsSync(BLURB_DIR)) return;
+    for (const name of fs.readdirSync(BLURB_DIR)) {
+      if (!name.endsWith(".md")) continue;
+      const text = fs
+        .readFileSync(path.join(BLURB_DIR, name), "utf8")
+        .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "") // tolerate stray frontmatter
+        .trim();
+      if (text) blurbTexts.set(name.slice(0, -3), text);
+    }
+  });
+
   // One static band per post date — the sky the night it was written —
   // generated on demand from the filter and written out with the rest of the
   // art in eleventy.after.
@@ -690,6 +712,13 @@ export default function (eleventyConfig) {
         status: meta?.status ?? "active",
         ...art,
         coverUrl: coverUrls.get(slug) ?? null,
+        // Not to be confused with essay.blurb (an essay's lede on tag pages):
+        // this is the subject's own standing paragraph, rendered in full
+        // wherever it appears — Hat writes blurbs to fit, so there is no
+        // lede extraction.
+        blurbHtml: blurbTexts.has(slug)
+          ? revealSpoilers(md.render(blurbTexts.get(slug)))
+          : null,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
         essays,

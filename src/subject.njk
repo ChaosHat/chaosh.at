@@ -31,6 +31,12 @@ eleventyComputed:
         </span>
         {% endif %}
       </p>
+      {#- The standing blurb: undated, revisable, the subject's one paragraph
+          for when a whole article would be absurd but the page shouldn't read
+          as blank. Lives beside the cover, above the header rule. -#}
+      {% if subject.blurbHtml %}
+      <div class="subject-blurb">{{ subject.blurbHtml | safe }}</div>
+      {% endif %}
     </div>
   </header>
 
@@ -64,7 +70,7 @@ eleventyComputed:
     </div>
     {% endfor %}
   </section>
-  {% elif not (subject.essays | length) %}
+  {% elif not (subject.essays | length or subject.blurbHtml) %}
   <p class="empty">Nothing written about this yet.</p>
   {% endif %}
 </article>

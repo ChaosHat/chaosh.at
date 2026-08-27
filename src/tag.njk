@@ -22,6 +22,25 @@ eleventyComputed:
     {% endif %}
   </header>
 
+  {#- Members' standing blurbs, above the timeline: undated, so they can't
+      slot into the stream — they sit where the tag's definition does. Each
+      row carries the member's chip and links home, same grammar as a
+      fragment's meta line. Blurbs are written to fit, so full text here. -#}
+  {% set blurbed = tag.members | selectattr("blurbHtml") | list %}
+  {% if blurbed | length %}
+  <section class="blurbs">
+    {% for member in blurbed %}
+    <div class="fragment">
+      <p class="fragment-meta">
+        <span class="sky" style="background-image:url({{ member.chipUrl }})" aria-hidden="true"></span>
+        <a class="fragment-subject" href="/s/{{ member.slug }}/">{{ member.title }}</a>
+      </p>
+      {{ member.blurbHtml | safe }}
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
   {% if tag.entries | length %}
   <section class="timeline">
     {% for entry in tag.entries %}
@@ -50,9 +69,11 @@ eleventyComputed:
     </div>
     {% endfor %}
   </section>
-  {% elif tag.members | length %}
+  {% elif not (blurbed | length) %}
+    {% if tag.members | length %}
   <p class="empty">Nothing written about these yet.</p>
-  {% else %}
+    {% else %}
   <p class="empty">No games on this tag yet.</p>
+    {% endif %}
   {% endif %}
 </article>
