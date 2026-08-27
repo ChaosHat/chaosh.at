@@ -139,7 +139,7 @@ mina-the-hollower:
   aliases:
     - mina
 monster-hunter-stories-3:
-  title: Monster Hunter Stories 3
+  title: 'Monster Hunter Stories 3: Twisted Reflection'
   category:
     - games
   status: backlog
@@ -147,6 +147,7 @@ monster-hunter-stories-3:
     - mhs3
     - stories 3
     - mh stories 3
+    - twisted reflection
 monster-hunter-wilds:
   title: Monster Hunter Wilds
   category:
@@ -189,10 +190,12 @@ persona-5-royal:
     - p5r
     - persona 5 royal
 pokopia:
-  title: Pokopia
+  title: Pokémon Pokopia
   category:
     - games
   status: shelved
+  aliases:
+    - pokemon pokopia
 slay-the-spire-2:
   title: Slay the Spire 2
   category:
