@@ -9,9 +9,38 @@ permalink: "/shelf/{{ shelf.category }}/"
 eleventyComputed:
   title: "{{ shelf.label }}"
 ---
-{% set items = collections.subjectPages | inCategory(shelf.category) | shelveSort %}
+{% set items = collections.subjectPages | inCategory(shelf.category) | shelveSort | shelfRanks %}
 
 <h1>{{ shelf.label }}</h1>
+
+{#- Sort, in CSS. The radios carry no script: each tile ships a precomputed rank
+    per axis (see shelfRanks) and the checked radio decides which one `order`
+    reads. DOM order is status order, so the default view needs no rule at all
+    and a reader with no CSS still gets the shelf in its intended sequence.
+
+    The caveat worth knowing: `order` moves tiles visually but not in the DOM, so
+    tab and screen-reader order stay as authored. That is why the default is the
+    authored one — only the three opt-in axes diverge, and a reader who never
+    touches the control is never out of sync.
+
+    Hidden below six items: a shelf that fits on one screen is not one you sort,
+    and the boardgames shelf currently holds exactly one game. -#}
+{#- The wrapper is what :has() hangs off — the radios and the grid have to sit
+    inside one element for the checked state to reach the tiles. -#}
+<div class="shelf-sorter">
+{% if items | length > 5 %}
+<fieldset class="shelf-sort">
+  <legend>sort</legend>
+  <input type="radio" name="shelf-sort" id="sort-status" checked>
+  <label for="sort-status">status</label>
+  <input type="radio" name="shelf-sort" id="sort-az">
+  <label for="sort-az">a–z</label>
+  <input type="radio" name="shelf-sort" id="sort-recent">
+  <label for="sort-recent">recent</label>
+  <input type="radio" name="shelf-sort" id="sort-fav">
+  <label for="sort-fav">favorites</label>
+</fieldset>
+{% endif %}
 
 {#- Two jobs, split across two pieces of art. The COVER identifies: a reader
     hunting for one game scans box art far faster than titles, and faster still
@@ -29,7 +58,7 @@ eleventyComputed:
     lays out as one even grid rather than a ragged one. -#}
 <ul class="shelf-grid">
   {% for item in items %}
-  <li class="shelf-item">
+  <li class="shelf-item{% if item.favorite %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-fav:{{ item.oFav }}">
     <a href="/s/{{ item.slug }}/">
       <span class="shelf-art">
         {% if item.coverUrl %}
@@ -43,9 +72,14 @@ eleventyComputed:
         {% endif %}
       </span>
       <span class="shelf-caption">{{ item.title }}</span>
+      {#- Gold is the fast channel, but it is only a channel — this badge is what
+          carries the same fact for a reader who cannot see the colour, and it is
+          why the frame does not have to work alone. -#}
+      {% if item.favorite %}<span class="badge b-favorite">favorite</span>{% endif %}
       <span class="badge b-{{ item.status }}">{{ item.status }}</span>
       {% if item.rating %}<span class="rating">{{ item.rating }}/5</span>{% endif %}
     </a>
   </li>
   {% endfor %}
 </ul>
+</div>

@@ -1,3 +1,14 @@
+# The canon. Ten games, hard cap, unordered — "here is where I'm coming from"
+# in ten seconds. A judgment, not a classification, which makes it a different
+# kind of tag from its neighbours: those group by shared DNA, this one groups by
+# nothing except that Hat says so. Membership lives here rather than as a flag
+# on each subject precisely BECAUSE of the cap — ten lines you can count in one
+# place, where an eleventh is visible. Demotions move a slug to `ex-favorites`
+# (uncreated until there is one), so the list keeps its own paper trail.
+favorites:
+  title: Favorites
+  members:
+    - fire-emblem-awakening
 crpg:
   title: CRPG
   members:

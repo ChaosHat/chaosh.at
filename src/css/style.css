@@ -40,6 +40,13 @@
   --st-abandoned: #f0aec2;
   --st-completed: #a9d0f6;
 
+  /* The canon's gold. Deliberately hotter and more saturated than
+     --st-backlog (#f0dda0), which is the only other warm tone on the site and
+     sits one tile away on the same shelf — at pale gold the two read as the
+     same mark. Matches MOON_GOLD in aurora.js, which gilds a favourite's moon;
+     if one moves, move both. */
+  --gold: #f5c86b;
+
   /* Retained, unused: the per-block prose cap used until 2026-08-18. Capping
      blocks individually is what stranded headings and datelines at the shell
      edge; --read below replaced it by narrowing the whole reading column. */
@@ -581,6 +588,75 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 .shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 12px/1.5 var(--pixel); }
+
+/* ------------------------------------------------- shelf sort (no script)
+
+   Each tile carries a precomputed rank per axis (--o-az and friends, stamped in
+   shelf.njk); the checked radio selects which one `order` reads. Status is the
+   authored DOM order and so needs no rule — which also means the shelf is
+   correctly sorted before any of this applies, including for a reader whose
+   browser lacks :has(). Adding an axis is a rank in shelfRanks, a radio, and one
+   line here. */
+.shelf-sorter:has(#sort-az:checked) .shelf-item { order: var(--o-az); }
+.shelf-sorter:has(#sort-recent:checked) .shelf-item { order: var(--o-recent); }
+.shelf-sorter:has(#sort-fav:checked) .shelf-item { order: var(--o-fav); }
+
+.shelf-sort {
+  border: 0;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.shelf-sort legend {
+  float: left; /* keeps the legend on the flex row rather than above it */
+  padding: 0 0.6rem 0 0;
+  font: 12px/1.5 var(--pixel);
+  color: var(--muted);
+}
+
+/* The input is the state; the label is the control. Clipped rather than
+   display:none so it keeps its place in the tab order and stays operable by
+   keyboard — arrow keys move through the group as a radio group should. */
+.shelf-sort input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+
+.shelf-sort label {
+  font: 12px/1.5 var(--pixel);
+  color: var(--muted);
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--edge);
+  cursor: pointer;
+}
+
+.shelf-sort label:hover { color: var(--ink); }
+.shelf-sort input:checked + label { color: var(--night); background: var(--accent); border-color: var(--accent); }
+/* Focus has to live on the label, since the input it belongs to is clipped. */
+.shelf-sort input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ------------------------------------------------------ shelf favourites
+
+   The frame is the channel that always fires. A favourite's moon is gilded in
+   aurora.js too, but only `completed` subjects have a moon — an active replay
+   would otherwise show nothing, so the gold cannot live in the art alone.
+   Both borders take the colour: banner and cover are drawn as one card with a
+   shared edge, and gilding half of it would split the object in two. */
+.is-favorite .sky,
+.is-favorite .shelf-cover { border-color: var(--gold); }
+
+.is-favorite .shelf-art {
+  box-shadow: 0 0 0 1px var(--gold), 0 0 14px -4px var(--gold);
+}
+
+.b-favorite { --c: var(--gold); }
 
 .shelf-list { list-style: none; margin: 0; padding: 0; }
 
