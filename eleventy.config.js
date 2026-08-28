@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet, hashOf, BANNER_H } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -214,6 +214,47 @@ export default function (eleventyConfig) {
     (subjects ?? []).filter((s) => (s.category ?? []).includes(category)),
   );
 
+  // Viewer-facing sort, done without a line of JavaScript. CSS cannot sort, but
+  // it can read a number: every axis the shelf offers is knowable at build time,
+  // so each one is ranked here and stamped on the tile as a custom property. The
+  // radio in shelf.njk then picks which precomputed rank `order` reads. That is
+  // the whole trick, and it is why the axes are all static facts — a shuffle, or
+  // anything per-visitor, is the one thing this shape cannot do.
+  //
+  // Runs AFTER shelveSort, and depends on it: sort is stable, so any axis that
+  // does not fully order the list falls back to status order rather than to
+  // input order. Returns new objects — the collection is shared across shelves
+  // and mutating it would let one category's ranks leak into another's.
+  eleventyConfig.addFilter("shelfRanks", (subjects) => {
+    const items = (subjects ?? []).slice();
+    const byTitle = (a, b) => String(a.title).localeCompare(String(b.title));
+    const rankBy = (cmp) => {
+      const order = new Map();
+      items.slice().sort(cmp).forEach((s, i) => order.set(s.slug, i));
+      return order;
+    };
+
+    const az = rankBy(byTitle);
+    // Newest first, and the undated go to the back: on the day this shipped 22
+    // of 32 games had never been written about, so this axis doubles as "what
+    // actually has writing behind it", with the whole backlog trailing it.
+    const recent = rankBy((a, b) => {
+      if (!a.lastWrote !== !b.lastWrote) return a.lastWrote ? -1 : 1;
+      if (!a.lastWrote) return byTitle(a, b);
+      return b.lastWrote - a.lastWrote || byTitle(a, b);
+    });
+    // Canon floats, everything else holds still. Deliberately not a re-sort:
+    // below the ten it should read as the shelf you were already looking at.
+    const fav = rankBy((a, b) => (b.favorite === true) - (a.favorite === true));
+
+    return items.map((s) => ({
+      ...s,
+      oAz: az.get(s.slug),
+      oRecent: recent.get(s.slug),
+      oFav: fav.get(s.slug),
+    }));
+  });
+
   // Posts missing a usable date are held out of the site entirely rather than
   // published under an invented one. Reported after the build, never fatal.
   const undated = new Set();
@@ -318,6 +359,13 @@ export default function (eleventyConfig) {
   const tagLinks = (slugs) =>
     (slugs ?? []).map((t) => ({ slug: t, title: tags[t]?.title ?? t }));
 
+  // One tag is load-bearing rather than editorial: `favorites` is the capped
+  // canon, and the shelf reads it for gold and for a sort axis. Resolved once
+  // here so nothing downstream has to know it is a tag at all — if the canon
+  // ever moves to its own file, this line is the only thing that changes.
+  const FAVORITES_TAG = "favorites";
+  const favoriteSlugs = new Set(tags[FAVORITES_TAG]?.members ?? []);
+
   // ------------------------------------------------------------------- sky
   //
   // Generated cover art: the slug picks the hue and seeds the aurora's path,
@@ -403,9 +451,10 @@ export default function (eleventyConfig) {
   const registerSky = (slug, meta, tier) => {
     const hue = subjectHues.get(slug) ?? 0;
     const status = meta?.status ?? "active";
-    skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier));
-    skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier));
-    skyFiles.set(`img/sky/${slug}-banner.svg`, bannerSvg(slug, hue, status, tier));
+    const opts = { favorite: favoriteSlugs.has(slug) };
+    skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier, opts));
+    skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier, opts));
+    skyFiles.set(`img/sky/${slug}-banner.svg`, bannerSvg(slug, hue, status, tier, BANNER_H, opts));
     return {
       skyUrl: `/img/sky/${slug}.svg`,
       chipUrl: `/img/sky/${slug}-chip.svg`,
@@ -711,6 +760,13 @@ export default function (eleventyConfig) {
         ...meta,
         status: meta?.status ?? "active",
         ...art,
+        // Both of these exist for the shelf's sort axes. lastWrote is the same
+        // date the recency tier is derived from, kept in its raw form because a
+        // tier is three buckets and sorting wants the real ordering; null for a
+        // subject registered but never yet written about, which the sort pushes
+        // to the back rather than jumbling among the dated ones.
+        lastWrote: lastWrote ?? null,
+        favorite: favoriteSlugs.has(slug),
         coverUrl: coverUrls.get(slug) ?? null,
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
         // this is the subject's own standing paragraph, rendered in full

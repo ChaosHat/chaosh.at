@@ -58,6 +58,12 @@ const NIGHT = ["#14152e", "#1a1c38", "#202544"];
 const NIGHT_DONE = ["#0e0f20", "#111227", "#14162e"];
 const STAR = "#eef2ff";
 const MOON = "#ecf0fb";
+// A favourite's moon, gilded. Only the moon changes: the curtains carry status
+// and recency, and recolouring those would overwrite an axis the shelf already
+// reads. Since the moon belongs to `completed` alone, an active favourite (a
+// replay) has nothing here to gild — the gold frame on the tile is the channel
+// that always fires, and this is the flourish on top of it.
+const MOON_GOLD = "#f7d789";
 
 // ---------------------------------------------------------------- random
 
@@ -190,9 +196,10 @@ const svgWrap = (w, h, body, pAR = "none") =>
 // stretching. The crescent lives entirely in the top 128 units, so a 3:4 box
 // (subject head, shelf) and the shortest fragment all show the whole moon;
 // taller fragments reveal more night below it, square pixels throughout.
-export const subjectSvg = (slug, ladderHue, status, tier) => {
+export const subjectSvg = (slug, ladderHue, status, tier, { favorite = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
+  const moon = favorite ? MOON_GOLD : MOON;
   const W = 96;
   const H = status === "completed" ? 320 : 128;
 
@@ -206,8 +213,8 @@ export const subjectSvg = (slug, ladderHue, status, tier) => {
       `<mask id='m'><circle cx='48' cy='56' r='54' fill='#fff'/>` +
       `<circle cx='63' cy='48' r='28' fill='#000'/></mask>` +
       `<g mask='url(#m)'>` +
-      `<circle cx='48' cy='56' r='51' fill='${MOON}' fill-opacity='0.16'/>` +
-      `<circle cx='48' cy='56' r='30' fill='${MOON}'/>` +
+      `<circle cx='48' cy='56' r='51' fill='${moon}' fill-opacity='0.16'/>` +
+      `<circle cx='48' cy='56' r='30' fill='${moon}'/>` +
       `</g>`;
   } else if (status === "abandoned") {
     body += curtain(rand, GREY, { yMin: 42, yMax: 58, hBase: 14, op: 0.3 });
@@ -241,9 +248,10 @@ export const subjectSvg = (slug, ladderHue, status, tier) => {
 //
 // Band count still tracks status: abandoned keeps its single grey ghost (the
 // doc's "one curtain, desaturated"), completed keeps none and gets the moon.
-export const chipSvg = (slug, ladderHue, status, tier) => {
+export const chipSvg = (slug, ladderHue, status, tier, { favorite = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = status === "abandoned" ? GREY : palette(ladderHue);
+  const moon = favorite ? MOON_GOLD : MOON;
   const W = 24;
   const H = 32;
   const op =
@@ -293,7 +301,7 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
     body += `<g opacity='${op}'>${high}${main}</g>`;
   }
   if (status === "completed") {
-    body += `<circle cx='16' cy='9' r='4' fill='${MOON}'/>`;
+    body += `<circle cx='16' cy='9' r='4' fill='${moon}'/>`;
   }
   body += `<rect x='${(rand() * W).toFixed(0)}' y='${(rand() * 8).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
   body += `<rect x='${(rand() * W).toFixed(0)}' y='${(20 + rand() * 10).toFixed(0)}' width='1' height='1' fill='${STAR}'/>`;
@@ -327,9 +335,10 @@ export const chipSvg = (slug, ladderHue, status, tier) => {
 export const BANNER_W = 96;
 export const BANNER_H = 17;
 
-export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H) => {
+export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H, { favorite = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
+  const moon = favorite ? MOON_GOLD : MOON;
   const W = BANNER_W;
   const H = h;
 
@@ -367,8 +376,8 @@ export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H) => {
       `<mask id='m'><circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.86)}' fill='#fff'/>` +
       `<circle cx='${f(cx + r * 0.5)}' cy='${f(cy - r * 0.27)}' r='${f(r * 0.93)}' fill='#000'/></mask>` +
       `<g mask='url(#m)'>` +
-      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.7)}' fill='${MOON}' fill-opacity='0.16'/>` +
-      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r)}' fill='${MOON}'/>` +
+      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.7)}' fill='${moon}' fill-opacity='0.16'/>` +
+      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r)}' fill='${moon}'/>` +
       `</g>`;
   } else if (status === "abandoned") {
     body += curtain(rand, GREY, { ...shape, ...band(lowY), hBase: 0.5 * H, op: 0.3 });
