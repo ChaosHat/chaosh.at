@@ -1,0 +1,1 @@
+Attempted but bounced off a few times. Just wasn't able to really get in the mood/mindset. 

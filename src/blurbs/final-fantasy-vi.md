@@ -1,0 +1,1 @@
+Played but not finished, ultimately boring mechanics and I think the storytelling is hurt by the medium. Too cramped, not enough space on the cartridge to let things breathe. 

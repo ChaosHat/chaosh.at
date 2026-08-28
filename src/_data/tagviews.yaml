@@ -45,11 +45,20 @@ star-wars:
   members:
     - star-wars-jedi-fallen-order
     - star-wars-zero-company
+metroid:
+  title: Metroid
+  members:
+    - super-metroid
+    - metroid-zero-mission
+    - metroid-samus-returns
+    - metroid-dread
 metroidvania:
   title: Metroidvanias
   members:
     - super-metroid
     - metroid-zero-mission
+    - metroid-samus-returns
+    - metroid-dread
     - castlevania-symphony-of-the-night
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps

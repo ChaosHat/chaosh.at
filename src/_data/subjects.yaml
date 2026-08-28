@@ -1,5 +1,5 @@
 castlevania-symphony-of-the-night:
-  title: 'Castlevania: Symphony of the Night'
+  title: "Castlevania: Symphony of the Night"
   category:
     - games
   status: completed
@@ -62,7 +62,7 @@ final-fantasy-vii-remake:
     - ffviir
     - final fantasy 7 remake
 fire-emblem-awakening:
-  title: 'Fire Emblem: Awakening'
+  title: "Fire Emblem: Awakening"
   category:
     - games
   status: completed
@@ -71,7 +71,7 @@ fire-emblem-awakening:
     - fe awakening
     - fea
 fire-emblem-fates-conquest:
-  title: 'Fire Emblem Fates: Conquest'
+  title: "Fire Emblem Fates: Conquest"
   category:
     - games
   status: completed
@@ -80,7 +80,7 @@ fire-emblem-fates-conquest:
     - fates conquest
     - fe conquest
 fire-emblem-fortunes-weave:
-  title: 'Fire Emblem: Fortune''s Weave'
+  title: "Fire Emblem: Fortune's Weave"
   category:
     - games
   status: backlog
@@ -89,7 +89,7 @@ fire-emblem-fortunes-weave:
     - fortune's weave
     - fe fortunes weave
 fire-emblem-path-of-radiance:
-  title: 'Fire Emblem: Path of Radiance'
+  title: "Fire Emblem: Path of Radiance"
   category:
     - games
   status: abandoned
@@ -98,7 +98,7 @@ fire-emblem-path-of-radiance:
     - por
     - fe por
 fire-emblem-three-houses:
-  title: 'Fire Emblem: Three Houses'
+  title: "Fire Emblem: Three Houses"
   category:
     - games
   status: completed
@@ -114,16 +114,24 @@ metaphor-refantazio:
   rating: 4
   aliases:
     - metaphor refantazio
-metroid-samus-returns:
-  title: 'Metroid: Samus Returns'
+metroid-dread:
+  title: Metroid Dread
   category:
     - games
   status: active
   aliases:
+    - dread
+    - metroid dread
+metroid-samus-returns:
+  title: "Metroid: Samus Returns"
+  category:
+    - games
+  status: completed
+  aliases:
     - samus returns
     - msr
 metroid-zero-mission:
-  title: 'Metroid: Zero Mission'
+  title: "Metroid: Zero Mission"
   category:
     - games
   status: completed
@@ -139,7 +147,7 @@ mina-the-hollower:
   aliases:
     - mina
 monster-hunter-stories-3:
-  title: 'Monster Hunter Stories 3: Twisted Reflection'
+  title: "Monster Hunter Stories 3: Twisted Reflection"
   category:
     - games
   status: backlog
@@ -210,7 +218,7 @@ split-fiction:
     - games
   status: sampled
 star-wars-jedi-fallen-order:
-  title: 'STAR WARS Jedi: Fallen Order'
+  title: "STAR WARS Jedi: Fallen Order"
   category:
     - games
   status: shelved

@@ -1,0 +1,1 @@
+A great looking classic but poorly paced and ultimately frustrating. I'm glad I played this as a historical artifact but not my favorite of the genre. 

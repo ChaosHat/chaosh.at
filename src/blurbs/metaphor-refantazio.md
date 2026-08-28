@@ -1,0 +1,1 @@
+So good, right up until the last minute. Excellent combat, good characters, a villain I loved to hate. 

@@ -1,0 +1,1 @@
+A classic, but not my favorite just due to the floatiness of jumping and how much of a pain in the ass the wall jumps are. 

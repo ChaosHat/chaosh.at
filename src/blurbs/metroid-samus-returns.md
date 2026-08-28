@@ -1,0 +1,1 @@
+I think this might be my least favorite 2D Metroid (I'm only counting the most recent remakes of 1 and 2 in this) but it's still a really good game. The Aeion Pulse and frustrating, gotcha puzzle design were the low parts of this. 
