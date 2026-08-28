@@ -53,11 +53,10 @@ eleventyComputed:
       {% if entry.kind == "essay" %}
       <p class="fragment-meta">
         <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-        <a class="fragment-subject" href="{{ entry.url }}">{{ entry.title }}</a>
+        <a class="essay-title" href="{{ entry.url }}">{{ entry.title }}</a>
       </p>
-      <p class="tag-essay">{{ entry.blurb }}
-        <a class="more" href="{{ entry.url }}">read →</a>
-      </p>
+      <p class="tag-essay">{{ entry.blurb }}</p>
+      <a class="more" href="{{ entry.url }}">read →</a>
       {% else %}
       <p class="fragment-meta">
         <span class="sky" style="background-image:url({{ entry.subject.chipUrl }})" aria-hidden="true"></span>

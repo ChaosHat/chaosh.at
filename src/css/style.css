@@ -626,13 +626,22 @@ a.post-list-date:hover { color: var(--accent); }
 
 .essay { margin-bottom: 3rem; }
 
-.timeline-head {
+/* Was .timeline-head, when the timeline was the only labelled section. Both
+   halves of a subject page carry one now — "Deep thoughts" over the pinned
+   essays, "Along the way" over the fragments — so the name generalised. */
+.section-head {
   margin: 0 0 1.75rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--edge);
   font: 400 12px/1 var(--pixel);
   color: var(--muted);
 }
+
+/* The subject header already closes on a rule, so the first section's label
+   would sit in a 12px band between two lines drawn 2rem apart. It keeps the
+   type and drops the rule; "Along the way" still carries one, which is what
+   separates the two halves. */
+.essays .section-head { padding-bottom: 0; border-bottom: 0; margin-bottom: 1.1rem; }
 
 .fragment { max-width: none; }
 
@@ -677,7 +686,30 @@ a.post-list-date:hover { color: var(--accent); }
 
 .fragment-subject:hover { color: var(--accent); }
 
+/* A pinned essay's title, on a subject or a tag page. It shipped wearing
+   .fragment-subject — 12px muted, identical to the dateline sat next to it —
+   so the title of the most considered thing on the page read as a second
+   timestamp. Same promotion .frag-subject got on a daily, same reasoning and
+   same treatment, so the two headings match wherever they meet. */
+.essay-title {
+  padding-bottom: 2px;
+  font: 700 16px/1.3 var(--pixel);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--muted);
+}
+
+.essay-title:hover,
+.essay-title:focus-visible { color: var(--accent); border-color: var(--accent); }
+
 .tag-essay { margin: 0; }
+
+/* .more is a padded box; sat inline at the end of the lede it grew the last
+   line box by its own margin and padding, so the blurb's final line spaced
+   itself out to make room for a button. It gets its own line instead — which
+   is also what puts air between the pinned essays and "Along the way". */
+.tag-essay + .more { margin-bottom: 0.4rem; }
+.subject .essays { margin-bottom: 2.75rem; }
 
 /* Members' standing blurbs, between the tag head and the timeline. */
 .blurbs { margin-bottom: 2.5rem; }

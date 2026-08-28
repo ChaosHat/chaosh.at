@@ -46,15 +46,15 @@ eleventyComputed:
       keep essays inline in the stream instead. -#}
   {% if subject.essays | length %}
   <section class="essays">
+    <h2 class="section-head">Deep thoughts</h2>
     {% for essay in subject.essays %}
     <div class="fragment">
       <p class="fragment-meta">
         <a class="fragment-date" href="{{ essay.url }}">{{ essay.date | readableDate }}</a>
-        <a class="fragment-subject" href="{{ essay.url }}">{{ essay.title }}</a>
+        <a class="essay-title" href="{{ essay.url }}">{{ essay.title }}</a>
       </p>
-      <p class="tag-essay">{{ essay.blurb }}
-        <a class="more" href="{{ essay.url }}">read →</a>
-      </p>
+      <p class="tag-essay">{{ essay.blurb }}</p>
+      <a class="more" href="{{ essay.url }}">read →</a>
     </div>
     {% endfor %}
   </section>
@@ -62,7 +62,7 @@ eleventyComputed:
 
   {% if subject.fragments | length %}
   <section class="timeline">
-    {% if subject.essays | length %}<h2 class="timeline-head">Along the way</h2>{% endif %}
+    {% if subject.essays | length %}<h2 class="section-head">Along the way</h2>{% endif %}
     {% for fragment in subject.fragments %}
     <div class="fragment">
       <a class="fragment-date" href="{{ fragment.sourceUrl }}">{{ fragment.date | readableDate }}</a>
