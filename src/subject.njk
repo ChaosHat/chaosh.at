@@ -9,7 +9,7 @@ eleventyComputed:
   title: "{{ subject.title }}"
 ---
 <article class="subject">
-  <header class="subject-head">
+  <header class="subject-head{% if subject.essays | length %} no-rule{% endif %}">
     {#- The subject's sky at the one size where the full three-curtain scene
         is properly legible. Small renders elsewhere use the chip variant. -#}
     {%- if subject.coverUrl %}
@@ -49,10 +49,8 @@ eleventyComputed:
     <h2 class="section-head">Deep thoughts</h2>
     {% for essay in subject.essays %}
     <div class="fragment">
-      <p class="fragment-meta">
-        <a class="fragment-date" href="{{ essay.url }}">{{ essay.date | readableDate }}</a>
-        <a class="essay-title" href="{{ essay.url }}">{{ essay.title }}</a>
-      </p>
+      <a class="essay-title" href="{{ essay.url }}">{{ essay.title }}</a>
+      <a class="fragment-date" href="{{ essay.url }}">{{ essay.date | readableDate }}</a>
       <p class="tag-essay">{{ essay.blurb }}</p>
       <a class="more" href="{{ essay.url }}">read →</a>
     </div>

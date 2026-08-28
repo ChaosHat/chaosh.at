@@ -51,10 +51,8 @@ eleventyComputed:
           title instead of a chip, and its lede links to its /e/ page, the
           full text's one home. -#}
       {% if entry.kind == "essay" %}
-      <p class="fragment-meta">
-        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-        <a class="essay-title" href="{{ entry.url }}">{{ entry.title }}</a>
-      </p>
+      <a class="essay-title" href="{{ entry.url }}">{{ entry.title }}</a>
+      <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
       <p class="tag-essay">{{ entry.blurb }}</p>
       <a class="more" href="{{ entry.url }}">read →</a>
       {% else %}

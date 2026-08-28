@@ -637,11 +637,17 @@ a.post-list-date:hover { color: var(--accent); }
   color: var(--muted);
 }
 
-/* The subject header already closes on a rule, so the first section's label
-   would sit in a 12px band between two lines drawn 2rem apart. It keeps the
-   type and drops the rule; "Along the way" still carries one, which is what
-   separates the two halves. */
-.essays .section-head { padding-bottom: 0; border-bottom: 0; margin-bottom: 1.1rem; }
+/* Every label sits ABOVE its rule, so the line reads as the top of the section
+   it opens rather than the bottom of whatever came before. That means when an
+   essay section follows, "Deep thoughts" carries the rule that closes the
+   header and the header drops its own — two rules 2rem apart is one too many.
+   A subject with no essay keeps the header rule: nothing below it to take the
+   job over, since "Along the way" only appears when there are essays above. */
+.subject-head.no-rule {
+  padding-bottom: 0;
+  margin-bottom: 2.5rem;
+  border-bottom: 0;
+}
 
 .fragment { max-width: none; }
 
@@ -689,18 +695,19 @@ a.post-list-date:hover { color: var(--accent); }
 /* A pinned essay's title, on a subject or a tag page. It shipped wearing
    .fragment-subject — 12px muted, identical to the dateline sat next to it —
    so the title of the most considered thing on the page read as a second
-   timestamp. Same promotion .frag-subject got on a daily, same reasoning and
-   same treatment, so the two headings match wherever they meet. */
+   timestamp. It takes the shape a titled post already has in the feed and on
+   its own /e/ page instead: serif title, dateline beneath it as a subdate. An
+   essay looks the same everywhere it is listed. */
 .essay-title {
-  padding-bottom: 2px;
-  font: 700 16px/1.3 var(--pixel);
+  display: block;
+  margin-bottom: 0.35rem;
+  font: 600 1.4rem/1.25 var(--serif);
   color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid var(--muted);
 }
 
 .essay-title:hover,
-.essay-title:focus-visible { color: var(--accent); border-color: var(--accent); }
+.essay-title:focus-visible { color: var(--accent); }
 
 .tag-essay { margin: 0; }
 
