@@ -1,0 +1,1 @@
+My intro to Monster Hunter and truly mindblowing for me at the time. The loop here is so good, the game makes you feel powerful while continually increasing the stakes. It's also so epic feeling, the monsters and the environments are so vast and amazing.

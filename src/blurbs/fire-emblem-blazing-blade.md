@@ -1,0 +1,1 @@
+Unending nostalgia for this game. I love this cast so much, the sprite art is peak for GBA era. What a foundation. 

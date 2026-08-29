@@ -1,0 +1,1 @@
+WoW was something that I was truly obsessed with for a long time out of high school and a few years thereafter. Playerbots is a nice stroll down memory lane with no pressure, even if it's impossible to capture those old highs.

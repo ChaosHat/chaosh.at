@@ -1,0 +1,1 @@
+One of the greatest rpgs of all time. Imaginative, free, and stylish as all hell. It feels like a world that could be real, not too far off from where we are now, for good or bad. 

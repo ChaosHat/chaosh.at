@@ -1,0 +1,1 @@
+Good tactics game, the sidescrolling presentation is really unique and interesting, as is the decision to make it physics based instead of % to hit. 

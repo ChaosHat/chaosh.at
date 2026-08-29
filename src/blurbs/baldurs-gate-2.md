@@ -1,0 +1,1 @@
+This is the first game I can remember being absolutely hype with anticipation for and boy did it pay that hype off. Amazing. A triumph. I loved bringing that spiral bound tome of a manual around to read about it. Truly formative for me. 

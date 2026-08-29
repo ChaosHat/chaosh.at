@@ -1,0 +1,1 @@
+Ambitious as all hell, my first experience with a Pokemon romhack. There are lots of ideas here, arguably too many, but at least it tries. Hoopa remains a goofy as all hell Pokemon to base your game around though.

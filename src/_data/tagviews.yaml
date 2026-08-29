@@ -9,10 +9,15 @@ favorites:
   title: Favorites
   members:
     - fire-emblem-awakening
+    - mass-effect-legendary-edition
+    - baldurs-gate-3
 crpg:
   title: CRPG
   members:
     - esoteric-ebb
+    - baldurs-gate
+    - baldurs-gate-2
+    - baldurs-gate-3
 final-fantasy:
   title: Final Fantasy
   members:
@@ -21,6 +26,7 @@ final-fantasy:
 jrpg:
   title: JRPG
   members:
+    - chrono-trigger
     - dragon-quest-xi-s
     - final-fantasy-vi
     - final-fantasy-vii-remake
@@ -35,6 +41,8 @@ atlus:
 fire-emblem:
   title: Fire Emblem
   members:
+    - fire-emblem-blazing-blade
+    - fire-emblem-sacred-stones
     - fire-emblem-path-of-radiance
     - fire-emblem-awakening
     - fire-emblem-fates-conquest
@@ -44,6 +52,8 @@ tactics:
   title: Tactics
   description: Turn-based, grid-based, one bad move away from a reset.
   members:
+    - fire-emblem-blazing-blade
+    - fire-emblem-sacred-stones
     - fire-emblem-path-of-radiance
     - fire-emblem-awakening
     - fire-emblem-fates-conquest
@@ -73,3 +83,10 @@ metroidvania:
     - castlevania-symphony-of-the-night
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
+monster-hunter:
+  title: Monster Hunter
+  members:
+    - monster-hunter-world
+    - monster-hunter-rise
+    - monster-hunter-wilds
+    - monster-hunter-stories-3

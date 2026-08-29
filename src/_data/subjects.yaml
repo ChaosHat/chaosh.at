@@ -1,3 +1,28 @@
+baldurs-gate:
+  title: Baldur's Gate
+  category:
+    - games
+  status: completed
+  aliases:
+    - bg1
+    - baldurs gate 1
+baldurs-gate-2:
+  title: "Baldur's Gate II: Shadows of Amn"
+  category:
+    - games
+  status: completed
+  aliases:
+    - bg2
+    - baldurs gate 2
+    - shadows of amn
+baldurs-gate-3:
+  title: Baldur's Gate 3
+  category:
+    - games
+  status: completed
+  aliases:
+    - bg3
+    - baldurs gate 3
 castlevania-symphony-of-the-night:
   title: "Castlevania: Symphony of the Night"
   category:
@@ -8,11 +33,35 @@ castlevania-symphony-of-the-night:
     - castlevania sotn
     - symphony of the night
     - castlevania - sotn
+chrono-trigger:
+  title: Chrono Trigger
+  category:
+    - games
+  status: active
+  aliases:
+    - chrono
+    - ct
+cyberpunk-2077:
+  title: Cyberpunk 2077
+  category:
+    - games
+  status: completed
+  aliases:
+    - cp2077
+    - "2077"
+diablo-iv:
+  title: Diablo IV
+  category:
+    - games
+  status: completed
+  aliases:
+    - d4
+    - diablo 4
 dragon-quest-xi-s:
   title: Dragon Quest XI S
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - dqxis
     - dqxi s
@@ -26,6 +75,15 @@ esoteric-ebb:
   aliases:
     - ebb
     - esoteric ebb
+fallout-new-vegas:
+  title: "Fallout: New Vegas"
+  category:
+    - games
+  status: completed
+  aliases:
+    - new vegas
+    - fnv
+    - fallout nv
 fields-of-mistria:
   title: Fields of Mistria
   category:
@@ -70,6 +128,15 @@ fire-emblem-awakening:
     - awakening
     - fe awakening
     - fea
+fire-emblem-blazing-blade:
+  title: "Fire Emblem: Blazing Blade"
+  category:
+    - games
+  status: completed
+  aliases:
+    - blazing blade
+    - fe7
+    - fe blazing blade
 fire-emblem-fates-conquest:
   title: "Fire Emblem Fates: Conquest"
   category:
@@ -97,6 +164,15 @@ fire-emblem-path-of-radiance:
     - path of radiance
     - por
     - fe por
+fire-emblem-sacred-stones:
+  title: "Fire Emblem: The Sacred Stones"
+  category:
+    - games
+  status: completed
+  aliases:
+    - sacred stones
+    - fe8
+    - fe sacred stones
 fire-emblem-three-houses:
   title: "Fire Emblem: Three Houses"
   category:
@@ -106,6 +182,23 @@ fire-emblem-three-houses:
     - three houses
     - fe3h
     - 3h
+indiana-jones-and-the-great-circle:
+  title: Indiana Jones and the Great Circle
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - great circle
+    - the great circle
+mass-effect-legendary-edition:
+  title: Mass Effect Legendary Edition
+  category:
+    - games
+  status: active
+  aliases:
+    - mass effect
+    - mele
+    - legendary edition
 metaphor-refantazio:
   title: Metaphor ReFantazio
   category:
@@ -146,6 +239,14 @@ mina-the-hollower:
   status: abandoned
   aliases:
     - mina
+monster-hunter-rise:
+  title: Monster Hunter Rise
+  category:
+    - games
+  status: completed
+  aliases:
+    - mh rise
+    - mhr
 monster-hunter-stories-3:
   title: "Monster Hunter Stories 3: Twisted Reflection"
   category:
@@ -164,6 +265,14 @@ monster-hunter-wilds:
   aliases:
     - wilds
     - mh wilds
+monster-hunter-world:
+  title: "Monster Hunter: World"
+  category:
+    - games
+  status: completed
+  aliases:
+    - mh world
+    - mhw
 my-time-at-sandrock:
   title: My Time at Sandrock
   category:
@@ -197,6 +306,14 @@ persona-5-royal:
   aliases:
     - p5r
     - persona 5 royal
+pokemon-unbound:
+  title: Pokémon Unbound
+  category:
+    - games
+  status: completed
+  aliases:
+    - pokemon unbound
+    - unbound
 pokopia:
   title: Pokémon Pokopia
   category:
@@ -234,6 +351,15 @@ star-wars-zero-company:
     - zero company
     - swzc
     - zc
+steamworld-heist-2:
+  title: SteamWorld Heist II
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - steamworld heist 2
+    - swh2
+    - heist 2
 super-mariomon:
   title: Super Mariomon
   category:
@@ -248,6 +374,20 @@ super-metroid:
   status: completed
   aliases:
     - super metroid
+tape-to-tape:
+  title: Tape to Tape
+  category:
+    - games
+  status: shelved
+  aliases:
+    - t2t
+the-plucky-squire:
+  title: The Plucky Squire
+  category:
+    - games
+  status: abandoned
+  aliases:
+    - plucky squire
 triangle-strategy:
   title: Triangle Strategy
   category:

@@ -1,0 +1,1 @@
+Playing this series and the anticipation for it defined a large swath of my early adulthood as a gamer. It's amazing, beginning to end and still so iconic. 
