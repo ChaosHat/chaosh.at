@@ -190,6 +190,16 @@ indiana-jones-and-the-great-circle:
   aliases:
     - great circle
     - the great circle
+kingdom-hearts:
+  title: Kingdom Hearts
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - kh
+    - kh1
+    - kingdom hearts 1
+    - kh final mix
 mass-effect-legendary-edition:
   title: Mass Effect Legendary Edition
   category:
