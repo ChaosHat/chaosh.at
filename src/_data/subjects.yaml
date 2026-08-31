@@ -7,7 +7,7 @@ baldurs-gate:
     - bg1
     - baldurs gate 1
 baldurs-gate-2:
-  title: "Baldur's Gate II: Shadows of Amn"
+  title: 'Baldur''s Gate II: Shadows of Amn'
   category:
     - games
   status: completed
@@ -24,7 +24,7 @@ baldurs-gate-3:
     - bg3
     - baldurs gate 3
 castlevania-symphony-of-the-night:
-  title: "Castlevania: Symphony of the Night"
+  title: 'Castlevania: Symphony of the Night'
   category:
     - games
   status: completed
@@ -41,6 +41,15 @@ chrono-trigger:
   aliases:
     - chrono
     - ct
+crusader-kings-3:
+  title: Crusader Kings III
+  category:
+    - games
+  status: completed
+  aliases:
+    - ck3
+    - crusader kings 3
+    - crusader kings iii
 cyberpunk-2077:
   title: Cyberpunk 2077
   category:
@@ -48,7 +57,7 @@ cyberpunk-2077:
   status: completed
   aliases:
     - cp2077
-    - "2077"
+    - '2077'
 diablo-iv:
   title: Diablo IV
   category:
@@ -76,7 +85,7 @@ esoteric-ebb:
     - ebb
     - esoteric ebb
 fallout-new-vegas:
-  title: "Fallout: New Vegas"
+  title: 'Fallout: New Vegas'
   category:
     - games
   status: completed
@@ -120,7 +129,7 @@ final-fantasy-vii-remake:
     - ffviir
     - final fantasy 7 remake
 fire-emblem-awakening:
-  title: "Fire Emblem: Awakening"
+  title: 'Fire Emblem: Awakening'
   category:
     - games
   status: completed
@@ -129,7 +138,7 @@ fire-emblem-awakening:
     - fe awakening
     - fea
 fire-emblem-blazing-blade:
-  title: "Fire Emblem: Blazing Blade"
+  title: 'Fire Emblem: Blazing Blade'
   category:
     - games
   status: completed
@@ -138,7 +147,7 @@ fire-emblem-blazing-blade:
     - fe7
     - fe blazing blade
 fire-emblem-fates-conquest:
-  title: "Fire Emblem Fates: Conquest"
+  title: 'Fire Emblem Fates: Conquest'
   category:
     - games
   status: completed
@@ -147,7 +156,7 @@ fire-emblem-fates-conquest:
     - fates conquest
     - fe conquest
 fire-emblem-fortunes-weave:
-  title: "Fire Emblem: Fortune's Weave"
+  title: 'Fire Emblem: Fortune''s Weave'
   category:
     - games
   status: backlog
@@ -156,7 +165,7 @@ fire-emblem-fortunes-weave:
     - fortune's weave
     - fe fortunes weave
 fire-emblem-path-of-radiance:
-  title: "Fire Emblem: Path of Radiance"
+  title: 'Fire Emblem: Path of Radiance'
   category:
     - games
   status: abandoned
@@ -165,7 +174,7 @@ fire-emblem-path-of-radiance:
     - por
     - fe por
 fire-emblem-sacred-stones:
-  title: "Fire Emblem: The Sacred Stones"
+  title: 'Fire Emblem: The Sacred Stones'
   category:
     - games
   status: completed
@@ -174,7 +183,7 @@ fire-emblem-sacred-stones:
     - fe8
     - fe sacred stones
 fire-emblem-three-houses:
-  title: "Fire Emblem: Three Houses"
+  title: 'Fire Emblem: Three Houses'
   category:
     - games
   status: completed
@@ -182,6 +191,22 @@ fire-emblem-three-houses:
     - three houses
     - fe3h
     - 3h
+ghost-of-yotei:
+  title: Ghost of Yōtei
+  category:
+    - games
+  status: completed
+  aliases:
+    - ghost of yotei
+    - yotei
+horizon-forbidden-west:
+  title: Horizon Forbidden West
+  category:
+    - games
+  status: completed
+  aliases:
+    - forbidden west
+    - hfw
 indiana-jones-and-the-great-circle:
   title: Indiana Jones and the Great Circle
   category:
@@ -200,6 +225,15 @@ kingdom-hearts:
     - kh1
     - kingdom hearts 1
     - kh final mix
+marvels-spider-man-2:
+  title: Marvel's Spider-Man 2
+  category:
+    - games
+  status: completed
+  aliases:
+    - spider-man 2
+    - spiderman 2
+    - marvels spider-man 2
 mass-effect-legendary-edition:
   title: Mass Effect Legendary Edition
   category:
@@ -225,8 +259,16 @@ metroid-dread:
   aliases:
     - dread
     - metroid dread
+metroid-fusion:
+  title: Metroid Fusion
+  category:
+    - games
+  status: completed
+  aliases:
+    - fusion
+    - metroid fusion
 metroid-samus-returns:
-  title: "Metroid: Samus Returns"
+  title: 'Metroid: Samus Returns'
   category:
     - games
   status: completed
@@ -234,7 +276,7 @@ metroid-samus-returns:
     - samus returns
     - msr
 metroid-zero-mission:
-  title: "Metroid: Zero Mission"
+  title: 'Metroid: Zero Mission'
   category:
     - games
   status: completed
@@ -258,7 +300,7 @@ monster-hunter-rise:
     - mh rise
     - mhr
 monster-hunter-stories-3:
-  title: "Monster Hunter Stories 3: Twisted Reflection"
+  title: 'Monster Hunter Stories 3: Twisted Reflection'
   category:
     - games
   status: backlog
@@ -276,7 +318,7 @@ monster-hunter-wilds:
     - wilds
     - mh wilds
 monster-hunter-world:
-  title: "Monster Hunter: World"
+  title: 'Monster Hunter: World'
   category:
     - games
   status: completed
@@ -308,6 +350,15 @@ ori-and-the-will-of-the-wisps:
     - will of the wisps
     - wotw
     - ori wotw
+paper-mario-the-thousand-year-door:
+  title: 'Paper Mario: The Thousand-Year Door'
+  category:
+    - games
+  status: completed
+  aliases:
+    - ttyd
+    - thousand year door
+    - paper mario ttyd
 persona-5-royal:
   title: Persona 5 Royal
   category:
@@ -316,6 +367,18 @@ persona-5-royal:
   aliases:
     - p5r
     - persona 5 royal
+pokemon-hgss:
+  title: Pokémon HeartGold & SoulSilver
+  category:
+    - games
+  status: completed
+  aliases:
+    - hgss
+    - soulsilver
+    - soul silver
+    - heartgold
+    - pokemon soulsilver
+    - pokemon heartgold
 pokemon-unbound:
   title: Pokémon Unbound
   category:
@@ -345,7 +408,7 @@ split-fiction:
     - games
   status: sampled
 star-wars-jedi-fallen-order:
-  title: "STAR WARS Jedi: Fallen Order"
+  title: 'STAR WARS Jedi: Fallen Order'
   category:
     - games
   status: shelved

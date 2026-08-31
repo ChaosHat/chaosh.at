@@ -2,8 +2,15 @@ favorites:
   title: Favorites
   members:
     - fire-emblem-awakening
-    - mass-effect-legendary-edition
+    - pokopia
     - baldurs-gate-3
+    - cyberpunk-2077
+    - monster-hunter-rise
+    - pokemon-hgss
+    - crusader-kings-3
+    - metroid-fusion
+    - marvels-spider-man-2
+    - paper-mario-the-thousand-year-door
 crpg:
   title: CRPG
   members:
@@ -26,6 +33,7 @@ jrpg:
     - metaphor-refantazio
     - persona-5-royal
     - kingdom-hearts
+    - paper-mario-the-thousand-year-door
 atlus:
   title: Atlus
   description: Same DNA and lineage, different titles.
@@ -65,6 +73,7 @@ metroid:
   members:
     - super-metroid
     - metroid-zero-mission
+    - metroid-fusion
     - metroid-samus-returns
     - metroid-dread
 metroidvania:
@@ -72,11 +81,18 @@ metroidvania:
   members:
     - super-metroid
     - metroid-zero-mission
+    - metroid-fusion
     - metroid-samus-returns
     - metroid-dread
     - castlevania-symphony-of-the-night
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
+pokemon:
+  title: Pokémon
+  members:
+    - pokemon-hgss
+    - pokemon-unbound
+    - pokopia
 monster-hunter:
   title: Monster Hunter
   members:
