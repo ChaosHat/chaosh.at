@@ -1,0 +1,1 @@
+This nails so many things about Metroid, the creepiness, the loneliness. This is the template of what comes later. 

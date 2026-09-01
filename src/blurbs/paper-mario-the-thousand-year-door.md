@@ -1,0 +1,1 @@
+A classic JRPG that's light, fun, and satisfying. 

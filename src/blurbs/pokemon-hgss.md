@@ -1,0 +1,1 @@
+The best Pokemon game for me. So much content in one game, really well refined. 
