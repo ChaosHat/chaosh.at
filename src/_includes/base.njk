@@ -20,7 +20,7 @@
       <a class="site-title" href="/">{{ site.title }}</a>
       <nav class="site-nav">
         {% for shelf in collections.shelves %}
-        <a href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
+        <a class="nav-shelf" href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
         {% endfor %}
         {% if collections.essayPages | length %}<a href="/essays/">deep thoughts</a>{% endif %}
         <a href="/archive/">archive</a>

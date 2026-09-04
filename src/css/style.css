@@ -204,9 +204,13 @@ h1, h2, h3 { line-height: 1.25; }
   clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
 }
 
+/* Baseline, not centre: the row carries two type sizes now (see .nav-shelf)
+   and centring would leave the smaller links floating against the larger
+   ones. Baselines line up the way a line of text does. */
 .site-nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: 0.3rem;
   margin-left: auto;
   font: 12px/1 var(--pixel);
@@ -222,6 +226,19 @@ h1, h2, h3 { line-height: 1.25; }
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
 
+/* The shelves are the only nav items that are *categories*; the rest is
+   utility (essays index, archive, feed). They shipped as five identical
+   12px muted peers, so nothing said which two were the way into the site --
+   an outside reviewer read the whole row as undifferentiated and asked for a
+   dropdown, which would have hidden the categories rather than raised them.
+   16px ink is the same step .frag-subject already takes: the chrome typeface
+   at heading scale, which is why no new size enters the scale. Utility stays
+   at 12px muted, so the row still fits two lines on a phone instead of three
+   -- promoting everything would have made the wrap worse, not better. */
+.site-nav a.nav-shelf { font-size: 16px; color: var(--ink); }
+.site-nav a.nav-shelf:hover,
+.site-nav a.nav-shelf:focus-visible { color: var(--accent); }
+
 /* ----------------------------------------------------------------- intro
    Standing lines under the masthead saying what the auroras are. The art
    encodes status and recency and nothing on the page decoded it, so a first
@@ -235,7 +252,6 @@ h1, h2, h3 { line-height: 1.25; }
   max-width: var(--wide);
   margin: -0.5rem 0 2rem;
   color: var(--muted);
-  font-style: italic;
 }
 
 .site-intro span { display: block; }
@@ -300,7 +316,7 @@ h1, h2, h3 { line-height: 1.25; }
    active green of what's live now. */
 .essays .now-label { color: var(--st-completed); }
 
-.essay-when { color: var(--muted); font: 10px/1 var(--pixel); }
+.essay-when { color: var(--muted); font: 12px/1 var(--pixel); }
 
 .essays-all {
   margin-left: auto;
@@ -380,7 +396,7 @@ h1, h2, h3 { line-height: 1.25; }
 .post-list-subdate {
   display: block;
   margin: 0;
-  font: 12px/1.4 var(--pixel);
+  font: 16px/1.35 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -480,7 +496,7 @@ a.post-list-date:hover { color: var(--accent); }
 .post-head { margin-bottom: 2rem; }
 .post-title { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
 .post-date { margin: 0; font: 400 1.4rem/1.2 var(--serif); }
-.post-subdate { margin: 0; font: 12px/1.4 var(--pixel); color: var(--muted); }
+.post-subdate { margin: 0; font: 16px/1.35 var(--pixel); color: var(--muted); }
 
 .post-tags {
   margin-top: 2.5rem;
