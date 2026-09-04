@@ -21,6 +21,7 @@ crpg:
 final-fantasy:
   title: Final Fantasy
   members:
+    - final-fantasy-iv
     - final-fantasy-vi
     - final-fantasy-vii-remake
 jrpg:
@@ -28,6 +29,7 @@ jrpg:
   members:
     - chrono-trigger
     - dragon-quest-xi-s
+    - final-fantasy-iv
     - final-fantasy-vi
     - final-fantasy-vii-remake
     - metaphor-refantazio
@@ -76,6 +78,11 @@ metroid:
     - metroid-fusion
     - metroid-samus-returns
     - metroid-dread
+castlevania:
+  title: Castlevania
+  members:
+    - castlevania-symphony-of-the-night
+    - castlevania-dawn-of-sorrow
 metroidvania:
   title: Metroidvanias
   members:
@@ -85,6 +92,7 @@ metroidvania:
     - metroid-samus-returns
     - metroid-dread
     - castlevania-symphony-of-the-night
+    - castlevania-dawn-of-sorrow
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
 pokemon:

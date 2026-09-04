@@ -23,6 +23,16 @@ baldurs-gate-3:
   aliases:
     - bg3
     - baldurs gate 3
+castlevania-dawn-of-sorrow:
+  title: "Castlevania: Dawn of Sorrow"
+  category:
+    - games
+  status: active
+  aliases:
+    - dawn of sorrow
+    - castlevania dawn of sorrow
+    - castlevania dos
+    - cdos
 castlevania-symphony-of-the-night:
   title: "Castlevania: Symphony of the Night"
   category:
@@ -37,7 +47,7 @@ chrono-trigger:
   title: Chrono Trigger
   category:
     - games
-  status: active
+  status: completed
   aliases:
     - chrono
     - ct
@@ -110,6 +120,15 @@ final-fantasy-resonance:
   aliases:
     - ffr
     - ffresonance
+final-fantasy-iv:
+  title: Final Fantasy IV
+  category:
+    - games
+  status: active
+  aliases:
+    - ffiv
+    - ff4
+    - final fantasy 4
 final-fantasy-vi:
   title: Final Fantasy VI
   category:
