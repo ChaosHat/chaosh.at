@@ -1,0 +1,13 @@
+# URLs that were live and moved. GitHub Pages serves static files and has no
+# server-side redirect, so each of these becomes a meta-refresh stub with a
+# rel=canonical pointing at the real page — which is what a crawler needs and
+# what a bookmark or an inbound link survives on.
+#
+# Kept as data rather than a hand-written file per move, so "did you leave a
+# redirect?" is a question with one place to check the next time something is
+# renamed. Entries are permanent; the cost of one is a 400-byte file.
+
+- from: /t/favorites/
+  to: /t/canon/
+  # Renamed 2026-09-04. A game doesn't stop being a favourite when it loses its
+  # slot, so "favorite" claimed a permanence the ten-slot roster doesn't have.

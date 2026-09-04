@@ -1,5 +1,11 @@
-favorites:
-  title: Favorites
+# The canon. Load-bearing rather than editorial: the shelf reads this list for
+# gold, for the ♥ badge, and for a sort axis, and a game listed here renders no
+# feel chip — canon supersedes. Strict ten, admission rubric in Canon Rubric.md.
+# Renamed from `favorites` 2026-09-04: a game doesn't stop being a favourite
+# when it loses its slot, so "favorite" claimed a permanence the mechanism
+# doesn't deliver. /t/favorites/ still resolves — see src/_data/redirects.yaml.
+canon:
+  title: Canon
   members:
     - fire-emblem-awakening
     - pokopia

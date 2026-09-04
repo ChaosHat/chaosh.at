@@ -196,10 +196,10 @@ const svgWrap = (w, h, body, pAR = "none") =>
 // stretching. The crescent lives entirely in the top 128 units, so a 3:4 box
 // (subject head, shelf) and the shortest fragment all show the whole moon;
 // taller fragments reveal more night below it, square pixels throughout.
-export const subjectSvg = (slug, ladderHue, status, tier, { favorite = false } = {}) => {
+export const subjectSvg = (slug, ladderHue, status, tier, { canon = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
-  const moon = favorite ? MOON_GOLD : MOON;
+  const moon = canon ? MOON_GOLD : MOON;
   const W = 96;
   const H = status === "completed" ? 320 : 128;
 
@@ -248,10 +248,10 @@ export const subjectSvg = (slug, ladderHue, status, tier, { favorite = false } =
 //
 // Band count still tracks status: abandoned keeps its single grey ghost (the
 // doc's "one curtain, desaturated"), completed keeps none and gets the moon.
-export const chipSvg = (slug, ladderHue, status, tier, { favorite = false } = {}) => {
+export const chipSvg = (slug, ladderHue, status, tier, { canon = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = status === "abandoned" ? GREY : palette(ladderHue);
-  const moon = favorite ? MOON_GOLD : MOON;
+  const moon = canon ? MOON_GOLD : MOON;
   const W = 24;
   const H = 32;
   const op =
@@ -335,10 +335,10 @@ export const chipSvg = (slug, ladderHue, status, tier, { favorite = false } = {}
 export const BANNER_W = 96;
 export const BANNER_H = 17;
 
-export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H, { favorite = false } = {}) => {
+export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H, { canon = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
   const pal = palette(ladderHue);
-  const moon = favorite ? MOON_GOLD : MOON;
+  const moon = canon ? MOON_GOLD : MOON;
   const W = BANNER_W;
   const H = h;
 

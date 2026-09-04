@@ -245,13 +245,13 @@ export default function (eleventyConfig) {
     });
     // Canon floats, everything else holds still. Deliberately not a re-sort:
     // below the ten it should read as the shelf you were already looking at.
-    const fav = rankBy((a, b) => (b.favorite === true) - (a.favorite === true));
+    const canon = rankBy((a, b) => (b.canon === true) - (a.canon === true));
 
     return items.map((s) => ({
       ...s,
       oAz: az.get(s.slug),
       oRecent: recent.get(s.slug),
-      oFav: fav.get(s.slug),
+      oCanon: canon.get(s.slug),
     }));
   });
 
@@ -359,12 +359,46 @@ export default function (eleventyConfig) {
   const tagLinks = (slugs) =>
     (slugs ?? []).map((t) => ({ slug: t, title: tags[t]?.title ?? t }));
 
-  // One tag is load-bearing rather than editorial: `favorites` is the capped
-  // canon, and the shelf reads it for gold and for a sort axis. Resolved once
-  // here so nothing downstream has to know it is a tag at all — if the canon
-  // ever moves to its own file, this line is the only thing that changes.
-  const FAVORITES_TAG = "favorites";
-  const favoriteSlugs = new Set(tags[FAVORITES_TAG]?.members ?? []);
+  // One tag is load-bearing rather than editorial: `canon` is the capped
+  // roster, and the shelf reads it for gold, for the ♥ badge, and for a sort
+  // axis. Resolved once here so nothing downstream has to know it is a tag at
+  // all — if the canon ever moves to its own file, this line is the only thing
+  // that changes. Renamed from `favorites` 2026-09-04: the roster rotates, and
+  // "favorite" claimed a permanence the mechanism does not deliver.
+  const CANON_TAG = "canon";
+  const canonSlugs = new Set(tags[CANON_TAG]?.members ?? []);
+
+  // ------------------------------------------------------------------ feel
+  //
+  // The third axis, and the sparse one. Status is total and says what happened;
+  // canon is a capped ten; `feel:` is optional, at most one per subject, and
+  // says what he thought. The vocabulary is CLOSED — six entries in feels.yaml
+  // — and an unknown value is reported after the build, never minted, the same
+  // contract about: has. A set that grows by typo stops being a vocabulary a
+  // reader can hold.
+  //
+  // CANON SUPERSEDES: a subject in the canon carries no feel, here rather than
+  // in the templates, so the rule holds for the chip, the /f/ views and
+  // anything added later without each of them having to remember it.
+  const feelsFile = path.join("src", "_data", "feels.yaml");
+  const feels = fs.existsSync(feelsFile)
+    ? parseYaml(fs.readFileSync(feelsFile, "utf8")) || {}
+    : {};
+
+  const badFeels = [];
+  const feelOf = (slug, meta) => {
+    const want = meta?.feel;
+    if (want == null) return null;
+    if (typeof want !== "string" || !feels[want]) {
+      // A list is the shape error worth naming separately: one charm per
+      // subject is what stops the marks reading as a score that composes.
+      badFeels.push({ slug, value: Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want) });
+      return null;
+    }
+    if (canonSlugs.has(slug)) return null;
+    const f = feels[want];
+    return { slug: want, title: f?.title ?? want, glyph: f?.glyph ?? "" };
+  };
 
   // ------------------------------------------------------------------- sky
   //
@@ -451,7 +485,7 @@ export default function (eleventyConfig) {
   const registerSky = (slug, meta, tier) => {
     const hue = subjectHues.get(slug) ?? 0;
     const status = meta?.status ?? "active";
-    const opts = { favorite: favoriteSlugs.has(slug) };
+    const opts = { canon: canonSlugs.has(slug) };
     skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier, opts));
     skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier, opts));
     skyFiles.set(`img/sky/${slug}-banner.svg`, bannerSvg(slug, hue, status, tier, BANNER_H, opts));
@@ -766,7 +800,10 @@ export default function (eleventyConfig) {
         // subject registered but never yet written about, which the sort pushes
         // to the back rather than jumbling among the dated ones.
         lastWrote: lastWrote ?? null,
-        favorite: favoriteSlugs.has(slug),
+        canon: canonSlugs.has(slug),
+        // null on a canon subject by construction — see feelOf. The template
+        // needs no conditional beyond "is there one".
+        feel: feelOf(slug, meta),
         coverUrl: coverUrls.get(slug) ?? null,
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
         // this is the subject's own standing paragraph, rendered in full
@@ -837,6 +874,53 @@ export default function (eleventyConfig) {
       return {
         slug,
         title: meta?.title ?? slug,
+        description: meta?.description ?? null,
+        members,
+        entries,
+      };
+    });
+  });
+
+  // A feel view is a tag page with a derived membership. Everything else about
+  // it — the definition at the top, the members line, the mixed timeline — is
+  // the shape tag.njk already has, so /f/ reuses that template wholesale.
+  //
+  // Membership is grouped from `feel:` at build time and never hand-listed: a
+  // declared member list beside a per-subject key is two sources of truth, and
+  // they drift the first time something is retagged. Mints no nav link, same
+  // rule as tags — a feel view is reached by clicking a chip, which is what
+  // makes the vocabulary self-teaching rather than something you read a legend
+  // for. All six build even at zero members, the same courtesy an empty tag
+  // gets; with nothing linking to it, an unused charm costs a page nobody
+  // reaches rather than a broken one somebody does.
+  eleventyConfig.addCollection("feelPages", (api) => {
+    const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
+
+    return Object.entries(feels).map(([slug, meta]) => {
+      const members = [...bySlug.values()].filter((s) => s.feel?.slug === slug);
+
+      // Essays deliberately do NOT reach a feel view. An essay is about a
+      // subject; a charm is a reaction to one, and routing essays here would
+      // make /f/ a second front page for the same writing. The members'
+      // fragments are the page.
+      const entries = [];
+      for (const subject of members) {
+        for (const fragment of subject.fragments) {
+          entries.push({
+            kind: "fragment",
+            date: fragment.date,
+            url: fragment.sourceUrl,
+            subject,
+            html: fragment.html,
+          });
+        }
+      }
+      entries.sort((a, b) => a.date - b.date);
+
+      return {
+        slug,
+        title: meta?.title ?? slug,
+        glyph: meta?.glyph ?? "",
         description: meta?.description ?? null,
         members,
         entries,
@@ -1115,6 +1199,19 @@ export default function (eleventyConfig) {
         console.warn(`  · ${slug} → ${subjectHues.get(slug)}deg`);
       }
       console.warn(`  Set "hue: <0-359>" in subjects.yaml to pin one.\n`);
+    }
+
+    // Reported, never minted. A bad value drops the chip AND the game's row in
+    // its /f/ view, and both failures are invisible on the page — the tile just
+    // looks like one of the fifty that were left unmarked on purpose.
+    if (badFeels.length > 0) {
+      console.warn(
+        `\n[chaosh.at] ${badFeels.length} feel: value(s) not in feels.yaml:`,
+      );
+      for (const { slug, value } of badFeels) {
+        console.warn(`  · ${slug} → ${value}`);
+      }
+      console.warn(`  That game renders no chip. Fix the slug, or add the charm to feels.yaml on purpose.\n`);
     }
 
     if (unmatched.size > 0) {

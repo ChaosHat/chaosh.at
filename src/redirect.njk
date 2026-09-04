@@ -1,0 +1,24 @@
+---
+pagination:
+  data: redirects
+  size: 1
+  alias: r
+permalink: "{{ r.from }}index.html"
+eleventyExcludeFromCollections: true
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    {#- rel=canonical is the half a crawler reads; the refresh is the half a
+        person reads. noindex keeps the stub itself out of results so the
+        canonical target isn't competing with a blank page. -#}
+    <meta http-equiv="refresh" content="0; url={{ r.to }}">
+    <link rel="canonical" href="{{ site.url }}{{ r.to }}">
+    <meta name="robots" content="noindex">
+    <title>Moved — {{ site.title }}</title>
+  </head>
+  <body>
+    <p>This moved to <a href="{{ r.to }}">{{ site.url }}{{ r.to }}</a>.</p>
+  </body>
+</html>

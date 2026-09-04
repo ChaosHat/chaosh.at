@@ -1,0 +1,66 @@
+# The feel axis — the third channel on a shelf tile, beside status and canon.
+#
+# Status is total (every subject has one) and says what happened. Feel is
+# SPARSE and opt-in, and says what Hat thought. Most subjects carry nothing;
+# that is the design, and it is what makes a chip mean something. A subject
+# opts in with one `feel:` key in subjects.yaml, naming exactly one slug below.
+#
+# Three rules the whole thing rests on:
+#   - ONE per subject, never two. Forcing the single truest thing is where the
+#     interesting call lives, and a reader who sees marks stack assumes they
+#     compose into a score.
+#   - CANON SUPERSEDES. A game in the canon tagview renders no feel chip and
+#     appears in no /f/ view. The ten are the statement; these are the texture
+#     on the other forty-seven.
+#   - CATEGORICAL, never ordinal. Nothing here is better than anything else.
+#     That is what makes it not a rating.
+#
+# Membership in /f/<slug>/ is DERIVED by grouping subjects on `feel:` — never
+# listed here. A member list beside a per-subject key is two sources of truth
+# and drifts the first time something is retagged.
+#
+# Adding a seventh is a design decision, not a typo-fix: an unknown `feel:`
+# value is reported at build time and never auto-minted. Full rationale in
+# 90_Reference/90_Context/Decisions.md.
+#
+# `description:` is the paragraph at the top of the view. Hat's to write —
+# what is here is a Claude placeholder and reads like one.
+
+wont-shut-up:
+  title: won't shut up
+  glyph: 📣
+  description: The unqualified push. Evangelism as an act, not a score.
+
+yes-but:
+  title: yes, but —
+  glyph: ✳️
+  description: >-
+    Liked it, you probably will too, brace for one named thing. The caveat is
+    in the blurb; that is the whole promise this mark makes.
+
+acquired-taste:
+  title: acquired taste
+  glyph: ⚠️
+  description: I loved it and you probably won't. My taste, not the game's flaw.
+
+museum-piece:
+  title: museum piece
+  glyph: 🎩
+  description: >-
+    The verdict is in. I see why it's great; it never landed for me. Not
+    "never again" — just that going back wouldn't be expected to change anything.
+
+wrong-time:
+  title: wrong time
+  glyph: 🪞
+  description: >-
+    No verdict formed, either way. I didn't dislike it, I just didn't feel like
+    continuing, for reasons. Nothing here is a rejection.
+
+comfort-food:
+  title: comfort food
+  glyph: 🍜
+  description: >-
+    My judgement here is compromised, probably nostalgia. I like this, but I'm
+    coming at it from a different place, so it may not be consistent with
+    anything else I say.

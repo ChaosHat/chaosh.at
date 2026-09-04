@@ -38,6 +38,7 @@ castlevania-symphony-of-the-night:
   category:
     - games
   status: completed
+  feel: museum-piece
   aliases:
     - sotn
     - castlevania sotn
@@ -108,7 +109,7 @@ fields-of-mistria:
   category:
     - games
   status: shelved
-  rating: 4
+  feel: yes-but
   aliases:
     - mistria
     - fom
@@ -134,6 +135,7 @@ final-fantasy-vi:
   category:
     - games
   status: abandoned
+  feel: museum-piece
   aliases:
     - ffvi
     - ff6
@@ -258,6 +260,7 @@ mass-effect-legendary-edition:
   category:
     - games
   status: completed
+  feel: wont-shut-up
   aliases:
     - mass effect
     - mele
@@ -267,7 +270,6 @@ metaphor-refantazio:
   category:
     - games
   status: completed
-  rating: 4
   aliases:
     - metaphor refantazio
 metroid-dread:
@@ -464,6 +466,7 @@ super-metroid:
   category:
     - games
   status: completed
+  feel: yes-but
   aliases:
     - super metroid
 tape-to-tape:

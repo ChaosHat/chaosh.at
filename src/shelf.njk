@@ -37,8 +37,8 @@ eleventyComputed:
   <label for="sort-az">a–z</label>
   <input type="radio" name="shelf-sort" id="sort-recent">
   <label for="sort-recent">recent</label>
-  <input type="radio" name="shelf-sort" id="sort-fav">
-  <label for="sort-fav">favorites</label>
+  <input type="radio" name="shelf-sort" id="sort-canon">
+  <label for="sort-canon">canon</label>
 </fieldset>
 {% endif %}
 
@@ -58,7 +58,7 @@ eleventyComputed:
     lays out as one even grid rather than a ragged one. -#}
 <ul class="shelf-grid">
   {% for item in items %}
-  <li class="shelf-item{% if item.favorite %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-fav:{{ item.oFav }}">
+  <li class="shelf-item{% if item.canon %} is-canon{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }}">
     <a href="/s/{{ item.slug }}/">
       <span class="shelf-art">
         {% if item.coverUrl %}
@@ -75,9 +75,24 @@ eleventyComputed:
       {#- Gold is the fast channel, but it is only a channel — this badge is what
           carries the same fact for a reader who cannot see the colour, and it is
           why the frame does not have to work alone. -#}
-      {% if item.favorite %}<span class="badge b-favorite">favorite</span>{% endif %}
+      {% if item.canon %}<span class="badge badge-g b-canon" data-g="♥">canon</span>{% endif %}
       <span class="badge b-{{ item.status }}">{{ item.status }}</span>
-      {% if item.rating %}<span class="rating">{{ item.rating }}/5</span>{% endif %}
+      {#- The third axis, and the sparse one: status says what happened, this
+          says what he thought of it. Most tiles carry nothing — that is the
+          design, not an unfinished import, and it is what makes a chip mean
+          something. Hollow where the status badge is filled, and glyphed where
+          the status badge has an abstract dot: two independent signals keep the
+          axes apart at 12px over busy cover art. It borrows the tile's status
+          hue rather than inventing a sixth colour taxonomy, so the colour still
+          means the one thing it always meant.
+          Suppressed on canon in eleventyConfig (feelOf), not here — the ten are
+          the statement, the charms are the texture on the other forty-seven.
+
+          A SPAN, not a link, unlike the same chip on a subject page: the whole
+          tile is already one anchor, and an <a> inside an <a> is invalid — the
+          parser closes the outer one early and the tile's layout comes apart.
+          The charm's view is one click further, from the subject page. -#}
+      {% if item.feel %}<span class="feel feel-hue feel-g" data-g="{{ item.feel.glyph }}" style="--c:var(--st-{{ item.status }})">{{ item.feel.title }}</span>{% endif %}
     </a>
   </li>
   {% endfor %}

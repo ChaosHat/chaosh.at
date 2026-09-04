@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% if title %}{{ title }} — {{ site.title }}{% elif isDaily %}{{ page.date | readableDate }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
     <meta name="description" content="{{ description or site.description }}">
-    {#- The face is 8KB and every page's chrome is set in it, so it is fetched
-        alongside the stylesheet rather than discovered inside it. -#}
+    {#- Both faces are fetched alongside the stylesheet rather than discovered
+        inside it. Silkscreen is 8KB and sets every page's chrome; Alegreya is
+        17KB and sets every page's prose. Only the roman is preloaded of each:
+        bold and italic are a minority of the glyphs on any page and can arrive
+        a beat later, but the roman arriving late IS the flash. -#}
     <link rel="preload" href="/fonts/silkscreen-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/alegreya-sans-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>

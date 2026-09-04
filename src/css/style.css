@@ -17,9 +17,48 @@
   src: url("/fonts/silkscreen-700.woff2") format("woff2");
 }
 
+/* Alegreya Sans, self-hosted on the same terms as Silkscreen: one origin, no
+   third-party DNS on first paint, and the site's own voice not dependent on
+   someone else's CDN. Three static files — the family is not variable, so 400,
+   400 italic and 700 are three faces and three loads. Nothing else ships; the
+   CSS asks for no other weight, and a synthesised bold on a humanist sans is
+   worse than not offering one. Subset and its reasoning: src/fonts/SUBSET.md. */
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/alegreya-sans-400.woff2") format("woff2");
+}
+/* A TRUE italic — different letterforms, not a slant — and the reason this
+   family won. The site carries 29 <em>; a synthesised oblique on a humanist
+   skeleton is the one place the whole choice would have shown its seams. */
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/alegreya-sans-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/alegreya-sans-700.woff2") format("woff2");
+}
+
 :root {
   --pixel: "Silkscreen", ui-monospace, monospace;
-  --serif: ui-serif, Georgia, "Times New Roman", serif;
+  /* Named for its ROLE, not its classification — it held `ui-serif, Georgia,
+     "Times New Roman", serif` until 2026-09-04, which meant the body copy was
+     never one thing: iPhone Safari resolved it to New York, Windows Chrome to
+     Georgia, Linux to Noto Serif. Readers were seeing different sites. Why the
+     prose face is a humanist sans and not a serif is argued in the design doc's
+     Type section; the short version is that Silkscreen is itself a bitmap sans,
+     so a NEUTRAL sans collapses the two-voice split — a humanist one, with a
+     written skeleton and a true italic, does not. */
+  --prose: "Alegreya Sans", system-ui, sans-serif;
 
   /* Black night. All color on the site is aurora; the chrome stays out of
      the argument. One theme only, by decision. */
@@ -43,7 +82,7 @@
   /* The canon's gold. Deliberately hotter and more saturated than
      --st-backlog (#f0dda0), which is the only other warm tone on the site and
      sits one tile away on the same shelf — at pale gold the two read as the
-     same mark. Matches MOON_GOLD in aurora.js, which gilds a favourite's moon;
+     same mark. Matches MOON_GOLD in aurora.js, which gilds a canon subject's moon;
      if one moves, move both. */
   --gold: #f5c86b;
 
@@ -78,7 +117,7 @@ body {
   max-width: var(--wide);
   background: transparent;
   color: var(--ink);
-  font: 1.125rem/1.62 var(--serif);
+  font: 1.125rem/1.55 var(--prose);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -348,6 +387,55 @@ h1, h2, h3 { line-height: 1.25; }
 .b-abandoned { --c: var(--st-abandoned); }
 .b-completed { --c: var(--st-completed); }
 
+/* The feel chip — the third axis, and the sparse one. Told apart from a status
+   badge by TWO independent signals, because one is too thin at 12px over cover
+   art: fill (badge is filled, chip is hollow) and mark (badge carries an
+   abstract 4px dot, chip carries a pictogram). That pairing is why the statuses
+   do NOT also get glyphs — it would spend one of the two discriminators, and
+   "completed" is plain English where "won't shut up" is not, so a status glyph
+   buys decode risk and no meaning.
+
+   The colour is BORROWED, not invented: the chip takes the tile's own status
+   hue. A colourless chip read as disabled, and a hue per charm would collide
+   with the seven statuses and hand the reader two clashing legends. Borrowing
+   means the colour still says exactly what it always said, and the filled badge
+   and hollow chip read as one matched pair. --c is set inline by the template. */
+.feel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.45rem;
+  font: 12px/1 var(--pixel);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.feel-hue {
+  color: var(--c);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+.feel-hue:hover,
+.feel-hue:focus-visible { border-color: var(--c); }
+
+/* The glyph takes the 4px dot's slot: ~8px of width, no second line, and the
+   words are still right there — which is the whole reason emoji work here and
+   failed as a mark on their own. */
+.feel-g::before { content: attr(data-g); font-size: 11px; line-height: 1; flex: none; }
+
+/* Same trick on the canon badge, where ♥ is the non-colour channel carrying
+   what the gold frame says — an exception for the rare gilded ten, not a
+   precedent for glyphing the statuses. */
+.badge-g::before {
+  content: attr(data-g);
+  width: auto;
+  height: auto;
+  background: none;
+  font-size: 11px;
+  line-height: 1;
+}
+
 .tag-list {
   display: flex;
   flex-wrap: wrap;
@@ -385,7 +473,8 @@ h1, h2, h3 { line-height: 1.25; }
 .post-list-title {
   display: block;
   margin-bottom: 0.4rem;
-  font: 600 1.4rem/1.25 var(--serif);
+  font: 700 1.4rem/1.12 var(--prose);
+  letter-spacing: -0.018em;
   text-decoration: none;
   color: var(--ink);
 }
@@ -417,7 +506,7 @@ a.post-list-date:hover { color: var(--accent); }
    brightness — length is the one axis the daily stream already has and never
    used. This is the one place pixel squares are knowingly non-square. */
 .frag { display: flex; gap: 1rem; align-items: stretch; }
-.frag + .frag { margin-top: 1.9rem; }
+.frag + .frag { margin-top: 1.4rem; }
 /* The sky stops partway down its entry, so its lower edge is dissolved rather
    than cut: an unmasked bottom leaves a hard line and a boxed border sitting
    in the middle of the prose, which reads as a clipped image instead of a sky.
@@ -444,6 +533,12 @@ a.post-list-date:hover { color: var(--accent); }
 .frag-body { min-width: 0; }
 .frag-body > :first-child { margin-top: 0; }
 .frag-body > :last-child { margin-bottom: 0; }
+
+/* Every prose container on the site, in one place. */
+.post > p,
+.post-body p,
+.frag-body p,
+.fragment > p { margin: 0 0 0.72em; }
 
 .frag-head {
   display: flex;
@@ -494,8 +589,8 @@ a.post-list-date:hover { color: var(--accent); }
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
-.post-date { margin: 0; font: 400 1.4rem/1.2 var(--serif); }
+.post-title { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
+.post-date { margin: 0; font: 400 1.4rem/1.2 var(--prose); }
 .post-subdate { margin: 0; font: 16px/1.35 var(--pixel); color: var(--muted); }
 
 .post-tags {
@@ -615,7 +710,7 @@ a.post-list-date:hover { color: var(--accent); }
    line here. */
 .shelf-sorter:has(#sort-az:checked) .shelf-item { order: var(--o-az); }
 .shelf-sorter:has(#sort-recent:checked) .shelf-item { order: var(--o-recent); }
-.shelf-sorter:has(#sort-fav:checked) .shelf-item { order: var(--o-fav); }
+.shelf-sorter:has(#sort-canon:checked) .shelf-item { order: var(--o-canon); }
 
 .shelf-sort {
   border: 0;
@@ -665,14 +760,14 @@ a.post-list-date:hover { color: var(--accent); }
    would otherwise show nothing, so the gold cannot live in the art alone.
    Both borders take the colour: banner and cover are drawn as one card with a
    shared edge, and gilding half of it would split the object in two. */
-.is-favorite .sky,
-.is-favorite .shelf-cover { border-color: var(--gold); }
+.is-canon .sky,
+.is-canon .shelf-cover { border-color: var(--gold); }
 
-.is-favorite .shelf-art {
+.is-canon .shelf-art {
   box-shadow: 0 0 0 1px var(--gold), 0 0 14px -4px var(--gold);
 }
 
-.b-favorite { --c: var(--gold); }
+.b-canon { --c: var(--gold); }
 
 .shelf-list { list-style: none; margin: 0; padding: 0; }
 
@@ -698,7 +793,7 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 0.7rem; font: 600 1.75rem/1.15 var(--serif); }
+.subject-head h1 { margin: 0 0 0.7rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
 
 .subject-meta {
   display: flex;
@@ -756,10 +851,17 @@ a.post-list-date:hover { color: var(--accent); }
 
 .fragment-date:hover { color: var(--accent); }
 
-/* ------------------------------------------------------------- tag page */
+/* ------------------------------------------------- tag page, and /f/ views */
+/* Both take the same shape and share src/_includes/view.njk, so the .tag-*
+   classes here read as "view page" — a curated tagview or a feel view. */
 
 .tag-head { margin-bottom: 2.25rem; }
-.tag-head h1 { margin: 0 0 0.5rem; font: 600 1.75rem/1.15 var(--serif); }
+
+/* The charm's own glyph at the head of its /f/ view — the one place the
+   pictogram appears without its words beside it, because the words are the
+   <h1> it sits in. */
+.view-glyph { font-size: 0.8em; margin-right: 0.15em; }
+.tag-head h1 { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
 .tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
 .tag-members { margin: 0; font: 12px/1.8 var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
@@ -793,7 +895,8 @@ a.post-list-date:hover { color: var(--accent); }
 .essay-title {
   display: block;
   margin-bottom: 0.35rem;
-  font: 600 1.4rem/1.25 var(--serif);
+  font: 700 1.4rem/1.12 var(--prose);
+  letter-spacing: -0.018em;
   color: var(--ink);
   text-decoration: none;
 }
