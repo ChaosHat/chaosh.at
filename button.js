@@ -30,7 +30,7 @@ const STAR = [238, 242, 255];
 // a true 2×2, the T's bar is symmetric. The dot sits at the CHAOS·HAT word
 // boundary, raised to mid-height, not at the domain's ".at" — that break is
 // the one place the eye should not stop. Never regenerate this from the font.
-const WORDMARK = [
+export const WORDMARK = [
   "..###....##...##....###......###......#####......##...##...####...######",
   ".#####...##...##...#####.....###.....#####.......##...##..######..######",
   "##...##..##...##..##...##..##...##..##...........##...##..##..##....##..",
@@ -40,6 +40,32 @@ const WORDMARK = [
   ".#####...##...##..##...##..#######...#####.......##...##..##..##....##..",
   "..###....##...##..##...##....###....#####........##...##..##..##....##..",
 ];
+
+// The same bitmap as an inline SVG for the masthead, so the site's name and
+// its button are one mark at two sizes. Rows are run-length encoded into a
+// single path; currentColor lets it take the link's colour like text would.
+export const wordmarkSvg = (scale = 2, label = "chaosh.at") => {
+  const w = WORDMARK[0].length;
+  const h = WORDMARK.length;
+  let d = "";
+  WORDMARK.forEach((row, y) => {
+    let x = 0;
+    while (x < w) {
+      if (row[x] !== "#") {
+        x += 1;
+        continue;
+      }
+      let run = 0;
+      while (row[x + run] === "#") run += 1;
+      d += `M${x} ${y}h${run}v1h-${run}z`;
+      x += run;
+    }
+  });
+  return (
+    `<svg class="wordmark" viewBox="0 0 ${w} ${h}" width="${w * scale}" height="${h * scale}" ` +
+    `role="img" aria-label="${label}" shape-rendering="crispEdges"><path fill="currentColor" d="${d}"/></svg>`
+  );
+};
 
 const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 

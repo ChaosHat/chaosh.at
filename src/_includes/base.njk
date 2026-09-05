@@ -21,7 +21,10 @@
       never change width as you navigate between the two kinds of page. -#}
   <body{% if wide %} class="wide"{% endif %}>
     <header class="site-header">
-      <a class="site-title" href="/">{{ site.title }}</a>
+      {#- The name is the site button's wordmark (button.js), not set type:
+          CHAOS·HAT with the dot at the word boundary. aria-label carries
+          the domain for readers and crawlers. -#}
+      <a class="site-title" href="/">{{ wordmark | safe }}</a>
       <nav class="site-nav">
         {% for shelf in collections.shelves %}
         <a class="nav-shelf" href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>

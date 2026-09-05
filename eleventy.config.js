@@ -3,7 +3,7 @@ import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
 import { subjectSvg, chipSvg, daySky, headerSheet, hashOf } from "./aurora.js";
-import { buttonFiles } from "./button.js";
+import { buttonFiles, wordmarkSvg } from "./button.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -1155,6 +1155,9 @@ export default function (eleventyConfig) {
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. One 16-frame sprite sheet, stepped
   // through by CSS.
+  // The masthead's name is the button's wordmark at 2× — one mark, two sizes.
+  eleventyConfig.addGlobalData("wordmark", wordmarkSvg(2));
+
   const today = new Date().toISOString().slice(0, 10);
   skyFiles.set("img/aurora/sheet.svg", headerSheet(today));
 

@@ -236,6 +236,11 @@ h1, h2, h3 { line-height: 1.25; }
   color: var(--ink);
 }
 
+/* The name is a pixel bitmap (see button.js), 72×8 shown at 2×: 144×16,
+   within a few px of the 24px Silkscreen title it replaced, so the header's
+   geometry did not move. currentColor keeps it behaving like link text. */
+.site-title .wordmark { display: block; image-rendering: pixelated; }
+
 .site-title::before {
   content: "";
   width: 18px;
