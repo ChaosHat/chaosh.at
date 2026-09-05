@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, bannerSvg, daySky, headerSheet, hashOf, BANNER_H } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, headerSheet, hashOf } from "./aurora.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -246,12 +246,18 @@ export default function (eleventyConfig) {
     // Canon floats, everything else holds still. Deliberately not a re-sort:
     // below the ten it should read as the shelf you were already looking at.
     const canon = rankBy((a, b) => (b.canon === true) - (a.canon === true));
+    // The ladder, top to bottom: canon, then the rungs by rank, then the
+    // unrated. Within a rung the status order holds (stable sort), so the
+    // grouped shelf still reads active-first inside each band.
+    const rungOf = (s) => (s.canon ? 0 : (s.rating?.rank ?? 99));
+    const rating = rankBy((a, b) => rungOf(a) - rungOf(b));
 
     return items.map((s) => ({
       ...s,
       oAz: az.get(s.slug),
       oRecent: recent.get(s.slug),
       oCanon: canon.get(s.slug),
+      oRating: rating.get(s.slug),
     }));
   });
 
@@ -368,36 +374,45 @@ export default function (eleventyConfig) {
   const CANON_TAG = "canon";
   const canonSlugs = new Set(tags[CANON_TAG]?.members ?? []);
 
-  // ------------------------------------------------------------------ feel
+  // ---------------------------------------------------------------- rating
   //
-  // The third axis, and the sparse one. Status is total and says what happened;
-  // canon is a capped ten; `feel:` is optional, at most one per subject, and
-  // says what he thought. The vocabulary is CLOSED — six entries in feels.yaml
-  // — and an unknown value is reported after the build, never minted, the same
-  // contract about: has. A set that grows by typo stops being a vocabulary a
-  // reader can hold.
+  // The third axis. Status is total and says what happened; canon is a capped
+  // ten; `rating:` is one rung from the ORDINAL ladder in ratings.yaml and says
+  // what he thought. The vocabulary is CLOSED — four rungs — and an unknown
+  // value is reported after the build, never minted, the same contract about:
+  // has. The ladder the shelf reads is canon > favorite > loved > liked >
+  // disliked, and "pending" for anything rated nothing.
   //
-  // CANON SUPERSEDES: a subject in the canon carries no feel, here rather than
-  // in the templates, so the rule holds for the chip, the /f/ views and
-  // anything added later without each of them having to remember it.
-  const feelsFile = path.join("src", "_data", "feels.yaml");
-  const feels = fs.existsSync(feelsFile)
-    ? parseYaml(fs.readFileSync(feelsFile, "utf8")) || {}
+  // This replaced six categorical "charms" (feels.yaml, 2026-09-04, never
+  // live). They were built so no mark could outrank another, and that is why
+  // they failed: a reader maps someone else's taste onto their own, and that
+  // needs magnitude.
+  //
+  // CANON SUPERSEDES: a subject in the canon carries no rating, here rather
+  // than in the templates, so the rule holds for the tile, the subject page,
+  // the /r/ views and anything added later without each having to remember
+  // it. The tile renders "canon" in the rating cell instead.
+  const ratingsFile = path.join("src", "_data", "ratings.yaml");
+  const ratings = fs.existsSync(ratingsFile)
+    ? parseYaml(fs.readFileSync(ratingsFile, "utf8")) || {}
     : {};
+  const ratingOrder = Object.entries(ratings)
+    .sort(([, a], [, b]) => (a?.rank ?? 99) - (b?.rank ?? 99))
+    .map(([slug]) => slug);
 
-  const badFeels = [];
-  const feelOf = (slug, meta) => {
-    const want = meta?.feel;
+  const badRatings = [];
+  const ratingOf = (slug, meta) => {
+    const want = meta?.rating;
     if (want == null) return null;
-    if (typeof want !== "string" || !feels[want]) {
-      // A list is the shape error worth naming separately: one charm per
-      // subject is what stops the marks reading as a score that composes.
-      badFeels.push({ slug, value: Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want) });
+    if (typeof want !== "string" || !ratings[want]) {
+      // A list is the shape error worth naming separately: a game has one
+      // verdict, and two rungs on one tile would read as a range.
+      badRatings.push({ slug, value: Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want) });
       return null;
     }
     if (canonSlugs.has(slug)) return null;
-    const f = feels[want];
-    return { slug: want, title: f?.title ?? want, glyph: f?.glyph ?? "" };
+    const r = ratings[want];
+    return { slug: want, title: r?.title ?? want, rank: r?.rank ?? ratingOrder.indexOf(want) + 1 };
   };
 
   // ------------------------------------------------------------------- sky
@@ -488,11 +503,9 @@ export default function (eleventyConfig) {
     const opts = { canon: canonSlugs.has(slug) };
     skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier, opts));
     skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier, opts));
-    skyFiles.set(`img/sky/${slug}-banner.svg`, bannerSvg(slug, hue, status, tier, BANNER_H, opts));
     return {
       skyUrl: `/img/sky/${slug}.svg`,
       chipUrl: `/img/sky/${slug}-chip.svg`,
-      bannerUrl: `/img/sky/${slug}-banner.svg`,
     };
   };
 
@@ -546,15 +559,13 @@ export default function (eleventyConfig) {
     return `/${rel}`;
   });
 
-  const skyUrls = new Map(); // slug -> {skyUrl, chipUrl, bannerUrl}, for linkSubjects
+  const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
 
   const skyTag = (slug, status) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
-    // A covered subject shows its cover here instead of its sky. No banner:
-    // on the shelf the banner carries status because nothing else does, but a
-    // fragment already has a status badge sitting beside its heading, and at
-    // this width the strip is a 20px sliver restating it.
+    // A covered subject shows its cover here instead of its sky. Status is
+    // the badge sitting beside the heading, not anything in the art.
     //
     // Background image, not <img>, for the same reason the sky is one: an img
     // carries intrinsic height and would drive the row instead of being driven
@@ -801,9 +812,9 @@ export default function (eleventyConfig) {
         // to the back rather than jumbling among the dated ones.
         lastWrote: lastWrote ?? null,
         canon: canonSlugs.has(slug),
-        // null on a canon subject by construction — see feelOf. The template
-        // needs no conditional beyond "is there one".
-        feel: feelOf(slug, meta),
+        // null on a canon subject by construction — see ratingOf. Templates
+        // branch on canon first, then on this, then render "pending".
+        rating: ratingOf(slug, meta),
         coverUrl: coverUrls.get(slug) ?? null,
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
         // this is the subject's own standing paragraph, rendered in full
@@ -881,27 +892,27 @@ export default function (eleventyConfig) {
     });
   });
 
-  // A feel view is a tag page with a derived membership. Everything else about
-  // it — the definition at the top, the members line, the mixed timeline — is
-  // the shape tag.njk already has, so /f/ reuses that template wholesale.
+  // A rating view is a tag page with a derived membership. Everything else
+  // about it — the definition at the top, the members line, the mixed timeline
+  // — is the shape tag.njk already has, so /r/<rung>/ reuses that template.
   //
-  // Membership is grouped from `feel:` at build time and never hand-listed: a
+  // Membership is grouped from `rating:` at build time and never hand-listed: a
   // declared member list beside a per-subject key is two sources of truth, and
-  // they drift the first time something is retagged. Mints no nav link, same
-  // rule as tags — a feel view is reached by clicking a chip, which is what
-  // makes the vocabulary self-teaching rather than something you read a legend
-  // for. All six build even at zero members, the same courtesy an empty tag
-  // gets; with nothing linking to it, an unused charm costs a page nobody
-  // reaches rather than a broken one somebody does.
-  eleventyConfig.addCollection("feelPages", (api) => {
+  // they drift the first time something is re-rated. Mints no nav link, same
+  // rule as tags — a rung's view is reached from its chip on a subject page or
+  // from the /r/ index, and "every game I loved" is the calibration surface the
+  // scale exists for. All four build even at zero members, the same courtesy
+  // an empty tag gets. Ordered by rank so the index can loop them as-is.
+  eleventyConfig.addCollection("ratingPages", (api) => {
     const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
 
-    return Object.entries(feels).map(([slug, meta]) => {
-      const members = [...bySlug.values()].filter((s) => s.feel?.slug === slug);
+    return ratingOrder.map((slug) => {
+      const meta = ratings[slug];
+      const members = [...bySlug.values()].filter((s) => s.rating?.slug === slug);
 
-      // Essays deliberately do NOT reach a feel view. An essay is about a
-      // subject; a charm is a reaction to one, and routing essays here would
-      // make /f/ a second front page for the same writing. The members'
+      // Essays deliberately do NOT reach a rating view. An essay is about a
+      // subject; a rating is a verdict on one, and routing essays here would
+      // make /r/ a second front page for the same writing. The members'
       // fragments are the page.
       const entries = [];
       for (const subject of members) {
@@ -920,10 +931,11 @@ export default function (eleventyConfig) {
       return {
         slug,
         title: meta?.title ?? slug,
-        glyph: meta?.glyph ?? "",
+        rank: meta?.rank ?? null,
         description: meta?.description ?? null,
         members,
         entries,
+        indexUrl: "/r/",
       };
     });
   });
@@ -1201,17 +1213,17 @@ export default function (eleventyConfig) {
       console.warn(`  Set "hue: <0-359>" in subjects.yaml to pin one.\n`);
     }
 
-    // Reported, never minted. A bad value drops the chip AND the game's row in
-    // its /f/ view, and both failures are invisible on the page — the tile just
-    // looks like one of the fifty that were left unmarked on purpose.
-    if (badFeels.length > 0) {
+    // Reported, never minted. A bad value renders the tile as "pending" AND
+    // drops the game's row from its /r/ view, and both failures are invisible
+    // on the page — the tile just looks like one left unrated on purpose.
+    if (badRatings.length > 0) {
       console.warn(
-        `\n[chaosh.at] ${badFeels.length} feel: value(s) not in feels.yaml:`,
+        `\n[chaosh.at] ${badRatings.length} rating: value(s) not in ratings.yaml:`,
       );
-      for (const { slug, value } of badFeels) {
+      for (const { slug, value } of badRatings) {
         console.warn(`  · ${slug} → ${value}`);
       }
-      console.warn(`  That game renders no chip. Fix the slug, or add the charm to feels.yaml on purpose.\n`);
+      console.warn(`  That game renders as pending. Fix the slug, or add the rung to ratings.yaml on purpose.\n`);
     }
 
     if (unmatched.size > 0) {

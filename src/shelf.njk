@@ -39,60 +39,69 @@ eleventyComputed:
   <label for="sort-recent">recent</label>
   <input type="radio" name="shelf-sort" id="sort-canon">
   <label for="sort-canon">canon</label>
+  <input type="radio" name="shelf-sort" id="sort-rating">
+  <label for="sort-rating">rating</label>
 </fieldset>
+{#- The scale, printed: the one link to the page that shows every rung in
+    order. Sits with the sort control because "rating" is the axis it
+    explains, and a word under a cover is only half a scale on its own. -#}
+<a class="shelf-key" href="/r/">what the ratings mean</a>
 {% endif %}
 
-{#- Two jobs, split across two pieces of art. The COVER identifies: a reader
-    hunting for one game scans box art far faster than titles, and faster still
-    than a dozen abstract night scenes that deliberately encode no identity.
-    The BANNER above it is that subject's own sky cropped to a strip, and it
-    keeps both axes the tile always carried — how much aurora is left says
-    status, how brightly it burns says how recently it was written about. The
-    shelf still reads as a state-of-the-category at a glance; you just no longer
-    have to decode which scene is which game to use it.
+{#- One card per game: the cover, then two cells hung directly under it —
+    status, then rating — then the title. The COVER identifies: a reader
+    hunting for one game scans box art far faster than titles. The CELLS say
+    what happened and what he thought, in that order, in words. The title comes
+    LAST so the cells sit at one height across every row: put the caption
+    between and every wrapped title pushes its badges down a line, which was
+    the ragged shelf this layout replaced (2026-09-04).
+
+    Two cells stacked, never side by side: at six columns the tile is ~140px
+    and a status word plus a rating word in Silkscreen never both fit on one
+    line ("abandoned" + "disliked" is ~160px of glyphs). Full-width cells fit
+    every word in both vocabularies with room to spare.
+
+    The aurora banner that used to sit above the cover is gone. Its status
+    half had been redundant since the badges arrived, and recency-by-
+    brightness was the subtlest encoding of the least important axis — still
+    reachable through the `recent` sort.
 
     Covers are SOURCED, and sourced means sometimes absent. A subject without
-    one falls back to the whole generated tile, stretched by CSS to the exact
-    height the banner-and-cover stack comes to — so the original guarantee holds
-    (no shelf goes blank waiting on an image) and a half-covered shelf still
-    lays out as one even grid rather than a ragged one. -#}
+    one falls back to its generated tile, stretched by CSS to the cover's 2:3,
+    so the original guarantee holds (no shelf goes blank waiting on an image)
+    and a half-covered shelf still lays out as one even grid. -#}
 <ul class="shelf-grid">
   {% for item in items %}
-  <li class="shelf-item{% if item.canon %} is-canon{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }}">
+  <li class="shelf-item st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
     <a href="/s/{{ item.slug }}/">
-      <span class="shelf-art">
-        {% if item.coverUrl %}
-        <span class="sky sky-banner" style="background-image:url({{ item.bannerUrl }})" aria-hidden="true"></span>
-        {#- A real <img>, unlike every sky on the site: the generated art is
-            decoration and belongs in CSS, but a cover is content, it wants an
-            alt, and a shelf that keeps growing wants lazy loading. -#}
-        <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" loading="lazy" decoding="async">
-        {% else %}
-        <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
-        {% endif %}
+      <span class="shelf-card">
+        <span class="shelf-art">
+          {% if item.coverUrl %}
+          {#- A real <img>, unlike every sky on the site: the generated art is
+              decoration and belongs in CSS, but a cover is content, it wants an
+              alt, and a shelf that keeps growing wants lazy loading. -#}
+          <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" loading="lazy" decoding="async">
+          {% else %}
+          <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
+          {% endif %}
+        </span>
+        {#- SPANs, not links: the whole tile is already one anchor, and an <a>
+            inside an <a> is invalid — the parser closes the outer one early
+            and the tile's layout comes apart. The rung's view is one click
+            further, from the subject page. -#}
+        <span class="cell badge b-{{ item.status }}">{{ item.status }}</span>
+        {#- The rating cell. Canon supersedes (ratingOf returns null for the
+            ten) and takes the cell itself, gold with the ♥, so the top of the
+            ladder is read in the same place as every other rung. The rung
+            below wears silver on the whole card: metal orders the top two
+            where English couldn't order "favorite" against "loved". Unrated
+            renders "pending" rather than an empty cell — a blank beside a
+            filled neighbour reads as a field someone forgot. -#}
+        {% if item.canon %}<span class="cell rating badge-g b-canon" data-g="♥">canon</span>
+        {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}">{{ item.rating.title }}</span>
+        {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
       </span>
       <span class="shelf-caption">{{ item.title }}</span>
-      {#- Gold is the fast channel, but it is only a channel — this badge is what
-          carries the same fact for a reader who cannot see the colour, and it is
-          why the frame does not have to work alone. -#}
-      {% if item.canon %}<span class="badge badge-g b-canon" data-g="♥">canon</span>{% endif %}
-      <span class="badge b-{{ item.status }}">{{ item.status }}</span>
-      {#- The third axis, and the sparse one: status says what happened, this
-          says what he thought of it. Most tiles carry nothing — that is the
-          design, not an unfinished import, and it is what makes a chip mean
-          something. Hollow where the status badge is filled, and glyphed where
-          the status badge has an abstract dot: two independent signals keep the
-          axes apart at 12px over busy cover art. It borrows the tile's status
-          hue rather than inventing a sixth colour taxonomy, so the colour still
-          means the one thing it always meant.
-          Suppressed on canon in eleventyConfig (feelOf), not here — the ten are
-          the statement, the charms are the texture on the other forty-seven.
-
-          A SPAN, not a link, unlike the same chip on a subject page: the whole
-          tile is already one anchor, and an <a> inside an <a> is invalid — the
-          parser closes the outer one early and the tile's layout comes apart.
-          The charm's view is one click further, from the subject page. -#}
-      {% if item.feel %}<span class="feel feel-hue feel-g" data-g="{{ item.feel.glyph }}" style="--c:var(--st-{{ item.status }})">{{ item.feel.title }}</span>{% endif %}
     </a>
   </li>
   {% endfor %}

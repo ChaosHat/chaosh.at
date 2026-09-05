@@ -1,0 +1,41 @@
+---
+layout: base.njk
+permalink: "/r/"
+title: Ratings
+description: What the words under the covers mean, in order.
+---
+{#- The scale, printed. Every rung in order on one page, canon at the top,
+    each with its one line — the only surface that shows the whole ladder at
+    once, and the answer to "how many rungs are there and where does this
+    sit". A five-point score with no scale printed anywhere was deleted from
+    this site on 2026-09-04 for exactly that failure; this page is what keeps
+    the replacement from repeating it.
+
+    Reached from the shelf's sort control and from every rung's own page. No
+    nav link: it's a key, not a section. -#}
+<article class="tag ratings">
+  <header class="tag-head">
+    <h1>Ratings</h1>
+    <p class="tag-desc">Two words under every cover: what happened, and what I thought. This is the second one, top to bottom.</p>
+  </header>
+  <ol class="ladder">
+    {%- for tag in collections.tagPages %}{% if tag.slug == "canon" %}
+    <li class="rung rung-canon">
+      <a class="badge badge-g b-canon" data-g="♥" href="/t/{{ tag.slug }}/">canon</a>
+      <p class="rung-desc">{{ tag.description }}</p>
+      <p class="rung-count">{{ tag.members | length }} games</p>
+    </li>
+    {%- endif %}{% endfor %}
+    {%- for rung in collections.ratingPages %}
+    <li class="rung rung-{{ rung.slug }}">
+      <a class="rating r-{{ rung.slug }}" href="/r/{{ rung.slug }}/">{{ rung.title }}</a>
+      {% if rung.description %}<p class="rung-desc">{{ rung.description }}</p>{% endif %}
+      <p class="rung-count">{{ rung.members | length }} game{% if rung.members | length != 1 %}s{% endif %}</p>
+    </li>
+    {%- endfor %}
+    <li class="rung rung-pending">
+      <span class="rating r-pending">pending</span>
+      <p class="rung-desc">No verdict yet. Not started, still going, or stopped for reasons that weren't the game.</p>
+    </li>
+  </ol>
+</article>

@@ -1,0 +1,80 @@
+# The rating scale — what Hat thought of a game, as the second of two cells
+# under its cover on the shelf (status above, rating below) and a chip in the
+# meta row of its subject page. A subject opts in with one `rating:` key in
+# subjects.yaml naming exactly one slug below.
+#
+# ORDINAL, and deliberately so. This replaced a set of six categorical "charms"
+# on 2026-09-04, the same day they were built. The charms were designed so that
+# no mark could read as better than another; trying to actually use them kept
+# hitting things they couldn't say, and the cause was the design itself. A
+# reader's use for a review is to map someone else's taste onto their own, and
+# that mapping needs magnitude — which a categorical set refuses to carry on
+# purpose.
+#
+# The ladder, top to bottom, as the shelf reads it:
+#
+#   canon     gold frame + ♥   — the capped ten (tagviews.yaml, own rubric)
+#   favorite  silver frame     — former canon, or canon consideration
+#   loved
+#   liked
+#   disliked
+#   pending   (rendered for any non-canon subject with no rating)
+#
+# Why it is self-ordering, which the earlier drafts were not: the top two are
+# ranked by METAL, which every reader already orders (gold over silver), and
+# the three below are past-tense verbs English already orders. Nothing on the
+# ladder needs the index page to be understood. The index (/r/) exists anyway,
+# because a scale should be printed somewhere.
+#
+# Past tense on purpose — these are verdicts on an experience that happened,
+# not live feelings. `favorite` is a noun because it names a class of game the
+# way `canon` does; the frame is what makes those two a class.
+#
+# `disliked`, not "not for me": the softer phrase was preferred and lost on
+# two counts — three words on a one-word ladder, and every one-word softening
+# ("pass") could be read as its own opposite. It is a first-person feeling,
+# not a verdict on the game; the description below is where the softening
+# goes, and it is Hat's to write.
+#
+# CANON IS THE TOP RUNG AND IS NOT LISTED HERE. It stays a capped-ten set in
+# tagviews.yaml with its own admission rubric (Canon Rubric.md), renders gold
+# with a ♥, and SUPERSEDES: a game in the ten renders "canon" in its rating
+# cell and joins no /r/ view. A game leaving the ten lands on `favorite` —
+# which is the whole reason `favorites` was renamed to `canon`.
+#
+# `rank` is display order; low is warm. Membership in /r/<slug>/ is DERIVED by
+# grouping subjects on `rating:`, never listed here.
+#
+# Unrated is a real state and renders as "pending": a backlog game has no
+# rating because it hasn't been played, and an abandoned game with none is a
+# verdict deliberately suspended — which is not the same as `disliked`.
+#
+# ⚠️ Slugs must never be bare yes/no/on/off — those are BOOLEANS in the YAML
+# the loaders use, and the key would parse as True/False and vanish.
+
+favorite:
+  rank: 1
+  title: favorite
+  description: >-
+    A game I'll keep coming back to. Former canon, or on the doorstep of it.
+
+loved:
+  rank: 2
+  title: loved
+  description: >-
+    A strong recommendation. No caveat to hand you first; I think you should
+    play it.
+
+liked:
+  rank: 3
+  title: liked
+  description: >-
+    A recommendation, with some caveats. Still a yes — there's just a thing or
+    two you should know going in.
+
+disliked:
+  rank: 4
+  title: disliked
+  description: >-
+    Didn't land for me. Not "bad" — plenty of good games sit here, and plenty
+    of people will disagree with me about them. A taste statement.

@@ -1,18 +1,21 @@
 {#- A VIEW page: a heading, a definition, the games it gathers, and one mixed
     timeline of everything written about them. Two things take this shape —
-    /t/ (a curated tagview, membership authored in tagviews.yaml) and /f/ (a
-    feel view, membership DERIVED by grouping subjects on their `feel:`) — and
-    they differ only in where the member list comes from, which is settled by
-    the time this renders. Sharing the body is the reason /f/ cost a template
-    and not a page type.
+    /t/ (a curated tagview, membership authored in tagviews.yaml) and /r/ (a
+    rating rung, membership DERIVED by grouping subjects on their `rating:`) —
+    and they differ only in where the member list comes from, which is settled
+    by the time this renders. Sharing the body is the reason /r/ cost a
+    template and not a page type.
 
-    Callers set `view` (slug, title, glyph, description, members, entries) and
-    `emptyLabel`. The `.tag-*` classes are structural and read as "view page"
-    here, tagview or feel alike — see the tag-page block in style.css. -#}
+    Callers set `view` (slug, title, glyph, description, members, entries,
+    optional indexUrl) and `emptyLabel`. The `.tag-*` classes are structural
+    and read as "view page" here, tagview or rung alike — see the tag-page
+    block in style.css. -#}
 <article class="tag">
   <header class="tag-head">
     <h1>{% if view.glyph %}<span class="view-glyph" aria-hidden="true">{{ view.glyph }}</span> {% endif %}{{ view.title }}</h1>
     {% if view.description %}<p class="tag-desc">{{ view.description }}</p>{% endif %}
+    {#- A rung is one step of a ladder, and a ladder is only legible whole. -#}
+    {% if view.indexUrl %}<p class="tag-index"><a href="{{ view.indexUrl }}">the whole scale →</a></p>{% endif %}
     {#- Membership IS the definition of the view, so it goes at the top rather
         than being inferred from the timeline below. -#}
     {% if view.members | length %}
@@ -49,8 +52,8 @@
           subjects: the hue says which game before the label has been read.
           An essay is its own thing, not a subject — its row carries its
           title instead of a chip, and its lede links to its /e/ page, the
-          full text's one home. Feel views carry no essays at all (an essay is
-          about a game, not a reaction to one), so this branch simply never
+          full text's one home. Rating views carry no essays at all (an essay
+          is about a game, not a verdict on one), so this branch simply never
           fires there — no conditional needed. -#}
       {% if entry.kind == "essay" %}
       <a class="essay-title" href="{{ entry.url }}">{{ entry.title }}</a>

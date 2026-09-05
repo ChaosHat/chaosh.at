@@ -111,7 +111,9 @@ const smooth = (pts) => {
 //
 // `sway` scales the vertical wander (wave amplitude and end-to-end drift),
 // `edgeH` the thickness of the bright edge, `quant` the y grid the edge snaps
-// to, and `step` the column width. All four exist for the banner, whose box is
+// to, and `step` the column width. All four were added for the shelf banner
+// strip (retired 2026-09-04 with the rating cells; the reasoning is in the
+// design doc's changelog) and stay because the lesson does: that box was
 // an eighth the height of the tile these numbers were tuned against: there, an
 // unscaled curtain wanders clean out of frame, one snapped to the tile's 3-unit
 // grid crosses a single step and lies flat like a rule, and 4-wide columns are
@@ -308,95 +310,6 @@ export const chipSvg = (slug, ladderHue, status, tier, { canon = false } = {}) =
   return svgWrap(W, H, body);
 };
 
-// The banner: what a sky becomes when a shelf tile is carrying SOURCED cover
-// art and the generated art steps back to being a status light. Not the tile
-// squashed — squashing flattens the curtains into the graph-line failure the
-// chip was invented to dodge. It is the same night through a WIDE window: two
-// curtains at tile scale, cropped by a short frame, rays running off the top
-// the way a real curtain running out of frame does.
-//
-// Same seed as the tile, so a subject's banner and its tile are the same sky
-// and not two pictures. Both meaning axes survive the crop: status still says
-// how much aurora is left (three-then-two curtains, grey ghost, moon), recency
-// still says how brightly it burns. Only the identifying job moves — that's the
-// cover's now, which is the point of the whole arrangement.
-//
-// 96 wide is not a free choice — it is the TILE's width, and the banner has to
-// keep it. curtain()'s per-column ray jitter is a function of raw x, so its
-// spatial frequency is fixed per unit of width: at 192 the rays came out twice
-// as fine, and a wide strip of high-frequency rays is precisely the "banded
-// stripe" this drawing was built to avoid. Same width, same hue, same chunk.
-//
-// Height is the one knob, and every other number below is derived from it as a
-// fraction. Tuning this by hand once produced a strip that only looked right at
-// one height; expressed as fractions, changing BANNER_H alone re-tunes the
-// wander, the ray length, the edge weight and the moon together, and the strip
-// stays a strip at any size worth using. Sane range is roughly 10–20.
-export const BANNER_W = 96;
-export const BANNER_H = 17;
-
-export const bannerSvg = (slug, ladderHue, status, tier, h = BANNER_H, { canon = false } = {}) => {
-  const rand = mulberry32(hashOf(slug));
-  const pal = palette(ladderHue);
-  const moon = canon ? MOON_GOLD : MOON;
-  const W = BANNER_W;
-  const H = h;
-
-  // The main curtain rides low on purpose: the strip's bottom edge IS the top
-  // of the cover, so an edge sitting near it reads as aurora over a horizon
-  // rather than a band floating above a dark gap.
-  const lowY = 0.68 * H;
-  const highY = 0.3 * H;
-  // sway is calibrated so the wave amplitude lands near an eighth of the frame
-  // whatever the frame is: range(5,9) averages 7, so 0.018*H puts amp ≈ 0.125*H.
-  // quant 1 because at these heights the tile's 3-unit grid is a quarter of the
-  // whole box — it would step the edge in visible jumps instead of a wave.
-  const shape = {
-    sway: 0.018 * H,
-    edgeH: Math.max(2, Math.round(0.14 * H)),
-    quant: 1,
-    step: 2, // finer than the tile's 4 — see the aliasing note on curtain()
-  };
-  const band = (y) => ({ yMin: y - 0.05 * H, yMax: y + 0.05 * H });
-
-  let body = nightBase(status === "completed" ? NIGHT_DONE : NIGHT, W, H);
-  body += stars(rand, Math.round((status === "completed" ? 0.5 : 0.35) * H), { w: W, h: H });
-
-  if (status === "completed") {
-    // The tile's waning crescent, same construction — lit disc with the
-    // night-side disc masked out, halo carved by the same mask — hung left so
-    // the rest of the strip stays open night. The HALO is what has to fit
-    // inside H, not the disc: clipped, its soft edge becomes a hard chord and
-    // the thing stops reading as a moon and starts reading as a grey badge.
-    const r = 0.28 * H; // lit disc
-    const cx = 1.2 * H;
-    const cy = 0.5 * H;
-    const f = (n) => n.toFixed(2);
-    body +=
-      `<mask id='m'><circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.86)}' fill='#fff'/>` +
-      `<circle cx='${f(cx + r * 0.5)}' cy='${f(cy - r * 0.27)}' r='${f(r * 0.93)}' fill='#000'/></mask>` +
-      `<g mask='url(#m)'>` +
-      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r * 1.7)}' fill='${moon}' fill-opacity='0.16'/>` +
-      `<circle cx='${f(cx)}' cy='${f(cy)}' r='${f(r)}' fill='${moon}'/>` +
-      `</g>`;
-  } else if (status === "abandoned") {
-    body += curtain(rand, GREY, { ...shape, ...band(lowY), hBase: 0.5 * H, op: 0.3 });
-  } else if (status === "shelved") {
-    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.25 });
-    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.36 * H, op: 0.35 });
-  } else if (status === "dabbling") {
-    // Same middle ground as the tile: shelved's thinner pair, active's tier.
-    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.3 * tier });
-    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.45 * H, op: 0.55 * tier });
-  } else {
-    // A second curtain only when there is room for one. Below ~16 the two
-    // overlap into a single smear, which reads as less sky rather than more —
-    // the same reduction the chip makes, for the same reason.
-    if (H >= 16) body += curtain(rand, pal, { ...shape, ...band(highY), hBase: 0.12 * H, op: 0.4 * tier });
-    body += curtain(rand, pal, { ...shape, ...band(lowY), hBase: 0.57 * H, op: 0.8 * tier });
-  }
-  return svgWrap(W, H, body);
-};
 
 // MOCK — the day band: the sky the night a post was written.
 //

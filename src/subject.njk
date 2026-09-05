@@ -22,10 +22,12 @@ eleventyComputed:
       <p class="subject-meta">
         {% if subject.canon %}<span class="badge badge-g b-canon" data-g="♥">canon</span>{% endif %}
         <span class="badge b-{{ subject.status }}">{{ subject.status }}</span>
-        {#- Same chip as the shelf tile, same suppression rule, and a link to
-            the charm's own view — which is the only way /f/ is ever reached,
-            and how the vocabulary teaches itself. -#}
-        {% if subject.feel %}<a class="feel feel-hue feel-g" data-g="{{ subject.feel.glyph }}" style="--c:var(--st-{{ subject.status }})" href="/f/{{ subject.feel.slug }}/">{{ subject.feel.title }}</a>{% endif %}
+        {#- The rating, as a chip linking to its rung's view — every game
+            rated the same word, which is how the word calibrates itself. A
+            canon subject carries none: the ♥ badge above is the top rung.
+            Unrated renders "pending" here too, unlinked, so a subject page
+            never looks like the field was forgotten. -#}
+        {% if subject.rating %}<a class="rating r-{{ subject.rating.slug }}" href="/r/{{ subject.rating.slug }}/">{{ subject.rating.title }}</a>{% elif not subject.canon %}<a class="rating r-pending" href="/r/">pending</a>{% endif %}
         {#- Sidestepping to the franchise or the genre is the natural next move
             for a reader who arrived by following a title, so the tags sit in the
             meta row rather than at the foot of a long timeline. -#}

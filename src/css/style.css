@@ -85,6 +85,11 @@
      same mark. Matches MOON_GOLD in aurora.js, which gilds a canon subject's moon;
      if one moves, move both. */
   --gold: #f5c86b;
+  /* The rung below canon. Has to read as a metal beside gold and as a
+     different thing from three cool pale neighbours on the same shelf —
+     --muted (#a9a6ce), --st-sampled (#b6bda8), --st-completed (#a9d0f6) —
+     so it is brighter and less blue than all three. */
+  --silver: #cfd3e0;
 
   /* Retained, unused: the per-block prose cap used until 2026-08-18. Capping
      blocks individually is what stranded headings and datelines at the shell
@@ -387,42 +392,44 @@ h1, h2, h3 { line-height: 1.25; }
 .b-abandoned { --c: var(--st-abandoned); }
 .b-completed { --c: var(--st-completed); }
 
-/* The feel chip — the third axis, and the sparse one. Told apart from a status
-   badge by TWO independent signals, because one is too thin at 12px over cover
-   art: fill (badge is filled, chip is hollow) and mark (badge carries an
-   abstract 4px dot, chip carries a pictogram). That pairing is why the statuses
-   do NOT also get glyphs — it would spend one of the two discriminators, and
-   "completed" is plain English where "won't shut up" is not, so a status glyph
-   buys decode risk and no meaning.
+/* The rating chip — the third axis. Told apart from a status badge by fill:
+   the badge is filled in its status hue, the chip is hollow and colourless.
+   Colourless on purpose, where the charms it replaced borrowed the status hue:
+   the charms were categorical and a borrowed hue cost nothing, but on an
+   ORDINAL scale the same word in seven colours across the shelf would read as
+   seven different ratings. The word is the whole mark; the two rungs that do
+   get a colour (canon gold, favorite silver) get it as a frame on the card,
+   not as a hue on the word, so the metal and the word say the same thing.
 
-   The colour is BORROWED, not invented: the chip takes the tile's own status
-   hue. A colourless chip read as disabled, and a hue per charm would collide
-   with the seven statuses and hand the reader two clashing legends. Borrowing
-   means the colour still says exactly what it always said, and the filled badge
-   and hollow chip read as one matched pair. --c is set inline by the template. */
-.feel {
+   No 4px dot, no glyph: a status badge carries the dot, and its absence is the
+   second discriminator at 12px. Canon's ♥ is the one exception, handled by
+   .badge-g. */
+.rating {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
   padding: 0.3rem 0.45rem;
   font: 12px/1 var(--pixel);
   white-space: nowrap;
   text-decoration: none;
-}
-
-.feel-hue {
-  color: var(--c);
+  color: var(--muted);
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
 }
 
-.feel-hue:hover,
-.feel-hue:focus-visible { border-color: var(--c); }
+a.rating:hover,
+a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 
-/* The glyph takes the 4px dot's slot: ~8px of width, no second line, and the
-   words are still right there — which is the whole reason emoji work here and
-   failed as a mark on their own. */
-.feel-g::before { content: attr(data-g); font-size: 11px; line-height: 1; flex: none; }
+.r-favorite { color: var(--silver); border-color: color-mix(in srgb, var(--silver) 55%, transparent); }
+
+/* Pending is a placeholder, not a fifth rung: dimmer and dashed, so it reads
+   as "nothing here yet" rather than as a verdict called "pending". Rendered
+   rather than omitted because a blank cell beside a filled neighbour reads as
+   a field somebody forgot. */
+.r-pending {
+  color: color-mix(in srgb, var(--muted) 55%, transparent);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--muted) 30%, transparent);
+}
 
 /* Same trick on the canon badge, where ♥ is the non-colour channel carrying
    what the gold frame says — an exception for the rare gilded ten, not a
@@ -658,18 +665,11 @@ a.post-list-date:hover { color: var(--accent); }
 
 .shelf-item a { display: block; text-decoration: none; color: inherit; }
 
-/* The lift takes the whole art stack. Banner and cover are one object — moving
-   only the strip would peel it off the box it labels. */
-.shelf-art { display: block; transition: transform 0.1s steps(3); }
-.shelf-item a:hover .shelf-art { transform: translateY(-4px); }
-
-/* The strip hung above a sourced cover. --banner-h must match aurora.js's
-   BANNER_H, and it is the only number to change: the fallback tile's height
-   below is derived from it, so the grid stays even automatically. No bottom
-   border — one edge between strip and cover, not two, so the pair reads as a
-   single card with a lit header. */
-.shelf-grid { --banner-w: 96; --banner-h: 17; }
-.sky-banner { aspect-ratio: var(--banner-w) / var(--banner-h); border-bottom: 0; }
+/* The card is cover + two cells, and the lift takes the whole card: they are
+   one object, and lifting the art alone would peel it off the label under it. */
+.shelf-card { display: block; transition: transform 0.1s steps(3); }
+.shelf-item a:hover .shelf-card { transform: translateY(-4px); }
+.shelf-art { display: block; }
 
 /* 2:3 is SteamGridDB's portrait grid size (600x900), so a fetched cover lands
    unscaled. cover-sizing catches the other dimensions the API serves. No
@@ -680,7 +680,6 @@ a.post-list-date:hover { color: var(--accent); }
   width: 100%;
   aspect-ratio: 2 / 3;
   border: 1px solid var(--edge);
-  border-top: 0;
   /* Night showing through until a lazy cover arrives, so the grid never
      flashes a white or empty box against the dark page. */
   background: var(--deep);
@@ -688,17 +687,26 @@ a.post-list-date:hover { color: var(--accent); }
 }
 
 /* Covered and coverless tiles are held to the same height so a partly-covered
-   shelf lays out as one clean grid rather than a ragged one: the banner plus a
-   2:3 cover comes to (banner-h/banner-w + 1.5) column-widths, and the fallback
-   sky stretches to exactly that. Derived, not hardcoded, so retuning the banner
-   height cannot silently leave the two forms mismatched. Stretching is what
-   these SVGs are for — pAR='none' just lengthens the rays, and a completed
-   scene cover-crops from its tall 3:10 canvas, so the crescent never deforms. */
-.shelf-item .sky:not(.sky-banner) {
-  aspect-ratio: 1 / calc(var(--banner-h) / var(--banner-w) + 1.5);
+   shelf lays out as one clean grid rather than a ragged one: the fallback sky
+   stretches to the cover's 2:3. Stretching is what these SVGs are for —
+   pAR='none' just lengthens the rays, and a completed scene cover-crops from
+   its tall 3:10 canvas, so the crescent never deforms. */
+.shelf-item .sky { aspect-ratio: 2 / 3; }
+
+/* The two cells, hung off the cover. Each takes the card's full width, so the
+   longest word in either vocabulary fits at 12px with room; a side-by-side
+   pair never did at six columns. Edges are SHARED, not doubled: the cover
+   keeps its bottom edge, the status cell keeps its bottom edge, and each cell
+   drops its top — one line between every layer, so the stack reads as a
+   single card with a two-line label rather than three boxes in a pile. */
+.shelf-card .cell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  border-top: 0;
 }
 
-.shelf-caption { display: block; margin: 0.7rem 0 0.45rem; font: 12px/1.5 var(--pixel); }
+.shelf-caption { display: block; margin: 0.55rem 0 0; font: 12px/1.5 var(--pixel); }
 
 /* ------------------------------------------------- shelf sort (no script)
 
@@ -711,6 +719,7 @@ a.post-list-date:hover { color: var(--accent); }
 .shelf-sorter:has(#sort-az:checked) .shelf-item { order: var(--o-az); }
 .shelf-sorter:has(#sort-recent:checked) .shelf-item { order: var(--o-recent); }
 .shelf-sorter:has(#sort-canon:checked) .shelf-item { order: var(--o-canon); }
+.shelf-sorter:has(#sort-rating:checked) .shelf-item { order: var(--o-rating); }
 
 .shelf-sort {
   border: 0;
@@ -753,21 +762,46 @@ a.post-list-date:hover { color: var(--accent); }
 /* Focus has to live on the label, since the input it belongs to is clipped. */
 .shelf-sort input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ------------------------------------------------------ shelf favourites
+/* ---------------------------------------------------- shelf canon + silver
 
-   The frame is the channel that always fires. A favourite's moon is gilded in
-   aurora.js too, but only `completed` subjects have a moon — an active replay
-   would otherwise show nothing, so the gold cannot live in the art alone.
-   Both borders take the colour: banner and cover are drawn as one card with a
-   shared edge, and gilding half of it would split the object in two. */
+   The frame is the channel that always fires. A canon subject's moon is gilded
+   in aurora.js too, but only `completed` subjects have a moon — an active
+   replay would otherwise show nothing, so the gold cannot live in the art
+   alone. The whole card takes the colour: cover and cells are drawn as one
+   object with shared edges, and gilding half of it would split it in two.
+
+   Silver is the same grammar one step down. It exists because "favorite" and
+   "loved" cannot be ordered by English alone, and a reader orders gold over
+   silver without being told — so the top two rungs of the ladder are ranked by
+   metal, and the three verbs below rank themselves. Quieter glow than gold:
+   it is the runner-up's frame, and it should read that way beside the ten. */
 .is-canon .sky,
 .is-canon .shelf-cover { border-color: var(--gold); }
 
-.is-canon .shelf-art {
+.is-canon .shelf-card {
   box-shadow: 0 0 0 1px var(--gold), 0 0 14px -4px var(--gold);
 }
 
+.is-favorite .sky,
+.is-favorite .shelf-cover { border-color: var(--silver); }
+
+.is-favorite .shelf-card {
+  box-shadow: 0 0 0 1px var(--silver), 0 0 10px -5px var(--silver);
+}
+
 .b-canon { --c: var(--gold); }
+
+/* The link to the printed scale, beside the sort control it explains. */
+.shelf-key {
+  display: inline-block;
+  margin: 0 0 1.5rem;
+  font: 12px/1 var(--pixel);
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
+}
+.shelf-key:hover,
+.shelf-key:focus-visible { color: var(--ink); border-color: var(--ink); }
 
 .shelf-list { list-style: none; margin: 0; padding: 0; }
 
@@ -802,8 +836,6 @@ a.post-list-date:hover { color: var(--accent); }
   flex-wrap: wrap;
   margin: 0;
 }
-
-.rating { font: 12px/1 var(--pixel); color: var(--st-active); }
 
 /* The standing blurb: the subject's one revisable paragraph, in the header's
    text column beside the cover — it just flows there, no layout of its own. */
@@ -853,7 +885,7 @@ a.post-list-date:hover { color: var(--accent); }
 
 /* ------------------------------------------------- tag page, and /f/ views */
 /* Both take the same shape and share src/_includes/view.njk, so the .tag-*
-   classes here read as "view page" — a curated tagview or a feel view. */
+   classes here read as "view page" — a curated tagview or a rating rung. */
 
 .tag-head { margin-bottom: 2.25rem; }
 
@@ -865,6 +897,39 @@ a.post-list-date:hover { color: var(--accent); }
 .tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
 .tag-members { margin: 0; font: 12px/1.8 var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
+.tag-index { margin: 0 0 0.6rem; font: 12px/1 var(--pixel); }
+.tag-index a { color: var(--muted); text-decoration: none; }
+.tag-index a:hover,
+.tag-index a:focus-visible { color: var(--ink); }
+
+/* /r/ — the ladder, printed. One rung per row, top to bottom, the chip
+   exactly as it renders on a tile so the page doubles as the legend. Rows are
+   ordered, never numbered: the order IS the information, and printing 1–5
+   would re-mint the score this page exists to replace. */
+.ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.1rem;
+}
+.rung {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.2rem 1rem;
+  align-items: start;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--edge);
+}
+.rung > .badge,
+.rung > .rating { grid-row: 1 / span 2; justify-self: start; }
+.rung-desc { margin: 0; }
+.rung-count { margin: 0; font: 12px/1.5 var(--pixel); color: var(--muted); }
+@media (max-width: 34rem) {
+  .rung { grid-template-columns: 1fr; }
+  .rung > .badge,
+  .rung > .rating { grid-row: auto; }
+}
 
 /* This timeline mixes subjects, so each entry carries its own sky. */
 .fragment-meta {

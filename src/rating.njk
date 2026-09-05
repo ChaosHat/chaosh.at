@@ -1,0 +1,23 @@
+---
+layout: base.njk
+pagination:
+  data: collections.ratingPages
+  size: 1
+  alias: rating
+permalink: "/r/{{ rating.slug }}/"
+eleventyComputed:
+  title: "{{ rating.title }}"
+  description: "{{ rating.description }}"
+---
+{#- One rung of the rating ladder: every game rated this, and everything
+    written about them. Mints no nav link, same rule as tags — reached from
+    the chip on a subject page or from the /r/ index. "Every game I loved" is
+    the calibration surface the scale exists for: a reader who knows two of
+    the games on this page knows how to read the word on a third.
+
+    Membership is derived in eleventy.config.js by grouping subjects on
+    `rating:`, with canon subjects excluded at the source — a game in the ten
+    carries no rung, so it never appears here. -#}
+{%- set view = rating %}
+{%- set emptyLabel = "No games rated this yet." %}
+{% include "view.njk" %}
