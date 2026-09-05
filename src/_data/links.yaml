@@ -3,6 +3,8 @@
 #
 # - name: Friend's Site          # display name
 #   url: https://example.org     # where the name links
-#   button: https://example.org/button.png   # their 88×31, hotlinked; omit for a text-only row
+#   button: /img/buttons/friend.gif   # their 88×31 — a copy in the repo's src/img/buttons/, or a hotlink URL; omit for a text-only row
 #   note: one line about what they write     # optional
-[]
+- name: Adri's Headspace
+  url: https://adriannatchalla.gay/
+  button: /img/buttons/adris-headspace.gif
