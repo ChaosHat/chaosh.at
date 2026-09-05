@@ -87,6 +87,10 @@ export default function (eleventyConfig) {
   // deliberately not copied.
   eleventyConfig.addPassthroughCopy({ "src/img/posts": "img/posts" });
   eleventyConfig.addPassthroughCopy({ "src/img/covers": "img/covers" });
+  // Friends' 88×31s for /links/, hosted here rather than hotlinked: a copy
+  // survives their site moving and costs them no bandwidth. links.yaml points
+  // at /img/buttons/<name>.
+  eleventyConfig.addPassthroughCopy({ "src/img/buttons": "img/buttons" });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
   eleventyConfig.setLibrary("md", md);
