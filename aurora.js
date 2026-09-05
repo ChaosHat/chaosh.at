@@ -40,7 +40,7 @@ const ARC_START = 140;
 const ARC_SPAN = 240;
 const arcHue = (ladderHue) => ARC_START + (ladderHue / 360) * ARC_SPAN;
 
-const palette = (ladderHue) => {
+export const palette = (ladderHue) => {
   const H = arcHue(ladderHue);
   return {
     edge: oklch(0.9, 0.13, H),

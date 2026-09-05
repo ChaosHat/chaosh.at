@@ -1,0 +1,8 @@
+# People who link back. Rendered at /links/ under the site button; publish.py
+# carries this file into the repo like subjects.yaml. Curated, not exhaustive.
+#
+# - name: Friend's Site          # display name
+#   url: https://example.org     # where the name links
+#   button: https://example.org/button.png   # their 88×31, hotlinked; omit for a text-only row
+#   note: one line about what they write     # optional
+[]

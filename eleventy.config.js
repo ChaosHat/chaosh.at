@@ -3,6 +3,7 @@ import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
 import { subjectSvg, chipSvg, daySky, headerSheet, hashOf } from "./aurora.js";
+import { buttonFiles } from "./button.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -1154,7 +1155,17 @@ export default function (eleventyConfig) {
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. One 16-frame sprite sheet, stepped
   // through by CSS.
-  skyFiles.set("img/aurora/sheet.svg", headerSheet(new Date().toISOString().slice(0, 10)));
+  const today = new Date().toISOString().slice(0, 10);
+  skyFiles.set("img/aurora/sheet.svg", headerSheet(today));
+
+  // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
+  // and animated; the friend picks. Same date-driven hue as the masthead —
+  // a button on someone else's page wears the day's sky. Binary, but it
+  // rides in skyFiles with the SVGs: writeFileSync takes a Buffer as readily
+  // as a string, and one write loop is one place to look.
+  const button = buttonFiles(today);
+  skyFiles.set("button.png", button.png);
+  skyFiles.set("button.gif", button.gif);
 
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.

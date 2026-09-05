@@ -1,0 +1,31 @@
+---
+layout: base.njk
+title: Links
+permalink: /links/
+---
+{#- The button and the people who link back. Entries come from the vault's
+    links.yaml (carried into src/_data by publish.py like the other manifests);
+    the button itself is generated at build time by button.js. The page exists
+    even with no entries — handing out the button is the half that matters. -#}
+<h1>Links</h1>
+
+<p class="links-lede">Want to link here? This is the button. Still or animated, hotlink it or copy it, either is fine.</p>
+
+<div class="button-row">
+  <a href="/"><img src="/button.png" width="88" height="31" alt="{{ site.title }}"></a>
+  <a href="/"><img src="/button.gif" width="88" height="31" alt="{{ site.title }}, animated"></a>
+</div>
+
+<pre class="snippet"><code>&lt;a href="{{ site.url }}"&gt;&lt;img src="{{ site.url }}/button.png" width="88" height="31" alt="{{ site.title }}"&gt;&lt;/a&gt;</code></pre>
+
+{% if links and links.length %}
+<h2 class="links-head">People who link back</h2>
+<ul class="links-list">
+  {% for l in links %}
+  <li>
+    {% if l.button %}<a class="links-button" href="{{ l.url }}"><img src="{{ l.button }}" width="88" height="31" alt="{{ l.name }}" loading="lazy"></a>{% else %}<span class="links-button links-button-none" aria-hidden="true"></span>{% endif %}
+    <span class="links-body"><a href="{{ l.url }}">{{ l.name }}</a>{% if l.note %} <span class="links-note">— {{ l.note }}</span>{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
