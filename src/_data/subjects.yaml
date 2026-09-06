@@ -25,16 +25,48 @@ baldurs-gate-3:
   aliases:
     - bg3
     - baldurs gate 3
+castlevania-aria-of-sorrow:
+  title: "Castlevania: Aria of Sorrow"
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - aria of sorrow
+    - castlevania aria of sorrow
+    - aos
+    - caos
 castlevania-dawn-of-sorrow:
   title: "Castlevania: Dawn of Sorrow"
   category:
     - games
-  status: active
+  status: completed
+  rating: liked
   aliases:
     - dawn of sorrow
     - castlevania dawn of sorrow
     - castlevania dos
     - cdos
+castlevania-order-of-ecclesia:
+  title: "Castlevania: Order of Ecclesia"
+  category:
+    - games
+  status: active
+  aliases:
+    - order of ecclesia
+    - castlevania order of ecclesia
+    - ooe
+    - cooe
+castlevania-portrait-of-ruin:
+  title: "Castlevania: Portrait of Ruin"
+  category:
+    - games
+  status: backlog
+  aliases:
+    - portrait of ruin
+    - castlevania portrait of ruin
+    - por
+    - cpor
 castlevania-symphony-of-the-night:
   title: "Castlevania: Symphony of the Night"
   category:

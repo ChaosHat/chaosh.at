@@ -88,7 +88,10 @@ castlevania:
   title: Castlevania
   members:
     - castlevania-symphony-of-the-night
+    - castlevania-aria-of-sorrow
     - castlevania-dawn-of-sorrow
+    - castlevania-order-of-ecclesia
+    - castlevania-portrait-of-ruin
 metroidvania:
   title: Metroidvanias
   members:
@@ -98,7 +101,10 @@ metroidvania:
     - metroid-samus-returns
     - metroid-dread
     - castlevania-symphony-of-the-night
+    - castlevania-aria-of-sorrow
     - castlevania-dawn-of-sorrow
+    - castlevania-order-of-ecclesia
+    - castlevania-portrait-of-ruin
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
 pokemon:
