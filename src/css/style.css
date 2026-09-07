@@ -611,6 +611,30 @@ a.post-list-date:hover { color: var(--accent); }
   border-top: 1px solid var(--edge);
 }
 
+/* The essay's shelf card, floated as the opening paragraph's indent. Shelf
+   tile width, so the cover lands at the size it was fetched to be read at;
+   the cells hang under it exactly as on the shelf. The float releases on a
+   phone — at 34rem the column is too narrow to wrap prose beside a 8.5rem
+   card, and a card above the text is a cleaner start than three-word lines. */
+.essay-card {
+  float: left;
+  width: 8.5rem;
+  margin: 0.35rem 1.5rem 0.75rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+.essay-card .shelf-cover,
+.essay-card .sky { aspect-ratio: 2 / 3; }
+.essay-card .cell {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  border-top: 0;
+}
+@media (max-width: 34rem) {
+  .essay-card { float: none; margin: 0 0 1.25rem; }
+}
+
 /* --------------------------------------------------- archive / best of */
 
 .archive-list { list-style: none; margin: 0; padding: 0; }

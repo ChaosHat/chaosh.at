@@ -714,6 +714,23 @@ export default function (eleventyConfig) {
         blurb,
         citedSubjects,
         cites: subjectLinks(citedSubjects),
+        // The shelf card for each cited subject, floated beside the essay's
+        // opening paragraph (2026-09-06). Same fields the shelf reads, so the
+        // template is the shelf's card verbatim. The sky path is spelled out
+        // rather than read from skyUrls: essays can build before the subject
+        // fan-out registers skies, and registerSky always writes this path.
+        cards: citedSubjects.map((s) => {
+          const meta = subjects[s] ?? {};
+          return {
+            slug: s,
+            title: meta.title ?? s,
+            status: meta.status ?? "active",
+            canon: canonSlugs.has(s),
+            rating: ratingOf(s, meta),
+            coverUrl: coverUrls.get(s) ?? null,
+            skyUrl: `/img/sky/${s}.svg`,
+          };
+        }),
         citedTags: tagLinks(tagOrder.filter((t) => citedTagSlugs.has(t))),
       };
     });

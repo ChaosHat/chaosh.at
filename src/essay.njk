@@ -9,10 +9,32 @@ eleventyComputed:
   title: "{{ essay.title }}"
 ---
 <article class="post essay-page">
-  <header class="post-head">
+  {#- The essay's date seeds the same day-sky a daily gets, so the essay and
+      the daily it shipped alongside share a band. Before this the header kept
+      the daily's padding with nothing drawn in it — 3.3rem of air under the
+      date (2026-09-06). -#}
+  <header class="post-head" style="--day-sky:url({{ essay.date | daySky }})">
     <h1 class="post-title">{{ essay.title }}</h1>
     <p class="post-subdate">{{ essay.date | readableDate }}</p>
   </header>
+  {#- One shelf card per cited subject, floated so the opening paragraph
+      wraps it — the essay's one guaranteed image. SPANs inside, same reason
+      as the shelf: the card is one anchor. -#}
+  {% for c in essay.cards %}
+  <a class="essay-card shelf-card{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
+    <span class="shelf-art">
+      {% if c.coverUrl %}
+      <img class="shelf-cover" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
+      {% else %}
+      <span class="sky" style="background-image:url({{ c.skyUrl }})" aria-hidden="true"></span>
+      {% endif %}
+    </span>
+    <span class="cell badge b-{{ c.status }}">{{ c.status }}</span>
+    {% if c.canon %}<span class="cell rating badge-g b-canon" data-g="♥">canon</span>
+    {% elif c.rating %}<span class="cell rating r-{{ c.rating.slug }}">{{ c.rating.title }}</span>
+    {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
+  </a>
+  {% endfor %}
   {{ essay.html | safe }}
   {#- The essay mirror of a daily's tag footer: the subjects it's about
       (about-list order), then the union of their tags plus any tag cited
