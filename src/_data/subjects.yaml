@@ -113,6 +113,16 @@ diablo-iv:
   aliases:
     - d4
     - diablo 4
+dragon-quest-v:
+  title: "Dragon Quest V: Hand of the Heavenly Bride"
+  category:
+    - games
+  status: active
+  aliases:
+    - dqv
+    - dq5
+    - dragon quest 5
+    - hand of the heavenly bride
 dragon-quest-xi-s:
   title: Dragon Quest XI S
   category:
@@ -326,7 +336,6 @@ metroid-dread:
   category:
     - games
   status: completed
-  rating: favorite
   aliases:
     - dread
     - metroid dread
@@ -335,6 +344,7 @@ metroid-fusion:
   category:
     - games
   status: completed
+  rating: favorite
   aliases:
     - fusion
     - metroid fusion

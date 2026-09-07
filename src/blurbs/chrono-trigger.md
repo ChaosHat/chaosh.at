@@ -1,0 +1,1 @@
+I only played this recently but I understand why it's a classic. Innovative, ahead of it's time, and so fun. Lovable and memorable characters too. It does a lot with so little.

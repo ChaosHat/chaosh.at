@@ -1,0 +1,1 @@
+A worthy successor to Aria but the story isn't quite as interesting. 

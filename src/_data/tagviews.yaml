@@ -14,7 +14,7 @@ canon:
     - monster-hunter-rise
     - pokemon-hgss
     - crusader-kings-3
-    - metroid-fusion
+    - metroid-dread
     - marvels-spider-man-2
     - paper-mario-the-thousand-year-door
 crpg:
@@ -24,6 +24,11 @@ crpg:
     - baldurs-gate
     - baldurs-gate-2
     - baldurs-gate-3
+dragon-quest:
+  title: Dragon Quest
+  members:
+    - dragon-quest-v
+    - dragon-quest-xi-s
 final-fantasy:
   title: Final Fantasy
   members:
@@ -34,6 +39,7 @@ jrpg:
   title: JRPG
   members:
     - chrono-trigger
+    - dragon-quest-v
     - dragon-quest-xi-s
     - final-fantasy-iv
     - final-fantasy-vi

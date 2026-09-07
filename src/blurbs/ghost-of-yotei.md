@@ -1,0 +1,1 @@
+A rare extremely fun open world game. I love the atmosphere, the style of this game. It truly feels cinematic and it's gorgeous. Also an amazing performance by Erika Ishii. 

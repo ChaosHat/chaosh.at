@@ -1,0 +1,1 @@
+The best Metroid, but not perfect. It's great at instilling that titular sense of dread, it controls so well, and it does the best job of making you and Samus feel both afraid and powerful. It just feels good to play overall. 
