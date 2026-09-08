@@ -1,0 +1,1 @@
+Everyone’s favorite Pandemic time game. This is a really strong game but honestly maybe not even the strongest in the series. In many ways it feels like there’s the least to do and it’s just a decorating sim and really missing out on a lot of quality of life things. 

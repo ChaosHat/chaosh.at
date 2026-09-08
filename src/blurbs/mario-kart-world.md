@@ -1,0 +1,1 @@
+This is not the best Mario Kart but an okay Mario Kart is a pretty good game still. I just wish there was a more standard grand prix mode with three laps per race. Also, I feel like for the asking price they owe me some free content updates.

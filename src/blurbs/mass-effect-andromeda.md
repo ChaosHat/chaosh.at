@@ -1,0 +1,1 @@
+There are so many good ideas here, the combat is better than ever and the move away from Paragon/Renegade to the four axis system is just a better idea. The problem is the game just has too much samey filler. I don’t feel like my time is being respected.

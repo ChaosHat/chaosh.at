@@ -194,11 +194,19 @@ final-fantasy-vii-remake:
   category:
     - games
   status: completed
-  rating: favorite
   aliases:
     - ff7r
     - ffviir
     - final fantasy 7 remake
+final-fantasy-vii-rebirth:
+  title: Final Fantasy VII Rebirth
+  category:
+    - games
+  status: backlog
+  aliases:
+    - ff7 rebirth
+    - ffvii rebirth
+    - rebirth
 fire-emblem-awakening:
   title: "Fire Emblem: Awakening"
   category:
@@ -462,6 +470,7 @@ pokemon-hgss:
   category:
     - games
   status: completed
+  rating: favorite
   aliases:
     - hgss
     - soulsilver
@@ -490,7 +499,7 @@ slay-the-spire-2:
   category:
     - games
   status: dabbling
-  rating: liked
+  rating: loved
   aliases:
     - sts2
     - slay the spire ii
@@ -505,6 +514,7 @@ star-wars-jedi-fallen-order:
   category:
     - games
   status: shelved
+  rating: liked
   aliases:
     - swjfo
     - fallen order
@@ -586,3 +596,280 @@ flamecraft-duals:
   hide_from_now: true
   aliases:
     - flamecraft duals
+animal-crossing-new-horizons:
+  title: "Animal Crossing: New Horizons"
+  category:
+    - games
+  status: abandoned
+  rating: loved
+  aliases:
+    - acnh
+    - animal crossing
+    - new horizons
+anno-117:
+  title: "Anno 117: Pax Romana"
+  category:
+    - games
+  status: abandoned
+  rating: loved
+  aliases:
+    - anno
+    - anno 117
+    - pax romana
+borderlands-4:
+  title: Borderlands 4
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - bl4
+    - borderlands
+donkey-kong-bananza:
+  title: " Bananza"
+  category:
+    - games
+  status: abandoned
+  rating: loved
+  aliases:
+    - bananza
+    - dk bananza
+    - dkb
+fallout-2:
+  title: Fallout 2
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - fo2
+    - fallout ii
+final-fantasy-tactics:
+  title: Final Fantasy Tactics
+  category:
+    - games
+  status: backlog
+  aliases:
+    - fft
+    - ff tactics
+horizon-zero-dawn:
+  title: Horizon Zero Dawn
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - hzd
+    - zero dawn
+kotor:
+  title: "Star Wars: Knights of the Old Republic"
+  category:
+    - games
+  status: completed
+  rating: favorite
+  aliases:
+    - kotor
+    - kotor 1
+    - knights of the old republic
+kotor-2:
+  title: "Star Wars: Knights of the Old Republic II — The Sith Lords"
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - kotor 2
+    - kotor2
+    - kotor ii
+    - the sith lords
+    - sith lords
+marvel-snap:
+  title: Marvel Snap
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - snap
+mass-effect-andromeda:
+  title: Mass Effect Andromeda
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - andromeda
+    - mea
+mega-man-11:
+  title: Mega Man 11
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - mm11
+    - megaman 11
+metroid-prime-remastered:
+  title: Metroid Prime Remastered
+  category:
+    - games
+  status: abandoned
+  rating: loved
+  aliases:
+    - metroid prime
+    - prime
+    - mpr
+no-mans-sky:
+  title: No Man's Sky
+  category:
+    - games
+  status: sampled
+  rating: loved
+  aliases:
+    - nms
+    - no mans sky
+portal:
+  title: Portal
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - portal 1
+portal-2:
+  title: Portal 2
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - portal2
+sea-of-stars:
+  title: Sea of Stars
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - sos
+starcraft:
+  title: StarCraft
+  category:
+    - games
+  status: completed
+  rating: liked
+  aliases:
+    - sc1
+    - starcraft 1
+    - brood war
+starcraft-2:
+  title: StarCraft II
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - sc2
+    - starcraft 2
+    - wings of liberty
+super-mario-wonder:
+  title: Super Mario Bros. Wonder
+  category:
+    - games
+  status: abandoned
+  rating: liked
+  aliases:
+    - wonder
+    - super mario wonder
+    - mario wonder
+super-mario-world:
+  title: Super Mario World
+  category:
+    - games
+  status: completed
+  rating: favorite
+  aliases:
+    - smw
+    - mario world
+mario-kart-world:
+  title: Mario Kart World
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - mkw
+    - mario kart
+warcraft-3:
+  title: "Warcraft III: Reign of Chaos"
+  category:
+    - games
+  status: completed
+  rating: favorite
+  aliases:
+    - wc3
+    - warcraft 3
+    - warcraft iii
+    - reign of chaos
+    - frozen throne
+zelda-a-link-to-the-past:
+  title: "The Legend of Zelda: A Link to the Past"
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - link to the past
+    - alttp
+    - lttp
+    - zelda alttp
+zelda-breath-of-the-wild:
+  title: "The Legend of Zelda: Breath of the Wild"
+  category:
+    - games
+  status: completed
+  rating: favorite
+  aliases:
+    - breath of the wild
+    - botw
+    - zelda botw
+zelda-ocarina-of-time:
+  title: "The Legend of Zelda: Ocarina of Time"
+  category:
+    - games
+  status: completed
+  rating: loved
+  aliases:
+    - ocarina of time
+    - ocarina
+    - oot
+    - zelda oot
+zelda-twilight-princess:
+  title: "The Legend of Zelda: Twilight Princess"
+  category:
+    - games
+  status: completed
+  rating: liked
+  aliases:
+    - twilight princess
+    - tp
+    - zelda twilight princess
+fallout-1:
+  title: Fallout
+  category:
+    - games
+  status: completed
+  rating: liked
+  aliases:
+    - fallout
+    - fo1
+    - fallout 1
+zelda-tears-of-the-kingdom:
+  title: "The Legend of Zelda: Tears of the Kingdom"
+  category:
+    - games
+  status: backlog
+  aliases:
+    - tears of the kingdom
+    - totk
+    - zelda totk

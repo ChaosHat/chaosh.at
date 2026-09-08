@@ -1,0 +1,1 @@
+What a great expansion of the first game. I think it might have gone a little overboard on the number of weapons, but aside from that it’s so fun. I’m so in love with the setting. Yes it’s over the top and dumb, but it’s cool as hell. 

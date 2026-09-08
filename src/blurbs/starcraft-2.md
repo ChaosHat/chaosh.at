@@ -1,0 +1,1 @@
+This is the best I’ve ever been at any game ever possibly, hitting diamond in ranked. It’s so fun with high highs and low lows: there’s no randomness or anything to hide behind. If you lost, it’s because you’re bad. Fun campaign too.

@@ -1,0 +1,1 @@
+Probably the best Zelda. The right balance of everything.

@@ -1,0 +1,1 @@
+What a ridiculously cool open world game. I love collecting and upgrading the ships so much. I’m not much of an open world survival craft person but the ships and upgrade trees are very satisfying here. 

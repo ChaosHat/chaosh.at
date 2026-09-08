@@ -1,0 +1,1 @@
+An incredible follow up and what a role for JK Simmons. He is this character and J. Jonah Jameson (arguably basically the same character.) Builds on everything that was good about the first one and adds co-op!

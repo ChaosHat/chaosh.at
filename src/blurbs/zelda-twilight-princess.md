@@ -1,0 +1,1 @@
+This game is…good? I played it back in the day, I have renewed interest due to the Dusk decomp (recomp? I can never remember which or what the difference is).

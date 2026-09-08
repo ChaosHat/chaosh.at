@@ -12,7 +12,7 @@ canon:
     - baldurs-gate-3
     - cyberpunk-2077
     - monster-hunter-rise
-    - pokemon-hgss
+    - final-fantasy-vii-remake
     - crusader-kings-3
     - metroid-dread
     - marvels-spider-man-2
@@ -24,6 +24,10 @@ crpg:
     - baldurs-gate
     - baldurs-gate-2
     - baldurs-gate-3
+    - fallout-2
+    - kotor
+    - kotor-2
+    - fallout-1
 dragon-quest:
   title: Dragon Quest
   members:
@@ -35,6 +39,8 @@ final-fantasy:
     - final-fantasy-iv
     - final-fantasy-vi
     - final-fantasy-vii-remake
+    - final-fantasy-vii-rebirth
+    - final-fantasy-tactics
 jrpg:
   title: JRPG
   members:
@@ -44,10 +50,12 @@ jrpg:
     - final-fantasy-iv
     - final-fantasy-vi
     - final-fantasy-vii-remake
+    - final-fantasy-vii-rebirth
     - metaphor-refantazio
     - persona-5-royal
     - kingdom-hearts
     - paper-mario-the-thousand-year-door
+    - sea-of-stars
 atlus:
   title: Atlus
   description: Same DNA and lineage, different titles.
@@ -77,11 +85,14 @@ tactics:
     - fire-emblem-fortunes-weave
     - triangle-strategy
     - star-wars-zero-company
+    - final-fantasy-tactics
 star-wars:
   title: Star Wars
   members:
     - star-wars-jedi-fallen-order
     - star-wars-zero-company
+    - kotor
+    - kotor-2
 metroid:
   title: Metroid
   members:
@@ -90,6 +101,7 @@ metroid:
     - metroid-fusion
     - metroid-samus-returns
     - metroid-dread
+    - metroid-prime-remastered
 castlevania:
   title: Castlevania
   members:
@@ -126,3 +138,51 @@ monster-hunter:
     - monster-hunter-rise
     - monster-hunter-wilds
     - monster-hunter-stories-3
+zelda:
+  title: The Legend of Zelda
+  members:
+    - zelda-a-link-to-the-past
+    - zelda-ocarina-of-time
+    - zelda-twilight-princess
+    - zelda-breath-of-the-wild
+    - zelda-tears-of-the-kingdom
+mass-effect:
+  title: Mass Effect
+  members:
+    - mass-effect-legendary-edition
+    - mass-effect-andromeda
+horizon:
+  title: Horizon
+  members:
+    - horizon-zero-dawn
+    - horizon-forbidden-west
+blizzard:
+  title: Blizzard
+  description: The other house that built me.
+  members:
+    - starcraft
+    - starcraft-2
+    - warcraft-3
+    - world-of-warcraft-playerbots
+    - diablo-iv
+rts:
+  title: RTS
+  description: Build the base, mass the army, hope you counted right.
+  members:
+    - starcraft
+    - starcraft-2
+    - warcraft-3
+mario:
+  title: Mario
+  members:
+    - super-mario-world
+    - super-mario-wonder
+    - mario-kart-world
+    - paper-mario-the-thousand-year-door
+    - super-mariomon
+fallout:
+  title: Fallout
+  members:
+    - fallout-1
+    - fallout-2
+    - fallout-new-vegas

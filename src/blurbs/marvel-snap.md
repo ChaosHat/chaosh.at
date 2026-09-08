@@ -1,0 +1,1 @@
+I played a lot of this and it was so good for a long time. Ultimately I think a lot of changes in the direction of the game drove me away from it. 

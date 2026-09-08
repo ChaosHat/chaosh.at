@@ -1,0 +1,1 @@
+Bounced off this. It’s beautiful and a wonderful homage but it doesn’t feel like there’s enough there. I might come back to this, it’s really not that long.

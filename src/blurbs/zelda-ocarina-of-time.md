@@ -1,0 +1,1 @@
+I have beaten and re-beaten this game so many times. I think I still remember how to get Biggoron’s Sword from memory. 

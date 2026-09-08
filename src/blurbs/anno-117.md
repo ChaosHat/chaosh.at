@@ -1,0 +1,1 @@
+A good city/civ management game I bounced off of. I think I'll come back to it when I'm in the mood for this kind of game again. 

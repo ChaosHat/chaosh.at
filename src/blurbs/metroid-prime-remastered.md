@@ -1,0 +1,1 @@
+This game looks the way I remember the original did. The original is great, and so too is this, so atmospheric and such an incredible translation of Metroid into 3D.

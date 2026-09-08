@@ -1,0 +1,1 @@
+My feelings on this are conflicted. It’s a fun game, but I mostly have memories of being frustrated in co-op with my daughter. The latest update should smooth over a lot of my issues with that, but I haven’t put more time into it yet.

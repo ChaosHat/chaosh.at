@@ -1,0 +1,1 @@
+Bounced off this pretty hard, just haven’t been into these kinds of games lately. It’s fine. 

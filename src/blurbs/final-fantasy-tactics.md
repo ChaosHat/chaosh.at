@@ -1,0 +1,1 @@
+I really wanted to like this but it’s too grindy. Also, I don’t like the emphasis on using randos you picked up in a bar instead of the story characters. That’s what I like about Fire Emblem! The whole class building thing is really cool and fun though!

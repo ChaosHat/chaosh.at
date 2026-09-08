@@ -1,0 +1,1 @@
+Bounced off this so hard. The mechanics are just so boring. I need a little more meat on that bone. Lesson learned: stop playing Final Fantasies before 7. 

@@ -1,0 +1,1 @@
+An all time classic. The time pressure is kind of the best and worst thing about this game. You kind of wish you had a more relaxed time to explore and take it all in, but it also drives the game forward and provides urgency.

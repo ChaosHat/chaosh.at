@@ -1,0 +1,1 @@
+I’ve almost beaten this and I should probably just finish it. I liked it, I did that thing where I almost got to the end and then I decided I should go back and get a lot more bananas and then stalled out. It’s really fun though, just good clean carnage.

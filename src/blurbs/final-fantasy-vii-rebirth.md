@@ -1,0 +1,1 @@
+Most of the way through this, I just lost momentum due to the open world stuff. I want to revisit and plan to just chase the open world stuff that actually sparks joy instead of trying to be a completionist about it. The upgrades to the combat system are really fun though, and having more of the cast is great.

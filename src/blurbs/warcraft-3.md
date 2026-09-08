@@ -1,0 +1,1 @@
+This is my favorite RTS campaign and it was an excellent multiplayer game. And I don’t just mean customs! I think this was the first game I really tried hard to get good at on ladder. I miss the hero units and this series. 

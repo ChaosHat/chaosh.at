@@ -1,0 +1,1 @@
+I feel like I love the idea of Mega Man more than I like slamming my head into it? Yes I’m outing my own lack of skill.
