@@ -127,11 +127,15 @@ body {
 }
 
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
-   One 16-frame sprite sheet stepped through by background-position — sprite
+   One 8-frame sprite sheet stepped through by background-position — sprite
    animation, one decode, no flicker. The tile is periodic and rendered at a
-   fixed 480px width with repeat-x, so pixel density never changes with the
+   fixed 960px width with repeat-x, so pixel density never changes with the
    viewport; the height is px, not rem, because the frame window must match
-   the sheet's 112px frame exactly or neighbouring frames bleed through. */
+   the sheet's 112px frame exactly or neighbouring frames bleed through.
+
+   960 and 8 are ribbonSheet's contract, not free numbers — the three values
+   below are derived from them (960 x 8*112, steps(8), -896px) and all four
+   places move together. The reasoning for both is in aurora.js. */
 body::before {
   content: "";
   position: absolute;
@@ -143,12 +147,12 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background: url("/img/aurora/sheet.svg") repeat-x;
-  background-size: 480px 1792px;
-  animation: aurora-roll 11.2s steps(16) infinite;
+  background-size: 960px 896px;
+  animation: aurora-roll 11.2s steps(8) infinite;
 }
 
 @keyframes aurora-roll {
-  to { background-position: 0 -1792px; }
+  to { background-position: 0 -896px; }
 }
 
 /* The reading column. Everything that is prose lives in <main>, so centring
@@ -1194,14 +1198,23 @@ a.sky-cover:hover { border-color: var(--accent); }
 .post-head { margin-bottom: 2rem; padding: 1.1rem 0 1.3rem; }
 .entry-head { margin-bottom: 1.3rem; padding: 1.1rem 0 1.3rem; }
 
-/* The dateline sits on the aurora, so it gets a hard 1px outline rather than a
+/* Everything that sits on the aurora gets a hard 1px outline rather than a
    blur — a bitmap face wants bitmap treatment, and this is how SNES-era UI put
-   small type over a busy field. It lets the curtain come up behind the title
-   instead of being pushed out of the way to stay readable. Titles stay clean:
-   they are large and bright already, and an outline on a serif reads as a cheap
-   effect rather than a period one. */
+   small type over a busy field. It lets the curtain come up behind the type
+   instead of being pushed out of the way to stay readable.
+
+   The headings were exempt until 2026-09-07, on the reasoning that they are
+   large and bright already and that an outline on a serif reads as a cheap
+   effect. Two things retired that: the prose face changed to Alegreya Sans
+   (2026-09-04), and the band stopped being one drawing. A pale drapery fold
+   can now land directly behind a heading — in testing that made a title
+   vanish — and dimming the band far enough to fix it costs more than the
+   outline does. The wordmark has carried a one-pixel night halo all along, so
+   this is the house treatment, not an exception to it. */
 .entry-head .post-list-subdate,
 .entry-head .post-list-date,
+.post-head .post-title,
+.post-head .post-date,
 .post-head .post-subdate {
   color: var(--ink);
   text-shadow:

@@ -1,11 +1,11 @@
 // The site button: an 88×31 for other people's sidebars, drawn from the same
-// curtain math as the masthead and written out as button.png (still) and
+// aurora as the masthead and written out as button.png (still) and
 // button.gif (16 frames). Rasterised here in plain JS — no canvas, no browser
 // — so the build stays a pure function of the date, same as the header.
 // Design record: vault, 80_Projects/"chaosh.at Design" (2026-09-05) and
 // 90_Reference/91_Documentation/"chaosh.at Design System".
 import zlib from "node:zlib";
-import { hashOf, palette } from "./aurora.js";
+import { daySpread, hashOf, palette, ribbonColumns } from "./aurora.js";
 
 export const BUTTON_W = 88;
 export const BUTTON_H = 31;
@@ -126,50 +126,51 @@ const blur = (src, sigma) => {
   return out;
 };
 
-// The header's curtain, with its spatial frequencies scaled from 120 columns
-// to 44 (see headerSheet in aurora.js for the unscaled terms). Same layers:
-// a blurred glow along the lit edge, then deep / mid / edge rects per column,
-// brightness pulsing in place across the 16 frames rather than marching.
-const sky = (r, pal, k, { yEdge, hBase, op, glowW }) => {
-  const theta = (k / N) * TAU;
+// The masthead's ribbon, rasterised. It calls `ribbonColumns` — the SAME
+// sampler the SVG surfaces use — and only turns the columns it gets back into
+// pixels. The previous version instead carried a hand-scaled copy of the
+// header's terms ("spatial frequencies scaled from 120 columns to 44"), which
+// is why `headerSheet` survived in aurora.js long after nothing drew with it:
+// deleting it would have orphaned the only written record of what this file
+// was imitating. Two drawings that must agree, and nothing making them.
+//
+// 88px carries one crest, like the post band's 480 does — the button is a
+// finished picture, not a tile, so it gets a whole aurora rather than a slice
+// of one. Six slices, not nine: the body is ~17px here and nine would put the
+// ramp below a pixel a step.
+const sky = (r, pal, k, { base, thick, op, glowW }) => {
   const F = k / N;
-  const step = 2;
   const ebb = 1 + 0.08 * Math.sin(TAU * F + 1.9);
-  const edgeY = [];
-  const rects = [];
-  for (let x = 0; x <= W; x += step) {
-    const t = x / W;
-    const y =
-      yEdge +
-      2.4 * Math.sin(TAU * 1 * t + 1.3) +
-      1.2 * Math.sin(TAU * 2 * t + 4.1) +
-      0.6 * Math.sin(TAU * 2 * t + theta);
-    const yb = Math.round(y);
-    edgeY.push(y);
-    const n = 0.5 + 0.5 * Math.sin(TAU * 3 * t + 2.6 + theta) * Math.sin(TAU * 5 * t + 1.3 + theta);
-    const pulse =
-      0.55 * Math.sin(TAU * 2 * t + 1.1) * Math.sin(TAU * 1 * F + 0.7) +
-      0.35 * Math.sin(TAU * 3 * t + 4.2) * Math.sin(TAU * 2 * F + 2.9) +
-      0.28 * Math.sin(TAU * 5 * t + 2.0) * Math.sin(TAU * 3 * F + 5.0);
-    const b = Math.min(1, Math.max(0.18, 0.6 + 0.36 * pulse));
-    const flick = 0.85 + 0.15 * Math.sin(TAU * 4 * t + 0.5) * Math.sin(TAU * 2 * F + 4.0);
-    const ray = hBase * (0.9 + 1.5 * n);
-    rects.push([x, Math.round(yb - ray), step, Math.round(ray * 0.7), hexRgb(pal.deep), Math.max(0.08, 0.32 * b)]);
-    rects.push([x, Math.round(yb - ray * 0.5), step, Math.round(ray * 0.5), hexRgb(pal.mid), Math.max(0.07, 0.58 * b * flick)]);
-    rects.push([x, yb - 2, step, 3, hexRgb(pal.edge), Math.max(0.1, 0.95 * b * flick)]);
-  }
-  // Glow: a stroke glowW thick along the edge, blurred, at 15% — the same
-  // three numbers the SVG version uses (stroke-width, stdDeviation, opacity).
+  const { cols, edge, step } = ribbonColumns(pal, {
+    w: W,
+    h: H,
+    F,
+    step: 2,
+    base,
+    sweep: 0.09,
+    thick,
+    crestFloor: 0.5,
+    k: 0.42,
+    slices: 6,
+  });
+
+  // Glow along the lit edge, blurred — the raster equivalent of the SVG's
+  // stroke-width / stdDeviation / opacity trio, same three numbers.
   const cover = new Float32Array(W * H);
   for (let x = 0; x < W; x += 1) {
-    const yc = edgeY[Math.floor(x / step)];
-    for (let y = 0; y < H; y += 1) if (Math.abs(y + 0.5 - yc) <= glowW / 2) cover[y * W + x] = 1;
+    const yc = edge[Math.min(edge.length - 1, Math.floor(x / step))][1];
+    for (let y = 0; y < H; y += 1)
+      if (Math.abs(y + 0.5 - yc) <= glowW / 2) cover[y * W + x] = 1;
   }
   const soft = blur(cover, glowW / 3);
   const glow = hexRgb(pal.glow);
   for (let y = 0; y < H; y += 1)
-    for (let x = 0; x < W; x += 1) r.blend(x, y, glow, op * ebb * 0.15 * soft[y * W + x]);
-  for (const [x, y, w, h, c, a] of rects) r.rect(x, y, w, h, c, op * ebb * a);
+    for (let x = 0; x < W; x += 1)
+      r.blend(x, y, glow, op * ebb * 0.15 * soft[y * W + x]);
+
+  for (const { x, parts } of cols)
+    for (const { fill, op: o, y, h } of parts)
+      r.rect(x, y, step, h, hexRgb(fill), op * ebb * o);
 };
 
 const wordmark = (r) => {
@@ -197,9 +198,9 @@ const frame = (pal, k) => {
   r.blend(5, 4, STAR, 0.7);
   r.blend(82, 6, STAR, 0.7);
   r.blend(44, 2, STAR, 0.45);
-  // The "veil": the whole tile is sky at the masthead's own opacity, the lit
-  // edge low, rays reaching up behind the name.
-  sky(r, pal, k, { yEdge: 25.5, hBase: 10, op: 0.42, glowW: 12 });
+  // The "veil": the whole tile is sky, the lit edge low, the body reaching up
+  // behind the name.
+  sky(r, pal, k, { base: 0.82, thick: 0.88, op: 0.55, glowW: 12 });
   wordmark(r);
   r.rect(0, 0, W, 1, EDGE);
   r.rect(0, H - 1, W, 1, EDGE);
@@ -211,7 +212,10 @@ const frame = (pal, k) => {
 // Same hue rule as the masthead: the date picks it, so a hotlinked button
 // wears the day's sky like the site does.
 export const buttonFrames = (dateStr) => {
-  const pal = palette((hashOf(dateStr) % 360000) / 1000);
+  // Same hue, ceiling and daily spread as the masthead: a hotlinked button
+  // wears the day's sky exactly as the site does.
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const pal = palette(hue, { lMax: 0.8, spread: daySpread(dateStr) });
   return Array.from({ length: N }, (_, k) => frame(pal, k));
 };
 

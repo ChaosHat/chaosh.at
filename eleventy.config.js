@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, headerSheet, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, ribbonSheet, hashOf } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
@@ -1180,7 +1180,7 @@ export default function (eleventyConfig) {
   eleventyConfig.addGlobalData("wordmark", wordmarkSvg(2));
 
   const today = new Date().toISOString().slice(0, 10);
-  skyFiles.set("img/aurora/sheet.svg", headerSheet(today));
+  skyFiles.set("img/aurora/sheet.svg", ribbonSheet(today));
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —
