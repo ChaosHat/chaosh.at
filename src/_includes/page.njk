@@ -1,0 +1,13 @@
+---
+layout: base.njk
+---
+{#- A standing page: no date, no sky, not in the feed. Currently only /about/,
+    whose source is the vault's About.md carried whole by publish.py; the
+    layout, URL and title come from src/about/about.json so the vault file
+    needs no frontmatter (a `title:` there overrides). Spoilers work; the
+    linkSubjects filter is deliberately absent — it is the daily-fragment
+    renderer and wraps its input in a fragment row with a blank sky chip. -#}
+<article class="page">
+  <h1>{{ title }}</h1>
+  {{ content | spoilers | safe }}
+</article>
