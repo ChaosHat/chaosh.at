@@ -47,6 +47,73 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
   return true;
 });
 
+// Figures. Obsidian has no caption syntax, so the Manual's convention is an
+// italic line in its own paragraph directly under the image:
+//   ![[ripley-power-loader.jpg|Ripley in the power loader]]
+//   *The Varia suit is truly a triumph of miniaturization.*
+// This folds that pair into <figure><img><figcaption>…</figcaption></figure>,
+// and a lone image paragraph into a bare <figure>, so the CSS styles one thing
+// and feed readers get a real caption instead of two paragraphs. The wrapping
+// <em> is dropped — the italic was the signal, not the styling (the caption
+// face is Silkscreen, which has no italic); emphasis inside it survives.
+// Runs after "inline" so the children are parsed. (2026-09-08, Metroid Dread.)
+//
+// Two styles, chosen by Obsidian's own width number so the vault preview
+// approximates the page. Default (no width, or under FIG_FULL_PX) is a
+// magazine float: half the column, hung into the margin, prose wrapping
+// beside it — the accent shot. A width of FIG_FULL_PX or more is the full
+// column — the "look at this" shot, where a pixel screenshot at half size
+// would lose the thing being pointed at. Floats alternate right, left, right
+// per rendered document (so per section in a daily), starting right because
+// an essay's card already floats left through the opening paragraphs. The
+// side is decided here rather than with :nth-of-type so full figures don't
+// count. The width attr stays on the <img> either way (harmless: the CSS
+// sizes the image to its figure).
+const FIG_FULL_PX = 700;
+const isImageParagraph = (t, i) =>
+  t[i]?.type === "paragraph_open" &&
+  t[i + 1]?.type === "inline" &&
+  t[i + 1].children.length === 1 &&
+  t[i + 1].children[0].type === "image" &&
+  t[i + 2]?.type === "paragraph_close";
+const isCaptionParagraph = (t, i) => {
+  if (t[i]?.type !== "paragraph_open" || t[i + 1]?.type !== "inline" || t[i + 2]?.type !== "paragraph_close") return false;
+  const c = t[i + 1].children;
+  return c.length >= 3 && c[0].type === "em_open" && c[c.length - 1].type === "em_close" &&
+    c.slice(1, -1).every((x) => x.level > 0);
+};
+md.core.ruler.push("obsidian_figure", (state) => {
+  const t = state.tokens;
+  const out = [];
+  let floats = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (!isImageParagraph(t, i)) { out.push(t[i]); continue; }
+    const open = new state.Token("figure_open", "figure", 1);
+    const close = new state.Token("figure_close", "figure", -1);
+    open.block = close.block = true;
+    open.map = t[i].map;
+    const width = Number(t[i + 1].children[0].attrGet("width"));
+    if (width >= FIG_FULL_PX) {
+      open.attrSet("class", "fig-full");
+    } else {
+      open.attrSet("class", `fig-float ${floats++ % 2 ? "fig-left" : "fig-right"}`);
+    }
+    out.push(open, t[i + 1]);
+    i += 2;
+    if (isCaptionParagraph(t, i + 1)) {
+      const capOpen = new state.Token("figcaption_open", "figcaption", 1);
+      const capClose = new state.Token("figcaption_close", "figcaption", -1);
+      capOpen.block = capClose.block = true;
+      const inline = t[i + 2];
+      inline.children = inline.children.slice(1, -1);
+      out.push(capOpen, inline, capClose);
+      i += 3;
+    }
+    out.push(close);
+  }
+  state.tokens = out;
+});
+
 // Headings are matched loosely so "DQXIS", "dqxi s" and "Dragon Quest XI S"
 // all land on the same subject.
 export const normalise = (s) =>
