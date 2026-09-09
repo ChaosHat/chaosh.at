@@ -799,16 +799,24 @@ export default function (eleventyConfig) {
       // single-subject essay renders exactly as before.
       const cardBySlug = new Map(cards.map((c) => [c.slug, c]));
       const placed = new Set();
+      // A `---` inside a row ends it: the rest of that section is ordinary
+      // prose again, so the list can close with an outro at column width
+      // (the canon's "that's all of it folks"). The rule is consumed, not
+      // drawn — it was the signal, like a caption's italics.
       const sections = html
         .split(/(?=<h2[\s>])/i)
         .filter((s) => s.trim())
-        .map((part) => {
+        .flatMap((part) => {
           const m = /^(<h2[^>]*>([\s\S]*?)<\/h2>)([\s\S]*)$/i.exec(part);
-          if (!m) return { head: "", card: null, body: part };
+          if (!m) return [{ head: "", card: null, body: part }];
           const slug = aliasMap.get(normalise(m[2].replace(/<[^>]+>/g, "")));
           const card = slug && !placed.has(slug) ? cardBySlug.get(slug) ?? null : null;
-          if (card) placed.add(slug);
-          return { head: m[1], card, body: m[3] };
+          if (!card) return [{ head: m[1], card: null, body: m[3] }];
+          placed.add(slug);
+          const [body, ...rest] = m[3].split(/<hr\s*\/?>/i);
+          const out = [{ head: m[1], card, body }];
+          if (rest.length) out.push({ head: "", card: null, body: rest.join("<hr>") });
+          return out;
         });
 
       return {

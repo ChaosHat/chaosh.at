@@ -26,7 +26,7 @@ The other amazing thing is that while the story itself isn't anything too insane
 ## Cyberpunk 2077
 Cyberpunk is the 1B to BG3's 1A. What this game does is make it feel so much more intimate through the first person perspective, something I never *really* liked as much in other rpgs. Johnny Silverhand, your friends, your enemies, they're all talking TO you. Even though V is voiced, I don't know if another game has felt so immersive to me in that aspect. 
 
-Additionally, I love the setting. I really like cyberpunk settings because they so clearly hold up a mirror to our society and what it could be and is already becoming, in all the best and worst ways. It is a setting that is both filled with awe inspiring advances and also shows us that those things won't fix our problems. In fact, it just might make them worse. 
+Also, I love the setting. I really like cyberpunk settings because they hold up a mirror to our society and what it could be and is already becoming, in all the best and worst ways. It's a setting filled with awe inspiring advances and shows us that those things won't fix our problems. In fact, it just might make them worse. 
 ## Fire Emblem: Awakening
 There was a lot of competition for this spot. Blazing Blade or Three Houses were both worthy candidates, but neither of those has the exact right balance Awakening does. Awakening has a strong story and great mechanics. We keep the weapon triangle, the right amount of class changing and character building, and the kids mechanic is one of my all time favorites. I love the added layer of considering how to build your characters in the present to set up their kids for success. 
 ## Monster Hunter Rise
@@ -44,4 +44,5 @@ Pokemon Pokopia is here because of what a surprise it was to me. When you told m
 ## Marvel's Spider-Man 2
 I love Spider-Man and yes I know that's not a unique stance. Spider-Man 2 managed to show both Spider-Men and realize why the web crawling superheroes can be so much fun. It's an open world game where the open world feels alive and the events worth doing because it fits with the character and the story. Peter Parker is never too busy to stop and help someone in need on his way to bigger things. It makes you feel like him in essentially every aspect, his braininess, his sneakiness, and then how easily he can beat up on bad guys. When you master the systems here you feel like Spider-Man.
 
+---
 That's all of it folks. Watch this space for updates, it's something I'll likely reassess periodically, or as a new game demands to be on here. 

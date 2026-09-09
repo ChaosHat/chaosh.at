@@ -703,6 +703,7 @@ figcaption {
 .essay-row .essay-card { float: none; width: auto; margin: 0.3rem 0 0; }
 .essay-row h2 { margin-top: 0; }
 .essay-row-body > :last-child { margin-bottom: 0; }
+.essay-row + :not(.essay-row) { margin-top: 1.75rem; } /* the outro after a `---` */
 .essay-page .post-tags { clear: both; }
 @media (max-width: 34rem) {
   .essay-row { grid-template-columns: 6rem 1fr; gap: 0 1rem; }
