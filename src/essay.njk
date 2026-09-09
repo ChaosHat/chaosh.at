@@ -17,10 +17,11 @@ eleventyComputed:
     <h1 class="post-title">{{ essay.title }}</h1>
     <p class="post-subdate">{{ essay.date | readableDate }}</p>
   </header>
-  {#- One shelf card per cited subject, floated so the opening paragraph
-      wraps it — the essay's one guaranteed image. SPANs inside, same reason
-      as the shelf: the card is one anchor. -#}
-  {% for c in essay.cards %}
+  {#- One shelf card per cited subject. SPANs inside, same reason as the
+      shelf: the card is one anchor. A card whose subject a ## heading names
+      goes under that heading (essay.sections, config); the rest float beside
+      the opening paragraph — the essay's one guaranteed image. -#}
+  {% macro card(c) %}
   <a class="essay-card shelf-card{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
     <span class="shelf-art">
       {% if c.coverUrl %}
@@ -34,8 +35,15 @@ eleventyComputed:
     {% elif c.rating %}<span class="cell rating r-{{ c.rating.slug }}">{{ c.rating.title }}</span>
     {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
   </a>
+  {% endmacro %}
+  {% for c in essay.topCards %}{{ card(c) }}{% endfor %}
+  {% for s in essay.sections %}
+  <section class="essay-section">
+    {{ s.head | safe }}
+    {% if s.card %}{{ card(s.card) }}{% endif %}
+    {{ s.body | safe }}
+  </section>
   {% endfor %}
-  {{ essay.html | safe }}
   {#- The essay mirror of a daily's tag footer: the subjects it's about
       (about-list order), then the union of their tags plus any tag cited
       directly (tagviews order). Every view this essay appears in, linked. -#}

@@ -770,34 +770,61 @@ export default function (eleventyConfig) {
         for (const t of tagsOfSubject.get(s) ?? []) citedTagSlugs.add(t);
       }
 
+      // The shelf card for each cited subject, floated beside the essay's
+      // opening paragraph (2026-09-06). Same fields the shelf reads, so the
+      // template is the shelf's card verbatim. The sky path is spelled out
+      // rather than read from skyUrls: essays can build before the subject
+      // fan-out registers skies, and registerSky always writes this path.
+      const cards = citedSubjects.map((s) => {
+        const meta = subjects[s] ?? {};
+        return {
+          slug: s,
+          title: meta.title ?? s,
+          status: meta.status ?? "active",
+          canon: canonSlugs.has(s),
+          rating: ratingOf(s, meta),
+          coverUrl: coverUrls.get(s) ?? null,
+          skyUrl: `/img/sky/${s}.svg`,
+        };
+      });
+      const html = revealSpoilers(raw);
+
+      // Where each card sits. An essay whose ## headings name its subjects
+      // (the canon list — ten games, ten sections, 2026-09-09) reads better
+      // with each card beside its own section than with the whole stack
+      // floated at the top. A heading resolves through aliasMap exactly as a
+      // daily's does; the first heading to name a cited subject takes its
+      // card. Cards no heading claims stay at the top, so a single-subject
+      // essay renders as before. Sections carry the split so the template
+      // can wrap each one and clear the previous section's float.
+      const cardBySlug = new Map(cards.map((c) => [c.slug, c]));
+      const placed = new Set();
+      const sections = html
+        .split(/(?=<h2[\s>])/i)
+        .filter((s) => s.trim())
+        .map((part) => {
+          const m = /^(<h2[^>]*>([\s\S]*?)<\/h2>)([\s\S]*)$/i.exec(part);
+          if (!m) return { head: "", card: null, body: part };
+          const slug = aliasMap.get(normalise(m[2].replace(/<[^>]+>/g, "")));
+          const card = slug && !placed.has(slug) ? cardBySlug.get(slug) ?? null : null;
+          if (card) placed.add(slug);
+          return { head: m[1], card, body: m[3] };
+        });
+
       return {
         slug,
         url: `/e/${slug}/`,
         title: e.data.title || e.fileSlug,
         date: e.date,
         featured: e.data.featured === true,
-        html: revealSpoilers(raw),
+        html,
         feedHtml: stripSpoilers(raw),
         blurb,
         citedSubjects,
         cites: subjectLinks(citedSubjects),
-        // The shelf card for each cited subject, floated beside the essay's
-        // opening paragraph (2026-09-06). Same fields the shelf reads, so the
-        // template is the shelf's card verbatim. The sky path is spelled out
-        // rather than read from skyUrls: essays can build before the subject
-        // fan-out registers skies, and registerSky always writes this path.
-        cards: citedSubjects.map((s) => {
-          const meta = subjects[s] ?? {};
-          return {
-            slug: s,
-            title: meta.title ?? s,
-            status: meta.status ?? "active",
-            canon: canonSlugs.has(s),
-            rating: ratingOf(s, meta),
-            coverUrl: coverUrls.get(s) ?? null,
-            skyUrl: `/img/sky/${s}.svg`,
-          };
-        }),
+        cards,
+        topCards: cards.filter((c) => !placed.has(c.slug)),
+        sections,
         citedTags: tagLinks(tagOrder.filter((t) => citedTagSlugs.has(t))),
       };
     });
