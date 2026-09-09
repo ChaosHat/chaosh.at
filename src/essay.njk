@@ -37,12 +37,22 @@ eleventyComputed:
   </a>
   {% endmacro %}
   {% for c in essay.topCards %}{{ card(c) }}{% endfor %}
+  {#- A section whose heading names a cited subject is a row: card in the
+      left column, heading and prose in the right, so the two stay married
+      however short the prose. The rest of the essay passes through as is. -#}
   {% for s in essay.sections %}
-  <section class="essay-section">
-    {{ s.head | safe }}
-    {% if s.card %}{{ card(s.card) }}{% endif %}
-    {{ s.body | safe }}
+  {% if s.card %}
+  <section class="essay-row">
+    {{ card(s.card) }}
+    <div class="essay-row-body">
+      {{ s.head | safe }}
+      {{ s.body | safe }}
+    </div>
   </section>
+  {% else %}
+  {{ s.head | safe }}
+  {{ s.body | safe }}
+  {% endif %}
   {% endfor %}
   {#- The essay mirror of a daily's tag footer: the subjects it's about
       (about-list order), then the union of their tags plus any tag cited

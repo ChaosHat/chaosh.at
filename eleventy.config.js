@@ -794,9 +794,9 @@ export default function (eleventyConfig) {
       // with each card beside its own section than with the whole stack
       // floated at the top. A heading resolves through aliasMap exactly as a
       // daily's does; the first heading to name a cited subject takes its
-      // card. Cards no heading claims stay at the top, so a single-subject
-      // essay renders as before. Sections carry the split so the template
-      // can wrap each one and clear the previous section's float.
+      // card and its section renders as a row (card | heading + prose, see
+      // essay.njk). Cards no heading claims stay at the top, so a
+      // single-subject essay renders exactly as before.
       const cardBySlug = new Map(cards.map((c) => [c.slug, c]));
       const placed = new Set();
       const sections = html

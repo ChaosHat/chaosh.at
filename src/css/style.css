@@ -684,11 +684,30 @@ figcaption {
 @media (max-width: 34rem) {
   .essay-card { float: none; margin: 0 0 1.25rem; }
 }
-/* A section is one ## heading and its prose; when the heading names a cited
-   subject its card floats here instead of at the top (2026-09-09, the canon
-   essay). The clear keeps a short section's card from stacking the next
-   heading beside it, and the footer likewise. */
-.essay-section, .essay-page .post-tags { clear: both; }
+/* The list essay (2026-09-09, the canon; any ten-things post after it). A
+   ## heading that names a cited subject makes its section a row: the card in
+   a fixed left column, heading and prose in the right, top-aligned. A grid
+   rather than a float so a two-line entry can never let the next card ride
+   up beside it. The heading loses its top margin to sit level with the card;
+   the row carries the spacing instead. On a phone the card column narrows
+   rather than stacking — ten covers above ten paragraphs is a long scroll,
+   and a 6rem cover beside 17rem of prose still reads. The footer clears the
+   floated top cards of an ordinary essay. */
+.essay-row {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0 1.5rem;
+  align-items: start;
+  margin-top: 1.75rem;
+}
+.essay-row .essay-card { float: none; width: auto; margin: 0.3rem 0 0; }
+.essay-row h2 { margin-top: 0; }
+.essay-row-body > :last-child { margin-bottom: 0; }
+.essay-page .post-tags { clear: both; }
+@media (max-width: 34rem) {
+  .essay-row { grid-template-columns: 6rem 1fr; gap: 0 1rem; }
+  .essay-row .essay-card { margin: 0.2rem 0 0; }
+}
 
 /* --------------------------------------------------- archive / best of */
 
