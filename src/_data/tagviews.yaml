@@ -72,6 +72,7 @@ fire-emblem:
     - fire-emblem-fates-conquest
     - fire-emblem-three-houses
     - fire-emblem-fortunes-weave
+    - fire-emblem-engage
 tactics:
   title: Tactics
   description: Turn-based, grid-based, one bad move away from a reset.
@@ -86,6 +87,8 @@ tactics:
     - triangle-strategy
     - star-wars-zero-company
     - final-fantasy-tactics
+    - xcom-enemy-unknown
+    - fire-emblem-engage
 star-wars:
   title: Star Wars
   members:
@@ -131,6 +134,7 @@ pokemon:
     - pokemon-hgss
     - pokemon-unbound
     - pokopia
+    - pokemon-legends-arceus
 monster-hunter:
   title: Monster Hunter
   members:
@@ -146,6 +150,7 @@ zelda:
     - zelda-twilight-princess
     - zelda-breath-of-the-wild
     - zelda-tears-of-the-kingdom
+    - zelda-echoes-of-wisdom
 mass-effect:
   title: Mass Effect
   members:
@@ -165,6 +170,7 @@ blizzard:
     - warcraft-3
     - world-of-warcraft-playerbots
     - diablo-iv
+    - diablo-2
 rts:
   title: RTS
   description: Build the base, mass the army, hope you counted right.
