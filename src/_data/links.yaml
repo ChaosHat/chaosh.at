@@ -1,10 +1,3 @@
-# People who link back. Rendered at /links/ under the site button; publish.py
-# carries this file into the repo like subjects.yaml. Curated, not exhaustive.
-#
-# - name: Friend's Site          # display name
-#   url: https://example.org     # where the name links
-#   button: /img/buttons/friend.gif   # their 88×31 — a copy in the repo's src/img/buttons/, or a hotlink URL; omit for a text-only row
-#   note: one line about what they write     # optional
 - name: Adri's Headspace
   url: https://adriannatchalla.gay/
   button: /img/buttons/adris-headspace.gif
