@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 
 const LIVE = "https://sign.chaosh.at/entries.json";
+const ZONE = "America/New_York";
 
 export default async function () {
   const snapshot = JSON.parse(
@@ -25,8 +26,17 @@ export default async function () {
       console.warn(`[guestbook] live fetch failed (${e.message}); using snapshot (${snapshot.length})`);
     }
   }
+  // Signed-at is a moment, not a filename date, so unlike posts it is shown
+  // in Hat's own zone: an evening signing from the US should read as that
+  // evening, not as tomorrow in UTC. Both outputs are precomputed here so
+  // the template needs no zone-aware filter.
+  const text = new Intl.DateTimeFormat("en-GB", { timeZone: ZONE, day: "numeric", month: "long", year: "numeric" });
+  const iso = new Intl.DateTimeFormat("en-CA", { timeZone: ZONE, year: "numeric", month: "2-digit", day: "2-digit" });
   return {
     source,
-    entries: entries.map((e) => ({ ...e, date: new Date(e.date) })),
+    entries: entries.map((e) => {
+      const d = new Date(e.date);
+      return { ...e, dateText: text.format(d), dateISO: iso.format(d) };
+    }),
   };
 }

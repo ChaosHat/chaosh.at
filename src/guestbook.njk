@@ -39,7 +39,7 @@ permalink: /guestbook/
   <li class="gb-entry">
     <p class="gb-meta">
       <span class="gb-name">{% if e.website %}<a href="{{ e.website }}" rel="nofollow noopener ugc">{{ e.name }}</a>{% else %}{{ e.name }}{% endif %}</span>
-      <time datetime="{{ e.date | dateSlug }}">{{ e.date | readableDate }}</time>
+      <time datetime="{{ e.dateISO }}">{{ e.dateText }}</time>
     </p>
     <p class="gb-message">{{ e.message }}</p>
   </li>
