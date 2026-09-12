@@ -9,7 +9,11 @@ permalink: /guestbook/
     approved from ntfy, so nothing signed shows up until it's been read. -#}
 <h1>Guestbook</h1>
 
-<p class="links-lede">Sign the book. Name and a note, and your site if you have one. Entries show up once I've read them.</p>
+{#- The invitation is Hat's, written in the vault's site.yaml (`guestbook:`,
+    carried by publish.py like `intro:`). Line breaks in the yaml block
+    survive as their own spans, same as the home intro. -#}
+{% if site.guestbook %}<p class="links-lede">{% for line in site.guestbook.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
+<p class="gb-note">Entries show up once I've read them.</p>
 
 <form class="guestbook-form" method="post" action="https://sign.chaosh.at/sign">
   <label>name
