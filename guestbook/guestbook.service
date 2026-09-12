@@ -1,0 +1,24 @@
+# /etc/systemd/system/guestbook.service — the write side of chaosh.at/guestbook/.
+# Binary: /usr/local/bin/guestbook (go build from this folder). Secrets and
+# config: /etc/guestbook/env. State: /var/lib/guestbook/guestbook.json.
+[Unit]
+Description=chaosh.at guestbook
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=guestbook
+Group=guestbook
+EnvironmentFile=/etc/guestbook/env
+ExecStart=/usr/local/bin/guestbook
+StateDirectory=guestbook
+StateDirectoryMode=0750
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

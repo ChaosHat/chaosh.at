@@ -1171,6 +1171,43 @@ figcaption {
 .links-body a:hover { color: var(--accent); }
 .links-note { color: var(--muted); }
 
+/* ----------------------------------------------------------------- guestbook
+   The form is plain HTML posting to sign.chaosh.at; the entries are baked in
+   at build. Fields share the snippet's surface so the page reads as one
+   object. The honeypot is positioned off-canvas, not display:none — some
+   bots skip hidden fields and fill the rest. */
+
+.guestbook-form { display: grid; gap: 1rem; max-width: var(--read); margin: 0 0 2.5rem; }
+.guestbook-form label { display: grid; gap: 0.35rem; font: 12px/1 var(--pixel); color: var(--muted); }
+.gb-opt { font: inherit; opacity: 0.7; }
+.guestbook-form input,
+.guestbook-form textarea {
+  font: 1rem/1.5 var(--prose);
+  color: var(--ink); background: var(--deep);
+  border: 1px solid var(--edge); border-radius: 0; padding: 0.5rem 0.7rem;
+  width: 100%; box-sizing: border-box;
+}
+.guestbook-form textarea { resize: vertical; min-height: 6rem; }
+.guestbook-form input:focus-visible,
+.guestbook-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.guestbook-form button {
+  justify-self: start; cursor: pointer;
+  font: 12px/1 var(--pixel); color: var(--night); background: var(--accent);
+  border: 1px solid var(--accent); border-radius: 0; padding: 0.7rem 1.2rem;
+}
+.guestbook-form button:hover { background: var(--ink); border-color: var(--ink); }
+.guestbook-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gb-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+.guestbook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; max-width: var(--read); }
+.gb-meta { margin: 0 0 0.3rem; display: flex; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; }
+.gb-name { color: var(--ink); font-weight: 700; }
+.gb-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--edge); }
+.gb-name a:hover { color: var(--accent); border-color: var(--accent); }
+.gb-meta time { font: 12px/1 var(--pixel); color: var(--muted); }
+.gb-message { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.gb-empty { color: var(--muted); }
+
 /* Silkscreen is set in px, never rem, so it never lands on a fractional size.
    Its x-height is 0.5em — half the em, against roughly 0.48 for the body
    serif — so a nominally matching px size reads far smaller beside prose.

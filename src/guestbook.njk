@@ -1,0 +1,46 @@
+---
+layout: base.njk
+title: Guestbook
+permalink: /guestbook/
+---
+{#- The book. Entries come from src/_data/guestbook.js (live from the VPS at
+    build, snapshot as fallback). The form posts to the VPS service directly —
+    no JS here — and lands on /guestbook/thanks/. Entries are pending until
+    approved from ntfy, so nothing signed shows up until it's been read. -#}
+<h1>Guestbook</h1>
+
+<p class="links-lede">Sign the book. Name and a note, and your site if you have one. Entries show up once I've read them.</p>
+
+<form class="guestbook-form" method="post" action="https://sign.chaosh.at/sign">
+  <label>name
+    <input name="name" maxlength="60" required autocomplete="nickname">
+  </label>
+  <label>website <span class="gb-opt">(optional)</span>
+    <input name="website" maxlength="200" inputmode="url" autocomplete="url" placeholder="example.com">
+  </label>
+  <label>message
+    <textarea name="message" maxlength="500" rows="4" required></textarea>
+  </label>
+  {#- Honeypot. Hidden from people, filled by bots; the service drops it. -#}
+  <div class="gb-trap" aria-hidden="true">
+    <label>email <input name="email" tabindex="-1" autocomplete="off"></label>
+  </div>
+  <button type="submit">sign</button>
+</form>
+
+{% if guestbook.entries.length %}
+<h2 class="links-head">{{ guestbook.entries.length }} {% if guestbook.entries.length == 1 %}signature{% else %}signatures{% endif %}</h2>
+<ol class="guestbook-list" reversed>
+  {% for e in guestbook.entries %}
+  <li class="gb-entry">
+    <p class="gb-meta">
+      <span class="gb-name">{% if e.website %}<a href="{{ e.website }}" rel="nofollow noopener ugc">{{ e.name }}</a>{% else %}{{ e.name }}{% endif %}</span>
+      <time datetime="{{ e.date | dateSlug }}">{{ e.date | readableDate }}</time>
+    </p>
+    <p class="gb-message">{{ e.message }}</p>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="gb-empty">Nobody has signed yet.</p>
+{% endif %}
