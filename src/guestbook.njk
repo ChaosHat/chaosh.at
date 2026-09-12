@@ -13,7 +13,7 @@ permalink: /guestbook/
     carried by publish.py like `intro:`). Line breaks in the yaml block
     survive as their own spans, same as the home intro. -#}
 {% if site.guestbook %}<p class="links-lede">{% for line in site.guestbook.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
-<p class="gb-note">Entries show up once I've read them.</p>
+<p class="gb-note">Entries show up once I've read them, so if it's up you know I read it!</p>
 
 <form class="guestbook-form" method="post" action="https://sign.chaosh.at/sign">
   <label>name
