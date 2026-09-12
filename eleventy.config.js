@@ -1064,23 +1064,28 @@ export default function (eleventyConfig) {
     });
   });
 
-  // One shelf per category actually in use. Categories are a soft field, so a
-  // shelf appears the moment a subject claims it and disappears when none do —
-  // no separate list of shelves to keep in step.
-  // Insertion order IS the nav order — games first because it is what the site
-  // is mostly about, and alphabetical put "Board games" in front of it. A
-  // category with no entry here still gets a shelf (categories are a soft
-  // field); it just sorts to the end, alphabetically, among its own kind.
+  // One entry per category actually in use. Categories are a soft field, so a
+  // filter chip appears on /shelf/ the moment a subject claims it and
+  // disappears when none do — no separate list to keep in step.
+  // Insertion order IS the chip order — games first because it is what the
+  // site is mostly about. A category with no entry here still gets a chip
+  // (categories are a soft field); it just sorts to the end, alphabetically,
+  // among its own kind.
   //
-  // The key is the URL and lives in subjects.yaml; the label is only what the
-  // nav says. "Tabletop" over "Board games" is a label change alone, so
-  // /shelf/boardgames/ keeps working and nothing in subjects.yaml moves.
+  // The key lives in subjects.yaml; the label is only what the chip says.
+  // Until 2026-09-11 each category was its own page (/shelf/<category>/) and
+  // its own nav link, promoted at 16px; with 110 games to one board game the
+  // second shelf was a nav item leading to a single tile, so the shelves
+  // merged into one page under a "games" nav word and the categories became
+  // a filter beside the sort. The old URLs redirect (redirects.yaml). Labels
+  // are lowercase to match the sort chips they sit beside, and "video" rather
+  // than "games" because the page itself is called Games.
   const SHELF_LABELS = {
-    games: "Games",
-    boardgames: "Tabletop",
-    books: "Books",
-    shows: "Shows",
-    life: "Life",
+    games: "video",
+    boardgames: "tabletop",
+    books: "books",
+    shows: "shows",
+    life: "life",
   };
   const SHELF_ORDER = Object.keys(SHELF_LABELS);
 

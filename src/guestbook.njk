@@ -32,6 +32,9 @@ permalink: /guestbook/
   <button type="submit">sign</button>
 </form>
 
+{#- The page doubles as the contact page, so the other door is named here. -#}
+{% if site.bluesky %}<p class="gb-contact">Not a guestbook person? Say hi on <a href="https://bsky.app/profile/{{ site.bluesky }}">Bluesky</a> instead.</p>{% endif %}
+
 {% if guestbook.entries.length %}
 <h2 class="links-head">{{ guestbook.entries.length }} {% if guestbook.entries.length == 1 %}signature{% else %}signatures{% endif %}</h2>
 <ol class="guestbook-list" reversed>

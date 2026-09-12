@@ -25,13 +25,14 @@
           CHAOS·HAT with the dot at the word boundary. aria-label carries
           the domain for readers and crawlers. -#}
       <a class="site-title" href="/">{{ wordmark | safe }}</a>
+      {#- Five equal words (2026-09-11). The shelves used to be promoted as the
+          way in, but with one shelf and a home page that already leads
+          everywhere, tiering marked nothing. Archive is not here because the
+          home page ends in "all posts →" — a second door to the same place.
+          Feed lives in the footer: it is the one item that is not a page. -#}
       <nav class="site-nav">
-        {% for shelf in collections.shelves %}
-        <a class="nav-shelf" href="/shelf/{{ shelf.category }}/">{{ shelf.label }}</a>
-        {% endfor %}
+        <a href="/shelf/">games</a>
         {% if collections.essayPages | length %}<a href="/essays/">deep thoughts</a>{% endif %}
-        <a href="/archive/">archive</a>
-        <a href="/feed.xml">feed</a>
         {% if collections.pages | length %}<a href="/about/">about</a>{% endif %}
         <a href="/links/">links</a>
         <a href="/guestbook/">guestbook</a>
@@ -94,6 +95,7 @@
     <footer class="site-footer">
       <p>{{ site.author }}</p>
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
+      <p><a href="/feed.xml">feed</a></p>
     </footer>
   </body>
 </html>

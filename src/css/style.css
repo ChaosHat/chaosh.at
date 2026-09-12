@@ -257,13 +257,16 @@ h1, h2, h3 { line-height: 1.25; }
   clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
 }
 
-/* Baseline, not centre: the row carries two type sizes now (see .nav-shelf)
-   and centring would leave the smaller links floating against the larger
-   ones. Baselines line up the way a line of text does. */
+/* Five equal words at 12px. The row was tiered from 2026-09-03 to 2026-09-11
+   (shelf links at 16px ink) after an outside reviewer read seven identical
+   links as undifferentiated; that answer was hierarchy, not size, and it was
+   right for a row of seven. The row is five now, one of them the shelf, and
+   the phone wrap that tiering was managing is gone with the count — so the
+   tier went with it. If the row grows past six again, tier before shrinking. */
 .site-nav {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.3rem;
   margin-left: auto;
   font: 12px/1 var(--pixel);
@@ -279,18 +282,19 @@ h1, h2, h3 { line-height: 1.25; }
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
 
-/* The shelves are the only nav items that are *categories*; the rest is
-   utility (essays index, archive, feed). They shipped as five identical
-   12px muted peers, so nothing said which two were the way into the site --
-   an outside reviewer read the whole row as undifferentiated and asked for a
-   dropdown, which would have hidden the categories rather than raised them.
-   16px ink is the same step .frag-subject already takes: the chrome typeface
-   at heading scale, which is why no new size enters the scale. Utility stays
-   at 12px muted, so the row still fits two lines on a phone instead of three
-   -- promoting everything would have made the wrap worse, not better. */
-.site-nav a.nav-shelf { font-size: 16px; color: var(--ink); }
-.site-nav a.nav-shelf:hover,
-.site-nav a.nav-shelf:focus-visible { color: var(--accent); }
+/* On a phone five words at 12px Silkscreen run ~360px of glyphs alone, so
+   the row wraps at any padding — and a wrapped row over the masthead put
+   the stray word on top of the aurora. So the wordmark keeps the band to
+   itself and the nav drops under it, where a second line is just a second
+   line. 112px is the band's height (body::before); the title row is
+   1.75rem padding + 16px wordmark, and the header's own row gap adds the
+   rest. */
+@media (max-width: 34rem) {
+  .site-title { flex-basis: 100%; }
+  .site-nav { margin-left: 0; margin-top: 2.75rem; gap: 0 0.2rem; }
+  .site-nav a { padding-inline: 0.4rem; }
+  .site-nav a:first-child { padding-left: 0; }
+}
 
 /* ----------------------------------------------------------------- intro
    Standing lines under the masthead saying what the auroras are. The art
@@ -838,6 +842,16 @@ figcaption {
 .shelf-sorter:has(#sort-canon:checked) .shelf-item { order: var(--o-canon); }
 .shelf-sorter:has(#sort-rating:checked) .shelf-item { order: var(--o-rating); }
 
+/* The category filter, same trick with display instead of order. "all" is
+   the checked default and needs no rule. One line per category in
+   SHELF_LABELS (eleventy.config.js); a category added there without a line
+   here gets a chip that hides nothing, which is visible at once. */
+.shelf-sorter:has(#show-games:checked) .shelf-item:not(.cat-games) { display: none; }
+.shelf-sorter:has(#show-boardgames:checked) .shelf-item:not(.cat-boardgames) { display: none; }
+.shelf-sorter:has(#show-books:checked) .shelf-item:not(.cat-books) { display: none; }
+.shelf-sorter:has(#show-shows:checked) .shelf-item:not(.cat-shows) { display: none; }
+.shelf-sorter:has(#show-life:checked) .shelf-item:not(.cat-life) { display: none; }
+
 .shelf-sort {
   border: 0;
   margin: 0 0 1.4rem;
@@ -1201,6 +1215,7 @@ figcaption {
 .guestbook-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .gb-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
+.gb-contact { color: var(--muted); max-width: var(--read); margin: -1.5rem 0 2.5rem; }
 .guestbook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; max-width: var(--read); }
 .gb-meta { margin: 0 0 0.3rem; display: flex; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; }
 .gb-name { color: var(--ink); font-weight: 700; }

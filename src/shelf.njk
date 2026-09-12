@@ -1,17 +1,15 @@
 ---
 layout: base.njk
 wide: true
-pagination:
-  data: collections.shelves
-  size: 1
-  alias: shelf
-permalink: "/shelf/{{ shelf.category }}/"
-eleventyComputed:
-  title: "{{ shelf.label }}"
+title: Games
+permalink: /shelf/
 ---
-{% set items = collections.subjectPages | inCategory(shelf.category) | shelveSort | shelfRanks %}
+{#- One shelf for everything (2026-09-11; it was one page per category until
+    then, each with its own nav link). Category is a filter chip beside the
+    sort, built the same way: a radio group and :has(), no script. -#}
+{% set items = collections.subjectPages | shelveSort | shelfRanks %}
 
-<h1>{{ shelf.label }}</h1>
+<h1>{{ title }}</h1>
 
 {#- Sort, in CSS. The radios carry no script: each tile ships a precomputed rank
     per axis (see shelfRanks) and the checked radio decides which one `order`
@@ -20,11 +18,10 @@ eleventyComputed:
 
     The caveat worth knowing: `order` moves tiles visually but not in the DOM, so
     tab and screen-reader order stay as authored. That is why the default is the
-    authored one — only the three opt-in axes diverge, and a reader who never
-    touches the control is never out of sync.
+    authored one — only the opt-in axes diverge, and a reader who never touches
+    the control is never out of sync.
 
-    Hidden below six items: a shelf that fits on one screen is not one you sort,
-    and the boardgames shelf currently holds exactly one game. -#}
+    Hidden below six items: a shelf that fits on one screen is not one you sort. -#}
 {#- The wrapper is what :has() hangs off — the radios and the grid have to sit
     inside one element for the checked state to reach the tiles. -#}
 <div class="shelf-sorter">
@@ -42,8 +39,24 @@ eleventyComputed:
   <input type="radio" name="shelf-sort" id="sort-rating">
   <label for="sort-rating">rating</label>
 </fieldset>
+{% endif %}
+{#- The filter. Same shape as the sort, one chip per category in use, and
+    "all" checked so the default view needs no rule. Only renders when there
+    is more than one category to choose between. -#}
+{% if collections.shelves | length > 1 %}
+<fieldset class="shelf-sort shelf-filter">
+  <legend>show</legend>
+  <input type="radio" name="shelf-show" id="show-all" checked>
+  <label for="show-all">all</label>
+  {% for shelf in collections.shelves %}
+  <input type="radio" name="shelf-show" id="show-{{ shelf.category }}">
+  <label for="show-{{ shelf.category }}">{{ shelf.label }}</label>
+  {% endfor %}
+</fieldset>
+{% endif %}
+{% if items | length > 5 %}
 {#- The scale, printed: the one link to the page that shows every rung in
-    order. Sits with the sort control because "rating" is the axis it
+    order. Sits with the controls because "rating" is the axis it
     explains, and a word under a cover is only half a scale on its own. -#}
 <a class="shelf-key" href="/r/">what the ratings mean</a>
 {% endif %}
@@ -69,10 +82,13 @@ eleventyComputed:
     Covers are SOURCED, and sourced means sometimes absent. A subject without
     one falls back to its generated tile, stretched by CSS to the cover's 2:3,
     so the original guarantee holds (no shelf goes blank waiting on an image)
-    and a half-covered shelf still lays out as one even grid. -#}
+    and a half-covered shelf still lays out as one even grid.
+
+    The cat-* classes are what the filter reads; a subject in two categories
+    carries both and shows under either. -#}
 <ul class="shelf-grid">
   {% for item in items %}
-  <li class="shelf-item st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
+  <li class="shelf-item st-{{ item.status }}{% for c in item.category %} cat-{{ c }}{% endfor %}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
     <a href="/s/{{ item.slug }}/">
       <span class="shelf-card">
         <span class="shelf-art">

@@ -11,3 +11,10 @@
   to: /t/canon/
   # Renamed 2026-09-04. A game doesn't stop being a favourite when it loses its
   # slot, so "favorite" claimed a permanence the ten-slot roster doesn't have.
+
+- from: /shelf/games/
+  to: /shelf/
+- from: /shelf/boardgames/
+  to: /shelf/
+  # Merged 2026-09-11. One shelf, category as a filter chip beside the sort;
+  # the second shelf had one tile and a nav link of its own.
