@@ -21,7 +21,7 @@ I write everything in Obsidian, in one folder of my vault. A daily post is a not
 
 At 2am a timer on my desktop runs a Python script that checks what's ready, copies it into a public git repo, and pushes. GitHub Actions builds the site with Eleventy and serves it from GitHub Pages. The skies are SVGs seeded by the date, so each day, each game and the site button wear their own colors. The type is Silkscreen for the chrome and Alegreya Sans for the prose. There's no JavaScript on the page and no analytics.
 
-The plumbing was built with Claude Code; the words are mine. The source is at [github.com/ChaosHat/chaosh.at](https://github.com/ChaosHat/chaosh.at).
+The source is at [github.com/ChaosHat/chaosh.at](https://github.com/ChaosHat/chaosh.at).
 ## Contact
 - email is me at chaosh.at
 - [bluesky](https://bsky.app/profile/chaosh.at)

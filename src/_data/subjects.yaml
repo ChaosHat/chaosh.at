@@ -410,6 +410,13 @@ ghost-of-yotei:
   aliases:
     - ghost of yotei
     - yotei
+hollow-knight:
+  title: Hollow Knight
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - hk
 horizon-forbidden-west:
   title: Horizon Forbidden West
   category:
@@ -787,7 +794,7 @@ star-wars-zero-company:
   title: STAR WARS Zero Company
   category:
     - games
-  status: active
+  status: shelved
   aliases:
     - zero company
     - swzc
@@ -922,7 +929,7 @@ warcraft-3:
   title: 'Warcraft III: Reign of Chaos'
   category:
     - games
-  status: completed
+  status: dabbling
   rating: favorite
   aliases:
     - wc3
