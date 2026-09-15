@@ -2,7 +2,23 @@
 layout: base.njk
 ---
 <ul class="post-list">
-  {% for post in collections.dailies | limit(5) %}
+  {% for entry in collections.stream | limit(5) %}
+  {% if entry.kind == "essay" %}
+  {#- An essay in the stream is its lede and a link, never the text: the
+      full piece has one home. The kicker marks it as the other kind of post,
+      since a titled daily wears the same head. -#}
+  {% set e = entry.essay %}
+  <li class="stream-essay">
+    <div class="entry-head" style="--day-sky:url({{ e.date | daySky }})">
+      <span class="entry-kind">deep thoughts</span>
+      <a class="post-list-title" href="{{ e.url }}">{{ e.title }}</a>
+      <p class="post-list-subdate">{{ e.date | readableDate }}</p>
+    </div>
+    <div class="post-body"><p>{{ e.blurb }}</p></div>
+    <a class="more" href="{{ e.url }}">read the rest →</a>
+  </li>
+  {% else %}
+  {% set post = entry.post %}
   {#- Spoilers resolve BEFORE the cut: truncating first could strip a closing
       "||" and leave the opening one unpaired, which renders the words plainly. -#}
   {% set body = post.content | spoilers | homeBody %}
@@ -20,11 +36,12 @@ layout: base.njk
     <a class="more" href="{{ post.url }}">read the rest → <span class="more-cut">{{ body.cut | join(", ") }}</span></a>
     {% endif %}
   </li>
+  {% endif %}
   {% else %}
   <li class="empty">Nothing here yet.</li>
   {% endfor %}
 </ul>
 
-{% if collections.dailies | length > 5 %}
+{% if collections.stream | length > 5 %}
 <p class="all-link"><a href="/archive/">all posts →</a></p>
 {% endif %}

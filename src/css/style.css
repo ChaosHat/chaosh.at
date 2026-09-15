@@ -512,6 +512,16 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 
 a.post-list-date:hover { color: var(--accent); }
 
+/* An essay in the home stream (2026-09-15). Its head is a titled daily's
+   head, so the kicker is what says which kind of post this is — the strip's
+   label, in the strip's blue, sat above the title. */
+.entry-kind {
+  display: block;
+  margin-bottom: 0.55rem;
+  font: 12px/1 var(--pixel);
+  color: var(--st-completed);
+}
+
 /* Markup shape comes from linkSubjects() in eleventy.config.js. */
 /* The fragment sky grows with its entry, between a floor and a ceiling.
    Stretch is the default flex behaviour and this rule keeps it deliberately:
@@ -740,6 +750,9 @@ figcaption {
 }
 
 .archive-list a { font: 12px/1.5 var(--pixel); text-decoration: none; }
+
+/* The archive row's kicker, same word and blue as the home stream's. */
+.archive-kind { font: 12px/1.5 var(--pixel); color: var(--st-completed); }
 
 .archive-note {
   margin-left: auto;

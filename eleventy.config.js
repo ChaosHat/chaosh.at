@@ -365,6 +365,32 @@ export default function (eleventyConfig) {
     publishable(api.getFilteredByTag("dailies")).sort((a, b) => b.date - a.date),
   );
 
+  // The home stream and the archive: dailies and essays in ONE chronology.
+  // Until 2026-09-15 both rendered dailies only, so a new essay reached a
+  // browser visitor as nothing but a title swap in the signpost strip — easy
+  // to miss — while the Atom feed had interleaved essays all along, so the two
+  // surfaces disagreed about what was new. The pin-atop-the-stream idea was
+  // rejected (2026-08-13) because a pin goes stale between rare essays; an
+  // entry at its own date scrolls off like a daily and never can. On a
+  // same-day tie the essay leads: it is the considered piece, the daily the
+  // running log. Lede + link only — full text keeps its one home at /e/.
+  eleventyConfig.addCollection("stream", (api) => {
+    const rank = { essay: 0, daily: 1 };
+    const dailies = publishable(api.getFilteredByTag("dailies")).map((post) => ({
+      kind: "daily",
+      date: post.date,
+      post,
+    }));
+    const essays = buildEssayList(api).map((essay) => ({
+      kind: "essay",
+      date: essay.date,
+      essay,
+    }));
+    return [...dailies, ...essays].sort(
+      (a, b) => b.date - a.date || rank[a.kind] - rank[b.kind],
+    );
+  });
+
   // "Best of" is zero-length until Hat marks a post `featured: true`. Supporting
   // the flag now costs nothing; the page and its nav link stay hidden until then.
   eleventyConfig.addCollection("featured", (api) => {

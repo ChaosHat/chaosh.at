@@ -2,7 +2,7 @@
 layout: base.njk
 title: Archive
 pagination:
-  data: collections.dailies
+  data: collections.stream
   size: 20
   alias: posts
 permalink: "{% if pagination.pageNumber == 0 %}/archive/{% else %}/archive/page-{{ pagination.pageNumber + 1 }}/{% endif %}"
@@ -10,11 +10,20 @@ permalink: "{% if pagination.pageNumber == 0 %}/archive/{% else %}/archive/page-
 <h1>Archive</h1>
 
 <ul class="archive-list">
-  {% for post in posts %}
+  {% for entry in posts %}
+  {% if entry.kind == "essay" %}
+  <li>
+    <a href="{{ entry.essay.url }}">{{ entry.essay.title }}</a>
+    <span class="archive-kind">deep thoughts</span>
+    <span class="archive-note">{{ entry.date | readableDate }}</span>
+  </li>
+  {% else %}
+  {% set post = entry.post %}
   <li>
     <a href="{{ post.url }}">{{ post.data.title or (post.date | readableDate) }}</a>
     {% if post.data.title %}<span class="archive-note">{{ post.date | readableDate }}</span>{% endif %}
   </li>
+  {% endif %}
   {% endfor %}
 </ul>
 
