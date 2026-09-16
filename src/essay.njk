@@ -43,9 +43,9 @@ eleventyComputed:
   {% for s in essay.sections %}
   {% if s.card %}
   <section class="essay-row">
+    {{ s.head | safe }}
     {{ card(s.card) }}
     <div class="essay-row-body">
-      {{ s.head | safe }}
       {{ s.body | safe }}
     </div>
   </section>
