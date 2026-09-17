@@ -1,0 +1,1 @@
+This is a fun and very sweet game that is good but not quite *very good*. A few things keep it from being as high as it could be, but really I think it's just overambitious for what it could have done. Some of it feels a little half baked. 

@@ -1,0 +1,1 @@
+An RTS game without the army building and management sounds kind of lame but it actually makes it very chill. To be honest, most players aren't good enough to do anything with their army and also stay on top of their econ (BUT I AM DIAMOND RANK BITCHES) so this ends up just being chill and focusing on the most important part. 

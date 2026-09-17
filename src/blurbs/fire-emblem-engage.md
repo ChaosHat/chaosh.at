@@ -1,0 +1,1 @@
+I fell off this I want to say about 75% of the way through and I'm not totally sure why. I really want to come back to it though at some point. I remember the rings system being really inventive and a nice mechanical hook after Three Houses was pretty thin. 

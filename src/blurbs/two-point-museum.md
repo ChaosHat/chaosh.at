@@ -1,0 +1,1 @@
+An excellent cozy little management sim. My biggest complaint is that it feels like the signage is bugged or I just don't understand it well enough because it seems like I can never get enough credit for it. 

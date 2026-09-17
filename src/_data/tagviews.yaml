@@ -67,6 +67,7 @@ fire-emblem:
     - fire-emblem-three-houses
     - fire-emblem-fortunes-weave
     - fire-emblem-engage
+    - fire-emblem-binding-blade
 tactics:
   title: Tactics
   description: Turn-based, grid-based, one bad move away from a reset.
@@ -83,6 +84,7 @@ tactics:
     - final-fantasy-tactics
     - xcom-enemy-unknown
     - fire-emblem-engage
+    - fire-emblem-binding-blade
 star-wars:
   title: Star Wars
   members:

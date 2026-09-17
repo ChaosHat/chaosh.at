@@ -1,0 +1,1 @@
+Really fun 2D Zelda with some interesting gimmicks to it (the buying items, the entering the walls). It's not my favorite but it's fun and it doesn't take too long, and there's a lot of charm here. 

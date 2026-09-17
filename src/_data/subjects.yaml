@@ -334,6 +334,16 @@ fire-emblem-awakening:
     - awakening
     - fe awakening
     - fea
+fire-emblem-binding-blade:
+  title: 'Fire Emblem: Binding Blade'
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - binding blade
+    - fe6
+    - fe binding blade
+    - febb
 fire-emblem-blazing-blade:
   title: 'Fire Emblem: Blazing Blade'
   category:
@@ -368,7 +378,7 @@ fire-emblem-fortunes-weave:
   title: 'Fire Emblem: Fortune''s Weave'
   category:
     - games
-  status: backlog
+  status: active
   aliases:
     - fortunes weave
     - fortune's weave
@@ -976,6 +986,7 @@ zelda-a-link-between-worlds:
   category:
     - games
   status: active
+  rating: liked
   aliases:
     - link between worlds
     - albw

@@ -1,0 +1,1 @@
+I don't think I gave this game enough time but I was slightly discouraged by bugs that caused my progress to get eaten up. It felt a little thin, but maybe it gets a bit more complex later. Something to bookmark and revisit a bit later. 
