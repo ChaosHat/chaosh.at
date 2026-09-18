@@ -545,9 +545,13 @@ export default function (eleventyConfig) {
   // it burns. Written up in the vault at 90_Reference/91_Documentation/
   // "chaosh.at Design System" — including why hues sit on a ladder rather
   // than hashing straight to a degree.
+  // There is no per-subject override. A subject gets the colour the ladder
+  // gives it; if a colour is hated the fix is to stop that colour existing —
+  // a palette-level change to the arc the slots map onto (aurora.js, and the
+  // curated arc in "chaosh.at Design System") — never an escape hatch for one
+  // subject. Displacement is not a fault: it is how the ladder keeps two
+  // subjects off the same slot (2026-09-18).
   const SLOT_BASE = 24;
-
-  const displacedHues = [];
 
   const assignHues = () => {
     const slugs = Object.keys(subjects).sort();
@@ -559,16 +563,6 @@ export default function (eleventyConfig) {
     const used = new Set();
 
     for (const slug of slugs) {
-      const want = subjects[slug]?.hue;
-      if (!Number.isFinite(want)) continue;
-      const hue = ((want % 360) + 360) % 360;
-      hues.set(slug, hue);
-      used.add(Math.round(hue / step) % slots);
-    }
-
-    for (const slug of slugs) {
-      if (hues.has(slug)) continue;
-
       const want = hashOf(slug) % slots;
       if (!used.has(want)) {
         used.add(want);
@@ -593,7 +587,6 @@ export default function (eleventyConfig) {
 
       used.add(best);
       hues.set(slug, Math.round(best * step));
-      displacedHues.push(slug);
     }
 
     return hues;
@@ -1395,18 +1388,6 @@ export default function (eleventyConfig) {
       );
       for (const stray of strays) console.warn(`  · ${stray}`);
       console.warn(`  That subject is missing from its tag page. Check tagviews.yaml.\n`);
-    }
-
-    // Not a fault; reported because that subject's colour was decided by
-    // another subject existing, and `hue:` is how to take it back.
-    if (displacedHues.length > 0) {
-      console.warn(
-        `\n[chaosh.at] ${displacedHues.length} subject(s) moved off their preferred hue:`,
-      );
-      for (const slug of displacedHues) {
-        console.warn(`  · ${slug} → ${subjectHues.get(slug)}deg`);
-      }
-      console.warn(`  Set "hue: <0-359>" in subjects.yaml to pin one.\n`);
     }
 
     // Reported, never minted. A bad value renders the tile as "pending" AND
