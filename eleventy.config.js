@@ -468,7 +468,9 @@ export default function (eleventyConfig) {
   // Named tagviews, not tags, and that is not cosmetic: `tags` is reserved in
   // Eleventy's data cascade — a global of that name is read as every template's
   // collection membership and the build dies before rendering anything. The
-  // vault-side file Hat edits keeps the honest name; publish.py renames the copy.
+  // vault-side file and the repo copy share the name; publish.py copies it
+  // straight across. Nothing is renamed — only Eleventy's `tags` global is
+  // dangerous, and this file has never claimed that name on either side.
   const tagsFile = path.join("src", "_data", "tagviews.yaml");
   const tags = fs.existsSync(tagsFile)
     ? parseYaml(fs.readFileSync(tagsFile, "utf8")) || {}
@@ -654,10 +656,13 @@ export default function (eleventyConfig) {
   // A blurb is the third content type: an undated, revisable paragraph that
   // stands for a subject whose thoughts never took the form of a ## heading.
   // One markdown file per subject at src/blurbs/<slug>.md — the filename IS
-  // the slug, same contract as covers, so nothing is registered and nothing
-  // can drift. It publishes because it exists and retracts by deletion
-  // (publish.py carries both directions). Rescanned per build for the same
-  // reason covers are.
+  // the slug, same contract as covers, so the body cannot drift from the
+  // subject it belongs to. Since 2026-09-08 the blurb is also the subject's
+  // REGISTRATION: its frontmatter is compiled into subjects.yaml, so deleting
+  // the file is a compile error rather than a retraction — unregistering is
+  // `compile_subjects.py --forget <slug>`, said out loud. An empty body still
+  // renders nothing, so a registration stub costs a tile and no prose.
+  // Rescanned per build for the same reason covers are.
   const BLURB_DIR = path.join("src", "blurbs");
   const blurbTexts = new Map(); // slug -> markdown source
   eleventyConfig.on("eleventy.before", () => {
