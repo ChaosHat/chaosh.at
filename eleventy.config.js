@@ -379,6 +379,11 @@ export default function (eleventyConfig) {
   const publishedEssays = (api) =>
     api.getFilteredByTag("essays").filter((e) => {
       if (e.data.publish !== true) return false;
+      // hold: is the retraction verb on both tracks. publish.py already pulls
+      // a held essay out of the repo, so nothing is live-wrong today — this is
+      // the same backstop publishable() gives dailies, for the run where the
+      // repo copy is present and the flag is the only thing saying "not this".
+      if (e.data.hold) return false;
       if (!e.data.date) {
         undatedEssays.add(e.inputPath);
         return false;
@@ -523,14 +528,17 @@ export default function (eleventyConfig) {
     .sort(([, a], [, b]) => (a?.rank ?? 99) - (b?.rank ?? 99))
     .map(([slug]) => slug);
 
-  const badRatings = [];
+  // Keyed by slug, not a list: ratingOf runs once for the subject fan-out and
+  // again for every essay card that shows the same tile, so a single bad value
+  // used to be reported as many times as it happened to be rendered.
+  const badRatings = new Map(); // slug -> offending value, as text
   const ratingOf = (slug, meta) => {
     const want = meta?.rating;
     if (want == null) return null;
     if (typeof want !== "string" || !ratings[want]) {
       // A list is the shape error worth naming separately: a game has one
       // verdict, and two rungs on one tile would read as a range.
-      badRatings.push({ slug, value: Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want) });
+      badRatings.set(slug, Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want));
       return null;
     }
     if (canonSlugs.has(slug)) return null;
@@ -893,6 +901,17 @@ export default function (eleventyConfig) {
   eleventyConfig.on("eleventy.before", () => {
     fanOut = null;
     essayList = null;
+    // These collect during a build and are reported at the end. Under --serve
+    // the config is not re-evaluated between rebuilds, so without this they
+    // accumulate: the same undated post is reported once, then twice, then
+    // three times, and the counts stop meaning anything.
+    undated.clear();
+    undatedEssays.clear();
+    unmatched.clear();
+    aboutIssues.length = 0;
+    badRatings.clear();
+    essayCollisions.length = 0;
+    homelessEssays.length = 0;
   });
 
   const buildSubjectPages = (api) => {
@@ -1271,7 +1290,14 @@ export default function (eleventyConfig) {
   //          honest move is to not ship the words. Fixed-width, because a
   //          redaction that preserved length would leak it.
   const CODE_REGION = /(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>)/gi;
-  const SPOILER = /\|\|([\s\S]+?)\|\|/g;
+  // A spoiler is `||text||`. The match may not cross a block boundary: an
+  // unpaired `||` used to reach forward to the next one anywhere later in the
+  // document and blur — or, in the feed, delete — everything between, emitting
+  // a span straddling `</p><p>`. Forbidding block closers inside the match
+  // means a lone `||` now finds no partner and stays literal text, which is
+  // what it looks like to whoever typed it.
+  const SPOILER =
+    /\|\|((?:(?!<\/(?:p|li|h[1-6]|blockquote|ul|ol|pre|td|th|table)>)[\s\S])+?)\|\|/g;
 
   const outsideCode = (html, fn) =>
     String(html ?? "")
@@ -1393,11 +1419,11 @@ export default function (eleventyConfig) {
     // Reported, never minted. A bad value renders the tile as "pending" AND
     // drops the game's row from its /r/ view, and both failures are invisible
     // on the page — the tile just looks like one left unrated on purpose.
-    if (badRatings.length > 0) {
+    if (badRatings.size > 0) {
       console.warn(
-        `\n[chaosh.at] ${badRatings.length} rating: value(s) not in ratings.yaml:`,
+        `\n[chaosh.at] ${badRatings.size} rating: value(s) not in ratings.yaml:`,
       );
-      for (const { slug, value } of badRatings) {
+      for (const [slug, value] of badRatings) {
         console.warn(`  · ${slug} → ${value}`);
       }
       console.warn(`  That game renders as pending. Fix the slug, or add the rung to ratings.yaml on purpose.\n`);
