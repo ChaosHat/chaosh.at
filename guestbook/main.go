@@ -58,6 +58,11 @@ const (
 	perDay  = 6
 	// Approvals within this window share one rebuild.
 	dispatchCoalesce = 45 * time.Second
+	// How long a signer's IP stays readable. It feeds nothing but the 24h rate
+	// window, so keeping it for the life of the file buys nothing and quietly
+	// turns a guestbook into a log of who read the site. 30 days rather than 1
+	// so a spam run spread over several days is still traceable to one source.
+	ipRetention = 30 * 24 * time.Hour
 )
 
 type Entry struct {
@@ -103,8 +108,24 @@ func loadStore(dir string) (*store, error) {
 	return s, nil
 }
 
+// forgetOldIPs blanks the IP on entries past ipRetention. Caller holds mu.
+//
+// recent() needs no change: a blanked entry is far outside its 24h window, and
+// "" never matches a real client IP. Entries already in the file get blanked on
+// the first save after this ships.
+func (s *store) forgetOldIPs() {
+	cut := time.Now().UTC().Add(-ipRetention).Format(time.RFC3339)
+	for i := range s.Entries {
+		if s.Entries[i].IP != "" && s.Entries[i].Date < cut {
+			s.Entries[i].IP = ""
+		}
+	}
+}
+
 // save writes the whole file via temp+rename. Caller holds mu.
 func (s *store) save() error {
+	// Every write is an expiry point, so retention needs no timer of its own.
+	s.forgetOldIPs()
 	b, err := json.MarshalIndent(s, "", " ")
 	if err != nil {
 		return err
@@ -125,8 +146,11 @@ func (s *store) add(e Entry) (Entry, error) {
 	return e, s.save()
 }
 
-// moderate flips a pending entry. Returns the entry and whether it changed.
-func (s *store) moderate(id int64, token, status string) (Entry, bool, error) {
+// moderate flips a pending entry. Returns the entry, whether it changed, and
+// the status it held before — the caller needs the old one to know whether the
+// PUBLIC page changed, which is true when an entry leaves "approved" just as
+// much as when it arrives there.
+func (s *store) moderate(id int64, token, status string) (Entry, bool, string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for i := range s.Entries {
@@ -135,12 +159,13 @@ func (s *store) moderate(id int64, token, status string) (Entry, bool, error) {
 			continue
 		}
 		if e.Status == status {
-			return *e, false, nil
+			return *e, false, e.Status, nil
 		}
+		was := e.Status
 		e.Status = status
-		return *e, true, s.save()
+		return *e, true, was, s.save()
 	}
-	return Entry{}, false, errors.New("no such entry")
+	return Entry{}, false, "", errors.New("no such entry")
 }
 
 func (s *store) approved() []publicEntry {
@@ -352,13 +377,17 @@ func (a *app) moderate(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	e, changed, err := a.st.moderate(id, r.PathValue("token"), status)
+	e, changed, was, err := a.st.moderate(id, r.PathValue("token"), status)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	log.Printf("%s #%d (%q) changed=%v", status, e.ID, e.Name, changed)
-	if changed && status == "approved" {
+	log.Printf("%s #%d (%q) changed=%v was=%s", status, e.ID, e.Name, changed, was)
+	// Rebuild whenever the approved set changes — leaving "approved" is a
+	// change to the live page too. Without this, rejecting an entry already on
+	// the site only flipped a field here and the entry stayed visible to
+	// readers until the next nightly build.
+	if changed && (status == "approved" || was == "approved") {
 		a.requestBuild()
 	}
 	fmt.Fprintf(w, "%s #%d %s\n", status, e.ID, e.Name)
