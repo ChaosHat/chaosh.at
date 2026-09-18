@@ -6,8 +6,8 @@ pagination:
   alias: rating
 permalink: "/r/{{ rating.slug }}/"
 eleventyComputed:
-  title: "{{ rating.title }}"
-  description: "{{ rating.description }}"
+  title: "{{ rating.title | safe }}"
+  description: "{{ rating.description | safe }}"
 ---
 {#- One rung of the rating ladder: every game rated this, and everything
     written about them. Mints no nav link, same rule as tags — reached from

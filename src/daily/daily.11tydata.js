@@ -11,6 +11,12 @@ const isDated = (data) =>
 
 export default {
   layout: "post.njk",
+  // A daily is prose, not a template. Without this, Eleventy runs every post
+  // through Nunjucks before markdown, so a stray `{#`, `{{ x }}` or `{% y %}`
+  // in a day's writing is a fatal build error and nothing deploys. Fragments
+  // on subject/tag pages and the feed already skip Nunjucks (md.render on the
+  // raw input), so this also makes the two render paths genuinely identical.
+  templateEngineOverride: "md",
   tags: "dailies",
   isDaily: true,
   eleventyComputed: {

@@ -207,6 +207,31 @@ export default function (eleventyConfig) {
   const HOME_LIMIT = 1500; // visible characters
   const visibleLength = (s) => s.replace(/<[^>]+>/g, "").trim().length;
 
+  // Text cut out of RENDERED html is still html-encoded: markdown-it turned the
+  // author's `"` into `&quot;` and `&` into `&amp;`. Handing that to a template
+  // escapes it a second time (`&amp;quot;`), and handing it to `normalise` as a
+  // lookup key fails to match the plain-text alias the Python side computes off
+  // the raw markdown. Decode once, at the point of extraction, so what leaves
+  // here is genuinely plain text — templates stay autoescaped, `| safe` stays
+  // out of the picture. One pass, `&amp;` included in the alternation, so a
+  // literal `&quot;` the author typed decodes to `&quot;` and not to `"`.
+  const ENTITY = { quot: '"', amp: "&", lt: "<", gt: ">", "#39": "'" };
+  const decodeEntities = (s) =>
+    s.replace(/&(quot|amp|lt|gt|#39);/g, (_, e) => ENTITY[e]);
+
+  // Rendered html -> the plain text the author actually typed. Used for every
+  // alias lookup off rendered output: `normalise` turns punctuation into
+  // spaces, so an undecoded `&amp;` becomes the token "amp" and "Pokémon
+  // HeartGold & SoulSilver" stops matching its own alias — while the Python
+  // side, which reads the raw markdown, matches it fine. Decoding here keeps
+  // the two sides agreeing on what a heading says.
+  const plainText = (html) => decodeEntities(String(html).replace(/<[^>]+>/g, "")).trim();
+
+  // The inverse, for titles and other plain-text values interpolated straight
+  // into html strings this config emits (which no template gets to escape).
+  const escapeHtml = (s) =>
+    String(s).replace(/[&<>"']/g, (c) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot", "'": "#39" }[c]};`);
+
   const isSubject = (s) => /^<h2[\s>]/i.test(s.trim());
 
   eleventyConfig.addFilter("homeBody", (html) => {
@@ -247,7 +272,7 @@ export default function (eleventyConfig) {
     // for an untagged subject.
     const cut = sections.slice(i).map((section) => {
       const m = /^<h2[^>]*>([\s\S]*?)<\/h2>/i.exec(section.trim());
-      const heading = m ? m[1].replace(/<[^>]+>/g, "").trim() : "";
+      const heading = m ? plainText(m[1]) : "";
       const slug = aliasMap.get(normalise(heading));
       return subjects[slug]?.title ?? heading;
     });
@@ -783,7 +808,7 @@ export default function (eleventyConfig) {
       // lede, nothing paraphrases it. Off the REDACTED render: a blurb is
       // plain text in a stream, with no span to blur and nothing to click.
       const firstPara = stripSpoilers(raw).match(/<p>([\s\S]*?)<\/p>/i);
-      const blurb = firstPara ? firstPara[1].replace(/<[^>]+>/g, "").trim() : null;
+      const blurb = firstPara ? plainText(firstPara[1]) : null;
 
       const { citedSubjects, citedTagsDirect } = resolveAbout(e.inputPath, e.data.about);
       if (!citedSubjects.length && !citedTagsDirect.length) {
@@ -835,7 +860,7 @@ export default function (eleventyConfig) {
         .flatMap((part) => {
           const m = /^(<h2[^>]*>([\s\S]*?)<\/h2>)([\s\S]*)$/i.exec(part);
           if (!m) return [{ head: "", card: null, body: part }];
-          const slug = aliasMap.get(normalise(m[2].replace(/<[^>]+>/g, "")));
+          const slug = aliasMap.get(normalise(plainText(m[2])));
           const card = slug && !placed.has(slug) ? cardBySlug.get(slug) ?? null : null;
           if (!card) return [{ head: m[1], card: null, body: m[3] }];
           placed.add(slug);
@@ -1144,9 +1169,12 @@ export default function (eleventyConfig) {
     String(html ?? "").replace(
       /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
       (whole, attrs, inner) => {
-        const slug = aliasMap.get(normalise(inner.replace(/<[^>]+>/g, "")));
+        const slug = aliasMap.get(normalise(plainText(inner)));
         if (!slug) return whole;
-        const title = subjects[slug]?.title ?? inner;
+        // The canonical title is plain text from yaml going straight into html
+        // that no template gets to escape, so escape it here. `inner` is the
+        // fallback and is already rendered html — leave it alone.
+        const title = subjects[slug]?.title ? escapeHtml(subjects[slug].title) : inner;
         return `<h2${attrs}><a href="/s/${slug}/">${title}</a></h2>`;
       },
     );
@@ -1177,7 +1205,7 @@ export default function (eleventyConfig) {
       }
 
       const [, attrs, inner, rest] = m;
-      const slug = aliasMap.get(normalise(inner.replace(/<[^>]+>/g, "")));
+      const slug = aliasMap.get(normalise(plainText(inner)));
 
       // Unregistered headings stay exactly as written, but keep the column.
       if (!slug) {
@@ -1186,7 +1214,7 @@ export default function (eleventyConfig) {
       }
 
       const meta = subjects[slug] ?? {};
-      const title = meta.title ?? inner;
+      const title = meta.title ? escapeHtml(meta.title) : inner;
       const status = meta.status ?? "active";
       const head =
         `<h2 class="frag-head"${attrs}>` +
@@ -1221,7 +1249,7 @@ export default function (eleventyConfig) {
     for (const [, inner] of String(html ?? "").matchAll(
       /<h2[^>]*>([\s\S]*?)<\/h2>/gi,
     )) {
-      const slug = aliasMap.get(normalise(inner.replace(/<[^>]+>/g, "")));
+      const slug = aliasMap.get(normalise(plainText(inner)));
       for (const t of tagsOfSubject.get(slug) ?? []) found.add(t);
     }
     return tagLinks(tagOrder.filter((t) => found.has(t)));

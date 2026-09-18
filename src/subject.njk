@@ -6,7 +6,7 @@ pagination:
   alias: subject
 permalink: "/s/{{ subject.slug }}/"
 eleventyComputed:
-  title: "{{ subject.title }}"
+  title: "{{ subject.title | safe }}"
 ---
 <article class="subject">
   <header class="subject-head{% if subject.essays | length %} no-rule{% endif %}">

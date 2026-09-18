@@ -6,8 +6,8 @@ pagination:
   alias: tag
 permalink: "/t/{{ tag.slug }}/"
 eleventyComputed:
-  title: "{{ tag.title }}"
-  description: "{{ tag.description }}"
+  title: "{{ tag.title | safe }}"
+  description: "{{ tag.description | safe }}"
 ---
 {%- set view = tag %}
 {%- set emptyLabel = "No games on this tag yet." %}

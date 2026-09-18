@@ -6,7 +6,7 @@ pagination:
   alias: essay
 permalink: "/e/{{ essay.slug }}/"
 eleventyComputed:
-  title: "{{ essay.title }}"
+  title: "{{ essay.title | safe }}"
 ---
 <article class="post essay-page">
   {#- The essay's date seeds the same day-sky a daily gets, so the essay and

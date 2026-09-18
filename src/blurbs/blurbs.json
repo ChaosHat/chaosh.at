@@ -1,4 +1,5 @@
 {
   "permalink": false,
-  "eleventyExcludeFromCollections": true
+  "eleventyExcludeFromCollections": true,
+  "templateEngineOverride": "md"
 }
