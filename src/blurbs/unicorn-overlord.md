@@ -1,0 +1,1 @@
+This game feels like too much for me. There's so many permutations of how you build your units and then you have to build out their logic trees. It's cool but I don't want to dive that deep. Maybe I'll give it another shake at some point. 
