@@ -38,6 +38,36 @@ jobs:
         with:
           path: _site
 
+      # The vault side is loud — every refusal reaches the phone at 2am — while
+      # a build that dies up here reaches nobody, and the live site just quietly
+      # stops moving. Same ntfy topic as the publish run, so there is one feed
+      # to watch. Never fails the job: the build already failed, and a second
+      # failure on top of it only obscures the first.
+      - name: Notify on failure
+        if: failure()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          JOB: ${{ github.job }}
+          TRIGGER: ${{ github.event_name }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "NTFY_TOPIC unset — no alert sent."
+            exit 0
+          fi
+          auth=()
+          if [ -n "$NTFY_TOKEN" ]; then
+            auth=(-H "Authorization: Bearer $NTFY_TOKEN")
+          fi
+          curl -sS --max-time 10 \
+            -H "Title: chaosh.at build failed" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            "${auth[@]}" \
+            -d "The $JOB job failed ($TRIGGER). The site is serving the last good build.
+          $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://ntfy.hatnas.com/$NTFY_TOPIC" || true
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -47,3 +77,33 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # The vault side is loud — every refusal reaches the phone at 2am — while
+      # a build that dies up here reaches nobody, and the live site just quietly
+      # stops moving. Same ntfy topic as the publish run, so there is one feed
+      # to watch. Never fails the job: the build already failed, and a second
+      # failure on top of it only obscures the first.
+      - name: Notify on failure
+        if: failure()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          JOB: ${{ github.job }}
+          TRIGGER: ${{ github.event_name }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "NTFY_TOPIC unset — no alert sent."
+            exit 0
+          fi
+          auth=()
+          if [ -n "$NTFY_TOKEN" ]; then
+            auth=(-H "Authorization: Bearer $NTFY_TOKEN")
+          fi
+          curl -sS --max-time 10 \
+            -H "Title: chaosh.at build failed" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            "${auth[@]}" \
+            -d "The $JOB job failed ($TRIGGER). The site is serving the last good build.
+          $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://ntfy.hatnas.com/$NTFY_TOPIC" || true
