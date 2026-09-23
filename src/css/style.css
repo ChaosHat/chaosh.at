@@ -1128,6 +1128,17 @@ figcaption {
 
 .spoiler:focus { background: none; filter: none; outline: none; }
 
+/* Read aloud, never drawn: the spoiler's warning for a screen reader. Same
+   clip as the shelf's radios. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 /* Paper has no focus state, so a blurred spoiler would print unreadable. */
 @media print {
   .spoiler { background: none; filter: none; }

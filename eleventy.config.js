@@ -2,8 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, ribbonSheet, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, ribbonSheet } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
+import { assignSlots, huesFrom, readLock } from "./hues.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -561,48 +562,12 @@ export default function (eleventyConfig) {
   // curated arc in "chaosh.at Design System") — never an escape hatch for one
   // subject. Displacement is not a fault: it is how the ladder keeps two
   // subjects off the same slot (2026-09-18).
-  const SLOT_BASE = 24;
-
-  const assignHues = () => {
-    const slugs = Object.keys(subjects).sort();
-    let slots = SLOT_BASE;
-    while (slugs.length > slots) slots *= 2;
-    const step = 360 / slots;
-
-    const hues = new Map();
-    const used = new Set();
-
-    for (const slug of slugs) {
-      const want = hashOf(slug) % slots;
-      if (!used.has(want)) {
-        used.add(want);
-        hues.set(slug, Math.round(want * step));
-        continue;
-      }
-
-      let best = null;
-      let bestGap = -1;
-      for (let i = 0; i < slots; i += 1) {
-        if (used.has(i)) continue;
-        let gap = Infinity;
-        for (const taken of used) {
-          const raw = Math.abs(i - taken);
-          gap = Math.min(gap, Math.min(raw, slots - raw));
-        }
-        if (gap > bestGap) {
-          bestGap = gap;
-          best = i;
-        }
-      }
-
-      used.add(best);
-      hues.set(slug, Math.round(best * step));
-    }
-
-    return hues;
-  };
-
-  const subjectHues = assignHues();
+  //
+  // The ladder itself lives in hues.js, and the slots it has handed out are
+  // remembered in hues.lock.json, so registering a subject never recolours
+  // one that already exists (2026-09-23). Any slug the lock doesn't know yet
+  // is assigned here by the same function publish.py uses to extend it.
+  const subjectHues = huesFrom(assignSlots(readLock(), Object.keys(subjects)));
 
   // Recency tiers, not a continuous scale: bitmap-era art likes discrete
   // states, and a subject visibly changing tier at a 2am publish is an event.
@@ -914,6 +879,7 @@ export default function (eleventyConfig) {
     undatedEssays.clear();
     unmatched.clear();
     aboutIssues.length = 0;
+    dailyAbout.length = 0;
     badRatings.clear();
     essayCollisions.length = 0;
     homelessEssays.length = 0;
@@ -1311,12 +1277,16 @@ export default function (eleventyConfig) {
       .join("");
 
   // tabindex is what makes the span focusable, and focus is what reveals it —
-  // click or tab, and the site stays at zero JavaScript.
+  // click or tab, and the site stays at zero JavaScript. The blur is visual
+  // only: a screen reader reads the words straight through, so a hidden
+  // "spoiler:" label goes first, giving a listener the same warning the blur
+  // gives a reader, and the moment to skip ahead.
   const revealSpoilers = (html) =>
     outsideCode(html, (s) =>
       s.replace(
         SPOILER,
-        (_m, inner) => `<span class="spoiler" tabindex="0">${inner}</span>`,
+        (_m, inner) =>
+          `<span class="spoiler" tabindex="0"><span class="sr-only">spoiler: </span>${inner}</span>`,
       ),
     );
 
@@ -1343,6 +1313,12 @@ export default function (eleventyConfig) {
   // Every entry's date is the post's OWN date and is never advanced on edit, so
   // appending to yesterday's post cannot re-notify anyone. That property is what
   // makes 2am automation safe, and it is verified by test — see the changelog.
+  //
+  // Newest FEED_LIMIT only (2026-09-23). Full text of every post ever meant a
+  // file growing ~1MB a year, re-downloaded whole on every reader's poll. A
+  // reader who wants to go further back has the archive; the feed is for what
+  // is new. Dropping off the end is harmless — readers keep what they fetched.
+  const FEED_LIMIT = 30;
   eleventyConfig.addCollection("feed", (api) => {
     const entries = publishable(api.getFilteredByTag("dailies")).map((p) => ({
       url: p.url,
@@ -1355,7 +1331,7 @@ export default function (eleventyConfig) {
       entries.push({ url: e.url, date: e.date, title: e.title, html: e.feedHtml });
     }
 
-    return entries.sort((a, b) => b.date - a.date);
+    return entries.sort((a, b) => b.date - a.date).slice(0, FEED_LIMIT);
   });
 
   // The masthead's sky rolls its hue at each build — a different aurora every
