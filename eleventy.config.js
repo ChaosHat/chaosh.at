@@ -850,6 +850,10 @@ export default function (eleventyConfig) {
         html,
         feedHtml: stripSpoilers(raw),
         blurb,
+        // The link-card description when set; the lede stands in otherwise.
+        description: typeof e.data.description === "string" && e.data.description.trim()
+          ? e.data.description.trim()
+          : null,
         citedSubjects,
         cites: subjectLinks(citedSubjects),
         cards,
@@ -1334,6 +1338,215 @@ export default function (eleventyConfig) {
     return entries.sort((a, b) => b.date - a.date).slice(0, FEED_LIMIT);
   });
 
+  // ------------------------------------------------------------- link cards
+  //
+  // What a chaosh.at link unfurls into on Bluesky, Discord and the rest: an
+  // og:image drawn by og.js (the post's day sky, its title, the subject it
+  // files to, that subject's cover) plus per-page text tags. Dailies and
+  // essays get their own card — they are what gets shared; every other page
+  // gets the one site card (2026-09-23).
+  //
+  // A card can NEVER fail the build. og.js is imported dynamically, and every
+  // render is its own try/catch: a card that throws points its page at the
+  // site card and is reported after the build; a renderer that will not even
+  // load leaves every page with text tags and no image. Same "warn, never
+  // fail" contract as unmatched headings — this is the third door into "one
+  // post takes the site down", after template syntax (09-18) and unquoted
+  // frontmatter (09-23), closed by construction.
+  //
+  // Rendered here, in a collection, rather than in eleventy.after beside the
+  // skies: base.njk has to know whether a card rendered BEFORE it writes the
+  // page, or a failed card would ship as a dead og:image URL.
+  const OG_DESC_MAX = 160;
+  const OG_SITE_SKY = "2026-07-27"; // the first daily: the site card's sky is the site's first night
+  const OG_CACHE = path.join(".cache", "og");
+  const ogMeta = new Map(); // page url -> { image, alt, description, type, published }
+  const cardFiles = new Map(); // output path -> jpeg Buffer, written in eleventy.after
+  const cardFailures = []; // "<url>: <error>"
+  let ogSiteImage = null;
+
+  // Chip colours are the status tokens in style.css, read rather than copied
+  // so a retuned token cannot leave the cards on the old colour.
+  const cssTokens = (() => {
+    const out = {};
+    try {
+      const css = fs.readFileSync(path.join("src", "css", "style.css"), "utf8");
+      for (const [, name, hex] of css.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})\b/gi)) out[name] ??= hex;
+    } catch {
+      // A missing stylesheet is someone else's build failure; the cards fall
+      // back to muted chips.
+    }
+    return out;
+  })();
+  const statusColor = (status) => cssTokens[`st-${status}`] ?? cssTokens.muted ?? "#a9a6ce";
+
+  // "18 sep 2026" — Silkscreen at card size fits ~20 characters in the text
+  // column, so the month is short. Not Intl: en-GB spells September "Sept".
+  const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const kickerDate = (d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+
+  // ~160 characters, cut at a word boundary. Plain text in, plain text out.
+  const clipText = (s, max = OG_DESC_MAX) => {
+    const text = String(s ?? "").replace(/\s+/g, " ").trim();
+    if (text.length <= max) return text;
+    const cut = text.slice(0, max - 1);
+    const at = cut.lastIndexOf(" ");
+    return `${(at > max * 0.6 ? cut.slice(0, at) : cut).replace(/[\s,;:.—–-]+$/, "")}…`;
+  };
+
+  // A title is typed text, but it can still carry ||spoiler|| markup, and a
+  // card is as public as the feed — so the feed's rule: cut, not blurred.
+  const cardText = (s) => String(s ?? "").replace(/\|\|[\s\S]+?\|\|/g, "[spoiler]").trim();
+
+  // First paragraph of the REDACTED render. Headings are <h2>, images are
+  // <figure>, so the first <p> is already the first prose.
+  const firstPara = (html) => {
+    const m = stripSpoilers(html).match(/<p>([\s\S]*?)<\/p>/i);
+    return m ? plainText(m[1]) : "";
+  };
+
+  // The chip and the cover for a list of subject slugs: the chip names the
+  // first and counts the rest; the cover is the first that has one. Covers
+  // satori cannot read (webp, avif) count as no cover.
+  const cardSubjects = (slugs) => {
+    if (!slugs.length) return {};
+    const first = slugs[0];
+    const canon = canonSlugs.has(first);
+    const chip = {
+      text: String(subjects[first]?.title ?? first).toLowerCase(),
+      more: slugs.length - 1,
+      canon,
+      color: canon ? cssTokens.gold ?? "#f5c86b" : statusColor(subjects[first]?.status ?? "active"),
+    };
+    const withCover = slugs.find((s) => /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));
+    const cover = withCover
+      ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugs.has(withCover) }
+      : null;
+    return { chip, cover };
+  };
+
+  eleventyConfig.on("eleventy.before", () => {
+    ogMeta.clear();
+    cardFiles.clear();
+    cardFailures.length = 0;
+    ogSiteImage = null;
+  });
+
+  eleventyConfig.addCollection("linkCards", async (api) => {
+    // The outer guard: the per-card catches below cover rendering, this
+    // covers everything else (spec building, a malformed post). Whatever
+    // escapes, the pages still build, with whatever meta was gathered.
+    try {
+      return await buildLinkCards(api);
+    } catch (err) {
+      cardFailures.push(`link cards abandoned: ${err?.stack ?? err}`);
+      return [...ogMeta.keys()];
+    }
+  });
+
+  const buildLinkCards = async (api) => {
+    const siteData = (() => {
+      try {
+        return parseYaml(fs.readFileSync(path.join("src", "_data", "site.yaml"), "utf8")) || {};
+      } catch {
+        return {};
+      }
+    })();
+
+    // Text first: descriptions never depend on the renderer, so a page keeps
+    // them however badly the images go.
+    const jobs = []; // { url, rel, spec }
+    for (const post of publishable(api.getFilteredByTag("dailies"))) {
+      const key = post.date.toISOString().slice(0, 10);
+      const slugs = [];
+      for (const { heading, body } of splitSections(post.rawInput)) {
+        const slug = heading && body.join("").trim() ? aliasMap.get(normalise(heading)) : null;
+        if (slug && !slugs.includes(slug)) slugs.push(slug);
+      }
+      const title = cardText(post.data.title) || dateFormat.format(post.date);
+      ogMeta.set(post.url, {
+        description: clipText(firstPara(md.render(post.rawInput))),
+        type: "article",
+        published: post.date.toISOString(),
+        title,
+        alt: title,
+      });
+      jobs.push({
+        url: post.url,
+        rel: `og/daily/${key}.jpg`,
+        spec: { sky: key, kicker: `daily · ${kickerDate(post.date)}`, title, ...cardSubjects(slugs) },
+      });
+    }
+
+    for (const essay of buildEssayList(api)) {
+      const key = essay.date.toISOString().slice(0, 10);
+      const title = cardText(essay.title);
+      ogMeta.set(essay.url, {
+        description: clipText(cardText(essay.description) || essay.blurb || ""),
+        type: "article",
+        published: essay.date.toISOString(),
+        title,
+        alt: title,
+      });
+      jobs.push({
+        url: essay.url,
+        rel: `og/e/${essay.slug}.jpg`,
+        spec: { sky: key, kicker: `essay · ${kickerDate(essay.date)}`, title, ...cardSubjects(essay.citedSubjects) },
+      });
+    }
+
+    // Subject pages have no card of their own yet (not shared enough to earn
+    // one), but their text is cheap: the blurb, else what the tile says.
+    for (const [slug, meta] of Object.entries(subjects)) {
+      const blurb = blurbTexts.get(slug);
+      const verdict = canonSlugs.has(slug) ? "canon" : ratingOf(slug, meta)?.title;
+      ogMeta.set(`/s/${slug}/`, {
+        description: clipText(
+          (blurb && firstPara(md.render(blurb))) ||
+            [meta?.status ?? "active", verdict].filter(Boolean).join(" · "),
+        ),
+      });
+    }
+
+    let og;
+    try {
+      og = await import("./og.js");
+    } catch (err) {
+      cardFailures.push(`renderer did not load — no page has an image: ${err.message}`);
+      return [...ogMeta.keys()];
+    }
+
+    const render = async (url, rel, spec) => {
+      try {
+        cardFiles.set(rel, await og.renderCard(spec, { cacheDir: OG_CACHE }));
+        return `/${rel}`;
+      } catch (err) {
+        cardFailures.push(`${url}: ${err?.message ?? err}`);
+        return null;
+      }
+    };
+
+    ogSiteImage = await render("site card", "og/site.jpg", {
+      sky: OG_SITE_SKY,
+      title: cardText(siteData.description) || "chaosh.at",
+    });
+
+    for (const { url, rel, spec } of jobs) {
+      const image = (await render(url, rel, spec)) ?? ogSiteImage;
+      ogMeta.get(url).image = image;
+    }
+
+    return [...ogMeta.keys()];
+  };
+
+  // base.njk's one question per page. Taking the collection as its input is
+  // what makes the dependency real: Eleventy resolves collections.linkCards —
+  // every card rendered or failed — before any template reads this.
+  eleventyConfig.addFilter("linkCard", (_cards, url) => {
+    const meta = ogMeta.get(url) ?? {};
+    return { ...meta, image: "image" in meta ? meta.image : ogSiteImage };
+  });
+
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. One 16-frame sprite sheet, stepped
   // through by CSS.
@@ -1359,6 +1572,24 @@ export default function (eleventyConfig) {
       const dest = path.join("_site", rel);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.writeFileSync(dest, svg);
+    }
+
+    for (const [rel, jpg] of cardFiles) {
+      const dest = path.join("_site", rel);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, jpg);
+    }
+
+    // A card that failed is a page shared with the site card instead of its
+    // own — wrong but harmless, so it is a warning, never a failure.
+    if (cardFailures.length > 0) {
+      console.warn(`\n[chaosh.at] ${cardFailures.length} link card(s) failed to render:`);
+      for (const f of cardFailures) console.warn(`  · ${f}`);
+      console.warn(
+        ogSiteImage
+          ? `  Those pages unfurl with the site card. The site built normally.\n`
+          : `  No site card either — those pages unfurl as text only. The site built normally.\n`,
+      );
     }
 
     if (undated.size > 0) {

@@ -7,3 +7,6 @@ _site/
 .claude/
 CLAUDE.md
 *.handoff.md
+
+# link-card render cache (og.js)
+.cache/

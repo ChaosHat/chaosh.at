@@ -4,7 +4,35 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% if title %}{{ title }} — {{ site.title }}{% elif isDaily %}{{ page.date | readableDate }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
-    <meta name="description" content="{{ description or site.description }}">
+    {#- Link cards (2026-09-23): what a link unfurls into on Bluesky, Discord
+        and the rest. linkCard hands back this page's description, its card
+        (a daily's or essay's own, the site card for everything else, or none
+        if even that failed to render), and the article fields. Rendering
+        happens in the linkCards collection, before any page is written, so
+        a failed card never ships as a dead URL. Every URL here is absolute
+        (site.url carries no trailing slash): scrapers resolve nothing. -#}
+    {%- set card = collections.linkCards | linkCard(page.url) -%}
+    {#- card.title is the spoiler-stripped one: a card is as public as the feed. #}
+    {%- set ogTitle = card.title or title or ((page.date | readableDate) if isDaily else site.title) -%}
+    {%- set ogDesc = card.description or description or ((site.intro | replace("\n", " ")) if page.url == "/" else site.description) %}
+    <meta name="description" content="{{ ogDesc }}">
+    <link rel="canonical" href="{{ site.url }}{{ page.url }}">
+    <meta property="og:site_name" content="{{ site.title }}">
+    <meta property="og:type" content="{{ card.type or 'website' }}">
+    <meta property="og:url" content="{{ site.url }}{{ page.url }}">
+    <meta property="og:title" content="{{ ogTitle }}">
+    <meta property="og:description" content="{{ ogDesc }}">
+    {%- if card.published %}
+    <meta property="article:published_time" content="{{ card.published }}">
+    {%- endif %}
+    {%- if card.image %}
+    <meta property="og:image" content="{{ site.url }}{{ card.image }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    {%- set ogAlt = card.alt or ogTitle %}
+    <meta property="og:image:alt" content="{{ ogAlt }}{% if ogAlt != site.title %} — {{ site.title }}{% endif %}">
+    <meta name="twitter:card" content="summary_large_image">
+    {%- endif %}
     {#- Both faces are fetched alongside the stylesheet rather than discovered
         inside it. Silkscreen is 8KB and sets every page's chrome; Alegreya is
         17KB and sets every page's prose. Only the roman is preloaded of each:
