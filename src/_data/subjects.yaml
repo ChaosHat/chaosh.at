@@ -76,6 +76,16 @@ castlevania-aria-of-sorrow:
     - castlevania aria of sorrow
     - aos
     - caos
+castlevania-belmonts-curse:
+  title: 'Castlevania: Belmont''s Curse'
+  category:
+    - games
+  status: backlog
+  aliases:
+    - belmont's curse
+    - belmonts curse
+    - castlevania belmonts curse
+    - cbc
 castlevania-dawn-of-sorrow:
   title: 'Castlevania: Dawn of Sorrow'
   category:
@@ -794,6 +804,15 @@ split-fiction:
     - games
   status: sampled
   rating: liked
+star-wars-galactic-racer:
+  title: STAR WARS Galactic Racer
+  category:
+    - games
+  status: backlog
+  aliases:
+    - galactic racer
+    - star wars galactic racer
+    - swgr
 star-wars-jedi-fallen-order:
   title: 'STAR WARS Jedi: Fallen Order'
   category:

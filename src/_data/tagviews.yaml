@@ -90,6 +90,7 @@ star-wars:
   members:
     - star-wars-jedi-fallen-order
     - star-wars-zero-company
+    - star-wars-galactic-racer
     - kotor
     - kotor-2
 metroid:
@@ -109,6 +110,7 @@ castlevania:
     - castlevania-dawn-of-sorrow
     - castlevania-order-of-ecclesia
     - castlevania-portrait-of-ruin
+    - castlevania-belmonts-curse
 metroidvania:
   title: Metroidvanias
   members:
@@ -122,6 +124,7 @@ metroidvania:
     - castlevania-dawn-of-sorrow
     - castlevania-order-of-ecclesia
     - castlevania-portrait-of-ruin
+    - castlevania-belmonts-curse
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
     - hollow-knight
