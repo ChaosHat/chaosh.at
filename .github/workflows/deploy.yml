@@ -31,11 +31,14 @@ jobs:
       - run: npm run build
         env:
           CHAOSH_BIRTHDATE: ${{ secrets.CHAOSH_BIRTHDATE }}
+      # main → production; any other branch (run it by hand from the Actions
+      # tab) → a preview at <branch>.chaosh-at.pages.dev. wrangler also picks
+      # up ./functions from the repo root.
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy _site --project-name=chaosh-at --branch=main
+          command: pages deploy _site --project-name=chaosh-at --branch=${{ github.ref_name }}
 
       # The vault side is loud — every refusal reaches the phone at 2am — while
       # a build that dies up here reaches nobody, and the live site just quietly

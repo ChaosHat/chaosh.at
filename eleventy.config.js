@@ -151,6 +151,11 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
   eleventyConfig.addPassthroughCopy({ "src/CNAME": "CNAME" });
+  // Cloudflare Pages control files, and the fediverse host-meta (see
+  // src/_redirects for why it's a static file and not a redirect).
+  eleventyConfig.addPassthroughCopy({ "src/_redirects": "_redirects" });
+  eleventyConfig.addPassthroughCopy({ "src/_headers": "_headers" });
+  eleventyConfig.addPassthroughCopy({ "src/.well-known/host-meta": ".well-known/host-meta" });
   // Post images only — src/img/manifest.json is publish.py book-keeping and
   // deliberately not copied.
   eleventyConfig.addPassthroughCopy({ "src/img/posts": "img/posts" });

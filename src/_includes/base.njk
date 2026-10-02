@@ -118,11 +118,23 @@
       {{ content | safe }}
     </main>
     {#- The handle is the domain, so the link doubles as identity: rel="me"
-        lets the Bluesky profile verify back to here. Written in the vault's
-        site.yaml; empty renders no link rather than a dead one. -#}
-    <footer class="site-footer">
+        lets the Bluesky profile verify back to here, and the GoToSocial
+        profile (@hat@chaosh.at) the same way. Both written in the vault's
+        site.yaml; empty renders no link rather than a dead one.
+        The footer is also the site's h-card, which Bridgy Fed reads off the
+        home page to build the blog's own fediverse account. The hidden data
+        carries what the visible footer doesn't say: the account's display
+        name, its bio, and its username — acct:posts@chaosh.at, which
+        functions/.well-known/webfinger.js must route to Bridgy. Permanent
+        once anyone follows @posts. -#}
+    <footer class="site-footer h-card">
+      <data class="p-name" value="{{ site.title }}"></data>
+      <data class="u-url" value="{{ site.url }}/"></data>
+      <data class="u-url" value="acct:posts@chaosh.at"></data>
+      <data class="p-note" value="{{ site.description }}"></data>
       <p>{{ site.author }}</p>
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
+      {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
       <p><a href="/feed.xml">feed</a></p>
     </footer>
   </body>

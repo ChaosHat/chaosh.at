@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects. Webfinger is NOT here — it branches on the query
+# string, which _redirects can't, so it's a Function (functions/.well-known/).
+# host-meta is a static file pointing back at that Function, since both
+# GoToSocial and Bridgy Fed would otherwise each want to own it.
+/.well-known/nodeinfo  https://social.chaosh.at/.well-known/nodeinfo  301

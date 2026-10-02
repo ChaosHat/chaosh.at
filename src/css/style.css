@@ -1161,6 +1161,9 @@ figcaption {
 }
 
 .site-footer p { margin: 0; }
+/* The h-card's hidden properties (base.njk) are for parsers, not layout:
+   as flex items they'd each claim a gap. */
+.site-footer data { display: none; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent); }
 
