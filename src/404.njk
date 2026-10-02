@@ -1,0 +1,13 @@
+---
+layout: base.njk
+title: Not found
+permalink: /404.html
+eleventyExcludeFromCollections: true
+---
+{#- Cloudflare Pages serves this, with a real 404 status, for any URL that
+    doesn't exist. Without it Pages assumes a single-page app and answers
+    every miss with the home page and a 200 — so dead links look alive, and
+    a held post never reads as gone to anything that checks (2026-10-02). -#}
+<h1>Nothing here</h1>
+<p class="links-lede">That page doesn't exist, or it's been taken down.</p>
+<p><a href="/">&larr; home</a></p>
