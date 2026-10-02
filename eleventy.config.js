@@ -150,7 +150,6 @@ export const splitSections = (raw) => {
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
-  eleventyConfig.addPassthroughCopy({ "src/CNAME": "CNAME" });
   // Cloudflare Pages control files, and the fediverse host-meta (see
   // src/_redirects for why it's a static file and not a redirect).
   eleventyConfig.addPassthroughCopy({ "src/_redirects": "_redirects" });
