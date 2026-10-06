@@ -159,16 +159,27 @@ export const splitSections = (raw) => {
 // Short gaps stay as squares: those ARE the rhythm.
 //
 // STRIP_MAX caps the squares, keeping the most recent; `clipped` tells the
-// template the oldest history was cut. With `tail`, the strip runs on to
-// today — dark squares if the silence is short, one folded break ending in a
-// hollow "today" square if it's long — so a stalled game shows that it stalled.
-// Fewer than two lit days is no pattern at all: null, no strip.
+// template the oldest history was cut. With `tail`, the strip runs on to the
+// newest day that COULD be lit — dark squares if the silence is short, one
+// folded break ending in a hollow end square if it's long — so a stalled game
+// shows that it stalled. Fewer than two lit days is no pattern at all: null,
+// no strip.
+//
+// That newest day is yesterday in New York, not the build's today: publish.py
+// holds a daily until its day is over, so today is never lit at build time and
+// ending the tail there put a false dark square on every active subject (the
+// strip's first night, 2026-10-06). New York, not UTC: an evening push builds
+// after UTC midnight, which would have pushed the tail a day further still.
 export const STRIP_FOLD = 30;
 export const STRIP_MAX = 90;
 export const STRIP_TAIL = true;
 const DAY_MS = 86400000;
 const dayKey = (d) => d.toISOString().slice(0, 10);
 const dayOf = (key) => new Date(`${key}T00:00:00Z`).getTime();
+export const lastShippable = (now = new Date()) => {
+  const ny = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(now);
+  return new Date(dayOf(ny) - DAY_MS);
+};
 export const gapLabel = (days) =>
   days < 56 ? `${Math.round(days / 7)}w`
   : days < 730 ? `${Math.round(days / 30.4)}mo`
@@ -182,7 +193,7 @@ export const rayHeight = (words) =>
   Math.round(Math.min(28, 6 + 5 * Math.log2(1 + words / 15)));
 
 // `entries`: [{ date, words }] — several on one day sum.
-export const foldStrip = (entries, { tail = false, today = new Date() } = {}) => {
+export const foldStrip = (entries, { tail = false, through = lastShippable() } = {}) => {
   const words = new Map();
   for (const { date, words: w } of entries) {
     const key = dayKey(date);
@@ -217,14 +228,14 @@ export const foldStrip = (entries, { tail = false, today = new Date() } = {}) =>
   });
 
   if (tail) {
-    const todayKey = dayKey(today);
-    const since = (dayOf(todayKey) - dayOf(lit.at(-1))) / DAY_MS;
+    const endKey = dayKey(through);
+    const since = (dayOf(endKey) - dayOf(lit.at(-1))) / DAY_MS;
     if (since > STRIP_FOLD) {
       segments.push({ gap: gapLabel(since - 1), tail: true });
-      segments.push({ days: [{ key: todayKey, lit: false, today: true }] });
+      segments.push({ days: [{ key: endKey, lit: false, today: true }] });
     } else if (since > 0) {
       const last = segments.at(-1).days;
-      for (let t = dayOf(lit.at(-1)) + DAY_MS; t <= dayOf(todayKey); t += DAY_MS) {
+      for (let t = dayOf(lit.at(-1)) + DAY_MS; t <= dayOf(endKey); t += DAY_MS) {
         last.push({ key: dayKey(new Date(t)), lit: false });
       }
       last.at(-1).today = true;
