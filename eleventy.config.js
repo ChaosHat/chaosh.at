@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, ribbonSheet } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, ribbonSheet, palette } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
 
@@ -145,6 +145,117 @@ export const splitSections = (raw) => {
     }
   }
   return sections;
+};
+
+// The lit-days strip on subject pages: one square per day a subject was
+// written about, gaps in between left dark. It shows writing RHYTHM as shape —
+// a 19-day unbroken run, a scatter ending in a cluster — where the sky's
+// brightness tiers carry recency. Essays count, same as for the tiers.
+//
+// Gaps longer than STRIP_FOLD days fold into a single labelled break ("2y")
+// instead of a wall of dark squares, so a replay two years on shows both
+// playthroughs and the distance between them, and a board game picked up a
+// few times a year reads as a chain of short runs (Hat's call, 2026-10-05).
+// Short gaps stay as squares: those ARE the rhythm.
+//
+// STRIP_MAX caps the squares, keeping the most recent; `clipped` tells the
+// template the oldest history was cut. With `tail`, the strip runs on to
+// today — dark squares if the silence is short, one folded break ending in a
+// hollow "today" square if it's long — so a stalled game shows that it stalled.
+// Fewer than two lit days is no pattern at all: null, no strip.
+export const STRIP_FOLD = 30;
+export const STRIP_MAX = 90;
+export const STRIP_TAIL = true;
+const DAY_MS = 86400000;
+const dayKey = (d) => d.toISOString().slice(0, 10);
+const dayOf = (key) => new Date(`${key}T00:00:00Z`).getTime();
+export const gapLabel = (days) =>
+  days < 56 ? `${Math.round(days / 7)}w`
+  : days < 730 ? `${Math.round(days / 30.4)}mo`
+  : `${Math.round(days / 365)}y`;
+
+// Ray height on a lit day tracks how much was written that day: log-scaled so
+// a long day reads taller without dwarfing everything, floor so a one-liner
+// still shows, cap so an essay day doesn't punch through the page. ~10px for a
+// one-line note, ~18px for a solid paragraph, 28px at the cap (Hat, 2026-10-05).
+export const rayHeight = (words) =>
+  Math.round(Math.min(28, 6 + 5 * Math.log2(1 + words / 15)));
+
+// `entries`: [{ date, words }] — several on one day sum.
+export const foldStrip = (entries, { tail = false, today = new Date() } = {}) => {
+  const words = new Map();
+  for (const { date, words: w } of entries) {
+    const key = dayKey(date);
+    words.set(key, (words.get(key) ?? 0) + (w ?? 0));
+  }
+  const lit = [...words.keys()].sort();
+  if (lit.length < 2) return null;
+
+  // Runs: maximal stretches with no gap over STRIP_FOLD.
+  const runs = [[lit[0]]];
+  for (const key of lit.slice(1)) {
+    const prev = runs.at(-1).at(-1);
+    if ((dayOf(key) - dayOf(prev)) / DAY_MS > STRIP_FOLD) runs.push([key]);
+    else runs.at(-1).push(key);
+  }
+
+  const segments = [];
+  runs.forEach((run, i) => {
+    if (i > 0) {
+      const gap = (dayOf(run[0]) - dayOf(runs[i - 1].at(-1))) / DAY_MS - 1;
+      segments.push({ gap: gapLabel(gap) });
+    }
+    const set = new Set(run);
+    const days = [];
+    for (let t = dayOf(run[0]); t <= dayOf(run.at(-1)); t += DAY_MS) {
+      const key = dayKey(new Date(t));
+      days.push(set.has(key)
+        ? { key, lit: true, words: words.get(key), h: rayHeight(words.get(key)) }
+        : { key, lit: false });
+    }
+    segments.push({ days });
+  });
+
+  if (tail) {
+    const todayKey = dayKey(today);
+    const since = (dayOf(todayKey) - dayOf(lit.at(-1))) / DAY_MS;
+    if (since > STRIP_FOLD) {
+      segments.push({ gap: gapLabel(since - 1), tail: true });
+      segments.push({ days: [{ key: todayKey, lit: false, today: true }] });
+    } else if (since > 0) {
+      const last = segments.at(-1).days;
+      for (let t = dayOf(lit.at(-1)) + DAY_MS; t <= dayOf(todayKey); t += DAY_MS) {
+        last.push({ key: dayKey(new Date(t)), lit: false });
+      }
+      last.at(-1).today = true;
+    }
+  }
+
+  // Cap from the newest end backwards; a run that straddles the cap is cut
+  // from its left, and a break left dangling at the front goes with it.
+  let budget = STRIP_MAX;
+  let clipped = false;
+  const kept = [];
+  for (const seg of segments.slice().reverse()) {
+    if (budget <= 0) { clipped = true; break; }
+    if (seg.days) {
+      if (seg.days.length > budget) {
+        kept.unshift({ days: seg.days.slice(-budget) });
+        clipped = true;
+        budget = 0;
+        continue;
+      }
+      budget -= seg.days.length;
+    }
+    kept.unshift(seg);
+  }
+  while (kept[0]?.gap) kept.shift();
+  // A running index across every square, for the CSS shimmer's travelling
+  // delay — the wave crosses folded breaks without restarting.
+  let i = 0;
+  for (const seg of kept) for (const d of seg.days ?? []) d.i = i++;
+
+  return { segments: kept, clipped, first: lit[0], last: lit.at(-1) };
 };
 
 export default function (eleventyConfig) {
@@ -588,6 +699,18 @@ export default function (eleventyConfig) {
     return TIERS.find(([limit]) => days <= limit)[1];
   };
 
+  // The lit-days strip — see foldStrip at module scope. Tail only on the two
+  // statuses where "is the fire still lit?" is a live question.
+  const TAIL_STATUSES = new Set(["active", "dabbling"]);
+  const litStrip = (slug, entries, status) => {
+    const strip = foldStrip(entries, {
+      tail: STRIP_TAIL && TAIL_STATUSES.has(status),
+    });
+    // The subject's own sky palette, so the strip burns in the same colours
+    // as its cover: rim, body and crown banded down each lit square.
+    return strip && { ...strip, pal: palette(subjectHues.get(slug) ?? 0) };
+  };
+
   // slug -> generated art, filled during the fan-out (recency needs the
   // fragments), written to the output in eleventy.after.
   const skyFiles = new Map();
@@ -940,6 +1063,7 @@ export default function (eleventyConfig) {
           date: post.date,
           sourceUrl: post.url,
           html: revealSpoilers(md.render(text)),
+          words: text.split(/\s+/).filter(Boolean).length,
         });
       }
     }
@@ -977,6 +1101,11 @@ export default function (eleventyConfig) {
         // subject registered but never yet written about, which the sort pushes
         // to the back rather than jumbling among the dated ones.
         lastWrote: lastWrote ?? null,
+        litDays: litStrip(slug, [
+          ...fragments,
+          // An essay day is a big day: straight to the ray cap.
+          ...essays.map((e) => ({ date: e.date, words: 1000 })),
+        ], meta?.status ?? "active"),
         canon: canonSlugs.has(slug),
         // null on a canon subject by construction — see ratingOf. Templates
         // branch on canon first, then on this, then render "pending".

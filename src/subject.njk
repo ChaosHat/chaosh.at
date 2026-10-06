@@ -19,6 +19,13 @@ eleventyComputed:
     {%- endif %}
     <div>
       <h1>{{ subject.title }}</h1>
+      {#- One square per day written about, long gaps folded into a labelled
+          break, running on to today on active subjects. See foldStrip. -#}
+      {% if subject.litDays %}
+      <p class="lit-days{% if subject.litDays.clipped %} clipped{% endif %}" style="--le:{{ subject.litDays.pal.edge }};--lm:{{ subject.litDays.pal.mid }};--ld:{{ subject.litDays.pal.deep }};--lg:{{ subject.litDays.pal.glow }}" aria-label="Days written about, {{ subject.litDays.first }} to {{ subject.litDays.last }}">
+        {%- for seg in subject.litDays.segments %}{% if seg.gap %}<span class="gap{% if seg.tail %} tail{% endif %}">{{ seg.gap }}</span>{% else %}{% for d in seg.days %}<span class="{% if d.lit %}on{% endif %}{% if d.today %} today{% endif %}"{% if d.lit %} style="--i:{{ d.i }};--h:{{ d.h }}px"{% endif %} title="{{ d.key }}{% if d.lit %} · {{ d.words }} words{% endif %}"></span>{% endfor %}{% endif %}{% endfor -%}
+      </p>
+      {% endif %}
       <p class="subject-meta">
         {% if subject.canon %}<span class="badge badge-g b-canon" data-g="♥">canon</span>{% endif %}
         <span class="badge b-{{ subject.status }}">{{ subject.status }}</span>

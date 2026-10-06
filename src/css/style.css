@@ -961,6 +961,77 @@ figcaption {
 .subject-head > .sky { width: 8rem; }
 .subject-head h1 { margin: 0 0 0.7rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
 
+/* Lit-days strip: square pixels, one per day written about, lit in the
+   subject's hue (--lit, set inline from its palette); short gaps stay night.
+   A long gap folds into a .gap label in the pixel face instead of a wall of
+   dark squares. Squares stay a fixed 6px and the strip WRAPS when it runs out
+   of room — shrinking them turned a phone's long strip into 1px dust. .today is the hollow end square of an active
+   subject's tail. A clipped strip fades in from the left: history starts
+   earlier than shown. */
+.lit-days {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 26px 1px;
+  padding-top: 24px;
+  margin: -1.3rem 0 0.8rem;
+}
+.lit-days span {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--deep);
+}
+/* A lit day is a ray, not a block: a translucent base pixel on the strip's
+   horizon with a column of light above it, fading to nothing — the subject's
+   rim (--le) at the horizon rising through body (--lm) to crown (--ld),
+   from its own sky palette. Rays are wider than their square and blurred,
+   screen-blended so neighbours add like light: a run of days merges into one
+   soft curtain instead of a row of equaliser bars (tried second). Ray
+   heights (--h) follow that day's word count (rayHeight), so the curtain's
+   shape is how much was written, not decoration; solid banded squares with a halo (tried first,
+   2026-10-05) read as exactly that. The rays breathe — grow, fade, settle —
+   in a wave that travels the strip (--i staggers it). Smooth, not stepped:
+   stepping made the motion mechanical, and ethereal is the whole point. */
+.lit-days span.on {
+  position: relative;
+  background: color-mix(in srgb, var(--lm) 70%, var(--deep));
+}
+.lit-days span.on::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  bottom: 0;
+  height: var(--h, 12px);
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--le) 90%, transparent),
+    color-mix(in srgb, var(--lm) 60%, transparent) 30%,
+    color-mix(in srgb, var(--ld) 28%, transparent) 65%,
+    transparent);
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform-origin: bottom;
+  animation: lit-breathe 7s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 110ms - 7s);
+}
+@keyframes lit-breathe {
+  0%, 100% { opacity: 0.55; transform: scaleY(0.7); }
+  45% { opacity: 1; transform: scaleY(1.08); }
+}
+.lit-days span.today { background: none; box-shadow: inset 0 0 0 1px var(--muted); }
+.lit-days span.gap {
+  width: auto;
+  height: auto;
+  background: none;
+  padding: 0 0.35rem;
+  font: 8px/1 var(--pixel);
+  color: var(--muted);
+}
+.lit-days span.gap::before, .lit-days span.gap::after { content: "·"; padding: 0 0.2rem; opacity: 0.6; }
+.lit-days.clipped { mask-image: linear-gradient(to right, transparent, #000 2.5rem); }
+
 .subject-meta {
   display: flex;
   align-items: center;
@@ -1255,6 +1326,7 @@ figcaption {
 @media (prefers-reduced-motion: reduce) {
   .shelf-art, .spoiler { transition: none; }
   body::before { animation: none; }
+  .lit-days span.on::before { animation: none; opacity: 0.8; }
 }
 
 
