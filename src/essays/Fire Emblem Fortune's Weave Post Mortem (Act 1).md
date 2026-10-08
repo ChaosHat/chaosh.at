@@ -1,0 +1,44 @@
+---
+title: Fortune's Weave Act 1 Temp Check
+date: 2026-10-08
+publish: true
+description:
+about:
+  - fire-emblem-fortunes-weave
+featured:
+---
+I want to take a pause since I'm into act 2 of Fortune's Weave and this seems like a good time to recap my feelings on part 1's arcs in one nice and neat spot while it's still fresh in my mind. This game feels like it'll deserve a couple post mortems at least just because well, I've already played something like 80-90 hours just to get through the first acts. I'll just deal with some of the narrative impressions of the first act here, there'll probably be something to deal with mechanics/gameplay later. I have a lot of thoughts on that too. 
+
+To preface if you're not familiar with Fortune's Weave but reading this, there are four lords who have parallel (but also kind of alternate timeline) stories. You play them in order and they each kind of add to the whole of the story. The premise is that each of these lords is competing in the Heroic games, a state sponsored tournament where the eventual winner will have their wish granted by the Divine Emperor. 
+
+I'll go in order of least favorite to most and some light spoilers for character interactions will abound. 
+## Dietrich
+This was my least favorite one but the gap really closed by the end.  Dietrich has the dumbest wish possible and I felt was just very one note and linear as a character. Additionally, he's just so divorced from the proceedings of the plot of the rest of the characters and yet like some kind of plot blind Mr. Magoo he just stumbles into reveals and details that would knock the other characters on their asses. He just felt so detached from everything else and that's partially due to who he is. He's just kind of flat and cares about very little.
+
+I also don't love the party structure here. Dietrich just kind of follows Fabio around because well, he has nothing better to do why not! Fabio likes Dietrich because he is useful in his investigations, and he's hot. Esmeralda is also here because Dietrich is hot. And Mikaela is just...here. She's a motherly figure but she doesn't seem motivated by anything in particular. This whole group of people, while being individually interesting characters (well and also Mikaela) doesn't feel like a unit. My problem was that this just felt like a loose collection of people who didn't have compelling motivations. 
+
+Dietrich was the one I played last and I think playing him not first would be ideal. Important plot things happen but the character doesn't really care and there isn't context for it so I imagine this would feel like a series of interesting non sequiturs. Even playing one character beforehand I think would provide a mental framework to hang some of this on.
+
+Ultimately the end result of Cai vs Dietrich was a lot closer than I would have thought when I was about halfway through Dietrich's run. I do think I am retroactively a bit soured on Dietrich's run by finding out how much lore, plot, and character development is gated by missable cutscenes which is bizarre. I eventually watched (most?) of them on YouTube but seeing it that way removes the context and the ordering. Probably another souring element was that being fourth I was definitely the most bored and burnt out on act 1 stuff and maybe a little less patient. 
+## Cai
+Cai is fine. He feels like a B- and his story isn't doing anything that makes me love it particularly but it's fine! He has some fun moments and he as a character is more interesting than the story is necessarily. This story had the most cognitive dissonance for me though as it is just a bunch of kids and it does seem silly that they're recruiting a bunch of adults to come fight with them and do blood sport in an arena (it's never actually clear to me if people die in the arena or not).
+
+His cast is the one that I found very underwhelming. I benched Peter very early which is apparently a mistake according to popular opinion but he was not very good for me and I didn't care for him as a character. Tialla was good, but she's just kind of standard anime nerd friend. I suppose the NPCs like Aurora were good. Ultand also weirded me out with her final support, "come see me in five years and maybe I can be more than your big sister." Blech. What I can say is that his cast is very dedicated and they're on board and I like that. 
+
+Cai's route is the one I played first since he was the one I cared about the least going into it and I think I would recommend that for most people. His map is also the smallest and most straightforward so it does a better job of easing you in. 
+## Theodora
+Theodora felt great, it really harkened back to what I like about Fire Emblem, nobles who act nobly, furrowing their brow and concerned over their people and their futures and how to navigate paths between larger entities that can consume them. Her overworld abilities and mechanics were the most interesting of them, raising battalions and deploying them was a cool loop I would like to see integrated into a future game's overworld. I could imagine it being this thing where you have to raise troops and hold territory in a war footing to impact the resources available to your army. 
+
+Her party is also pretty weak, I liked Bonaventure and Tobias is...well he's a cartoon character who is okay. They're both just good, loyal retainers in the Fire Emblem tradition, although I am irritated that Bonaventure's supports are so thin. Lilian is a little one note but she kind of gets there and Lysander is a bowl of nothing. He's just bland and uninteresting. 
+
+Theodora was played second because her story seemed really intertwined with Cai's and that was definitely true. I would say that any spot except for first would be ideal for her, but she's certainly serviceable. It might even be best for her last considering how part two goes. 
+## Leda
+This is the most interesting path although the game makes some pretty big storytelling missteps. She's a compelling character and the performance is good although apparently between this and Ghost of Yotei I have a thing for female characters with revenge lists written in blood. There are definitely issues where the character isn't presented as a totally believable whole (the switch flipping between girl mode trading skin care tips and psycho revenge obsessed murder queen is a little too clean) but it still connected with me. Additionally, some things (Buccar's reconciliation) are never really addressed satisfyingly on screen.
+
+What really sends her over the top is the cast. The performances are great and the entire group is really there and bought in to her vision because they're personally invested. The cast does this great job of illustrating a group of friends who care about but are still worried about their friend. It's got real "we need to have an intervention vibes" while also being the best found family.  
+
+I was also pleasantly surprised by how some of these characters were executed. Olympia could have been super annoying as the rival but the characters are quickly shown to love each other and understand that their rivalry is good and makes each other better. I'm not sure Sirocco ever gets fully redemptive but he manages to have a core of caring and seriousness about Leda and Kalla that rings true. Mu is just a darling and everyone loves her and for good reason. Buccar could have been pretty tropey but his betrayal of her (and then coming back) shows his depth of caring in a pretty unique way (even if the game doesn't necessarily show it the best). 
+
+I also just like her design and I think that's part of it. Going into this I liked her the most and so I'm probably pretty motivated. That's why I played Leda third, I got the hang of the game's systems on Cai's, then refined it and understood how second playthroughs work on Theodora so I was hitting my stride here for the most part and that probably also helped. She's also probably the single most interesting unit in any Fire Emblem game which certainly helps. The combination of her songs as buffs, her dance, and the fact that she's a good mixed attacker gives a wide decision space for how to use her.
+
+Overall I think act 1 is a good game. It might even be a great game. I have issues with how it's presented and think that again, it suffers greatly from the level of ambition here. There's an element of having bitten off more than they can chew. It's hard to assign a grade to it though without fully knowing how it comes together and pays off. I suppose it's also hard to know without having fully consumed all of the missable cutscene content which I suppose I'll continue to look out for on YouTube. I think I would say this game is hard to recommend but a lot of the reasons why will live in the mechanics and gameplay post. 
