@@ -761,6 +761,15 @@ portal-2:
   rating: loved
   aliases:
     - portal2
+prince-of-persia-the-lost-crown:
+  title: 'Prince of Persia: The Lost Crown'
+  category:
+    - games
+  status: active
+  aliases:
+    - lost crown
+    - prince of persia the lost crown
+    - poplc
 sea-of-stars:
   title: Sea of Stars
   category:
