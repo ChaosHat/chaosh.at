@@ -27,6 +27,7 @@ dragon-quest:
   members:
     - dragon-quest-v
     - dragon-quest-xi-s
+    - dragon-warrior-monsters-2
 final-fantasy:
   title: Final Fantasy
   members:
@@ -50,6 +51,7 @@ jrpg:
     - kingdom-hearts
     - paper-mario-the-thousand-year-door
     - sea-of-stars
+    - dragon-warrior-monsters-2
 atlus:
   title: Atlus
   description: Same DNA and lineage, different titles.
@@ -136,6 +138,7 @@ pokemon:
     - pokemon-unbound
     - pokopia
     - pokemon-legends-arceus
+    - pokemon-crystal-legacy
 monster-hunter:
   title: Monster Hunter
   members:

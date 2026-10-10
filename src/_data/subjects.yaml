@@ -225,6 +225,16 @@ dragon-quest-xi-s:
     - dqxi s
     - dq11s
     - dragon quest 11 s
+dragon-warrior-monsters-2:
+  title: Dragon Warrior Monsters 2
+  category:
+    - games
+  status: sampled
+  aliases:
+    - dwm2
+    - dragon warrior monsters 2
+    - dragon quest monsters 2
+    - dqm2
 elden-ring:
   title: Elden Ring
   category:
@@ -706,6 +716,16 @@ persona-5-royal:
   aliases:
     - p5r
     - persona 5 royal
+pokemon-crystal-legacy:
+  title: Pokémon Crystal Legacy
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - pokemon crystal legacy
+    - crystal legacy
+    - pokemon crystal
+    - crystal
 pokemon-hgss:
   title: Pokémon HeartGold & SoulSilver
   category:
