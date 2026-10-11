@@ -509,6 +509,16 @@ kotor-2:
     - kotor ii
     - the sith lords
     - sith lords
+lufia-2:
+  title: 'Lufia II: Rise of the Sinistrals'
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - lufia 2
+    - lufia ii
+    - lufia2
+    - rise of the sinistrals
 mario-kart-world:
   title: Mario Kart World
   category:
@@ -905,6 +915,14 @@ stellaris:
     - games
   status: completed
   rating: loved
+super-mario-rpg:
+  title: Super Mario RPG
+  category:
+    - games
+  status: dabbling
+  aliases:
+    - smrpg
+    - mario rpg
 super-mario-wonder:
   title: Super Mario Bros. Wonder
   category:

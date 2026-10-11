@@ -52,6 +52,7 @@ jrpg:
     - paper-mario-the-thousand-year-door
     - sea-of-stars
     - dragon-warrior-monsters-2
+    - super-mario-rpg
 atlus:
   title: Atlus
   description: Same DNA and lineage, different titles.
@@ -191,6 +192,7 @@ mario:
     - mario-kart-world
     - paper-mario-the-thousand-year-door
     - super-mariomon
+    - super-mario-rpg
 fallout:
   title: Fallout
   members:
