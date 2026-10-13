@@ -838,6 +838,13 @@ slay-the-spire-2:
   aliases:
     - sts2
     - slay the spire ii
+sovereign-tower:
+  title: Sovereign Tower
+  category:
+    - games
+  status: active
+  aliases:
+    - sovereign
 split-fiction:
   title: Split Fiction
   category:
