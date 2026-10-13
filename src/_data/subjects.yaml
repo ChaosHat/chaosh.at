@@ -399,7 +399,7 @@ fire-emblem-fortunes-weave:
   title: 'Fire Emblem: Fortune''s Weave'
   category:
     - games
-  status: active
+  status: shelved
   aliases:
     - fortunes weave
     - fortune's weave
@@ -927,7 +927,7 @@ super-mario-rpg:
   title: Super Mario RPG
   category:
     - games
-  status: dabbling
+  status: active
   aliases:
     - smrpg
     - mario rpg
