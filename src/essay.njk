@@ -36,7 +36,15 @@ eleventyComputed:
     {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
   </a>
   {% endmacro %}
+  {#- Two or more unplaced cards would float into a ragged wall that pinches
+      the opening paragraph to one word a line (the Rubric essay, five about:
+      subjects, 2026-10-14). They get a row of their own above the prose
+      instead; a lone card keeps the float. -#}
+  {% if essay.topCards | length > 1 %}
+  <div class="essay-cards">{% for c in essay.topCards %}{{ card(c) }}{% endfor %}</div>
+  {% else %}
   {% for c in essay.topCards %}{{ card(c) }}{% endfor %}
+  {% endif %}
   {#- A section whose heading names a cited subject is a row: card in the
       left column, heading and prose in the right, so the two stay married
       however short the prose. The rest of the essay passes through as is. -#}

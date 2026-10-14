@@ -699,6 +699,20 @@ figcaption {
 @media (max-width: 34rem) {
   .essay-card { float: none; margin: 0 0 1.25rem; }
 }
+/* Multi-about essays: the cards share one row above the prose rather than
+   floating beside it. Smaller than the lone card so five fit the reading
+   width; three across on a phone instead of a full-size stack. */
+.essay-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin: 0.35rem 0 1.75rem;
+}
+.essay-cards .essay-card { float: none; width: 7rem; margin: 0; }
+@media (max-width: 34rem) {
+  .essay-cards { gap: 0.75rem; }
+  .essay-cards .essay-card { width: calc((100% - 1.5rem) / 3); }
+}
 /* The list essay (2026-09-09, the canon; any ten-things post after it). A
    ## heading that names a cited subject makes its section a row: the card in
    a fixed left column, heading and prose in the right, top-aligned. A grid
