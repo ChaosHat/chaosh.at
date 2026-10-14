@@ -610,7 +610,6 @@ figcaption {
 @media (min-width: 34.01rem) {
   .fig-float {
     --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
-    clear: none;
     width: 50%;
   }
   .fig-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
@@ -626,9 +625,8 @@ figcaption {
    right, hung into the margin by the same --hang rule .fig-float uses (up to
    half its own width, minus 4rem of air off the viewport edge, so a partial
    hang at laptop widths and the full half from ~1280px). Prose wraps down its
-   left side. Right, always: the essay card owns the left through the opening
-   paragraphs, which is exactly where a primer goes. `clear: right` so it
-   never stacks beside a right-floated figure.
+   left side. Side comes from the renderer (obsidian_float_sides), shared with
+   figures — see Floats below.
    The wash is --tint (the first about: subject's glow, set on the article by
    essay.njk; accent elsewhere) mixed thin into night — "all color on the
    site is aurora" — with a stronger rule of the same hue down its inner
@@ -656,10 +654,32 @@ figcaption {
 @media (min-width: 34.01rem) {
   .aside {
     --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
-    float: right;
-    clear: right;
     width: 50%;
+  }
+  .aside-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
+  .aside-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
+  .aside-left { border-left: 0; border-right: 2px solid color-mix(in oklab, var(--t) 55%, var(--night)); }
+}
+
+/* Floats — figures and asides, one system (2026-10-14). The renderer deals
+   sides in turn, right first (the lone essay card owns the left at the top).
+   Every float CLEARS BOTH: it never starts beside another float — not the
+   card, not the previous figure, not an aside on the far side — so prose is
+   only ever pinched by one thing at a time and never squeezed into a strip
+   between two. A float that would have collided just drops below the one
+   before it; the prose keeps flowing beside the earlier one meanwhile, so
+   it costs placement, never a gap. In a list-essay row the left margin
+   belongs to the row's card, so every float there goes right. */
+@media (min-width: 34.01rem) {
+  .fig-float, .aside { clear: both; }
+  .essay-row-body .fig-left,
+  .essay-row-body .aside-left {
+    float: right;
     margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem;
+  }
+  .essay-row-body .aside-left {
+    border-right: 0;
+    border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
   }
 }
 
@@ -772,10 +792,14 @@ figcaption {
    it. Floated with a negative margin equal to its own width plus the gap, so
    it takes no room from the measure. 72rem = the 47rem measure plus a 7rem
    card and its gutter on each side with air to spare; below that the strip
-   above stands in. */
+   above stands in. Absolutely positioned (top/left auto, so it stays where it
+   would have flowed) rather than floated since 2026-10-14: a float here took
+   part in the figure/aside clearing (see Floats) and would have held every
+   image and aside down until the whole stack ended, though the stack never
+   touches the measure. */
 @media (min-width: 72rem) {
   .essay-cards {
-    float: left;
+    position: absolute;
     flex-direction: column;
     overflow: visible;
     width: 7rem;

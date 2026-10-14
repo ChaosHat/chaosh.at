@@ -64,11 +64,8 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
 // magazine float: half the column, hung into the margin, prose wrapping
 // beside it — the accent shot. A width of FIG_FULL_PX or more is the full
 // column — the "look at this" shot, where a pixel screenshot at half size
-// would lose the thing being pointed at. Floats alternate right, left, right
-// per rendered document (so per section in a daily), starting right because
-// an essay's card already floats left through the opening paragraphs. The
-// side is decided here rather than with :nth-of-type so full figures don't
-// count. The width attr stays on the <img> either way (harmless: the CSS
+// would lose the thing being pointed at. Which side a float takes is decided
+// by obsidian_float_sides below, shared with asides. The width attr stays on the <img> either way (harmless: the CSS
 // sizes the image to its figure).
 const FIG_FULL_PX = 700;
 const isImageParagraph = (t, i) =>
@@ -86,18 +83,18 @@ const isCaptionParagraph = (t, i) => {
 md.core.ruler.push("obsidian_figure", (state) => {
   const t = state.tokens;
   const out = [];
-  let floats = 0;
   for (let i = 0; i < t.length; i++) {
     if (!isImageParagraph(t, i)) { out.push(t[i]); continue; }
     const open = new state.Token("figure_open", "figure", 1);
     const close = new state.Token("figure_close", "figure", -1);
     open.block = close.block = true;
     open.map = t[i].map;
+    open.level = t[i].level;
     const width = Number(t[i + 1].children[0].attrGet("width"));
     if (width >= FIG_FULL_PX) {
       open.attrSet("class", "fig-full");
     } else {
-      open.attrSet("class", `fig-float ${floats++ % 2 ? "fig-left" : "fig-right"}`);
+      open.attrSet("class", "fig-float");
     }
     out.push(open, t[i + 1]);
     i += 2;
@@ -166,6 +163,30 @@ md.core.ruler.push("obsidian_aside", (state) => {
         t.splice(i + 4, 0, open, rest, close);
       }
     }
+  }
+});
+
+// Float sides. Floated figures and asides are one sequence, so they take
+// turns: right, left, right… per rendered document (so per section in a
+// daily). It starts right because an essay's lone card floats left through
+// the opening paragraphs. Decided here rather than with :nth-of-type so full
+// figures don't count and a figure and an aside don't each run their own
+// alternation and land facing each other across a strip of prose. The CSS
+// clears every float, so at most one sits beside the text at any height;
+// alternation is what keeps the page from leaning, clearing is what keeps it
+// from colliding. Only top-level blocks count — a figure inside an aside
+// rides with the aside. (2026-10-14.)
+md.core.ruler.push("obsidian_float_sides", (state) => {
+  let n = 0;
+  for (const tok of state.tokens) {
+    if (tok.level !== 0) continue;
+    const cls = tok.attrGet("class") ?? "";
+    const isFloat =
+      (tok.type === "figure_open" && cls === "fig-float") ||
+      (tok.type === "blockquote_open" && cls === "aside");
+    if (!isFloat) continue;
+    const side = n++ % 2 ? "left" : "right";
+    tok.attrSet("class", `${cls} ${cls === "aside" ? "aside" : "fig"}-${side}`);
   }
 });
 
