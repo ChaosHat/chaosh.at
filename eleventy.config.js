@@ -419,14 +419,15 @@ export default function (eleventyConfig) {
   );
 
   // Shelf order: what he's on now first (committed, then noodling), then
-  // what's queued up, then finished, then the three kinds of stopped —
-  // `sampled` last because it is the one that carries no verdict, so it is the
-  // least worth a reader's eye. Within a group, alphabetical.
+  // what's queued up, then finished, then the two kinds of stopped (paused
+  // with a trigger, then done without the full experience). Within a group,
+  // alphabetical. `abandoned` and `sampled` merged into `incomplete`
+  // 2026-10-13.
   //
   // Anything missing from this list sorts to indexOf -1, i.e. AHEAD of active
   // and straight to the top of the shelf. A new status must be added here or
   // it silently takes over the front page.
-  const STATUS_ORDER = ["active", "dabbling", "backlog", "completed", "shelved", "abandoned", "sampled"];
+  const STATUS_ORDER = ["active", "dabbling", "backlog", "completed", "shelved", "incomplete"];
   eleventyConfig.addFilter("shelveSort", (subjects) =>
     (subjects ?? []).slice().sort((a, b) => {
       const s = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
@@ -661,18 +662,30 @@ export default function (eleventyConfig) {
   // again for every essay card that shows the same tile, so a single bad value
   // used to be reported as many times as it happened to be rendered.
   const badRatings = new Map(); // slug -> offending value, as text
+  // A trailing `*` ("liked*") is a PARTIAL verdict — liked what he saw,
+  // can't speak to the whole game. Same rung, same view, same sort; only the
+  // printed word carries the star. Added 2026-10-13 when `sampled` merged into
+  // `incomplete`: "my verdict isn't final" was a fact about the rating, so it
+  // moved onto the rating.
   const ratingOf = (slug, meta) => {
-    const want = meta?.rating;
-    if (want == null) return null;
+    const raw = meta?.rating;
+    if (raw == null) return null;
+    const partial = typeof raw === "string" && raw.endsWith("*");
+    const want = partial ? raw.slice(0, -1) : raw;
     if (typeof want !== "string" || !ratings[want]) {
       // A list is the shape error worth naming separately: a game has one
       // verdict, and two rungs on one tile would read as a range.
-      badRatings.set(slug, Array.isArray(want) ? `[${want}] (one slug, not a list)` : String(want));
+      badRatings.set(slug, Array.isArray(raw) ? `[${raw}] (one slug, not a list)` : String(raw));
       return null;
     }
     if (canonSlugs.has(slug)) return null;
     const r = ratings[want];
-    return { slug: want, title: r?.title ?? want, rank: r?.rank ?? ratingOrder.indexOf(want) + 1 };
+    return {
+      slug: want,
+      title: (r?.title ?? want) + (partial ? "*" : ""),
+      rank: r?.rank ?? ratingOrder.indexOf(want) + 1,
+      partial,
+    };
   };
 
   // ------------------------------------------------------------------- sky

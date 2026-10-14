@@ -72,11 +72,11 @@
 
   --st-active: #8ce8cc;
   --st-dabbling: #b9e8a0;
-  /* dabbling desaturated: sampled IS dabbling, faded out and stopped. */
-  --st-sampled: #b6bda8;
   --st-backlog: #f0dda0;
   --st-shelved: #cab5f5;
-  --st-abandoned: #f0aec2;
+  /* Was --st-abandoned; `abandoned` + `sampled` merged 2026-10-13, the
+     faded-green sampled hue retired with it. */
+  --st-incomplete: #f0aec2;
   --st-completed: #a9d0f6;
 
   /* The canon's gold. Deliberately hotter and more saturated than
@@ -87,7 +87,7 @@
   --gold: #f5c86b;
   /* The rung below canon. Has to read as a metal beside gold and as a
      different thing from three cool pale neighbours on the same shelf —
-     --muted (#a9a6ce), --st-sampled (#b6bda8), --st-completed (#a9d0f6) —
+     --muted (#a9a6ce), the retired sampled green (#b6bda8), --st-completed (#a9d0f6) —
      so it is brighter and less blue than all three. */
   --silver: #cfd3e0;
 
@@ -179,7 +179,7 @@ hr {
     var(--st-active) 18%,
     var(--st-completed) 42%,
     var(--st-shelved) 62%,
-    var(--st-abandoned) 82%,
+    var(--st-incomplete) 82%,
     transparent);
   -webkit-mask: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
   mask: repeating-linear-gradient(to right, #000 0 6px, transparent 6px 8px);
@@ -253,7 +253,7 @@ h1, h2, h3 { line-height: 1.25; }
   background: linear-gradient(
     var(--st-active) 0 22%, transparent 22% 32%,
     var(--accent) 32% 54%, transparent 54% 64%,
-    var(--st-abandoned) 64% 100%);
+    var(--st-incomplete) 64% 100%);
   clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
 }
 
@@ -399,10 +399,9 @@ h1, h2, h3 { line-height: 1.25; }
 
 .b-active { --c: var(--st-active); }
 .b-dabbling { --c: var(--st-dabbling); }
-.b-sampled { --c: var(--st-sampled); }
 .b-backlog { --c: var(--st-backlog); }
 .b-shelved { --c: var(--st-shelved); }
-.b-abandoned { --c: var(--st-abandoned); }
+.b-incomplete { --c: var(--st-incomplete); }
 .b-completed { --c: var(--st-completed); }
 
 /* The rating chip — the third axis. Told apart from a status badge by fill:

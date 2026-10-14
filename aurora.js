@@ -301,7 +301,7 @@ export const subjectSvg = (slug, ladderHue, status, tier, { canon = false } = {}
       `<circle cx='48' cy='56' r='51' fill='${moon}' fill-opacity='0.16'/>` +
       `<circle cx='48' cy='56' r='30' fill='${moon}'/>` +
       `</g>`;
-  } else if (status === "abandoned") {
+  } else if (status === "incomplete") {
     body += curtain(rand, GREY, { yMin: 42, yMax: 58, hBase: 14, op: 0.3 });
   } else if (status === "shelved") {
     body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.25 });
@@ -331,21 +331,21 @@ export const subjectSvg = (slug, ladderHue, status, tier, { canon = false } = {}
 // faint high curtain of the full scene, so the chip stays a reduction of the
 // real thing and not a different picture.
 //
-// Band count still tracks status: abandoned keeps its single grey ghost (the
+// Band count still tracks status: incomplete keeps its single grey ghost (the
 // doc's "one curtain, desaturated"), completed keeps none and gets the moon.
 export const chipSvg = (slug, ladderHue, status, tier, { canon = false } = {}) => {
   const rand = mulberry32(hashOf(slug));
-  const pal = status === "abandoned" ? GREY : palette(ladderHue);
+  const pal = status === "incomplete" ? GREY : palette(ladderHue);
   const moon = canon ? MOON_GOLD : MOON;
   const W = 24;
   const H = 32;
   const op =
     status === "completed" ? 0
-    : status === "abandoned" ? 0.5
+    : status === "incomplete" ? 0.5
     : status === "shelved" ? 0.45
     : status === "dabbling" ? 0.65 * Math.max(tier, 0.5)
     : Math.max(tier, 0.5);
-  const twoBands = status !== "abandoned" && status !== "completed";
+  const twoBands = status !== "incomplete" && status !== "completed";
 
   // Quantised to the 2-unit column grid, same as the full scene's rays.
   const band = ({ y0, ph, freq, amp, bodyH, edgeH, dim }) => {
