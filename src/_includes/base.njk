@@ -98,9 +98,10 @@
         the strip exists so a visitor learns the second body of writing is
         there at all, and it is furniture, so it does not go stale between
         essays. The chip is the first cited subject's; an essay that cites
-        only tags goes chipless. -#}
+        only tags goes chipless. Not on /essays/ itself: the list right
+        under it already leads with the same two (2026-10-14). -#}
     {% set essays = collections.essayPages | sort(true, false, "date") %}
-    {% if essays | length %}
+    {% if essays | length and page.url != "/essays/" %}
     <div class="now essays">
       <div class="now-head">
         <span class="now-label">deep thoughts</span>
