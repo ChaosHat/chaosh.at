@@ -71,7 +71,9 @@
   --accent: #8ce8cc;
 
   --st-active: #8ce8cc;
-  --st-dabbling: #b9e8a0;
+  /* Was --st-dabbling's green until 2026-10-13; dabbling folded into active
+     and the hue passed to owned board games. */
+  --st-owned: #b9e8a0;
   --st-backlog: #f0dda0;
   --st-shelved: #cab5f5;
   /* Was --st-abandoned; `abandoned` + `sampled` merged 2026-10-13, the
@@ -398,7 +400,7 @@ h1, h2, h3 { line-height: 1.25; }
 .badge::before { content: ""; width: 4px; height: 4px; background: currentColor; }
 
 .b-active { --c: var(--st-active); }
-.b-dabbling { --c: var(--st-dabbling); }
+.b-owned { --c: var(--st-owned); }
 .b-backlog { --c: var(--st-backlog); }
 .b-shelved { --c: var(--st-shelved); }
 .b-incomplete { --c: var(--st-incomplete); }

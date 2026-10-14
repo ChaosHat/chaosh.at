@@ -306,11 +306,13 @@ export const subjectSvg = (slug, ladderHue, status, tier, { canon = false } = {}
   } else if (status === "shelved") {
     body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.25 });
     body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 10, op: 0.35 });
-  } else if (status === "dabbling") {
-    // Between active and shelved: two curtains like a dying display, but
-    // still tier-scaled — noodling breathes with recency, shelved doesn't.
-    body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.3 * tier });
-    body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 12, op: 0.55 * tier });
+  } else if (status === "owned") {
+    // Owned board games: a steady two-curtain sky between active and
+    // shelved. Not tier-scaled — a board game isn't written about on a
+    // cadence, so recency would only ever read as fading. (Took over the
+    // dabbling branch 2026-10-13.)
+    body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 5, op: 0.3 });
+    body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 12, op: 0.55 });
   } else {
     body += curtain(rand, pal, { yMin: 16, yMax: 24, hBase: 7, op: 0.4 * tier });
     body += curtain(rand, pal, { yMin: 42, yMax: 58, hBase: 16, op: 0.8 * tier });
@@ -343,7 +345,7 @@ export const chipSvg = (slug, ladderHue, status, tier, { canon = false } = {}) =
     status === "completed" ? 0
     : status === "incomplete" ? 0.5
     : status === "shelved" ? 0.45
-    : status === "dabbling" ? 0.65 * Math.max(tier, 0.5)
+    : status === "owned" ? 0.65
     : Math.max(tier, 0.5);
   const twoBands = status !== "incomplete" && status !== "completed";
 

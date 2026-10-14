@@ -415,19 +415,20 @@ export default function (eleventyConfig) {
   // Now Playing is derived, never curated — it is the same `status: active`
   // that groups the shelves, so the two cannot drift apart.
   eleventyConfig.addFilter("nowPlaying", (subjects) =>
-    (subjects ?? []).filter((s) => s.status === "active" && !s.hide_from_now),
+    (subjects ?? []).filter((s) => s.status === "active"),
   );
 
-  // Shelf order: what he's on now first (committed, then noodling), then
-  // what's queued up, then finished, then the two kinds of stopped (paused
+  // Shelf order: what he's on now first, then what's queued up, then
+  // finished, then owned board games, then the two kinds of stopped (paused
   // with a trigger, then done without the full experience). Within a group,
-  // alphabetical. `abandoned` and `sampled` merged into `incomplete`
-  // 2026-10-13.
+  // alphabetical. 2026-10-13: `abandoned` + `sampled` merged into
+  // `incomplete`, `dabbling` folded into `active`, and `owned` replaced
+  // active + hide_from_now for board games.
   //
   // Anything missing from this list sorts to indexOf -1, i.e. AHEAD of active
   // and straight to the top of the shelf. A new status must be added here or
   // it silently takes over the front page.
-  const STATUS_ORDER = ["active", "dabbling", "backlog", "completed", "shelved", "incomplete"];
+  const STATUS_ORDER = ["active", "backlog", "completed", "owned", "shelved", "incomplete"];
   eleventyConfig.addFilter("shelveSort", (subjects) =>
     (subjects ?? []).slice().sort((a, b) => {
       const s = STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
@@ -723,9 +724,9 @@ export default function (eleventyConfig) {
     return TIERS.find(([limit]) => days <= limit)[1];
   };
 
-  // The lit-days strip — see foldStrip at module scope. Tail only on the two
-  // statuses where "is the fire still lit?" is a live question.
-  const TAIL_STATUSES = new Set(["active", "dabbling"]);
+  // The lit-days strip — see foldStrip at module scope. Tail only on the
+  // status where "is the fire still lit?" is a live question.
+  const TAIL_STATUSES = new Set(["active"]);
   const litStrip = (slug, entries, status) => {
     const strip = foldStrip(entries, {
       tail: STRIP_TAIL && TAIL_STATUSES.has(status),
