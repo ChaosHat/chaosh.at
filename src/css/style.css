@@ -699,19 +699,43 @@ figcaption {
 @media (max-width: 34rem) {
   .essay-card { float: none; margin: 0 0 1.25rem; }
 }
-/* Multi-about essays: the cards share one row above the prose rather than
-   floating beside it. Smaller than the lone card so five fit the reading
-   width; three across on a phone instead of a full-size stack. */
+/* Multi-about essays: the cards share one strip above the prose rather than
+   floating beside it. One line that scrolls sideways, never wraps: a wrapped
+   second row on a phone pushed the opening two covers down the page, and
+   shrinking to fit gets linearly worse with every cited subject (both mocked
+   and rejected, 2026-10-14). Five fit a tablet's measure with nothing to
+   scroll. On a phone the strip bleeds to the screen edge so a cut-off cover
+   says "swipe". */
 .essay-cards {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
   margin: 0.35rem 0 1.75rem;
 }
-.essay-cards .essay-card { float: none; width: 7rem; margin: 0; }
+.essay-cards .essay-card { flex: 0 0 7rem; width: 7rem; margin: 0; scroll-snap-align: start; }
 @media (max-width: 34rem) {
-  .essay-cards { gap: 0.75rem; }
-  .essay-cards .essay-card { width: calc((100% - 1.5rem) / 3); }
+  .essay-cards { gap: 0.75rem; margin-right: -1.25rem; padding-right: 1.25rem; }
+  .essay-cards .essay-card { flex-basis: 6.75rem; width: 6.75rem; }
+}
+/* Where the margin can hold them, the cards leave the prose's column
+   altogether: a vertical stack hung in the left gutter, so the text starts
+   under the title like any essay and the covers read as marginalia beside
+   it. Floated with a negative margin equal to its own width plus the gap, so
+   it takes no room from the measure. 72rem = the 47rem measure plus a 7rem
+   card and its gutter on each side with air to spare; below that the strip
+   above stands in. */
+@media (min-width: 72rem) {
+  .essay-cards {
+    float: left;
+    flex-direction: column;
+    overflow: visible;
+    width: 7rem;
+    gap: 1.25rem;
+    margin: 0.35rem 0 1rem -9rem;
+  }
 }
 /* The list essay (2026-09-09, the canon; any ten-things post after it). A
    ## heading that names a cited subject makes its section a row: the card in
