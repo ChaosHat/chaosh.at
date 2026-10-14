@@ -37,36 +37,4 @@ When I stripped all of that away, what made Gold and Silver memorable to me was 
 
 The goal is for each slot to say something different, to let each one earn its way onto this list, and in that way show who I am as a gamer, what I like and value. The rubric is here to help me figure out ten different ways to say that. Ten good games is just a top ten list; the canon is an attempt to have a conversation with you and give you the tl;dr about me. So when you're reading my posts you can say "of course Hat likes that, it's just like this thing in BG3."
 
----
-## Editor notes (2026-09-23)
-- **Pull from `Canon Rubric.md`** — notes are sharper than the draft
-	- HGSS cut = the actual "killed my favorites" story, from the live roster
-	- ~~Closer: ranking-vs-person line~~ — no: not Hat's line (2026-10-07)
-	- Maybe: Ohtani not Jordan; Warcraft 3 / dead lineage
-- **Structure**
-	- ~~Name tests up front~~ — no: tests are introduced as they come up, story by story (Hat, 2026-10-07)
-	- Separate tests 1 & 2 — BG2 = taking credit for history; Mass Effect = a slot you don't want challenged
-	- Mass Effect: swap the market prediction ("would take a decade") for the stance ("do I hope something beats it?"); cut the layoffs digression
-	- Mass Effect needs a verdict — say it's off, why, and that it lands on `favorite`
-- **Derivability**
-	- "Can't burn 4-5 slots on RPGs" — readers will count (BG3, CP77, Awakening, FFVIIR, TTYD, MH) and it's a genre quota in disguise
-	- Reframe: no two entries answer the same question about me — OR argue NV by supersession (Cyberpunk inherits it like BG3 inherits BG2)
-	- Keep "Everything else is doing the job for it"
-- **Open / close**
-	- Cut throat-clearing ("as you can imagine", "In light of that…"); lead with the business card
-	- Link back to Canon Premiere early
-	- Move the "not hard and fast" caveat up; end on the ranking-vs-person line
-- **Line edits**
-	- it's successor → its
-	- "examples of why" — drop the second "why"
-	- "and also serve" → serves
-	- "My next category is a word I'll invent, and it's beatability" → "Next, a word I'm inventing: beatability."
-	- "find a way to earn their way" → "let each one earn its slot"
-	- three-part, sci-fi, first-person, top-down
-	- comma splice at "the canon is an attempt"
-	- Keep: "I say thee nay!", rent seeking, nested ME parenthetical, spiral-bound manual, *inherits*
-- **Ship gates**
-	- `date:` empty → refused
-	- `about:` → baldurs-gate-2, baldurs-gate-3, mass-effect-legendary-edition, fallout-new-vegas (+ pokemon-hgss / warcraft-3 if used)
-	- `description:` fill in
-	- Title "killed my favorites" vs the favorites→canon rename — make the irony deliberate or reword
+
