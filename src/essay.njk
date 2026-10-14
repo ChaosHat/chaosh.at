@@ -8,7 +8,7 @@ permalink: "/e/{{ essay.slug }}/"
 eleventyComputed:
   title: "{{ essay.title | safe }}"
 ---
-<article class="post essay-page">
+<article class="post essay-page"{% if essay.tint %} style="--tint:{{ essay.tint }}"{% endif %}>
   {#- The essay's date seeds the same day-sky a daily gets, so the essay and
       the daily it shipped alongside share a band. Before this the header kept
       the daily's padding with nothing drawn in it — 3.3rem of air under the

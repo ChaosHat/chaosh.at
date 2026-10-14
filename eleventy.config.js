@@ -115,6 +115,60 @@ md.core.ruler.push("obsidian_figure", (state) => {
   state.tokens = out;
 });
 
+// Asides. Written in the vault as an Obsidian callout, so the editor previews
+// it as a box too:
+//   > [!aside] New to Fortune's Weave?
+//   > Two paragraphs of primer for readers who haven't played.
+// The blockquote becomes <aside class="aside">; text after the marker on the
+// first line becomes its title (<p class="aside-title">), and a bare
+// `[!aside]` has none. Obsidian's fold markers ([!aside]- / [!aside]+) are
+// accepted and ignored — the page never folds. Only `aside` is claimed; any
+// other callout type stays a plain blockquote. (2026-10-14, the Fortune's
+// Weave primer.)
+const ASIDE_MARK = /^\[!aside\][+-]?[ \t]*/i;
+md.core.ruler.push("obsidian_aside", (state) => {
+  const t = state.tokens;
+  for (let i = 0; i < t.length; i++) {
+    if (t[i].type !== "blockquote_open" || t[i + 1]?.type !== "paragraph_open") continue;
+    const inline = t[i + 2];
+    const first = inline?.children?.[0];
+    const m = first?.type === "text" && ASIDE_MARK.exec(first.content);
+    if (!m) continue;
+    let depth = 0;
+    let j = i;
+    for (; j < t.length; j++) {
+      if (t[j].type === "blockquote_open") depth++;
+      else if (t[j].type === "blockquote_close" && --depth === 0) break;
+    }
+    t[i].tag = t[j].tag = "aside";
+    t[i].attrSet("class", "aside");
+    first.content = first.content.slice(m[0].length);
+    // The title is the first line; the rest of that paragraph is body.
+    const kids = inline.children;
+    const br = kids.findIndex((c) => c.type === "softbreak" || c.type === "hardbreak");
+    const title = br < 0 ? kids : kids.slice(0, br);
+    const body = br < 0 ? [] : kids.slice(br + 1);
+    const hasTitle = title.some((c) => c.type !== "text" || c.content.trim());
+    if (!hasTitle && !body.length) {
+      t.splice(i + 1, 3); // marker alone on its line: drop the empty paragraph
+    } else if (!hasTitle) {
+      inline.children = body;
+    } else {
+      inline.children = title;
+      t[i + 1].attrSet("class", "aside-title");
+      if (body.length) {
+        const open = new state.Token("paragraph_open", "p", 1);
+        const close = new state.Token("paragraph_close", "p", -1);
+        const rest = new state.Token("inline", "", 0);
+        open.block = close.block = true;
+        rest.children = body;
+        rest.content = "";
+        t.splice(i + 4, 0, open, rest, close);
+      }
+    }
+  }
+});
+
 // Headings are matched loosely so "DQXIS", "dqxi s" and "Dragon Quest XI S"
 // all land on the same subject.
 export const normalise = (s) =>
@@ -1025,6 +1079,10 @@ export default function (eleventyConfig) {
           ? `/img/sky/${citedSubjects[0]}-chip.svg`
           : citedTagsDirect.length ? tagChip(citedTagsDirect[0]) : null,
         cites: subjectLinks(citedSubjects),
+        // An aside is washed in the first about: subject's hue, so a primer
+        // reads as belonging to the game it explains. Tag-only essays fall
+        // back to the accent in the CSS.
+        tint: citedSubjects.length ? palette(subjectHues.get(citedSubjects[0]) ?? 0).glow : null,
         cards,
         topCards: cards.filter((c) => !placed.has(c.slug)),
         sections,

@@ -617,6 +617,52 @@ figcaption {
   .fig-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
 }
 
+/* Asides — the renderer turns an Obsidian `> [!aside] Title` callout into
+   <aside class="aside"> (2026-10-14, the Fortune's Weave primer: a couple of
+   paragraphs for readers who haven't played, kept out of the argument).
+   Hat's brief is the magazine sidebar: a tinted box that runs ALONGSIDE the
+   prose, half in the column and half out in the gutter. So it is the figure
+   float with a wash instead of a picture — half the column wide, floated
+   right, hung into the margin by the same --hang rule .fig-float uses (up to
+   half its own width, minus 4rem of air off the viewport edge, so a partial
+   hang at laptop widths and the full half from ~1280px). Prose wraps down its
+   left side. Right, always: the essay card owns the left through the opening
+   paragraphs, which is exactly where a primer goes. `clear: right` so it
+   never stacks beside a right-floated figure.
+   The wash is --tint (the first about: subject's glow, set on the article by
+   essay.njk; accent elsewhere) mixed thin into night — "all color on the
+   site is aurora" — with a stronger rule of the same hue down its inner
+   edge. The type steps down a size, the sidebar voice; the title is chrome,
+   so pixel face. On a phone the float releases and it is a full-column box,
+   the same breakpoint as figures and the card. */
+.aside {
+  --t: var(--tint, var(--accent));
+  margin: 1.5rem 0;
+  padding: 0.9rem 1.1rem;
+  background: color-mix(in oklab, var(--t) 12%, var(--night));
+  border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.aside > :first-child { margin-top: 0; }
+.aside > :last-child { margin-bottom: 0; }
+.aside p { margin: 0 0 0.72em; }
+.aside .aside-title {
+  margin-bottom: 0.5rem;
+  font: 12px/1.5 var(--pixel);
+  color: var(--t);
+  letter-spacing: 0.02em;
+}
+@media (min-width: 34.01rem) {
+  .aside {
+    --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
+    float: right;
+    clear: right;
+    width: 50%;
+    margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem;
+  }
+}
+
 .frag-head {
   display: flex;
   align-items: center;
