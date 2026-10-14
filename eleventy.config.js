@@ -176,7 +176,45 @@ md.core.ruler.push("obsidian_aside", (state) => {
 // alternation is what keeps the page from leaning, clearing is what keeps it
 // from colliding. Only top-level blocks count — a figure inside an aside
 // rides with the aside. (2026-10-14.)
+// Two floats back to back in the source can't both have prose beside them:
+// the second clears the first, so either the first stands beside empty
+// space or (before this) the paragraph after them jogged sideways halfway
+// down when the second appeared. A magazine anchors every box to a
+// paragraph, so the renderer does too — a float that directly follows
+// another float moves below the next paragraph or list. Never across a
+// heading: that would move it into another section. (2026-10-14, Leda's
+// picture and the Fortune's Weave primer, written one after the other.)
+const isFloatOpen = (tok) =>
+  tok.level === 0 &&
+  ((tok.type === "figure_open" && tok.attrGet("class") === "fig-float") ||
+    (tok.type === "blockquote_open" && tok.attrGet("class") === "aside"));
+const topBlocks = (tokens) => {
+  const blocks = [];
+  for (let i = 0; i < tokens.length; i++) {
+    let j = i;
+    if (tokens[i].nesting === 1) {
+      let depth = 0;
+      for (; j < tokens.length; j++) {
+        depth += tokens[j].nesting;
+        if (depth === 0) break;
+      }
+    }
+    blocks.push(tokens.slice(i, j + 1));
+    i = j;
+  }
+  return blocks;
+};
+const ANCHOR = new Set(["paragraph_open", "bullet_list_open", "ordered_list_open"]);
+
 md.core.ruler.push("obsidian_float_sides", (state) => {
+  const blocks = topBlocks(state.tokens);
+  for (let k = 1; k < blocks.length - 1; k++) {
+    if (isFloatOpen(blocks[k][0]) && isFloatOpen(blocks[k - 1][0]) && ANCHOR.has(blocks[k + 1][0].type)) {
+      [blocks[k], blocks[k + 1]] = [blocks[k + 1], blocks[k]];
+      k++;
+    }
+  }
+  state.tokens = blocks.flat();
   let n = 0;
   for (const tok of state.tokens) {
     if (tok.level !== 0) continue;

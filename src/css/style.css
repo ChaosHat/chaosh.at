@@ -672,6 +672,22 @@ figcaption {
    belongs to the row's card, so every float there goes right. */
 @media (min-width: 34.01rem) {
   .fig-float, .aside { clear: both; }
+  /* The block after a float starts level with it. Clearing pushes a float
+     below the previous one, so it lands partway down the paragraph that
+     follows it in the source — that paragraph's first lines ran full width
+     beside the previous float's tail, then jogged sideways when this one
+     appeared (the Fortune's Weave primer under Leda's picture, 2026-10-14).
+     Alternation means the previous float is always on the OTHER side, so
+     clearing just that side lines the paragraph up with its float without
+     clearing the float itself. Costs a little air beside the previous
+     float's tail instead of a jog. Never applied to a float itself (that
+     would override its own clear: both). The renderer guarantees a block
+     between two floats (obsidian_float_sides), so this always has a
+     paragraph to act on. Not in list-essay rows, where every float is right
+     and the opposite-side rule would mean nothing. */
+  .fig-right + :not(.fig-float, .aside), .aside-right + :not(.fig-float, .aside) { clear: left; }
+  .fig-left + :not(.fig-float, .aside), .aside-left + :not(.fig-float, .aside) { clear: right; }
+  .essay-row-body .fig-float + *, .essay-row-body .aside + * { clear: none; }
   .essay-row-body .fig-left,
   .essay-row-body .aside-left {
     float: right;
