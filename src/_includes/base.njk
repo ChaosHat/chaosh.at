@@ -98,7 +98,7 @@
         the strip exists so a visitor learns the second body of writing is
         there at all, and it is furniture, so it does not go stale between
         essays. The chip is the first cited subject's; an essay that cites
-        only tags goes chipless. Not on /essays/ itself: the list right
+        only tags gets its first tag's chip (eleventy.config.js tagChip). Not on /essays/ itself: the list right
         under it already leads with the same two (2026-10-14). -#}
     {% set essays = collections.essayPages | sort(true, false, "date") %}
     {% if essays | length and page.url != "/essays/" %}
@@ -109,7 +109,7 @@
       </div>
       <div class="now-items">
         {% for e in essays | limit(2) %}
-        <a class="now-item" href="{{ e.url }}">{% if e.citedSubjects | length %}<span class="sky" style="background-image:url(/img/sky/{{ e.citedSubjects[0] }}-chip.svg)" aria-hidden="true"></span>{% endif %}{{ e.title }}<span class="essay-when">{{ e.date | shortDate }}</span></a>
+        <a class="now-item" href="{{ e.url }}">{% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}{{ e.title }}<span class="essay-when">{{ e.date | shortDate }}</span></a>
         {% endfor %}
       </div>
     </div>

@@ -8,7 +8,7 @@ permalink: /essays/
 <ul class="essay-list">
   {% for e in collections.essayPages | sort(true, false, "date") %}
   <li>
-    {% if e.citedSubjects | length %}<span class="sky" style="background-image:url(/img/sky/{{ e.citedSubjects[0] }}-chip.svg)" aria-hidden="true"></span>{% endif %}
+    {% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}
     <a href="{{ e.url }}">{{ e.title }}</a>
     <span class="archive-note">{{ e.date | readableDate }}</span>
   </li>

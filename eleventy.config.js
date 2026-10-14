@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, ribbonSheet, palette } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, ribbonSheet, palette, hashOf } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
 
@@ -752,6 +752,20 @@ export default function (eleventyConfig) {
     };
   };
 
+  // A tag-only essay (about: naming a tag, no subject) had no chip at all, so
+  // it sat bare in every essay list (2026-10-14). Tags get a chip of their
+  // own: no hue slot — tags aren't on the ladder and must never displace a
+  // subject — so the hue hashes from the slug, fixed for the tag's life. Drawn
+  // as an active subject would be (bands, no moon): a tag is never finished.
+  // List chip only; the essay page gets no card for a tag (Hat, 2026-10-14).
+  const tagChip = (slug) => {
+    const file = `img/sky/tag-${slug}-chip.svg`;
+    if (!skyFiles.has(file)) {
+      skyFiles.set(file, chipSvg(`tag:${slug}`, hashOf(`tag:${slug}`) % 360, "active", 1));
+    }
+    return `/${file}`;
+  };
+
   // Cover art is the one asset on this site that is SOURCED rather than
   // generated: an image named for the subject slug, fetched from SteamGridDB by
   // .claude/scripts/covers.py and committed. Absence is a normal state, not an
@@ -1007,6 +1021,9 @@ export default function (eleventyConfig) {
           ? e.data.description.trim()
           : null,
         citedSubjects,
+        chipUrl: citedSubjects.length
+          ? `/img/sky/${citedSubjects[0]}-chip.svg`
+          : citedTagsDirect.length ? tagChip(citedTagsDirect[0]) : null,
         cites: subjectLinks(citedSubjects),
         cards,
         topCards: cards.filter((c) => !placed.has(c.slug)),
