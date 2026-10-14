@@ -1,0 +1,1 @@
+A favorite 4X game, I love space and the real time aspect is a fun twist although it makes it a bit more stressful and less chill and cozy which is why it hasn't gotten as much playtime from me as it's turn based relatives.

@@ -1,0 +1,1 @@
+This has been on my to do list for a long time. I recall not loving the combat for some reason? The remaster is a good reason to jump back in at some point though.

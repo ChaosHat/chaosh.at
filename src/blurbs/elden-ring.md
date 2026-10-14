@@ -1,0 +1,1 @@
+I've tried multiple times to get into this and it's just not for me. I think I'm not a souls game person, I don't love the high stakes death, I don't like the "this is very hard and you get to slam your head into it" aspects, and I don't like the "we're gonna throw you out there and explain very little." I wish I did though!

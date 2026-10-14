@@ -13,7 +13,7 @@ animal-crossing-new-horizons:
   title: 'Animal Crossing: New Horizons'
   category:
     - games
-  status: abandoned
+  status: completed
   rating: loved
   aliases:
     - acnh
@@ -23,7 +23,7 @@ anno-117:
   title: 'Anno 117: Pax Romana'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - anno
@@ -60,7 +60,7 @@ borderlands-4:
   title: Borderlands 4
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - bl4
@@ -108,15 +108,6 @@ castlevania-order-of-ecclesia:
     - castlevania order of ecclesia
     - ooe
     - cooe
-castlevania-portrait-of-ruin:
-  title: 'Castlevania: Portrait of Ruin'
-  category:
-    - games
-  status: backlog
-  aliases:
-    - portrait of ruin
-    - castlevania portrait of ruin
-    - cpor
 castlevania-symphony-of-the-night:
   title: 'Castlevania: Symphony of the Night'
   category:
@@ -188,7 +179,7 @@ donkey-kong-bananza:
   title: Donkey Kong Bananza
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - bananza
@@ -229,7 +220,8 @@ dragon-warrior-monsters-2:
   title: Dragon Warrior Monsters 2
   category:
     - games
-  status: sampled
+  status: incomplete
+  rating: liked*
   aliases:
     - dwm2
     - dragon warrior monsters 2
@@ -239,7 +231,7 @@ elden-ring:
   title: Elden Ring
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: disliked
   aliases:
     - er
@@ -294,7 +286,7 @@ final-fantasy-iv:
   title: Final Fantasy IV
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: disliked
   aliases:
     - ffiv
@@ -312,7 +304,7 @@ final-fantasy-tactics:
   title: Final Fantasy Tactics
   category:
     - games
-  status: backlog
+  status: incomplete
   rating: disliked
   aliases:
     - fft
@@ -321,7 +313,7 @@ final-fantasy-vi:
   title: Final Fantasy VI
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: disliked
   aliases:
     - ffvi
@@ -358,7 +350,7 @@ fire-emblem-binding-blade:
   title: 'Fire Emblem: Binding Blade'
   category:
     - games
-  status: dabbling
+  status: active
   aliases:
     - binding blade
     - bindingblade
@@ -379,7 +371,7 @@ fire-emblem-engage:
   title: 'Fire Emblem: Engage'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - engage
@@ -409,7 +401,7 @@ fire-emblem-path-of-radiance:
   title: 'Fire Emblem: Path of Radiance'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - path of radiance
@@ -448,7 +440,7 @@ hollow-knight:
   title: Hollow Knight
   category:
     - games
-  status: dabbling
+  status: incomplete
   aliases:
     - hk
 horizon-forbidden-west:
@@ -473,7 +465,7 @@ indiana-jones-and-the-great-circle:
   title: Indiana Jones and the Great Circle
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - great circle
@@ -482,7 +474,7 @@ kingdom-hearts:
   title: Kingdom Hearts
   category:
     - games
-  status: dabbling
+  status: incomplete
   aliases:
     - kh
     - kh1
@@ -514,7 +506,7 @@ lufia-2:
   title: 'Lufia II: Rise of the Sinistrals'
   category:
     - games
-  status: dabbling
+  status: incomplete
   aliases:
     - lufia 2
     - lufia ii
@@ -533,7 +525,7 @@ marvel-snap:
   title: Marvel Snap
   category:
     - games
-  status: abandoned
+  status: completed
   rating: liked
   aliases:
     - snap
@@ -550,7 +542,7 @@ mass-effect-andromeda:
   title: Mass Effect Andromeda
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - andromeda
@@ -569,7 +561,7 @@ mega-man-11:
   title: Mega Man 11
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - mm11
@@ -603,7 +595,7 @@ metroid-prime-remastered:
   title: Metroid Prime Remastered
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - metroid prime
@@ -632,7 +624,7 @@ mina-the-hollower:
   title: Mina the Hollower
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - mina
@@ -676,7 +668,7 @@ my-time-at-sandrock:
   title: My Time at Sandrock
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - sandrock
@@ -685,8 +677,8 @@ no-mans-sky:
   title: No Man's Sky
   category:
     - games
-  status: sampled
-  rating: loved
+  status: incomplete
+  rating: loved*
   aliases:
     - nms
     - no mans sky
@@ -703,7 +695,7 @@ ori-and-the-will-of-the-wisps:
   title: Ori and the Will of the Wisps
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - will of the wisps
@@ -731,7 +723,8 @@ pokemon-crystal-legacy:
   title: Pokémon Crystal Legacy
   category:
     - games
-  status: dabbling
+  status: incomplete
+  rating: liked
   aliases:
     - pokemon crystal legacy
     - crystal legacy
@@ -754,7 +747,7 @@ pokemon-legends-arceus:
   title: 'Pokémon Legends: Arceus'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - pokemon legends arceus
@@ -805,7 +798,7 @@ sea-of-stars:
   title: Sea of Stars
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - sos
@@ -813,7 +806,7 @@ skyrim:
   title: 'The Elder Scrolls V: Skyrim'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: disliked
   aliases:
     - skyrim
@@ -833,8 +826,8 @@ slay-the-spire-2:
   title: Slay the Spire 2
   category:
     - games
-  status: dabbling
-  rating: loved
+  status: incomplete
+  rating: loved*
   aliases:
     - sts2
     - slay the spire ii
@@ -849,8 +842,8 @@ split-fiction:
   title: Split Fiction
   category:
     - games
-  status: sampled
-  rating: liked
+  status: incomplete
+  rating: liked*
 star-wars-galactic-racer:
   title: STAR WARS Galactic Racer
   category:
@@ -864,8 +857,8 @@ star-wars-jedi-fallen-order:
   title: 'STAR WARS Jedi: Fallen Order'
   category:
     - games
-  status: shelved
-  rating: liked
+  status: incomplete
+  rating: liked*
   aliases:
     - swjfo
     - fallen order
@@ -903,7 +896,7 @@ stardew-valley:
   title: Stardew Valley
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - stardew
@@ -911,7 +904,7 @@ steamworld-heist-2:
   title: SteamWorld Heist II
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: loved
   aliases:
     - steamworld heist 2
@@ -927,7 +920,8 @@ super-mario-rpg:
   title: Super Mario RPG
   category:
     - games
-  status: active
+  status: incomplete
+  rating: liked*
   aliases:
     - smrpg
     - mario rpg
@@ -935,7 +929,7 @@ super-mario-wonder:
   title: Super Mario Bros. Wonder
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - wonder
@@ -954,8 +948,8 @@ super-mariomon:
   title: Super Mariomon
   category:
     - games
-  status: sampled
-  rating: liked
+  status: incomplete
+  rating: liked*
   aliases:
     - mariomon
 super-metroid:
@@ -984,7 +978,7 @@ the-plucky-squire:
   title: The Plucky Squire
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - plucky squire
@@ -992,7 +986,7 @@ triangle-strategy:
   title: Triangle Strategy
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - triangle strat
@@ -1009,7 +1003,7 @@ unicorn-overlord:
   title: Unicorn Overlord
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: disliked
   aliases:
     - uo
@@ -1017,7 +1011,7 @@ warcraft-3:
   title: 'Warcraft III: Reign of Chaos'
   category:
     - games
-  status: dabbling
+  status: completed
   rating: favorite
   aliases:
     - wc3
@@ -1029,7 +1023,7 @@ witcher-3:
   title: 'The Witcher 3: Wild Hunt'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - witcher 3
@@ -1039,8 +1033,8 @@ world-of-warcraft-playerbots:
   title: World of Warcraft Playerbots
   category:
     - games
-  status: dabbling
-  rating: liked
+  status: incomplete
+  rating: liked*
   aliases:
     - wow
     - wow playerbots
@@ -1092,7 +1086,7 @@ zelda-echoes-of-wisdom:
   title: 'The Legend of Zelda: Echoes of Wisdom'
   category:
     - games
-  status: abandoned
+  status: incomplete
   rating: liked
   aliases:
     - echoes of wisdom
@@ -1113,7 +1107,7 @@ zelda-tears-of-the-kingdom:
   title: 'The Legend of Zelda: Tears of the Kingdom'
   category:
     - games
-  status: backlog
+  status: incomplete
   rating: liked
   aliases:
     - tears of the kingdom
@@ -1133,7 +1127,6 @@ flamecraft-duals:
   title: Flamecraft Duals
   category:
     - boardgames
-  status: active
-  hide_from_now: true
+  status: owned
   aliases:
     - flamecraft duals

@@ -112,7 +112,6 @@ castlevania:
     - castlevania-aria-of-sorrow
     - castlevania-dawn-of-sorrow
     - castlevania-order-of-ecclesia
-    - castlevania-portrait-of-ruin
     - castlevania-belmonts-curse
 metroidvania:
   title: Metroidvanias
@@ -126,7 +125,6 @@ metroidvania:
     - castlevania-aria-of-sorrow
     - castlevania-dawn-of-sorrow
     - castlevania-order-of-ecclesia
-    - castlevania-portrait-of-ruin
     - castlevania-belmonts-curse
     - ori-and-the-blind-forest
     - ori-and-the-will-of-the-wisps
