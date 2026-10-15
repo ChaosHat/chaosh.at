@@ -743,6 +743,14 @@ pokemon-hgss:
     - heartgold
     - pokemon soulsilver
     - pokemon heartgold
+pokemon-lazarus:
+  title: Pokémon Lazarus
+  category:
+    - games
+  status: active
+  aliases:
+    - pokemon lazarus
+    - lazarus
 pokemon-legends-arceus:
   title: 'Pokémon Legends: Arceus'
   category:
