@@ -1858,8 +1858,9 @@ export default function (eleventyConfig) {
   skyFiles.set("button.png", button.png);
   skyFiles.set("button.gif", button.gif);
 
-  // The forum signature (sig.js): six flush tiles — wordmark, three newest
-  // dailies, newest essay, Bluesky — at stable /sig/ URLs, redrawn every build. Built
+  // The forum signature (sig.js): one panel — wordmark, tagline, latest post,
+  // latest essay, Bluesky — cut into three flush images at stable /sig/ URLs,
+  // redrawn every build. Built
   // in a collection because it needs the posts; nothing reads the result. A
   // failure is a warning: the sig goes stale, the site still ships.
   eleventyConfig.addCollection("sig", async (api) => {
