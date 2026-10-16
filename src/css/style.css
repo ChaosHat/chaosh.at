@@ -278,7 +278,7 @@ h1, h2, h3 { line-height: 1.25; }
   align-items: center;
   gap: 0.3rem;
   margin-left: auto;
-  font: 11px/1 var(--pixel);
+  font: 16.5px/1 var(--pixel);
 }
 
 .site-nav a {
@@ -356,7 +356,7 @@ h1, h2, h3 { line-height: 1.25; }
 
 .now-label {
   flex-shrink: 0;
-  font: 11px/1 var(--pixel);
+  font: 16.5px/1 var(--pixel);
   color: var(--st-active);
 }
 
@@ -366,7 +366,7 @@ h1, h2, h3 { line-height: 1.25; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font: 11px/13px var(--pixel);
+  font: 16.5px/20px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -382,12 +382,12 @@ h1, h2, h3 { line-height: 1.25; }
    active green of what's live now. */
 .essays .now-label { color: var(--st-completed); }
 
-.essay-when { color: var(--muted); font: 11px/1 var(--pixel); }
+.essay-when { color: var(--muted); font: 16.5px/1 var(--pixel); white-space: nowrap; }
 
 .essays-all {
   margin-left: auto;
   flex-shrink: 0;
-  font: 11px/1 var(--pixel);
+  font: 16.5px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -610,7 +610,7 @@ figure > img { display: block; width: 100%; }
 figcaption {
   padding: 0.5rem 0.75rem;
   border-top: 1px solid var(--edge);
-  font: 11px/16px var(--pixel);
+  font: 16.5px/24px var(--pixel);
   color: var(--muted);
   text-align: center;
 }
@@ -1449,6 +1449,11 @@ figcaption {
    Chrome, the footer and pagination are all 11px; the old 10px and 8px
    tiers fold into it, since 10px of an 11px lattice is no longer a pixel
    font. Datelines and subject heads are 22px, the lattice at 2×.
+   One deliberate exception: the nav, the now-playing / deep-thoughts panels
+   and figure captions are 16.5px (1.5×), because 11 read too small there and
+   22 too loud (Hat, 2026-10-16). Off the lattice at 1×, so a font pixel
+   straddles device pixels there; on a 2× screen it is exactly 3 device
+   pixels and crisp. If those four ever look fuzzy, this is why.
    Below 34rem only the art shrinks. */
 @media (max-width: 34rem) {
   .frag > .sky { width: 2.25rem; min-height: 3rem; }
