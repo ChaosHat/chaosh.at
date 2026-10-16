@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="en">
+{#- The day's frame colour (aurora.js dayFrame): every panel, card and cover
+    border is drawn in the masthead's hue. style.css derives --dim and --fill
+    from it and keeps a lavender fallback for a build without one. -#}
+<html lang="en"{% if frame %} style="--frame:{{ frame }}"{% endif %}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

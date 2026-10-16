@@ -100,6 +100,21 @@
      so it is brighter and less blue than all three. */
   --silver: #cfd3e0;
 
+  /* The frame (2026-10-16, hi-bit): the chrome's one colour is the day's
+     aurora hue, set on <html> by the build (aurora.js dayFrame), so the
+     frames are green on a green day and violet on a violet one. Lavender
+     here is the fallback for a build that set none — the quietest of the
+     three candidates. --dim (the inset second line) and --fill (the panel
+     ground) are mixes of it into the night rather than their own stops, so
+     the ground stays night with a tint and never turns into a colour. The
+     rules are under "frames" below. */
+  --frame: #b6b2e0;
+  --dim: color-mix(in oklab, var(--frame) 30%, var(--night));
+  --fill: color-mix(in oklab, var(--frame) 6%, var(--night));
+  /* The 2px of night outside every frame, so a frame never touches the
+     aurora or a neighbour directly. Darker than --night on purpose. */
+  --ring: #05060e;
+
   /* Retained, unused: the per-block prose cap used until 2026-08-18. Capping
      blocks individually is what stranded headings and datelines at the shell
      edge; --read below replaced it by narrowing the whole reading column. */
@@ -233,6 +248,35 @@ h1 { font: 700 33px/40px var(--pixel); }
 .sky-blank::before { content: none; }
 
 
+/* ---------------------------------------------------------------- frames
+   B's double line in the day's hue (2026-10-16, the hi-bit redesign): a 2px
+   border in --frame, a 2px --dim line inset 6px inside it, 2px of --ring
+   outside, a flat --fill ground. No gradient, no bevel, no drop shadow — the
+   FF6 menu window was mocked first and was far too much. Two weights:
+
+   - the full frame, double line, on boxes that hold text: the furniture
+     strips and asides.
+   - the plain frame, border and ring only, on anything that holds a picture:
+     shelf and essay cards, covers, figures. outline paints over content, so
+     the inset line would be drawn across the art. */
+
+.now,
+.aside {
+  background: var(--fill);
+  border: 2px solid var(--frame);
+  outline: 2px solid var(--dim);
+  outline-offset: -6px;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.shelf-card,
+figure,
+.frag > .sky-cover,
+.subject-head > .sky-cover {
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
 /* ---------------------------------------------------------------- header */
 
 .site-header {
@@ -331,12 +375,10 @@ h1 { font: 700 33px/40px var(--pixel); }
 /* ------------------------------------------- now playing / latest essays */
 
 .now {
+  /* 0.8rem clears the inset line (2px border + 4px gap + 2px line) with the
+     same air the hairline box had inside it. */
   padding: 0.8rem 0.9rem;
   margin-bottom: 2.5rem;
-  background: var(--deep);
-  border: 1px solid var(--edge);
-  position: relative;
-  overflow: hidden;
 }
 
 /* Adjacent strips stack as one furniture unit; only the last one holds the
@@ -349,20 +391,10 @@ h1 { font: 700 33px/40px var(--pixel); }
   margin-bottom: 0.75rem;
 }
 
-/* Scanlines here only. Over prose they would be vandalism. */
-.now::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
-}
-
 .now-label {
   flex-shrink: 0;
   font: 16.5px/1 var(--pixel);
-  color: var(--st-active);
+  color: var(--frame);
 }
 
 .now-items { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -382,10 +414,6 @@ h1 { font: 700 33px/40px var(--pixel); }
    and reads as coloured lines, not sky — and this strip is where a stranger
    meets the art first, so it has to survive the encounter. */
 .now-item .sky { width: 32px; }
-
-/* Essays wear the completed blue: finished, considered things beside the
-   active green of what's live now. */
-.essays .now-label { color: var(--st-completed); }
 
 .essay-when { color: var(--muted); font: 16.5px/1 var(--pixel); white-space: nowrap; }
 
@@ -607,13 +635,12 @@ a.post-list-date:hover { color: var(--accent); }
 figure {
   clear: both;
   margin: 1.5rem 0;
-  border: 1px solid var(--edge);
-  background: var(--deep);
+  background: var(--fill);
 }
 figure > img { display: block; width: 100%; }
 figcaption {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid var(--edge);
+  border-top: 2px solid var(--frame);
   font: 16.5px/24px var(--pixel);
   color: var(--muted);
   text-align: center;
@@ -638,18 +665,15 @@ figcaption {
    hang at laptop widths and the full half from ~1280px). Prose wraps down its
    left side. Side comes from the renderer (obsidian_float_sides), shared with
    figures — see Floats below.
-   The wash is --tint (the first about: subject's glow, set on the article by
-   essay.njk; accent elsewhere) mixed thin into night — "all color on the
-   site is aurora" — with a stronger rule of the same hue down its inner
-   edge. The type steps down a size, the sidebar voice; the title is chrome,
+   Since 2026-10-16 it wears the full frame in the day's hue (see frames),
+   like the furniture strips. Until then it was a wash of --tint, the first
+   about: subject's glow, with a rule of that hue down its inner edge;
+   essay.njk still sets --tint, which nothing reads now. The type steps down a size, the sidebar voice; the title is chrome,
    so pixel face. On a phone the float releases and it is a full-column box,
    the same breakpoint as figures and the card. */
 .aside {
-  --t: var(--tint, var(--accent));
   margin: 1.5rem 0;
   padding: 0.9rem 1.1rem;
-  background: color-mix(in oklab, var(--t) 12%, var(--night));
-  border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -659,7 +683,7 @@ figcaption {
 .aside .aside-title {
   margin-bottom: 0.5rem;
   font: 11px/16px var(--pixel);
-  color: var(--t);
+  color: var(--frame);
 }
 @media (min-width: 34.01rem) {
   .aside {
@@ -668,7 +692,6 @@ figcaption {
   }
   .aside-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
   .aside-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
-  .aside-left { border-left: 0; border-right: 2px solid color-mix(in oklab, var(--t) 55%, var(--night)); }
 }
 
 /* Floats — figures and asides, one system (2026-10-14). The renderer deals
@@ -702,10 +725,6 @@ figcaption {
   .essay-row-body .aside-left {
     float: right;
     margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem;
-  }
-  .essay-row-body .aside-left {
-    border-right: 0;
-    border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
   }
 }
 
@@ -782,12 +801,6 @@ figcaption {
 }
 .essay-card .shelf-cover,
 .essay-card .sky { aspect-ratio: 2 / 3; }
-.essay-card .cell {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  border-top: 0;
-}
 @media (max-width: 34rem) {
   .essay-card { float: none; margin: 0 0 1.25rem; }
 }
@@ -937,7 +950,7 @@ figcaption {
 
 /* The card is cover + two cells, and the lift takes the whole card: they are
    one object, and lifting the art alone would peel it off the label under it. */
-.shelf-card { display: block; transition: transform 0.1s steps(3); }
+.shelf-card { display: block; background: var(--fill); transition: transform 0.1s steps(3); }
 .shelf-item a:hover .shelf-card { transform: translateY(-4px); }
 .shelf-art { display: block; }
 
@@ -949,7 +962,6 @@ figcaption {
   display: block;
   width: 100%;
   aspect-ratio: 2 / 3;
-  border: 1px solid var(--edge);
   /* Night showing through until a lazy cover arrives, so the grid never
      flashes a white or empty box against the dark page. */
   background: var(--deep);
@@ -962,18 +974,23 @@ figcaption {
    pAR='none' just lengthens the rays, and a completed scene cover-crops from
    its tall 3:10 canvas, so the crescent never deforms. */
 .shelf-item .sky { aspect-ratio: 2 / 3; }
+/* Inside a card the frame is the only edge (see frames): the art and the
+   cells drop their own borders, and a 2px --dim line parts the art from each
+   cell, so the card still reads as cover over a two-line label. */
+.shelf-card .sky { border: 0; }
 
 /* The two cells, hung off the cover. Each takes the card's full width, so the
    longest word in either vocabulary fits at 12px with room; a side-by-side
-   pair never did at six columns. Edges are SHARED, not doubled: the cover
-   keeps its bottom edge, the status cell keeps its bottom edge, and each cell
-   drops its top — one line between every layer, so the stack reads as a
-   single card with a two-line label rather than three boxes in a pile. */
+   pair never did at six columns. One line between every layer, so the stack
+   reads as a single card with a two-line label rather than three boxes in a
+   pile — since the frame (2026-10-16) that line is --dim, and the cells keep
+   their status wash but not their own borders. */
 .shelf-card .cell {
   display: flex;
   justify-content: center;
   width: 100%;
-  border-top: 0;
+  border: 0;
+  border-top: 2px solid var(--dim);
 }
 
 .shelf-caption { display: block; margin: 0.55rem 0 0; font: 11px/16px var(--pixel); }
@@ -1055,19 +1072,13 @@ figcaption {
    silver without being told — so the top two rungs of the ladder are ranked by
    metal, and the three verbs below rank themselves. Quieter glow than gold:
    it is the runner-up's frame, and it should read that way beside the ten. */
-.is-canon .sky,
-.is-canon .shelf-cover { border-color: var(--gold); }
+/* Since the frame (2026-10-16) the metal simply IS the card's frame colour:
+   gold or silver in place of the day's hue, ring and all, plus the glow. */
+.is-canon .shelf-card,
+.is-canon.shelf-card { --frame: var(--gold); box-shadow: 0 0 0 2px var(--ring), 0 0 14px -4px var(--gold); }
 
-.is-canon .shelf-card {
-  box-shadow: 0 0 0 1px var(--gold), 0 0 14px -4px var(--gold);
-}
-
-.is-favorite .sky,
-.is-favorite .shelf-cover { border-color: var(--silver); }
-
-.is-favorite .shelf-card {
-  box-shadow: 0 0 0 1px var(--silver), 0 0 10px -5px var(--silver);
-}
+.is-favorite .shelf-card,
+.is-favorite.shelf-card { --frame: var(--silver); box-shadow: 0 0 0 2px var(--ring), 0 0 10px -5px var(--silver); }
 
 .b-canon { --c: var(--gold); }
 

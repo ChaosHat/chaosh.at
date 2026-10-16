@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, ribbonSheet, palette, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, ribbonSheet, dayFrame, palette, hashOf } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
@@ -1848,6 +1848,9 @@ export default function (eleventyConfig) {
 
   const today = new Date().toISOString().slice(0, 10);
   skyFiles.set("img/aurora/sheet.svg", ribbonSheet(today));
+  // The chrome frame wears the masthead's hue (aurora.js dayFrame), so it
+  // rolls with the same build date. base.njk sets it on <html>.
+  eleventyConfig.addGlobalData("frame", dayFrame(today));
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —
