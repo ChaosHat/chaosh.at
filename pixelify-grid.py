@@ -38,6 +38,9 @@ REDRAW = {
     "quoteleft": [".#", "#.", "##", "..", "..", "..", ".."],
     "quotedblright": ["##.##", ".#..#", "#..#.", ".....", ".....", ".....", "....."],
     "quotedblleft": [".#..#", "#..#.", "##.##", ".....", ".....", ".....", "....."],
+    # Stock parens are angled with a mid notch; in bold they read as braces.
+    "parenleft": [".#", "#.", "#.", "#.", "#.", "#.", ".#"],
+    "parenright": ["#.", ".#", ".#", ".#", ".#", ".#", "#."],
     # Drawn stock on a half-pixel grid, which no snap can keep. Rarer ones
     # (super/subscripts, fractions, ‰, ª º) are left out of the subset.
     "equal": [".....", ".....", ".....", "#####", ".....", "#####", "....."],

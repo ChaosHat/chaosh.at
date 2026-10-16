@@ -40,7 +40,8 @@ pixel, ink one pixel in, no right bearing), so 11px and 22px render pure
 (stock, 5 is an S with a closed top-right, and 2 and Z share a bottom-left
 kick, so "15 Oct" read "1S Oct" and "Zelda" read "2elda"), redraws the quotes
 (their half-pixel tails snapped flat, so ' ’ ‘ all became one backtick) and
-= ~ @ ° © ® ™ (drawn stock on a half-pixel grid), adds ← and →, and
+the parentheses (in bold
+they read as braces), and = ~ @ ° © ® ™ (drawn stock on a half-pixel grid), adds ← and →, and
 builds 700 as a pixel bold — the 400 OR'd one pixel right — because the
 stock bold's 1.4-pixel stems can't sit on any lattice. Family is renamed
 "Pixelify Grid". OFL 1.1, no Reserved Font Name, so the modified copy may
