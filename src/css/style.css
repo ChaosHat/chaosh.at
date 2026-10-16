@@ -195,6 +195,11 @@ hr {
 }
 
 h1, h2, h3 { line-height: 1.25; }
+/* Titles are pixel, bold, on the lattice (2026-10-16): Alegreya titles read
+   as incongruous beside pixel chrome once the chrome stopped being caps, and
+   sat lighter than the 22px subject heads under them. Alegreya is prose only
+   now. Page titles 33px (3×), list and post titles 22px (2×). */
+h1 { font: 700 33px/40px var(--pixel); }
 
 /* ---------------------------------------------------------------- the sky
    Generated cover art, one SVG per subject, built nightly. The slug seeds
@@ -501,8 +506,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-title {
   display: block;
   margin-bottom: 0.4rem;
-  font: 700 1.4rem/1.12 var(--prose);
-  letter-spacing: -0.018em;
+  font: 700 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -727,7 +731,7 @@ figcaption {
    into every heading, where it would collide with the active badge. */
 .frag-subject {
   padding-bottom: 2px;
-  font: 700 22px/29px var(--pixel);
+  font: 400 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--muted);
@@ -754,8 +758,8 @@ figcaption {
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
-.post-date { margin: 0; font: 400 1.4rem/1.2 var(--prose); }
+.post-title { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
+.post-date { margin: 0; font: 700 22px/29px var(--pixel); }
 .post-subdate { margin: 0; font: 22px/30px var(--pixel); color: var(--muted); }
 
 .post-tags {
@@ -1090,7 +1094,7 @@ figcaption {
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 0.7rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
+.subject-head h1 { margin: 0 0 0.7rem; font: 700 33px/40px var(--pixel); }
 
 /* Lit-days strip: square pixels, one per day written about, lit in the
    subject's hue (--lit, set inline from its palette); short gaps stay night.
@@ -1227,7 +1231,7 @@ figcaption {
    pictogram appears without its words beside it, because the words are the
    <h1> it sits in. */
 .view-glyph { font-size: 0.8em; margin-right: 0.15em; }
-.tag-head h1 { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
+.tag-head h1 { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
 .tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
 .tag-members { margin: 0; font: 11px/20px var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
@@ -1294,8 +1298,7 @@ figcaption {
 .essay-title {
   display: block;
   margin-bottom: 0.35rem;
-  font: 700 1.4rem/1.12 var(--prose);
-  letter-spacing: -0.018em;
+  font: 700 22px/29px var(--pixel);
   color: var(--ink);
   text-decoration: none;
 }
