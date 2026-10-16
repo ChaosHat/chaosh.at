@@ -57,7 +57,7 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
 // and a lone image paragraph into a bare <figure>, so the CSS styles one thing
 // and feed readers get a real caption instead of two paragraphs. The wrapping
 // <em> is dropped — the italic was the signal, not the styling (the caption
-// face is Silkscreen, which has no italic); emphasis inside it survives.
+// face is the pixel face, which has no italic); emphasis inside it survives.
 // Runs after "inline" so the children are parsed. (2026-09-08, Metroid Dread.)
 //
 // Two styles, chosen by Obsidian's own width number so the vault preview
@@ -1673,7 +1673,7 @@ export default function (eleventyConfig) {
   })();
   const statusColor = (status) => cssTokens[`st-${status}`] ?? cssTokens.muted ?? "#a9a6ce";
 
-  // "18 sep 2026" — Silkscreen at card size fits ~20 characters in the text
+  // "18 sep 2026" — the pixel face at card size fits ~20 characters in the text
   // column, so the month is short. Not Intl: en-GB spells September "Sept".
   const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
   const kickerDate = (d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;

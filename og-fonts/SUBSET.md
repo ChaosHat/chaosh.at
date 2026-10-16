@@ -8,15 +8,17 @@ build inputs, like `hues.lock.json`.
     pyftsubset AlegreyaSans-Bold.ttf --unicodes="$RANGES" \
       --layout-features='kern,liga,clig,calt,ccmp,locl,mark,mkmk,rlig,rclt' \
       --no-hinting --desubroutinize --output-file=alegreya-sans-700.ttf
-    pyftsubset Silkscreen-Regular.ttf --unicodes="$RANGES" \
+    pyftsubset grid-400.ttf --unicodes="$PIXEL_RANGES" \
       --layout-features='kern,liga,clig,calt,ccmp,locl' \
-      --no-hinting --output-file=silkscreen-400.ttf
+      --no-hinting --output-file=pixelify-grid-400.ttf
+
+(`grid-400.ttf` is the output of `pixelify-grid.py`; see `src/fonts/SUBSET.md`.)
 
 The regular and italic faces (`alegreya-sans-400.ttf`, `alegreya-sans-400-italic.ttf`, for sig.js) were not re-cut: it is
 `src/fonts/alegreya-sans-400{,-italic}.woff2` decompressed to TTF with fontTools
 (`f.flavor = None`), so it is the site's own subset byte-for-byte in glyphs.
 
-Result: 37 KB and 13 KB (400: 38 KB). Silkscreen has no ♥ (U+2665) at any size, so og.js
+Result: 37 KB and 35 KB (400: 38 KB). Pixelify has no ♥ (U+2665), so og.js
 draws canon's heart as a pixel path rather than asking the font for it.
 
 `alegreya-sans-700-sigdigits.ttf` (unused since 2026-10-16, when the sig went to

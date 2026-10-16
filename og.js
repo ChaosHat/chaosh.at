@@ -30,20 +30,21 @@ const C = {
   gold: "#f5c86b",
 };
 
-// Silkscreen is drawn on an 8px grid (125 units a pixel at 1000 upm), so it
-// only stays crisp at whole multiples of 8. 5× is the smallest that survives a
-// feed: Bluesky shows the card ~300px wide, a quarter scale, and 40px becomes
-// ~10px. The mockup's 22–24px became 6px there — unreadable — which is why
-// the pixel rows are this large (2026-09-23).
-const PX = 5;
-const PIXEL = 8 * PX;
+// Pixelify Grid is drawn on an 11px lattice (100 units a pixel at 1100 upm),
+// so it only stays crisp at whole multiples of 11. 4× (44px) survives a feed:
+// Bluesky shows the card ~300px wide, a quarter scale, which puts one font
+// pixel on one screen pixel. Silkscreen sat at 5× its 8px grid (40px) for the
+// same reason; a mockup's 22–24px became 6px there — unreadable — which is
+// why the pixel rows are this large (2026-09-23, re-gridded 2026-10-16).
+const PX = 4;
+const PIXEL = 11 * PX;
 
 // A satori node. Plain objects rather than JSX: there is no build step here.
 const h = (type, style, children, props = {}) => ({ type, props: { style, children, ...props } });
 const dataUri = (mime, buf) => `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
 const svgUri = (svg) => dataUri("image/svg+xml", svg);
 
-// Silkscreen has no ♥ (nor does Alegreya), so canon's heart is drawn on the
+// Pixelify has no ♥ (nor does Alegreya), so canon's heart is drawn on the
 // same pixel grid as the chip text beside it, the way the wordmark is.
 const HEART = [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."];
 const heartSvg = (color) => {
@@ -116,7 +117,7 @@ export const cardTree = async (spec) => {
   const { size, ...wrap } = await fitTitle(title, textW, room);
 
   const head = [
-    kicker ? h("div", { fontFamily: "Silkscreen", fontSize: PIXEL, color: C.muted, marginBottom: 16 }, kicker) : null,
+    kicker ? h("div", { fontFamily: "Pixelify Grid", fontSize: PIXEL, color: C.muted, marginBottom: 16 }, kicker) : null,
     h("div", { ...titleStyle(size), ...wrap, color: C.ink }, title),
   ].filter(Boolean);
 
@@ -128,7 +129,7 @@ export const cardTree = async (spec) => {
           alignItems: "center",
           alignSelf: "flex-start",
           maxWidth: textW,
-          fontFamily: "Silkscreen",
+          fontFamily: "Pixelify Grid",
           fontSize: PIXEL,
           color: chip.color,
           border: `${PX - 2}px solid ${chip.color}`,
@@ -208,7 +209,7 @@ export const cardTree = async (spec) => {
 const FONT_DIR = "og-fonts";
 const FONT_FILES = [
   ["Alegreya Sans", "alegreya-sans-700.ttf", 700],
-  ["Silkscreen", "silkscreen-400.ttf", 400],
+  ["Pixelify Grid", "pixelify-grid-400.ttf", 400],
 ];
 let fonts = null;
 const loadFonts = () =>
