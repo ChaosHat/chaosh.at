@@ -4,6 +4,7 @@ import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
 import { subjectSvg, chipSvg, daySky, ribbonSheet, palette, hashOf } from "./aurora.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
+import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
@@ -1856,6 +1857,31 @@ export default function (eleventyConfig) {
   const button = buttonFiles(today);
   skyFiles.set("button.png", button.png);
   skyFiles.set("button.gif", button.gif);
+
+  // The forum signature (sig.js): six flush tiles — wordmark, three newest
+  // dailies, newest essay, Bluesky — at stable /sig/ URLs, redrawn every build. Built
+  // in a collection because it needs the posts; nothing reads the result. A
+  // failure is a warning: the sig goes stale, the site still ships.
+  eleventyConfig.addCollection("sig", async (api) => {
+    try {
+      const dailies = publishable(api.getFilteredByTag("dailies"))
+        .sort((a, b) => b.date - a.date)
+        .map((p) => ({ date: p.date, url: p.url }));
+      const essay = [...buildEssayList(api)].sort((a, b) => b.date - a.date)[0] ?? null;
+      const site = (() => {
+        try {
+          return parseYaml(fs.readFileSync(path.join("src", "_data", "site.yaml"), "utf8")) || {};
+        } catch {
+          return {};
+        }
+      })();
+      const { files } = await sigFiles({ dailies, essay, bluesky: site.bluesky, siteUrl: site.url ?? "" });
+      for (const [rel, data] of files) skyFiles.set(rel, data);
+    } catch (err) {
+      cardFailures.push(`forum sig not drawn: ${err?.stack ?? err}`);
+    }
+    return [];
+  });
 
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.
