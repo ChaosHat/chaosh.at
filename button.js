@@ -4,7 +4,7 @@
 // — so the build stays a pure function of the date, same as the header.
 // Design record: vault, 80_Projects/"chaosh.at Design" (2026-09-05) and
 // 90_Reference/91_Documentation/"chaosh.at Design System".
-import zlib from "node:zlib";
+import { encodePng } from "./png.js";
 import { daySpread, hashOf, palette, ribbonColumns } from "./aurora.js";
 
 export const BUTTON_W = 88;
@@ -219,46 +219,6 @@ export const buttonFrames = (dateStr) => {
   return Array.from({ length: N }, (_, k) => frame(pal, k));
 };
 
-// ------------------------------------------------------------------- png
-
-const CRC_TABLE = new Uint32Array(256).map((_, n) => {
-  let c = n;
-  for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-  return c >>> 0;
-});
-const crc32 = (buf) => {
-  let c = 0xffffffff;
-  for (const b of buf) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-};
-const chunk = (type, data) => {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length);
-  const body = Buffer.concat([Buffer.from(type, "ascii"), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(body));
-  return Buffer.concat([len, body, crc]);
-};
-
-export const encodePng = (rgb) => {
-  const raw = Buffer.alloc((W * 3 + 1) * H);
-  for (let y = 0; y < H; y += 1) {
-    raw[y * (W * 3 + 1)] = 0; // filter: none
-    raw.set(rgb.subarray(y * W * 3, (y + 1) * W * 3), y * (W * 3 + 1) + 1);
-  }
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(W, 0);
-  ihdr.writeUInt32BE(H, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // truecolour
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk("IHDR", ihdr),
-    chunk("IDAT", zlib.deflateSync(raw, { level: 9 })),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
-};
-
 // ------------------------------------------------------------------- gif
 
 // One global palette for all frames. Colours are snapped to `bits` per channel
@@ -377,5 +337,5 @@ export const encodeGif = (frames, delay = BUTTON_DELAY) => {
 
 export const buttonFiles = (dateStr) => {
   const frames = buttonFrames(dateStr);
-  return { png: encodePng(frames[0]), gif: encodeGif(frames) };
+  return { png: encodePng(frames[0], W, H), gif: encodeGif(frames) };
 };

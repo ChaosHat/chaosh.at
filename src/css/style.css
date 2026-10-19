@@ -130,14 +130,16 @@ body {
 
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
    One 8-frame sprite sheet stepped through by background-position — sprite
-   animation, one decode, no flicker. The tile is periodic and rendered at a
-   fixed 960px width with repeat-x, so pixel density never changes with the
-   viewport; the height is px, not rem, because the frame window must match
-   the sheet's 112px frame exactly or neighbouring frames bleed through.
+   animation, one decode, no flicker. The sheet is pixel art, 240×44 a frame,
+   shown at exactly ×4 with pixelated scaling: a fixed 960px tile with
+   repeat-x, so pixel density never changes with the viewport; the height is
+   px, not rem, because the frame window must match the 176px frame exactly or
+   neighbouring frames bleed through. At 176px the band runs past the header
+   rule into the top of the page; .site-intro wears a smoked box over it.
 
-   960 and 8 are ribbonSheet's contract, not free numbers — the three values
-   below are derived from them (960 x 8*112, steps(8), -896px) and all four
-   places move together. The reasoning for both is in aurora.js. */
+   240, 44, ×4 and 8 are pixelSheet's contract, not free numbers — the values
+   below are derived from them (176, 960 x 8*176, steps(8), -1408px) and all
+   of them move together. The reasoning is in aurora.js. */
 body::before {
   content: "";
   position: absolute;
@@ -145,16 +147,17 @@ body::before {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 112px;
+  height: 176px;
   z-index: -1;
   pointer-events: none;
-  background: url("/img/aurora/sheet.svg") repeat-x;
-  background-size: 960px 896px;
+  background: url("/img/aurora/sheet.png") repeat-x;
+  background-size: 960px 1408px;
+  image-rendering: pixelated;
   animation: aurora-roll 11.2s steps(8) infinite;
 }
 
 @keyframes aurora-roll {
-  to { background-position: 0 -896px; }
+  to { background-position: 0 -1408px; }
 }
 
 /* The reading column. Everything that is prose lives in <main>, so centring
@@ -288,14 +291,19 @@ h1, h2, h3 { line-height: 1.25; }
    the row wraps at any padding — and a wrapped row over the masthead put
    the stray word on top of the aurora. So the wordmark keeps the band to
    itself and the nav drops under it, where a second line is just a second
-   line. 112px is the band's height (body::before); the title row is
+   line. 176px is the band's height (body::before); the title row is
    1.75rem padding + 16px wordmark, and the header's own row gap adds the
    rest. */
 @media (max-width: 34rem) {
   .site-title { flex-basis: 100%; }
-  .site-nav { margin-left: 0; margin-top: 2.75rem; gap: 0 0.2rem; }
+  /* Since the band grew to 176px the dropped row lands on the brightest
+     rows of the aurora, so it wears the intro's smoked glass. */
+  .site-nav {
+    margin-left: 0; margin-top: 2.75rem; gap: 0 0.2rem;
+    background: rgb(10 12 24 / 0.78);
+    border: 1px solid var(--edge);
+  }
   .site-nav a { padding-inline: 0.4rem; }
-  .site-nav a:first-child { padding-left: 0; }
 }
 
 /* ----------------------------------------------------------------- intro
@@ -309,8 +317,16 @@ h1, h2, h3 { line-height: 1.25; }
 
 .site-intro {
   max-width: var(--wide);
+  width: fit-content;
   margin: -0.5rem 0 2rem;
+  padding: 0.75rem 1rem;
   color: var(--muted);
+  /* Smoked glass: the masthead runs down behind the intro since the band
+     grew to 176px (2026-10-19). Translucent night keeps the copy readable
+     and lets the aurora glow faintly through; an opaque card was the other
+     option and read as a sticker on the sky. */
+  background: rgb(10 12 24 / 0.78);
+  border: 1px solid var(--edge);
 }
 
 .site-intro span { display: block; }

@@ -836,3 +836,247 @@ export const ribbonSheet = (
     `</linearGradient>${clips}</defs>${frames}</svg>`
   );
 };
+
+// ---------------------------------------------------------------- pixel sheet
+
+// The masthead as true pixel art (2026-10-19, vault: "chaosh.at Decisions" →
+// "the aurora goes true pixel art"). Everything above draws at screen
+// resolution — chunky rects under a feGaussianBlur glow — and blocks beside
+// blur at another scale is a MIXED GRID, the tell that kept the masthead from
+// ever reading as pixel art. So this draws at the real resolution, 240×44,
+// with a fixed seven-colour ramp, no alpha but on/off, and every glow and fade
+// done by 4×4 ordered dither; CSS scales it ×4 with `image-rendering:
+// pixelated`. The ladder, the spread and the determinism are unchanged: only
+// the rendering is new.
+//
+// 44 rows, not the old band's 28: at 28 the curtains squashed into parallel
+// stripes. The band is 176px now and runs past the header rule into the top
+// of the page; the home page's intro sits in a smoked box over it (style.css).
+//
+// Ported from the vault's silhouette lab (99_Admin/attachments/
+// chaosh-aurora-silhouette-lab.html), where the numbers were tuned at 320×96.
+// Three changes for the masthead: every horizontal period divides 240, so the
+// tile repeats; motion runs on the frame phase, so 8 frames loop; and the
+// vertical numbers are restated for the masthead's rows.
+export const PIXEL_W = 240;
+export const PIXEL_FH = 44;
+export const PIXEL_SCALE = 4;
+const TAU = 2 * Math.PI;
+
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+const bay = (x, y) => BAYER[(y & 3) * 4 + (x & 3)];
+// Integer hash for per-pixel and per-column decisions; the date's own hash
+// is folded into the seeds, so each day gets its own rays and stars.
+const ihash = (n) => {
+  n = (n ^ 61) ^ (n >>> 16);
+  n = Math.imul(n, 9);
+  n ^= n >>> 4;
+  n = Math.imul(n, 0x27d4eb2d);
+  n ^= n >>> 15;
+  return (n >>> 0) / 4294967296;
+};
+const tri = (v) => 1 - Math.abs((v - Math.floor(v)) * 2 - 1);
+const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mixRgb = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+
+// The lit edge yb(x) and the thickness T(x): envelope first, as in `ribbon`.
+// `th` is the loop phase, 0..2π over the sheet, so every moving term returns
+// to where it started on frame 0.
+const pxGeom = (c, x, th, W) => {
+  const s = x / W;
+  const yb =
+    c.base +
+    c.sweep * Math.cos(TAU * s + c.ph) +
+    c.wob * Math.sin(TAU * 3 * s + 1.1 + c.ph) +
+    0.4 * c.wob * Math.sin(TAU * 5 * s + 4 + th);
+  const crest = 0.5 - 0.5 * Math.cos(TAU * s + c.ph);
+  const T = c.thick * (0.4 + 0.6 * crest) * (1 + 0.08 * Math.sin(TAU * 4 * s + 2.3 + th));
+  return { yb, T, crest };
+};
+
+// The ray profile, 0..1: two triangle waves sharpened by the 1.6 power, which
+// is what makes the nested chevrons. Periods are whole divisors of the tile
+// (c.n1, c.n2 cycles per tile). The waves BREATHE in place rather than
+// drifting — nothing marches sideways past the wordmark (2026-09-08) — and a
+// per-column flicker takes one of eight states, offset per column, so it
+// loops with the sheet.
+const pxSpike = (c, x, k, th, W) => {
+  const flick = ihash(((x * 7919) ^ (((k + Math.floor(ihash(x + c.seed) * 8)) % 8) * 104729)) + c.seed);
+  return (
+    0.6 * tri((c.n1 * x) / W + c.ph + 0.18 * Math.sin(th)) +
+    0.3 * tri((c.n2 * x) / W + c.ph * 2 - 0.12 * Math.sin(th + 1.3)) +
+    0.1 * flick
+  ) ** 1.6;
+};
+
+// The dithered glow under the lit edge.
+const pxUnder = (d) => (d < 1 ? 0.62 : Math.max(0, 0.3 - (d - 1) * 0.15));
+
+// Clustered rays for form 7: a few groups per tile, 3–6 rays each, 1–2px wide.
+// Returns how far above the envelope this column's ray reaches (0 = none).
+const pxRayExt = (c, x, th) => {
+  const CELL = 48; // 240 / 5
+  const cell = Math.floor(x / CELL);
+  if (ihash(cell * 7717 + c.seed) < 0.3) return 0;
+  const start = cell * CELL + Math.floor(ihash(cell * 313 + c.seed) * 18);
+  const n = 3 + Math.floor(ihash(cell * 59 + c.seed) * 4);
+  for (let i = 0; i < n; i += 1) {
+    const rx = start + i * 3 + Math.floor(ihash(cell * 17 + i + c.seed) * 2);
+    const w = ihash(cell * 23 + i * 7 + c.seed) > 0.6 ? 2 : 1;
+    if (x >= rx && x < rx + w) {
+      const breathe = 0.85 + 0.15 * Math.sin(th + cell * 1.7 + i);
+      return (0.25 + 0.55 * ihash(cell * 41 + i * 13 + c.seed)) * breathe;
+    }
+  }
+  return 0;
+};
+
+// The three masthead forms, each an intensity 0..1 at (x, y).
+const dissolve = (c, x, y, k, th, W) => {
+  const { yb, T, crest } = pxGeom(c, x, th, W);
+  const d = yb - y;
+  if (d < 0) return pxUnder(-d);
+  if (d > T) return 0;
+  const u = d / T;
+  if (u < 0.07) return 1;
+  const ray = 0.55 + 0.45 * pxSpike(c, x, k, th, W);
+  return (1 - u) ** 1.4 * (0.45 + 0.55 * ray * (1 - 0.6 * u)) * (0.75 + 0.25 * crest);
+};
+const PIXEL_FORMS = {
+  // 8 · short envelope, flames above: the dim fill reaches ~40% up, the flames
+  // climb past it and thin out, so the outline is never a fence.
+  shortflame: (c, x, y, k, th, W) => {
+    const { yb, T } = pxGeom(c, x, th, W);
+    const d = yb - y;
+    if (d < 0) return pxUnder(-d);
+    const env = T * (c.env ?? 0.42);
+    const r = T * (0.45 + 0.85 * pxSpike(c, x, k, th, W));
+    if (d > Math.max(env, r)) return 0;
+    if (d / T < 0.06) return 1;
+    let flame = d <= r ? (1 - d / r) ** 1.05 * 0.93 : 0;
+    if (d > env) flame *= 0.72;
+    const floor = d <= env ? 0.196 * (1 - sstep(0.75, 1, d / env)) : 0;
+    return Math.max(flame, floor);
+  },
+  // 7 · rayed arc: the dissolving envelope, plus clustered rays rising out of
+  // the body and fading on the same profile, only longer.
+  rayed: (c, x, y, k, th, W) => {
+    const base = dissolve(c, x, y, k, th, W);
+    const ext = pxRayExt(c, x, th);
+    if (!ext) return base;
+    const { yb, T } = pxGeom(c, x, th, W);
+    const d = yb - y;
+    if (d < 0) return base;
+    const Tr = T * (1 + ext);
+    if (d > Tr) return base;
+    return Math.max(base, (1 - d / Tr) ** 1.1 * 0.78);
+  },
+  // 3 · dissolving top: rays are brightness only, the top fades through dither.
+  dissolve,
+};
+export const PIXEL_FORM_NAMES = Object.keys(PIXEL_FORMS);
+
+// Picked by a hash of the date, repeats allowed (Hat: "could just be random").
+// Not the bands' ordinal sequence: that exists so two posts seen together
+// never match, and the masthead is only ever seen once a day.
+export const pixelForm = (dateStr) => PIXEL_FORM_NAMES[hashOf(`pxform:${dateStr}`) % PIXEL_FORM_NAMES.length];
+
+// The seven-step ramp: night, night2, a dusk mix, then the day's four inks.
+// The masthead draws only steps 2–6 (and stars); the two night steps are the
+// page's own background, so bare sky is transparent.
+const pxRamp = (pal) => {
+  const n2 = hexRgb(NIGHT[2]);
+  return [hexRgb(NIGHT[0]), n2, mixRgb(n2, hexRgb(pal.deep), 0.5), ...[pal.deep, pal.mid, pal.glow, pal.edge].map(hexRgb)];
+};
+
+// Render one frame of `form` into `px` (RGBA) at row offset `oy`.
+const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed }) => {
+  const th = (TAU * k) / N;
+  const fn = PIXEL_FORMS[form];
+  const star = hexRgb(STAR);
+  for (let y = 0; y < H; y += 1) {
+    // The wordmark and nav sit in the top half: light thins toward the top,
+    // the pixel version of the old gradient mask. It scales intensity BEFORE
+    // quantising, so the dimming lands as darker ramp steps, never as alpha.
+    const m = fade[0] + (1 - fade[0]) * sstep(0, fade[1], y / H);
+    for (let x = 0; x < W; x += 1) {
+      const b = bay(x, y);
+      // Painter's order, back to front: a curtain covers what is behind it
+      // wherever it is visibly there (≥ 0.16); behind its dissolving top, the
+      // brighter one shows. Max-blend everywhere made the back curtain's rim
+      // weave over and under the front one.
+      let best = 0;
+      let who = 0;
+      for (let i = 0; i < cs.length; i += 1) {
+        const I = fn(cs[i], x, y, k, th, W) * cs[i].gain * m;
+        if (I >= 0.16 || I > best) {
+          best = I;
+          who = i;
+        }
+      }
+      const val = best * 5.6 + (b - 0.5) * 0.55;
+      let idx = val >= 0.6 ? Math.min(6, 1 + Math.floor(val + 0.4)) : 0;
+      if (idx < 2) idx = 0;
+      // Stars: single pixels in bare sky, two brightnesses, a few blinking
+      // out per frame.
+      let rgb = null;
+      if (idx === 0 && best < 0.05) {
+        const h = ihash(x * 92821 + y * 68917 + seed);
+        if (h > 0.992 && ihash(x * 31 + y * 17 + k * 7 + seed) > 0.15)
+          rgb = h > 0.997 ? star : mixRgb(hexRgb(NIGHT[0]), star, 0.55);
+      } else if (idx >= 2) rgb = ramps[who][idx];
+      const o = ((oy + y) * W + x) * 4;
+      if (rgb) {
+        px[o] = rgb[0];
+        px[o + 1] = rgb[1];
+        px[o + 2] = rgb[2];
+        px[o + 3] = 255;
+      }
+    }
+  }
+};
+
+// The sheet: N frames of W×H stacked vertically, RGBA. Returns the raw pixels
+// so the build can encode them and the preview can inspect them.
+//
+// CSS MUST AGREE: the band is H×scale tall (176px), background-size is
+// (W×scale) by (N×H×scale) — 960×1408 at the defaults — `steps(N)`, and the
+// keyframe to `0 -(N×H×scale)px`.
+export const pixelSheet = (
+  dateStr,
+  {
+    W = PIXEL_W,
+    H = PIXEL_FH,
+    frames: N = RIBBON_FRAMES,
+    form,
+    lMax = 0.85,
+    fade = [0.5, 0.5],
+    // Posture, in fractions of the frame height: where each lit edge rides
+    // and how tall each curtain stands. Ray periods are whole cycles per tile.
+    // `env` is form 8's dim fill, as a share of the curtain: the lab's 0.42
+    // left deep dark notches between flames at this height, and a row of
+    // notched triangles is a pine forest.
+    back = { base: 0.62, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
+    front = { base: 0.86, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
+    sweep = 0.1,
+  } = {},
+) => {
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const spread = daySpread(dateStr);
+  // The back curtain gets its own ramp, 60° further along the ladder and
+  // capped darker, so where the curtains overlap they separate.
+  const ramps = [palette((hue + 60) % 360, { lMax: lMax - 0.13, spread }), palette(hue, { lMax, spread })].map(pxRamp);
+  const dh = hashOf(`pxgeom:${dateStr}`);
+  const seed = dh % 100003;
+  const dph = ((dh >>> 8) % 1000) / 1000;
+  const wob = (1.2 * H) / 28; // tuned at 28 rows
+  // Back curtain first.
+  const cs = [
+    { ...back, base: back.base * H, thick: back.thick * H, sweep: sweep * H, wob, ph: 2.4 + TAU * dph, gain: 0.55, seed: seed + 11 },
+    { ...front, base: front.base * H, thick: front.thick * H, sweep: sweep * H, wob, ph: 0.2 + TAU * dph, gain: 1.0, seed: seed + 23 },
+  ];
+  const f = form ?? pixelForm(dateStr);
+  const px = new Uint8Array(W * H * N * 4);
+  for (let k = 0; k < N; k += 1) pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs, ramps, fade, seed });
+  return { px, w: W, h: H * N, form: f };
+};

@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, ribbonSheet, palette, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, daySky, pixelSheet, palette, hashOf } from "./aurora.js";
+import { encodePng } from "./png.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
@@ -1841,13 +1842,14 @@ export default function (eleventyConfig) {
   });
 
   // The masthead's sky rolls its hue at each build — a different aurora every
-  // day, held all day, zero JavaScript. One 16-frame sprite sheet, stepped
-  // through by CSS.
+  // day, held all day, zero JavaScript. One 8-frame sprite sheet, drawn as
+  // true pixel art at 240×28 a frame and stepped through by CSS at ×4.
   // The masthead's name is the button's wordmark at 2× — one mark, two sizes.
   eleventyConfig.addGlobalData("wordmark", wordmarkSvg(2));
 
   const today = new Date().toISOString().slice(0, 10);
-  skyFiles.set("img/aurora/sheet.svg", ribbonSheet(today));
+  const sheet = pixelSheet(today);
+  skyFiles.set("img/aurora/sheet.png", encodePng(sheet.px, sheet.w, sheet.h, 4));
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —
