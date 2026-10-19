@@ -247,7 +247,7 @@ img { max-width: 100%; height: auto; }
 hr {
   border: 0;
   height: 2px;
-  margin: 2.2rem 0;
+  margin: 35px 0;
   background: linear-gradient(90deg,
     transparent,
     var(--st-active) 18%,
@@ -359,7 +359,7 @@ figure,
 .site-title {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 10px;
   font: 400 22px/1 var(--pixel);
   text-decoration: none;
   color: var(--ink);
@@ -392,13 +392,13 @@ figure,
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
+  gap: 5px;
   margin-left: auto;
   font: 16.5px/1 var(--pixel);
 }
 
 .site-nav a {
-  padding: 0.5rem 0.6rem;
+  padding: 0.5rem 10px;
   border: 1px solid transparent;
   text-decoration: none;
   color: var(--muted);
@@ -434,11 +434,11 @@ figure,
   /* Since the band grew to 176px the dropped row lands on the brightest
      rows of the aurora, so it wears the intro's smoked glass. */
   .site-nav {
-    margin-left: 0; margin-top: 2.75rem; gap: 0 0.2rem;
+    margin-left: 0; margin-top: 2.75rem; gap: 0 3px;
     background: var(--smoke);
     border: 1px solid var(--edge);
   }
-  .site-nav a { padding-inline: 0.4rem; }
+  .site-nav a { padding-inline: 6px; }
 }
 
 /* ----------------------------------------------------------------- intro
@@ -453,7 +453,7 @@ figure,
 .site-intro {
   max-width: var(--wide);
   margin: -0.5rem 0 2rem;
-  padding: 0.9rem 1rem;
+  padding: 14px 1rem;
   /* The pixel face at the panels' size, so the intro reads as one of the
      framed boxes rather than prose that wandered out of the column. */
   font: 16.5px/26px var(--pixel);
@@ -472,13 +472,13 @@ figure,
 .now {
   /* 0.8rem clears the inset line (2px border + 4px gap + 2px line) with the
      same air the hairline box had inside it. */
-  padding: 0.8rem 0.9rem;
+  padding: 13px 14px;
   margin-bottom: 2.5rem;
 }
 
 /* Adjacent strips stack as one furniture unit; only the last one holds the
    full gap before the stream. Without :has both simply keep the full gap. */
-.now:has(+ .now) { margin-bottom: 0.6rem; }
+.now:has(+ .now) { margin-bottom: 10px; }
 
 .now-head {
   display: flex;
@@ -524,8 +524,8 @@ figure,
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 0.45rem;
+  gap: 6px;
+  padding: 5px 7px;
   font: 11px/1 var(--pixel);
   color: var(--c);
   background: color-mix(in srgb, var(--c) 15%, transparent);
@@ -556,7 +556,7 @@ figure,
 .rating {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.45rem;
+  padding: 5px 7px;
   font: 11px/1 var(--pixel);
   white-space: nowrap;
   text-decoration: none;
@@ -595,7 +595,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 5px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -603,7 +603,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 
 .tag-link {
   display: inline-block;
-  padding: 0.3rem 0.45rem;
+  padding: 5px 7px;
   background: var(--deep);
   border: 1px solid var(--edge);
   font: 11px/1 var(--pixel);
@@ -624,11 +624,11 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
   border-top: 1px solid var(--edge);
 }
 
-.entry-head { margin-bottom: 1.3rem; }
+.entry-head { margin-bottom: 21px; }
 
 .post-list-title {
   display: block;
-  margin-bottom: 0.4rem;
+  margin-bottom: 6px;
   font: 400 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
@@ -652,7 +652,7 @@ a.post-list-date:hover { color: var(--accent); }
    label, in the strip's blue, sat above the title. */
 .entry-kind {
   display: block;
-  margin-bottom: 0.55rem;
+  margin-bottom: 9px;
   font: 11px/1 var(--pixel);
   color: var(--st-completed);
 }
@@ -671,7 +671,7 @@ a.post-list-date:hover { color: var(--accent); }
    brightness — length is the one axis the daily stream already has and never
    used. This is the one place pixel squares are knowingly non-square. */
 .frag { display: flex; gap: 1rem; align-items: stretch; }
-.frag + .frag { margin-top: 1.4rem; }
+.frag + .frag { margin-top: 22px; }
 /* The sky stops partway down its entry, so its lower edge is dissolved rather
    than cut: an unmasked bottom leaves a hard line and a boxed border sitting
    in the middle of the prose, which reads as a clipped image instead of a sky.
@@ -679,7 +679,7 @@ a.post-list-date:hover { color: var(--accent); }
    column ends in night rather than in an edge. */
 .frag > .sky {
   width: 3rem;
-  margin-top: 0.2rem;
+  margin-top: 3px;
   min-height: 4rem;  /* 3:4 at 3rem wide — the untouched tile */
   max-height: var(--sky-cap);
   -webkit-mask-image: linear-gradient(to bottom, #000 var(--sky-fade), transparent);
@@ -745,8 +745,8 @@ figcaption {
     --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
     width: 50%;
   }
-  .fig-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
-  .fig-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
+  .fig-right { float: right; margin: 5px calc(-1 * var(--hang)) 0.75rem 1.5rem; }
+  .fig-left { float: left; margin: 5px 1.5rem 0.75rem calc(-1 * var(--hang)); }
 }
 
 /* Asides — the renderer turns an Obsidian `> [!aside] Title` callout into
@@ -768,7 +768,7 @@ figcaption {
    the same breakpoint as figures and the card. */
 .aside {
   margin: 1.5rem 0;
-  padding: 0.9rem 1.1rem;
+  padding: 14px 18px;
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -785,8 +785,8 @@ figcaption {
     --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
     width: 50%;
   }
-  .aside-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
-  .aside-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
+  .aside-right { float: right; margin: 5px calc(-1 * var(--hang)) 0.75rem 1.5rem; }
+  .aside-left { float: left; margin: 5px 1.5rem 0.75rem calc(-1 * var(--hang)); }
 }
 
 /* Floats — figures and asides, one system (2026-10-14). The renderer deals
@@ -819,16 +819,16 @@ figcaption {
   .essay-row-body .fig-left,
   .essay-row-body .aside-left {
     float: right;
-    margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem;
+    margin: 5px calc(-1 * var(--hang)) 0.75rem 1.5rem;
   }
 }
 
 .frag-head {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 10px;
   flex-wrap: wrap;
-  margin: 0 0 0.6rem;
+  margin: 0 0 10px;
   font-weight: 400;
 }
 
@@ -857,8 +857,8 @@ figcaption {
 .more,
 .all-link a {
   display: inline-block;
-  margin-top: 1.1rem;
-  padding: 0.5rem 0.7rem;
+  margin-top: 18px;
+  padding: 0.5rem 11px;
   border: 1px solid var(--edge);
   font: 11px/1 var(--pixel);
   text-decoration: none;
@@ -890,7 +890,7 @@ figcaption {
 .essay-card {
   float: left;
   width: 8.5rem;
-  margin: 0.35rem 1.5rem 0.75rem 0;
+  margin: 6px 1.5rem 0.75rem 0;
   text-decoration: none;
   color: inherit;
 }
@@ -913,7 +913,7 @@ figcaption {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  margin: 0.35rem 0 1.75rem;
+  margin: 6px 0 1.75rem;
 }
 .essay-cards .essay-card { flex: 0 0 7rem; width: 7rem; margin: 0; scroll-snap-align: start; }
 @media (max-width: 34rem) {
@@ -938,7 +938,7 @@ figcaption {
     overflow: visible;
     width: 7rem;
     gap: 1.25rem;
-    margin: 0.35rem 0 1rem -9rem;
+    margin: 6px 0 1rem -9rem;
   }
 }
 /* The list essay (2026-09-09, the canon; any ten-things post after it). A
@@ -969,7 +969,7 @@ figcaption {
   margin: 1.75rem 0 0 calc(-1 * var(--hang));
 }
 .essay-row > h2 { grid-column: 2; grid-row: 1; margin-top: 0; }
-.essay-row .essay-card { float: none; width: auto; margin: 0.3rem 0 0; grid-column: 1; grid-row: 1 / 3; }
+.essay-row .essay-card { float: none; width: auto; margin: 5px 0 0; grid-column: 1; grid-row: 1 / 3; }
 .essay-row-body { grid-column: 2; grid-row: 2; }
 .essay-row-body > :first-child { margin-top: 0; }
 .essay-row-body > :last-child { margin-bottom: 0; }
@@ -977,7 +977,7 @@ figcaption {
 .essay-page .post-tags { clear: both; }
 @media (max-width: 34rem) {
   .essay-row { grid-template-columns: 6rem 1fr; gap: 0 1rem; }
-  .essay-row .essay-card { margin: 0.2rem 0 0; }
+  .essay-row .essay-card { margin: 3px 0 0; }
 }
 
 /* --------------------------------------------------- archive / best of */
@@ -1012,7 +1012,7 @@ figcaption {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--edge);
 }
 
@@ -1100,7 +1100,7 @@ figcaption {
   border-top: 2px solid var(--dim);
 }
 
-.shelf-caption { display: block; margin: 0.55rem 0 0; font: 11px/16px var(--pixel); }
+.shelf-caption { display: block; margin: 9px 0 0; font: 11px/16px var(--pixel); }
 
 /* ------------------------------------------------- shelf sort (no script)
 
@@ -1127,17 +1127,17 @@ figcaption {
 
 .shelf-sort {
   border: 0;
-  margin: 0 0 1.4rem;
+  margin: 0 0 22px;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.55rem;
+  gap: 9px;
 }
 
 .shelf-sort legend {
   float: left; /* keeps the legend on the flex row rather than above it */
-  padding: 0 0.6rem 0 0;
+  padding: 0 10px 0 0;
   font: 11px/16px var(--pixel);
   color: var(--muted);
 }
@@ -1156,7 +1156,7 @@ figcaption {
 .shelf-sort label {
   font: 11px/16px var(--pixel);
   color: var(--muted);
-  padding: 0.3rem 0.5rem;
+  padding: 5px 0.5rem;
   border: 1px solid var(--edge);
   cursor: pointer;
 }
@@ -1205,7 +1205,7 @@ figcaption {
 
 .subject-head {
   display: flex;
-  gap: 1.4rem;
+  gap: 22px;
   align-items: flex-start;
   padding-bottom: 1.75rem;
   margin-bottom: 2.25rem;
@@ -1213,7 +1213,7 @@ figcaption {
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 0.7rem; font: 400 33px/40px var(--pixel); }
+.subject-head h1 { margin: 0 0 11px; font: 400 33px/40px var(--pixel); }
 
 /* Lit-days strip: square pixels, one per day written about, lit in the
    subject's hue (--lit, set inline from its palette); short gaps stay night.
@@ -1228,7 +1228,7 @@ figcaption {
   align-items: center;
   gap: 26px 1px;
   padding-top: 24px;
-  margin: -1.3rem 0 0.8rem;
+  margin: -21px 0 13px;
 }
 .lit-days span {
   flex: none;
@@ -1279,24 +1279,24 @@ figcaption {
   width: auto;
   height: auto;
   background: none;
-  padding: 0 0.35rem;
+  padding: 0 6px;
   font: 11px/1 var(--pixel);
   color: var(--muted);
 }
-.lit-days span.gap::before, .lit-days span.gap::after { content: "·"; padding: 0 0.2rem; opacity: 0.6; }
+.lit-days span.gap::before, .lit-days span.gap::after { content: "·"; padding: 0 3px; opacity: 0.6; }
 .lit-days.clipped { mask-image: linear-gradient(to right, transparent, #000 2.5rem); }
 
 .subject-meta {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 7px;
   flex-wrap: wrap;
   margin: 0;
 }
 
 /* The standing blurb: the subject's one revisable paragraph, in the header's
    text column beside the cover — it just flows there, no layout of its own. */
-.subject-blurb { margin-top: 0.9rem; }
+.subject-blurb { margin-top: 14px; }
 .subject-blurb p { margin: 0 0 0.6em; }
 .subject-blurb > :last-child { margin-bottom: 0; }
 
@@ -1307,7 +1307,7 @@ figcaption {
    essays, "Along the way" over the fragments — so the name generalised. */
 .section-head {
   margin: 0 0 1.75rem;
-  padding-bottom: 0.8rem;
+  padding-bottom: 13px;
   border-bottom: 1px solid var(--edge);
   font: 400 11px/1 var(--pixel);
   color: var(--muted);
@@ -1332,7 +1332,7 @@ figcaption {
 
 .fragment-date {
   display: inline-block;
-  margin-bottom: 0.45rem;
+  margin-bottom: 7px;
   font: 11px/15px var(--pixel);
   color: var(--muted);
   text-decoration: none;
@@ -1351,10 +1351,10 @@ figcaption {
    <h1> it sits in. */
 .view-glyph { font-size: 0.8em; margin-right: 0.15em; }
 .tag-head h1 { margin: 0 0 0.5rem; font: 400 33px/40px var(--pixel); }
-.tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
+.tag-desc { margin: 0 0 10px; color: var(--muted); }
 .tag-members { margin: 0; font: 11px/20px var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
-.tag-index { margin: 0 0 0.6rem; font: 11px/1 var(--pixel); }
+.tag-index { margin: 0 0 10px; font: 11px/1 var(--pixel); }
 .tag-index a { color: var(--muted); text-decoration: none; }
 .tag-index a:hover,
 .tag-index a:focus-visible { color: var(--ink); }
@@ -1368,14 +1368,14 @@ figcaption {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 1.1rem;
+  gap: 18px;
 }
 .rung {
   display: grid;
   grid-template-columns: 7rem 1fr;
-  gap: 0.2rem 1rem;
+  gap: 3px 1rem;
   align-items: start;
-  padding-top: 1.1rem;
+  padding-top: 18px;
   border-top: 1px solid var(--edge);
 }
 .rung > .badge,
@@ -1393,8 +1393,8 @@ figcaption {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  margin: 0 0 0.4rem;
+  gap: 10px;
+  margin: 0 0 6px;
 }
 
 .fragment-meta .fragment-date { margin-bottom: 0; }
@@ -1416,7 +1416,7 @@ figcaption {
    essay looks the same everywhere it is listed. */
 .essay-title {
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 6px;
   font: 400 22px/29px var(--pixel);
   color: var(--ink);
   text-decoration: none;
@@ -1431,7 +1431,7 @@ figcaption {
    line box by its own margin and padding, so the blurb's final line spaced
    itself out to make room for a button. It gets its own line instead — which
    is also what puts air between the pinned essays and "Along the way". */
-.tag-essay + .more { margin-bottom: 0.4rem; }
+.tag-essay + .more { margin-bottom: 6px; }
 .subject .essays { margin-bottom: 2.75rem; }
 
 /* Members' standing blurbs, between the tag head and the timeline. */
@@ -1475,7 +1475,7 @@ figcaption {
 
 .site-footer {
   margin-top: 4rem;
-  padding-top: 1.4rem;
+  padding-top: 22px;
   border-top: 1px solid var(--edge);
   display: flex;
   gap: 1.25rem;
@@ -1506,7 +1506,7 @@ figcaption {
 
 .snippet {
   margin: 0 0 2.5rem;
-  padding: 0.7rem 0.9rem;
+  padding: 11px 14px;
   overflow-x: auto;
   background: var(--deep);
   border: 1px solid var(--edge);
@@ -1533,13 +1533,13 @@ figcaption {
 .links-lede span { display: block; }
 .gb-note { font: 11px/15px var(--pixel); color: var(--muted); max-width: var(--read); margin: -0.5rem 0 1.5rem; }
 .guestbook-form { display: grid; gap: 1rem; max-width: var(--read); margin: 0 0 2.5rem; }
-.guestbook-form label { display: grid; gap: 0.35rem; font: 11px/1 var(--pixel); color: var(--muted); }
+.guestbook-form label { display: grid; gap: 6px; font: 11px/1 var(--pixel); color: var(--muted); }
 .gb-opt { opacity: 0.7; }
 .guestbook-form input,
 .guestbook-form textarea {
   font: 1rem/1.5 var(--prose);
   color: var(--ink); background: var(--deep);
-  border: 1px solid var(--edge); border-radius: 0; padding: 0.5rem 0.7rem;
+  border: 1px solid var(--edge); border-radius: 0; padding: 0.5rem 11px;
   width: 100%; box-sizing: border-box;
 }
 .guestbook-form textarea { resize: vertical; min-height: 6rem; }
@@ -1548,7 +1548,7 @@ figcaption {
 .guestbook-form button {
   justify-self: start; cursor: pointer;
   font: 11px/1 var(--pixel); color: var(--night); background: var(--accent);
-  border: 1px solid var(--accent); border-radius: 0; padding: 0.7rem 1.2rem;
+  border: 1px solid var(--accent); border-radius: 0; padding: 11px 19px;
 }
 .guestbook-form button:hover { background: var(--ink); border-color: var(--ink); }
 .guestbook-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1556,7 +1556,7 @@ figcaption {
 
 .gb-contact { color: var(--muted); max-width: var(--read); margin: -1.5rem 0 2.5rem; }
 .guestbook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; max-width: var(--read); }
-.gb-meta { margin: 0 0 0.3rem; display: flex; gap: 0.8rem; align-items: baseline; flex-wrap: wrap; }
+.gb-meta { margin: 0 0 5px; display: flex; gap: 13px; align-items: baseline; flex-wrap: wrap; }
 .gb-name { color: var(--ink); font-weight: 700; }
 .gb-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--edge); }
 .gb-name a:hover { color: var(--accent); border-color: var(--accent); }
@@ -1576,6 +1576,11 @@ figcaption {
    11 read too small there and 22 too loud (Hat, 2026-10-16). Off the lattice at 1×, so a font pixel
    straddles device pixels there; on a 2× screen it is exactly 3 device
    pixels and crisp. If those ever look fuzzy, this is why.
+   Spacing is whole px too (2026-10-19): fractional rem in gaps and padding
+   put 11px text on half pixels even though the size was on the lattice —
+   #metroidvania on a subject page blurred because the cover gap was 22.4px
+   and chip padding 7.2px. Every fractional rem in spacing and widths was
+   rounded to px; keep new ones whole.
    Below 34rem only the art shrinks. */
 @media (max-width: 34rem) {
   .frag > .sky { width: 2.25rem; min-height: 3rem; }
@@ -1681,8 +1686,8 @@ a.sky-cover:hover { border-color: var(--accent); }
   .entry-head::before, .post-head::before { inset: 0 -3.5rem; }
 }
 
-.post-head { margin-bottom: 2rem; padding: 1.1rem 0 1.3rem; }
-.entry-head { margin-bottom: 1.3rem; padding: 1.1rem 0 1.3rem; }
+.post-head { margin-bottom: 2rem; padding: 18px 0 21px; }
+.entry-head { margin-bottom: 21px; padding: 18px 0 21px; }
 
 /* Everything that sits on the aurora gets a hard 1px outline rather than a
    blur — a bitmap face wants bitmap treatment, and this is how SNES-era UI put
