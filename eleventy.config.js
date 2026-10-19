@@ -4,7 +4,7 @@ import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
 import { pixelSubject, pixelBand, pixelSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
 import { encodePng } from "./png.js";
-import { buttonFiles, wordmarkSvg } from "./button.js";
+import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
 
@@ -1854,10 +1854,10 @@ export default function (eleventyConfig) {
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. One 8-frame sprite sheet, drawn as
   // true pixel art at 240×28 a frame and stepped through by CSS at ×4.
-  // The masthead's name is the button's wordmark at 2× — one mark, two sizes.
-  eleventyConfig.addGlobalData("wordmark", wordmarkSvg(2));
-
   const today = new Date().toISOString().slice(0, 10);
+  // The masthead's name is the comet mark (button.js): the button's wordmark
+  // at 2× with a comet falling through it, coloured from today's sky.
+  eleventyConfig.addGlobalData("wordmark", cometMarkSvg(today, 2));
   const sheet = pixelSheet(today);
   skyFiles.set("img/aurora/sheet.png", encodePng(sheet.px, sheet.w, sheet.h, 4));
   // The page's star tile, reseeded with the masthead every build.

@@ -67,6 +67,78 @@ export const wordmarkSvg = (scale = 2, label = "chaosh.at") => {
   );
 };
 
+// The masthead mark (2026-10-19): the wordmark with a comet falling out of the
+// sky through it — arcing over CHAOS from the top left, crossing the H at an
+// angle, and landing as a fireball (ball, flame funnel, glint) under the A/T
+// gap. Drawn once in a mock session and frozen here like WORDMARK; only the
+// colours move. The comet sits in front of the name, but its night outline
+// never cuts letter ink and the S is redrawn on top. Slots: n night outline,
+// i ink, d/m/g/e the day's deep/mid/glow/edge — so the comet wears the same
+// sky as the masthead. `deep` only reaches the dotted tail: further in, it
+// matched the aurora behind it and the trail vanished.
+// Reads as a cousin of the FFVII Meteor logo; that's welcome.
+export const COMET_MARK = [
+  "n...n...n.n.n.n.n.n.nnnnnnnnnnnnnnnnnnnn.nnnnnn.............................................",
+  "dn.ndn.ndndndndndnmnmmmmmmmmmmmmmmmmmmmmnmmmmmmnnnnn........................................",
+  "n...n...n.n.n.n.n.n.nnnnnnnnnnnnnnnnnnnnmmmmmmmmmmmmnnn.....................................",
+  "........................................nnnnnnnmmgggmmmnnn..................................",
+  "..............nnn....nn...nn....nnn......nnn...nnnnnnnnmmmnnnnn...nn...nnnn...nnnnnn........",
+  ".............niiin..niin.niin..niiin....niiin....niiiiinggmmmiin.niin.niiiin.niiiiiin.......",
+  "............niiiiin.niin.niin.niiiiin..nniiinn..niiiiinnnngggmmnnniinniiiiiinniiiiiin.......",
+  "...........niinnniinniinnniinniinnniinniinnniinniinnnn...nnnnggggniinniinniin.nniinn........",
+  "...........niin..nn.niiiiiiinniiiiiiinniin.niin.nniiin..niinniieegginniiiiiin..niin.........",
+  "...........niin..nn.niiiiiiinniiiiiiinniin.niin..niiinn.niinniiiieeggniiiiiin..niin.........",
+  "...........niinnniinniinnniinniinnniinniinnniin..nnnniin.nn.niinnnieegiinniin..niin.........",
+  "............niiiiin.niin.niinniin.niinniiiiiiin.niiiiin.....niin.niineeggniin..niin.........",
+  ".............niiin..niin.niinniin.niin.nniiinn.niiiiin......niin.niinngeggginn.niin.........",
+  "..............nnn....nn...nn..nn...nn....nnn....nnnnn........nn...nn..neeeegnmn.nn..........",
+  "......................................................................ngneeegngnnn..........",
+  ".......................................................................nmeeeeengmmn.........",
+  "........................................................................nmeeeeeneeenn.......",
+  ".........................................................................ngeeieeiiieen......",
+  "........................................................................nmggeneiiiiien......",
+  ".........................................................................nngneiiiiiiien.....",
+  "..........................................................................nmgeiiiiiiienn....",
+  "..........................................................................nmmeiiiiiiienin...",
+  "...........................................................................nmneiiiiiennin...",
+  "............................................................................nmeeiiieeneienn.",
+  ".............................................................................nnneeeniiiiiiin",
+  "................................................................................nnn.nneienn.",
+  "......................................................................................nin...",
+  "......................................................................................nin...",
+  ".......................................................................................n....",
+];
+// Where WORDMARK's top-left falls inside COMET_MARK, in art pixels.
+export const COMET_ORIGIN = [12, 5];
+
+export const cometMarkSvg = (dateStr, scale = 2, label = "chaosh.at") => {
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const pal = palette(hue, { lMax: 0.85, spread: daySpread(dateStr) });
+  const fill = { n: "#0a0c18", i: "#eceafa", d: pal.deep, m: pal.mid, g: pal.glow, e: pal.edge };
+  const w = COMET_MARK[0].length;
+  const h = COMET_MARK.length;
+  const d = {};
+  COMET_MARK.forEach((row, y) => {
+    let x = 0;
+    while (x < w) {
+      const c = row[x];
+      if (c === ".") {
+        x += 1;
+        continue;
+      }
+      let run = 0;
+      while (row[x + run] === c) run += 1;
+      d[c] = (d[c] ?? "") + `M${x} ${y}h${run}v1h-${run}z`;
+      x += run;
+    }
+  });
+  const paths = Object.entries(d).map(([c, p]) => `<path fill="${fill[c]}" d="${p}"/>`).join("");
+  return (
+    `<svg class="wordmark comet-mark" viewBox="0 0 ${w} ${h}" width="${w * scale}" height="${h * scale}" ` +
+    `role="img" aria-label="${label}" shape-rendering="crispEdges">${paths}</svg>`
+  );
+};
+
 const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
 // ---------------------------------------------------------------- raster

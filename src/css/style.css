@@ -380,16 +380,15 @@ figure,
    geometry did not move. currentColor keeps it behaving like link text. */
 .site-title .wordmark { display: block; image-rendering: pixelated; }
 
-.site-title::before {
-  content: "";
-  width: 18px;
-  height: 18px;
-  image-rendering: pixelated;
-  background: linear-gradient(
-    var(--st-active) 0 22%, transparent 22% 32%,
-    var(--accent) 32% 54%, transparent 54% 64%,
-    var(--st-incomplete) 64% 100%);
-  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+/* The comet mark (2026-10-19) replaced the placeholder gem. The svg is 92×29
+   art px at 2× (184×58); the name inside it starts 12 px in and 5 px down
+   (COMET_ORIGIN in button.js). Negative margins shrink its layout box back
+   to the bare name, 144×16, so the header row doesn't move: the comet's
+   tail hangs into the left margin and the fireball below the row. */
+.site-title .comet-mark {
+  flex: none;
+  max-width: none;
+  margin: -10px -16px -32px -24px;
 }
 
 /* Five equal words at 12px. The row was tiered from 2026-09-03 to 2026-09-11
