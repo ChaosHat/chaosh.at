@@ -103,6 +103,10 @@
      centred under the furniture rather than as prose that ran out early. */
   --read: 47rem;
   --wide: 58rem;
+  /* Smoked glass: translucent night for anything that sits over the sky —
+     the intro, the strips, the phone nav row, the reading column. One value
+     so the boxes stay one material. */
+  --smoke: rgb(10 12 24 / 0.78);
 
   /* How tall a fragment sky may grow before it stops tracking entry length,
      and where its lower edge starts dissolving into the page. */
@@ -187,7 +191,7 @@ body:not(.wide) main::before {
   position: absolute;
   z-index: -1;
   inset: -1rem -1.25rem;
-  background: rgb(10 12 24 / 0.78);
+  background: var(--smoke);
   pointer-events: none;
 }
 
@@ -326,7 +330,7 @@ h1, h2, h3 { line-height: 1.25; }
      rows of the aurora, so it wears the intro's smoked glass. */
   .site-nav {
     margin-left: 0; margin-top: 2.75rem; gap: 0 0.2rem;
-    background: rgb(10 12 24 / 0.78);
+    background: var(--smoke);
     border: 1px solid var(--edge);
   }
   .site-nav a { padding-inline: 0.4rem; }
@@ -343,15 +347,15 @@ h1, h2, h3 { line-height: 1.25; }
 
 .site-intro {
   max-width: var(--wide);
-  width: fit-content;
   margin: -0.5rem 0 2rem;
   padding: 0.75rem 1rem;
   color: var(--muted);
   /* Smoked glass: the masthead runs down behind the intro since the band
      grew to 176px (2026-10-19). Translucent night keeps the copy readable
      and lets the aurora glow faintly through; an opaque card was the other
-     option and read as a sticker on the sky. */
-  background: rgb(10 12 24 / 0.78);
+     option and read as a sticker on the sky. Full shell width, like the
+     strips below it. */
+  background: var(--smoke);
   border: 1px solid var(--edge);
 }
 
@@ -363,7 +367,7 @@ h1, h2, h3 { line-height: 1.25; }
 .now {
   padding: 0.8rem 0.9rem;
   margin-bottom: 2.5rem;
-  background: var(--deep);
+  background: var(--smoke);
   border: 1px solid var(--edge);
   position: relative;
   overflow: hidden;
