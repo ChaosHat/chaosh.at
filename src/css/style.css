@@ -280,7 +280,8 @@ h1,
 .essay-title { text-shadow: 1px 0 0 currentColor; }
 
 /* ---------------------------------------------------------------- the sky
-   Generated cover art, one SVG per subject, built nightly. The slug seeds
+   Generated cover art, one pixel PNG per subject (and a chip), built nightly
+   (SVG until 2026-10-19; aurora.js pixelSubject). The slug seeds
    the aurora's path and picks its hue; status decides how much aurora is
    left; recency decides how bright it burns. Small renders get a simplified
    chip variant — same night, the bright edge alone. */
@@ -294,17 +295,19 @@ h1,
   flex-shrink: 0;
   border: 1px solid var(--edge);
   background-color: var(--deep);
-  background-size: 100% 100%;
+  /* Natural size, top-centre, cropped by the box: the PNGs come pre-scaled
+     (×4 big, ×2 chip) and sized for the largest box each fills, with the
+     scene in the rows every box shows. Stretching them to the box — what
+     100% 100% did for the SVGs — would smear the pixels. */
+  background-size: auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
 }
 
-/* dither */
-.sky::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-conic-gradient(rgba(0, 0, 0, 0.16) 0% 25%, transparent 0% 50%);
-  background-size: 4px 4px;
-}
+/* The 4px checker that used to lie over every sky is gone (2026-10-19): the
+   pixel skies carry their own Bayer dither on their own grid, and a CSS
+   checker at 2px cells over 4px art pixels is a mixed grid. */
 
 /* Holds the fragment column open for prose that belongs to no subject. */
 .sky-blank { visibility: hidden; border-color: transparent; background: none; }

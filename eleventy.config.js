@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, pixelBand, pixelSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
+import { pixelSubject, pixelBand, pixelSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
 import { encodePng } from "./png.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -861,11 +861,15 @@ export default function (eleventyConfig) {
     const hue = subjectHues.get(slug) ?? 0;
     const status = meta?.status ?? "active";
     const opts = { canon: canonSlugs.has(slug) };
-    skyFiles.set(`img/sky/${slug}.svg`, subjectSvg(slug, hue, status, tier, opts));
-    skyFiles.set(`img/sky/${slug}-chip.svg`, chipSvg(slug, hue, status, tier, opts));
+    // Pixel art since 2026-10-19 (aurora.js pixelSubject): PNGs pre-scaled
+    // ×4 / ×2, shown at natural size and cropped, never stretched.
+    const big = pixelSubject(slug, hue, status, tier, opts);
+    const chip = pixelSubject(slug, hue, status, tier, { ...opts, chip: true });
+    skyFiles.set(`img/sky/${slug}.png`, encodePng(big.px, big.w, big.h, 4));
+    skyFiles.set(`img/sky/${slug}-chip.png`, encodePng(chip.px, chip.w, chip.h, 4));
     return {
-      skyUrl: `/img/sky/${slug}.svg`,
-      chipUrl: `/img/sky/${slug}-chip.svg`,
+      skyUrl: `/img/sky/${slug}.png`,
+      chipUrl: `/img/sky/${slug}-chip.png`,
     };
   };
 
@@ -876,9 +880,10 @@ export default function (eleventyConfig) {
   // as an active subject would be (bands, no moon): a tag is never finished.
   // List chip only; the essay page gets no card for a tag (Hat, 2026-10-14).
   const tagChip = (slug) => {
-    const file = `img/sky/tag-${slug}-chip.svg`;
+    const file = `img/sky/tag-${slug}-chip.png`;
     if (!skyFiles.has(file)) {
-      skyFiles.set(file, chipSvg(`tag:${slug}`, hashOf(`tag:${slug}`) % 360, "active", 1));
+      const c = pixelSubject(`tag:${slug}`, hashOf(`tag:${slug}`) % 360, "active", 1, { chip: true });
+      skyFiles.set(file, encodePng(c.px, c.w, c.h, 4));
     }
     return `/${file}`;
   };
@@ -1092,7 +1097,7 @@ export default function (eleventyConfig) {
           canon: canonSlugs.has(s),
           rating: ratingOf(s, meta),
           coverUrl: coverUrls.get(s) ?? null,
-          skyUrl: `/img/sky/${s}.svg`,
+          skyUrl: `/img/sky/${s}.png`,
         };
       });
       const html = revealSpoilers(raw);
@@ -1142,7 +1147,7 @@ export default function (eleventyConfig) {
           : null,
         citedSubjects,
         chipUrl: citedSubjects.length
-          ? `/img/sky/${citedSubjects[0]}-chip.svg`
+          ? `/img/sky/${citedSubjects[0]}-chip.png`
           : citedTagsDirect.length ? tagChip(citedTagsDirect[0]) : null,
         cites: subjectLinks(citedSubjects),
         // An aside is washed in the first about: subject's hue, so a primer

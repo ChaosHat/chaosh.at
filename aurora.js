@@ -1164,3 +1164,103 @@ export const starTile = (dateStr, { n = STAR_TILE, density = 0.0022 } = {}) => {
     }
   return { px, w: n, h: n };
 };
+
+// ---------------------------------------------------------- pixel subjects
+//
+// The subject skies and chips in pixels (2026-10-19), on the masthead's
+// pipeline: the same three forms, the same seven-step ramp, the same Bayer
+// dither, fed the subject's ladder hue instead of the date's. Status and
+// recency scale each curtain's intensity BEFORE quantising, so a faded sky
+// lands on darker ramp steps rather than on alpha — which is what the
+// alpha-carried axes needed to survive the move to pixels. The SVG versions
+// above stay for og.js and as the record.
+//
+// One image per subject, sized for the largest box it fills and cropped by
+// the rest, never stretched: a pixel image stretched to an arbitrary box
+// smears. The big sky is 52×80 art pixels and the chip 16×22; the scene
+// lives in the top rows every box shows (44 and 16), the rest is night. The
+// build pre-scales them (×4, ×2) so CSS shows them at natural size, anchored
+// top-centre, with pixelated scaling. Mocked against the SVGs for ten real
+// subjects before porting; Hat picked the pixel chips.
+export const PX_SKY = { w: 52, h: 80, scene: 44, scale: 4 };
+export const PX_CHIP = { w: 16, h: 22, scene: 16, scale: 2 };
+
+const pxUpscale = (px, w, h, k) => {
+  const out = new Uint8Array(w * k * h * k * 4);
+  for (let y = 0; y < h * k; y += 1)
+    for (let x = 0; x < w * k; x += 1) {
+      const i = (((y / k) | 0) * w + ((x / k) | 0)) * 4;
+      out.set(px.subarray(i, i + 4), (y * w * k + x) * 4);
+    }
+  return out;
+};
+
+export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chip = false } = {}) => {
+  const { w: W, h: H, scene: SH, scale } = chip ? PX_CHIP : PX_SKY;
+  const px = new Uint8Array(W * H * 4);
+  const done = status === "completed";
+  const night = (done ? NIGHT_DONE : NIGHT).map(hexRgb);
+  // The night in three dithered steps over the scene rows, then held.
+  for (let y = 0; y < H; y += 1)
+    for (let x = 0; x < W; x += 1) {
+      const v = Math.min(1, y / SH) * 2 + (bay(x, y) - 0.5) * 0.6;
+      px.set([...night[Math.max(0, Math.min(2, Math.round(v)))], 255], (y * W + x) * 4);
+    }
+  const seed = hashOf(slug) % 100003;
+
+  if (!done) {
+    const form = PIXEL_FORM_NAMES[hashOf(`form:${slug}`) % PIXEL_FORM_NAMES.length];
+    // How much is left burning. Active and backlog follow recency, as the
+    // SVG scenes did; the rest are fixed, like their SVG opacities.
+    const g = { shelved: 0.28, owned: 0.5, incomplete: 0.4 }[status] ?? tier;
+    const n1 = chip ? 2 : 4;
+    const n2 = chip ? 3 : 9;
+    const ph = (seed % 628) / 100;
+    const ramp = (h, lMax) => pxRamp(status === "incomplete" ? GREY : palette(h, { lMax }));
+    const curt = (base, thick, nn2, phase, gain, s) => ({
+      base: SH * base, thick: SH * thick, n1, n2: nn2, env: 0.65,
+      sweep: SH * 0.07, wob: SH * 0.035, ph: phase, gain, seed: s,
+    });
+    // Back to front. Incomplete keeps one grey ghost, as it always has.
+    const cs = [];
+    const ramps = [];
+    if (status !== "incomplete") {
+      cs.push(curt(chip ? 0.42 : 0.38, 0.32, n2 + 2, ph + 2.4, 0.6 * g, seed + 11));
+      ramps.push(ramp((ladderHue + 60) % 360, 0.72));
+    }
+    cs.push(curt(chip ? 0.62 : 0.66, chip ? 0.42 : 0.5, n2, ph, g, seed + 23));
+    ramps.push(ramp(ladderHue, 0.85));
+    pxFrame(px, { W, H: SH, oy: 0, k: 0, N: 1, form, cs, ramps, fade: [1, 0.01], seed, stars: true });
+  } else {
+    // Completed trades the aurora for the moon: a waning crescent, the lit
+    // disc less an offset one, with one dithered halo step on the big sky.
+    // Gold for canon (MOON_GOLD, which tracks --gold).
+    const moon = hexRgb(canon ? MOON_GOLD : MOON);
+    const r = chip ? W * 0.26 : 8;
+    const cx = W / 2;
+    const cy = chip ? SH * 0.42 : 13;
+    const ox = cx + r * 0.5;
+    const oy = cy - r * 0.27;
+    const halo = mixRgb(night[0], moon, 0.18);
+    for (let y = 0; y < SH; y += 1)
+      for (let x = 0; x < W; x += 1) {
+        const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
+        if (Math.hypot(x + 0.5 - ox, y + 0.5 - oy) < r * 0.95) continue;
+        const o = (y * W + x) * 4;
+        if (d < r) px.set([...moon, 255], o);
+        else if (!chip && d < r * 1.55 && bay(x, y) < 1 - (d - r) / (r * 0.55)) px.set([...halo, 255], o);
+      }
+  }
+  // Stars wherever the sky is still bare night, the scene and below.
+  const star = hexRgb(STAR);
+  const dimStar = mixRgb(night[0], star, 0.55);
+  for (let y = 0; y < H; y += 1)
+    for (let x = 0; x < W; x += 1) {
+      const h = ihash(x * 92821 + y * 68917 + seed);
+      if (h <= (chip ? 0.985 : 0.982)) continue;
+      const o = (y * W + x) * 4;
+      if (night.some((c) => c[0] === px[o] && c[1] === px[o + 1] && c[2] === px[o + 2]))
+        px.set([...(h > 0.993 ? star : dimStar), 255], o);
+    }
+  return { px: pxUpscale(px, W, H, scale), w: W * scale, h: H * scale };
+};
