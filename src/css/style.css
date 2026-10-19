@@ -359,7 +359,9 @@ figure,
   align-items: center;
   gap: 0.5rem 1.25rem;
   padding: 1.75rem 0 1rem;
-  margin-bottom: 1.75rem;
+  /* 4px + the 16px padding: the strips hang under the nav as one unit
+     rather than floating a band's width below it (2026-10-19). */
+  margin-bottom: 4px;
   /* No rule under the header since 2026-10-19: with the band behind it the
      line cut the aurora in two, and the nav panes already mark the row. */
 }
@@ -460,7 +462,7 @@ figure,
 
 .site-intro {
   max-width: var(--wide);
-  margin: -0.5rem 0 2rem;
+  margin: 0 0 10px; /* the strips' own stacking gap: intro + strips read as one unit */
   padding: 14px 1rem;
   /* The pixel face at the panels' size, so the intro reads as one of the
      framed boxes rather than prose that wandered out of the column. */
