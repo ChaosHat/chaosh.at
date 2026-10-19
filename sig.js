@@ -1,115 +1,84 @@
-// The forum signature: a small night panel — wordmark and tagline on top,
-// "latest post · latest essay · @chaosh.at on bluesky" below — drawn as one
-// picture and cut into three images that sit flush in a BBCode signature.
-// Changing content is the point: a sig that visibly updates reads as a live
-// site, not an ad (Hat, 2026-10-15). Coin Return allows three images per
-// signature, so the panel is cut in three, and each piece is exactly one item:
-// the cuts fall in the middle of the two separators on the bottom row,
-// wherever tonight's text puts them. Each piece is a stable image URL wrapped
-// in a stable link (/sig/<item>/) that forwards to whatever it shows tonight.
+// The forum signature: a small night panel in the site's pixel art — the
+// comet mark and tagline on top, then three columns (latest post, latest
+// essay, Bluesky), each a label over a title — drawn as one picture and cut
+// into three images that sit flush in a BBCode signature. Changing content is
+// the point: a sig that visibly updates reads as a live site, not an ad (Hat,
+// 2026-10-15). Coin Return allows three images per signature, so the panel is
+// cut in three, one column each, the cuts in the middle of the column gaps.
+// Each piece is a stable image URL wrapped in a stable link (/sig/<item>/)
+// that forwards to whatever it shows tonight.
 //
 // Width is free, height is not. The BBCode pins each image with
 // [IMG height=…] — Coin Return's XenForo honours it (Hat tested, 2026-10-16)
 // — so the browser derives the width from the PNG and the panel can grow or
-// shrink with the essay title every night. The earlier [IMG width=…] froze
-// every tile at its widest and left a hole when a title ran short.
+// shrink with the titles every night. The earlier [IMG width=…] froze every
+// tile at its widest and left a hole when a title ran short.
 //
-// The panel has its own dark ground (#0a0c18, a 1px edge) so it reads the
-// same on any forum theme. The one aurora is a wisp of the newest day's sky
-// between the rows: always the same shape (the `ribbon` form — `rays` and
-// `drapery` put streaks behind the text), only its hue follows the day, and
-// it is drawn on a fixed canvas and cropped by the panel, never stretched.
+// The look (2026-10-19, the hi-bit pass; layout from the 2026-10-16 mock
+// rounds): everything sits on one 1px art grid, drawn at 2×. The ground is
+// night with the masthead's own pixel curtains rising from the bottom
+// (aurora.js pixelSheet, the newest post's day), the frame is the day's frame
+// hue like every box on the site, the mark is COMET_MARK at 1× in the top
+// left — its fireball stops just above the label row — and the type is
+// Pixelify Grid at 11px, its native size, with the site's one-pixel night
+// outline so it holds on any band. Labels take the day's hue, titles ink.
 //
-// Same pipeline as og.js — satori lays out, resvg rasterises — and the same
-// rule: everything here may throw, and the config wraps it, so a sig that
-// fails costs the sig, never the build.
+// The background is our own raster; satori lays out only the text, resvg
+// rasterises it, and the two are composited with the text's alpha snapped to
+// whole pixels. Everything here may throw, and the config wraps it, so a sig
+// that fails costs the sig, never the build.
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import { DAY_H, daySpread, hashOf, palette, ribbon } from "./aurora.js";
-import { wordmarkSvg } from "./button.js";
+import { dayFrame, daySpread, hashOf, palette, pixelSheet } from "./aurora.js";
+import { COMET_MARK } from "./button.js";
 
-// Drawn at 2× and shown at 1× by the BBCode's height — a 1× PNG went soft on
-// hi-dpi screens (2026-10-15). Changing SIG_H means re-pasting the sig.
-export const SIG_H = 52;
+// Changing SIG_H means re-pasting the sig.
+export const SIG_H = 63;
 export const SIG_SCALE = 2;
 export const SIG_ITEMS = ["post", "essay", "bsky"];
 export const TAGLINE = "Daily game opinions, occasional essays, and auroras.";
 
-const C = { muted: "#8b8fa3", link: "#b4b1d8", ink: "#eceafa", tag: "#7d8196", ground: "#0a0c18", edge: "#2b3050" };
-const PAD = 12;
-const EDGE = 1;
-const DOT_W = 16;
+const NIGHT = [10, 12, 24];
+const INK = [236, 234, 250];
+const C = { tag: "#9a9db4", title: "#eceafa" };
+const PAD = 9; // text inset from the frame
+const GAP = 18; // between columns; the cuts fall in its middle
+const MARK_X = 5;
+const MARK_Y = 2;
+const TAG_X = MARK_X + COMET_MARK[0].length + 4;
 const FONT_DIR = "og-fonts";
 let fonts = null;
 const loadFonts = () =>
   (fonts ??= [
-    ["alegreya-sans-400.ttf", 400, "normal"],
-    ["alegreya-sans-400-italic.ttf", 400, "italic"],
-    ["alegreya-sans-700.ttf", 700, "normal"],
-  ].map(([file, weight, style]) => ({
-    name: "Alegreya Sans",
-    weight,
-    style,
-    data: fs.readFileSync(path.join(FONT_DIR, file)),
-  })));
+    { name: "Pixelify Grid", weight: 400, style: "normal", data: fs.readFileSync(path.join(FONT_DIR, "pixelify-grid-400.ttf")) },
+  ]);
 
+const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 const h = (type, style, children, props = {}) => ({ type, props: { style, children, ...props } });
-const svgUri = (svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 const span = (text, style) => h("span", style, text);
-
-// The wisp. daySky picks its form by date; the sig wants one form always, so
-// this is daySky's recipe (same hue hash, palette, posture) with the form
-// pinned to ribbon. Drawn WISP_W wide — wider than any panel — and centred,
-// so a narrow panel just shows less of its faded ends.
-const WISP_W = 600;
-const WISP_H = 34;
-const wisp = (dateStr) => {
-  const pal = palette((hashOf(dateStr) % 360000) / 1000, { lMax: 0.82, spread: daySpread(dateStr) });
-  const body = ribbon(pal, { w: WISP_W, h: DAY_H, F: 0, yoff: 0, step: 2, base: 0.7, sweep: 0.105, thick: 0.46 });
-  return (
-    `<svg xmlns='http://www.w3.org/2000/svg' width='${WISP_W}' height='${WISP_H}' viewBox='0 0 ${WISP_W} ${DAY_H}' preserveAspectRatio='none'>` +
-    `<defs><filter id='b' x='-60%' y='-60%' width='220%' height='220%'>` +
-    `<feGaussianBlur stdDeviation='${(7 * (DAY_H / 112)).toFixed(1)}'/></filter>` +
-    `<radialGradient id='rf' cx='0.5' cy='0.55' r='0.5'>` +
-    `<stop offset='0.35' stop-color='#fff'/><stop offset='1' stop-color='#000'/></radialGradient>` +
-    `<mask id='rm'><rect width='${WISP_W}' height='${DAY_H}' fill='url(#rf)'/></mask></defs>` +
-    `<g mask='url(#rm)' opacity='0.88'>${body}</g></svg>`
-  );
-};
-
-const wordmark = () =>
-  wordmarkSvg(1)
-    .replace('class="wordmark" ', 'xmlns="http://www.w3.org/2000/svg" ')
-    .replace("currentColor", C.ink);
-
-const label = (t) => span(t, { color: C.muted, marginRight: 4 });
-const bold = (t) => span(t, { color: C.link, fontWeight: 700 });
-// Fixed-width separator, so its middle — where the cut goes — is known.
-const dot = () => h("span", { display: "flex", justifyContent: "center", width: DOT_W, color: C.muted }, "·");
-
+// 11px is Pixelify Grid's own pixel: one font pixel per art pixel.
 const line = (children, height) =>
-  h("div", { display: "flex", alignItems: "center", height, fontFamily: "Alegreya Sans", fontSize: 14, whiteSpace: "nowrap" }, children);
+  h("div", { display: "flex", alignItems: "center", height, fontFamily: "Pixelify Grid", fontSize: 11, whiteSpace: "nowrap" }, children);
+const widthOf = async (text) =>
+  Number(/width="([\d.]+)"/.exec(await satori(line([span(text, {})], 16), { height: 16, fonts: loadFonts() }))?.[1]);
 
-const widthOf = async (...nodes) =>
-  Number(/width="([\d.]+)"/.exec(await satori(line(nodes, 22), { height: 22, fonts: loadFonts() }))?.[1]);
-
-// The essay title is the one free-length thing in the panel. Capped at
-// ESSAY_MAX px: cut at a word, "…" appended, trailing period dropped (a full
-// stop mid-line reads as the line ending). Quoted, so it reads as a title.
-export const ESSAY_MAX = 200;
+// Titles are the free-length things in the panel. Capped at TITLE_MAX px: cut
+// at a word, "…" appended, trailing period dropped (a full stop mid-line reads
+// as the line ending). Quoted, so they read as titles.
+export const TITLE_MAX = 190;
 const quoted = (t) => `“${t}”`;
 const fitTitle = async (title) => {
   const clean = title.trim().replace(/\.$/, "");
-  if ((await widthOf(bold(clean))) <= ESSAY_MAX) return clean;
+  if ((await widthOf(quoted(clean))) <= TITLE_MAX) return quoted(clean);
   const words = clean.split(/\s+/);
   for (let n = words.length - 1; n > 0; n -= 1) {
-    const cut = `${words.slice(0, n).join(" ").replace(/[\s,;:.\-—–]+$/, "")}…`;
-    if ((await widthOf(bold(cut))) <= ESSAY_MAX) return cut;
+    const cut = quoted(`${words.slice(0, n).join(" ").replace(/[\s,;:.\-—–]+$/, "")}…`);
+    if ((await widthOf(cut)) <= TITLE_MAX) return cut;
   }
-  return `${words[0]}…`;
+  return quoted(`${words[0]}…`);
 };
 
 // Columns [a, b) of an RGBA raster as a PNG.
@@ -142,8 +111,73 @@ const slicePng = (rgba, width, height, a, b) => {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const shortDate = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
 
-// dailies: newest first, [{ date: Date, url }] (only the first is used)
-// essay:   { title, url }
+// The night behind the type, at 1×: night, the masthead's curtains rising
+// from the bottom (lit edge just under the panel, dimmed and faded hard toward
+// the top so the type above stays readable), stars, the comet mark, the frame.
+const background = (dateStr, W) => {
+  const bg = new Uint8Array(W * SIG_H * 3);
+  for (let i = 0; i < W * SIG_H; i += 1) bg.set(NIGHT, i * 3);
+  // Ray periods scaled from the masthead's 240 columns, so a ray is as many
+  // pixels wide here as there.
+  const sc = W / 240;
+  const sky = pixelSheet(dateStr, {
+    W,
+    H: SIG_H,
+    frames: 1,
+    lMax: 0.7,
+    fade: [0.15, 1],
+    back: { base: 0.85, thick: 0.75, n1: Math.round(25 * sc), n2: Math.round(56 * sc), env: 0.65 },
+    front: { base: 1.04, thick: 0.95, n1: Math.round(21 * sc), n2: Math.round(49 * sc), env: 0.65 },
+  });
+  for (let i = 0; i < W * SIG_H; i += 1) if (sky.px[i * 4 + 3]) bg.set(sky.px.subarray(i * 4, i * 4 + 3), i * 3);
+  const put = (x, y, c) => {
+    if (x >= 0 && x < W && y >= 0 && y < SIG_H) bg.set(c, (y * W + x) * 3);
+  };
+  const pal = palette((hashOf(dateStr) % 360000) / 1000, { lMax: 0.85, spread: daySpread(dateStr) });
+  const fill = { n: NIGHT, i: INK, d: hexRgb(pal.deep), m: hexRgb(pal.mid), g: hexRgb(pal.glow), e: hexRgb(pal.edge) };
+  COMET_MARK.forEach((row, y) => [...row].forEach((c, x) => c !== "." && put(MARK_X + x, MARK_Y + y, fill[c])));
+  const frame = hexRgb(dayFrame(dateStr));
+  for (let x = 0; x < W; x += 1) {
+    put(x, 0, frame);
+    put(x, SIG_H - 1, frame);
+  }
+  for (let y = 0; y < SIG_H; y += 1) {
+    put(0, y, frame);
+    put(W - 1, y, frame);
+  }
+  return bg;
+};
+
+// Text over background at SIG_SCALE: text alpha snapped to whole pixels (it
+// is a pixel face on its own grid, so a half-covered pixel is an edge, not a
+// stroke), and one art pixel of night around every stroke — the site's
+// on-aurora outline.
+const composite = (bg, text, W) => {
+  const S = SIG_SCALE;
+  const w = W * S;
+  const hh = SIG_H * S;
+  const out = new Uint8Array(w * hh * 4);
+  const on = (x, y) => x >= 0 && y >= 0 && x < w && y < hh && text[(y * w + x) * 4 + 3] >= 128;
+  const ring = [[-2, 0], [2, 0], [0, -2], [0, 2], [-1, 0], [1, 0], [0, -1], [0, 1]];
+  for (let y = 0; y < hh; y += 1)
+    for (let x = 0; x < w; x += 1) {
+      const i = y * w + x;
+      const a = text[i * 4 + 3];
+      let rgb;
+      if (a >= 128) rgb = [0, 1, 2].map((c) => Math.min(255, Math.round((text[i * 4 + c] * 255) / a)));
+      else if (ring.some(([dx, dy]) => on(x + dx, y + dy))) rgb = NIGHT;
+      else {
+        const b = (Math.floor(y / S) * W + Math.floor(x / S)) * 3;
+        rgb = bg.subarray(b, b + 3);
+      }
+      out.set(rgb, i * 4);
+      out[i * 4 + 3] = 255;
+    }
+  return out;
+};
+
+// dailies: newest first, [{ date: Date, url, title? }] (only the first is used)
+// essay:   { title, url, date }
 // bluesky: handle without the @ (site.yaml `bluesky`)
 // -> { files: Map<rel, Buffer|string>, links: Map<item, url> }
 export const sigFiles = async ({ dailies, essay, bluesky, siteUrl = "" }) => {
@@ -152,63 +186,40 @@ export const sigFiles = async ({ dailies, essay, bluesky, siteUrl = "" }) => {
   // Three images are pasted once; drawing two would leave a broken one.
   if (!dailies.length || !essay || !bluesky) throw new Error("sig needs a daily, an essay and a bluesky handle");
   const newest = dailies[0];
+  const dateStr = newest.date.toISOString().slice(0, 10);
+  const hue = dayFrame(dateStr);
 
-  // The bottom row in three groups; the cuts go mid-separator between them.
-  const groups = [
-    [label("latest post"), bold(shortDate(newest.date))],
-    [label("latest essay"), bold(quoted(await fitTitle(essay.title)))],
-    [bold(`@${bluesky}`), span(" on bluesky", { color: C.muted, marginLeft: 4 })],
+  const cols = [
+    [`latest post · ${shortDate(newest.date)}`, newest.title ? await fitTitle(newest.title) : "(untitled)"],
+    [`latest essay · ${shortDate(essay.date)}`, await fitTitle(essay.title)],
+    ["bluesky", `@${bluesky}`],
   ];
-  const gw = await Promise.all(groups.map((g) => widthOf(...g)));
-  const row2 = [...groups[0], dot(), ...groups[1], dot(), ...groups[2]];
-  const top = [
-    h("img", { marginRight: 10 }, undefined, { src: svgUri(wordmark()), width: 72, height: 8 }),
-    span(TAGLINE, { color: C.tag, fontSize: 13, fontStyle: "italic" }),
-  ];
-  const inner = Math.max(await widthOf(...top), gw[0] + gw[1] + gw[2] + 2 * DOT_W);
-  const W = Math.ceil(inner) + 2 * (PAD + EDGE);
+  const cw = await Promise.all(cols.map(async ([l, v]) => Math.max(await widthOf(l), await widthOf(v))));
+  const left = 1 + PAD;
+  const W = Math.ceil(Math.max(TAG_X + (await widthOf(TAGLINE)), left + cw[0] + cw[1] + cw[2] + 2 * GAP) + PAD + 1);
 
-  const panel = h(
-    "div",
-    {
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      width: W,
-      height: SIG_H,
-      padding: `0 ${PAD}px`,
-      position: "relative",
-      background: C.ground,
-      border: `${EDGE}px solid ${C.edge}`,
-      borderRadius: 6,
-      overflow: "hidden",
-    },
-    [
-      // Centred between the rows (6px above the panel's middle, where row 1
-      // meets row 2), dimmed so the grey labels stay readable on any hue.
-      h("img", { position: "absolute", left: (W - WISP_W) / 2, top: (SIG_H - WISP_H) / 2 - 6, opacity: 0.7 }, undefined, {
-        src: svgUri(wisp(newest.date.toISOString().slice(0, 10))),
-        width: WISP_W,
-        height: WISP_H,
-      }),
-      line(top, 18),
-      line(row2, 22),
-    ],
-  );
+  const col = (i, text, color) => h("div", { display: "flex", width: cw[i] + (i < 2 ? GAP : 0) }, span(text, { color }));
+  const panel = h("div", { display: "flex", flexDirection: "column", width: W, height: SIG_H, paddingLeft: left, paddingTop: 4 }, [
+    line([h("div", { width: TAG_X - left }, ""), span(TAGLINE, { color: C.tag })], 16),
+    h("div", { height: 6 }, ""),
+    line(cols.map(([l], i) => col(i, l, hue)), 16),
+    line(cols.map(([, v], i) => col(i, v, C.title)), 16),
+  ]);
   const svg = await satori(panel, { width: W, height: SIG_H, fonts: loadFonts() });
+  // The text is rendered once and its pixels sliced: cropping by viewBox made
+  // resvg panic (a Rust abort, not a throw — it takes the whole build down)
+  // at most offsets, 2026-10-16.
+  const text = new Resvg(svg, { fitTo: { mode: "zoom", value: SIG_SCALE } }).render().pixels;
+  const img = composite(background(dateStr, W), text, W);
 
-  // Cut points in whole CSS px, so at 2× every piece meets its neighbour on
-  // the pixel grid and the three read as one picture. The panel is rendered
-  // once and its pixels sliced: cropping by viewBox made resvg panic (a Rust
-  // abort, not a throw — it takes the whole build down) at most offsets,
-  // 2026-10-16.
-  const x1 = Math.round(EDGE + PAD + gw[0] + DOT_W / 2);
-  const x2 = Math.round(EDGE + PAD + gw[0] + DOT_W + gw[1] + DOT_W / 2);
+  // Cut points in whole CSS px, mid-gap, so at 2× every piece meets its
+  // neighbour on the pixel grid and the three read as one picture.
+  const x1 = Math.round(left + cw[0] + GAP / 2);
+  const x2 = Math.round(left + cw[0] + GAP + cw[1] + GAP / 2);
   const cuts = [0, x1, x2, W].map((x) => x * SIG_SCALE);
-  const img = new Resvg(svg, { fitTo: { mode: "zoom", value: SIG_SCALE } }).render();
   const urls = [newest.url, essay.url, `https://bsky.app/profile/${bluesky}`];
   for (const [i, item] of SIG_ITEMS.entries()) {
-    files.set(`sig/${item}.png`, slicePng(img.pixels, img.width, img.height, cuts[i], cuts[i + 1]));
+    files.set(`sig/${item}.png`, slicePng(img, W * SIG_SCALE, SIG_H * SIG_SCALE, cuts[i], cuts[i + 1]));
     links.set(item, urls[i]);
   }
 

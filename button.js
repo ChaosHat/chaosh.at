@@ -1,28 +1,25 @@
 // The site button: an 88×31 for other people's sidebars, drawn from the same
-// aurora as the masthead and written out as button.png (still) and
-// button.gif (16 frames). Rasterised here in plain JS — no canvas, no browser
+// pixel aurora as the masthead (aurora.js pixelSheet) with the comet mark on
+// top, and written out as button.png (still) and button.gif (8 frames). Rasterised here in plain JS — no canvas, no browser
 // — so the build stays a pure function of the date, same as the header.
 // Design record: vault, 80_Projects/"chaosh.at Design" (2026-09-05) and
 // 90_Reference/91_Documentation/"chaosh.at Design System".
 import { encodePng } from "./png.js";
-import { daySpread, hashOf, palette, ribbonColumns } from "./aurora.js";
+import { dayFrame, daySpread, hashOf, palette, pixelSheet } from "./aurora.js";
 
 export const BUTTON_W = 88;
 export const BUTTON_H = 31;
-export const BUTTON_FRAMES = 16;
-// Centiseconds per frame. Half the masthead's pace: on someone else's page the
-// button should read as weather, not as a blink.
+export const BUTTON_FRAMES = 8;
+// Centiseconds per frame: the masthead's own pace (8 frames over 11.2s), so
+// the button breathes like the header it came from.
 export const BUTTON_DELAY = 140;
 
 const W = BUTTON_W;
 const H = BUTTON_H;
 const N = BUTTON_FRAMES;
-const TAU = 2 * Math.PI;
 
 const NIGHT = [10, 12, 24]; // --night
-const EDGE = [43, 48, 80]; // --edge
 const INK = [236, 234, 250]; // --ink
-const STAR = [238, 242, 255];
 
 // The wordmark. Silkscreen at 12px, thresholded once and kept as pixels —
 // 12px is 1.5 pixels per grid unit, and the S that fell out of that is the
@@ -77,39 +74,46 @@ export const wordmarkSvg = (scale = 2, label = "chaosh.at") => {
 // sky as the masthead. `deep` only reaches the dotted tail: further in, it
 // matched the aurora behind it and the trail vanished.
 // Reads as a cousin of the FFVII Meteor logo; that's welcome.
+// Redrawn the same day (round "A2e", the sig session): the tail is one smooth
+// cubic from the flat dotted run into the drop — the first version had a hard
+// knee where it turned down — and it passes BEHIND the name: every letter
+// keeps its night outline, so HAT stays legible where the trail crosses it,
+// and the trail shows only in the gaps. The fireball (funnel, ball, glint) is
+// the first version's, transplanted onto the new curve's end, and set as far
+// left as it goes (its funnel brushes the T's foot) so name and fireball span
+// exactly the button's 86 inside columns.
 export const COMET_MARK = [
-  "n...n...n.n.n.n.n.n.nnnnnnnnnnnnnnnnnnnn.nnnnnn.............................................",
-  "dn.ndn.ndndndndndnmnmmmmmmmmmmmmmmmmmmmmnmmmmmmnnnnn........................................",
-  "n...n...n.n.n.n.n.n.nnnnnnnnnnnnnnnnnnnnmmmmmmmmmmmmnnn.....................................",
-  "........................................nnnnnnnmmgggmmmnnn..................................",
-  "..............nnn....nn...nn....nnn......nnn...nnnnnnnnmmmnnnnn...nn...nnnn...nnnnnn........",
-  ".............niiin..niin.niin..niiin....niiin....niiiiinggmmmiin.niin.niiiin.niiiiiin.......",
-  "............niiiiin.niin.niin.niiiiin..nniiinn..niiiiinnnngggmmnnniinniiiiiinniiiiiin.......",
-  "...........niinnniinniinnniinniinnniinniinnniinniinnnn...nnnnggggniinniinniin.nniinn........",
-  "...........niin..nn.niiiiiiinniiiiiiinniin.niin.nniiin..niinniieegginniiiiiin..niin.........",
-  "...........niin..nn.niiiiiiinniiiiiiinniin.niin..niiinn.niinniiiieeggniiiiiin..niin.........",
-  "...........niinnniinniinnniinniinnniinniinnniin..nnnniin.nn.niinnnieegiinniin..niin.........",
-  "............niiiiin.niin.niinniin.niinniiiiiiin.niiiiin.....niin.niineeggniin..niin.........",
-  ".............niiin..niin.niinniin.niin.nniiinn.niiiiin......niin.niinngeggginn.niin.........",
-  "..............nnn....nn...nn..nn...nn....nnn....nnnnn........nn...nn..neeeegnmn.nn..........",
-  "......................................................................ngneeegngnnn..........",
-  ".......................................................................nmeeeeengmmn.........",
-  "........................................................................nmeeeeeneeenn.......",
-  ".........................................................................ngeeieeiiieen......",
-  "........................................................................nmggeneiiiiien......",
-  ".........................................................................nngneiiiiiiien.....",
-  "..........................................................................nmgeiiiiiiienn....",
-  "..........................................................................nmmeiiiiiiienin...",
-  "...........................................................................nmneiiiiiennin...",
-  "............................................................................nmeeiiieeneienn.",
-  ".............................................................................nnneeeniiiiiiin",
-  "................................................................................nnn.nneienn.",
-  "......................................................................................nin...",
-  "......................................................................................nin...",
-  ".......................................................................................n....",
+  "n...n...n.n.n.n.n.n.n.n.n.n.nnnnnnnnnnnnnnn........................................................",
+  "dn.ndn.ndndndndndndndndndndndmmmmmmmmmmmmmmnnnnnnnnn...............................................",
+  "n...n...n.n.n.n.n.n.n.n.n.n.nnnnnnnnnmmmmmmmmmmmmmmmnnnnnn.........................................",
+  ".....................................nnnnnnnnnnmmmmmmmmmmmnnnnn....................................",
+  "...............................................nnnnnnnmmmmmggggnnnn................................",
+  "................nnn....nn...nn....nnn......nnn......nnnnnnnggggnnggnnnn..nnnn...nnnnnn.............",
+  "...............niiin..niin.niin..niiin....niiin....niiiiin.nnnniingniinnniiiin.niiiiiin............",
+  "..............niiiiin.niin.niin.niiiiin..nniiinn..niiiiin.....niingniinniiiiiinniiiiiin............",
+  ".............niinnniinniinnniinniinnniinniinnniinniinnnn...nn.niinnniinniinniin.nniinn.............",
+  ".............niin..nn.niiiiiiinniiiiiiinniin.niin.nniiin..niinniiiiiiinniiiiiinnnniin..............",
+  ".............niin..nn.niiiiiiinniiiiiiinniin.niin..niiinn.niinniiiiiiinniiiiiineeniin..............",
+  ".............niinnniinniinnniinniinnniinniinnniin..nnnniin.nn.niinnniinniinniineeniin..............",
+  "..............niiiiin.niin.niinniin.niinniiiiiiin.niiiiin.....niin.niinniinniieeeegimn.............",
+  "...............niiin..niin.niinniin.niin.nniiinn.niiiiin......niin.niinniinniigneeegngnnn..........",
+  "................nnn....nn...nn..nn...nn....nnn....nnnnn........nn...nn..nn..nnnmeeeeengmmn.........",
+  "...............................................................................nmeeeeeneeenn.......",
+  "................................................................................ngeeieeiiieen......",
+  "...............................................................................nmggeneiiiiien......",
+  "................................................................................nngneiiiiiiien.....",
+  ".................................................................................nmgeiiiiiiienn....",
+  ".................................................................................nmmeiiiiiiienin...",
+  "..................................................................................nmneiiiiiennin...",
+  "...................................................................................nmeeiiieeneienn.",
+  "....................................................................................nnneeeniiiiiiin",
+  ".......................................................................................nnn.nneienn.",
+  ".............................................................................................nin...",
+  ".............................................................................................nin...",
+  "..............................................................................................n....",
 ];
 // Where WORDMARK's top-left falls inside COMET_MARK, in art pixels.
-export const COMET_ORIGIN = [12, 5];
+export const COMET_ORIGIN = [14, 6];
 
 export const cometMarkSvg = (dateStr, scale = 2, label = "chaosh.at") => {
   const hue = (hashOf(dateStr) % 360000) / 1000;
@@ -143,152 +147,51 @@ const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
 // ---------------------------------------------------------------- raster
 
-class Raster {
-  constructor() {
-    this.d = new Float32Array(W * H * 3);
-  }
-  blend(x, y, c, a) {
-    if (x < 0 || y < 0 || x >= W || y >= H || a <= 0) return;
-    const i = (y * W + x) * 3;
-    this.d[i] += (c[0] - this.d[i]) * a;
-    this.d[i + 1] += (c[1] - this.d[i + 1]) * a;
-    this.d[i + 2] += (c[2] - this.d[i + 2]) * a;
-  }
-  rect(x, y, w, h, c, a = 1) {
-    for (let yy = y; yy < y + h; yy += 1) for (let xx = x; xx < x + w; xx += 1) this.blend(xx, yy, c, a);
-  }
-  bytes() {
-    const out = new Uint8Array(W * H * 3);
-    for (let i = 0; i < out.length; i += 1) out[i] = Math.max(0, Math.min(255, Math.round(this.d[i])));
-    return out;
-  }
-}
+// The comet mark is 99×28; the button's inside is 86×29. The mark goes in at
+// 1× (its own art pixels — scaling pixel art is the one thing it can't take),
+// so it gives up BUTTON_CROP columns of the dotted tail on the left, which
+// reads as the comet coming in from off the tile. One row of sky below it.
+const BUTTON_CROP = 13;
 
-// Separable gaussian over a W×H coverage buffer.
-const blur = (src, sigma) => {
-  const r = Math.ceil(sigma * 3);
-  const k = [];
-  let sum = 0;
-  for (let i = -r; i <= r; i += 1) {
-    const v = Math.exp(-(i * i) / (2 * sigma * sigma));
-    k.push(v);
-    sum += v;
-  }
-  for (let i = 0; i < k.length; i += 1) k[i] /= sum;
-  const tmp = new Float32Array(W * H);
-  const out = new Float32Array(W * H);
-  for (let y = 0; y < H; y += 1)
-    for (let x = 0; x < W; x += 1) {
-      let v = 0;
-      for (let i = -r; i <= r; i += 1) {
-        const xx = x + i;
-        if (xx >= 0 && xx < W) v += src[y * W + xx] * k[i + r];
-      }
-      tmp[y * W + x] = v;
-    }
-  for (let y = 0; y < H; y += 1)
-    for (let x = 0; x < W; x += 1) {
-      let v = 0;
-      for (let i = -r; i <= r; i += 1) {
-        const yy = y + i;
-        if (yy >= 0 && yy < H) v += tmp[yy * W + x] * k[i + r];
-      }
-      out[y * W + x] = v;
-    }
-  return out;
-};
-
-// The masthead's ribbon, rasterised. It calls `ribbonColumns` — the SAME
-// sampler the SVG surfaces use — and only turns the columns it gets back into
-// pixels. The previous version instead carried a hand-scaled copy of the
-// header's terms ("spatial frequencies scaled from 120 columns to 44"), which
-// is why `headerSheet` survived in aurora.js long after nothing drew with it:
-// deleting it would have orphaned the only written record of what this file
-// was imitating. Two drawings that must agree, and nothing making them.
-//
-// 88px carries one crest, like the post band's 480 does — the button is a
-// finished picture, not a tile, so it gets a whole aurora rather than a slice
-// of one. Six slices, not nine: the body is ~17px here and nine would put the
-// ramp below a pixel a step.
-const sky = (r, pal, k, { base, thick, op, glowW }) => {
-  const F = k / N;
-  const ebb = 1 + 0.08 * Math.sin(TAU * F + 1.9);
-  const { cols, edge, step } = ribbonColumns(pal, {
-    w: W,
-    h: H,
-    F,
-    step: 2,
-    base,
-    sweep: 0.09,
-    thick,
-    crestFloor: 0.5,
-    k: 0.42,
-    slices: 6,
-  });
-
-  // Glow along the lit edge, blurred — the raster equivalent of the SVG's
-  // stroke-width / stdDeviation / opacity trio, same three numbers.
-  const cover = new Float32Array(W * H);
-  for (let x = 0; x < W; x += 1) {
-    const yc = edge[Math.min(edge.length - 1, Math.floor(x / step))][1];
-    for (let y = 0; y < H; y += 1)
-      if (Math.abs(y + 0.5 - yc) <= glowW / 2) cover[y * W + x] = 1;
-  }
-  const soft = blur(cover, glowW / 3);
-  const glow = hexRgb(pal.glow);
-  for (let y = 0; y < H; y += 1)
-    for (let x = 0; x < W; x += 1)
-      r.blend(x, y, glow, op * ebb * 0.15 * soft[y * W + x]);
-
-  for (const { x, parts } of cols)
-    for (const { fill, op: o, y, h } of parts)
-      r.rect(x, y, step, h, hexRgb(fill), op * ebb * o);
-};
-
-const wordmark = (r) => {
-  const w = WORDMARK[0].length;
-  const h = WORDMARK.length;
-  const x0 = Math.round((W - w) / 2);
-  const top = 14 - Math.ceil(h / 2);
-  const ink = (fn) =>
-    WORDMARK.forEach((row, y) => {
-      for (let x = 0; x < w; x += 1) if (row[x] === "#") fn(x0 + x, top + y);
-    });
-  // One-pixel night halo first, so the name holds against any band behind it.
-  ink((x, y) => {
-    r.blend(x - 1, y, NIGHT, 1);
-    r.blend(x + 1, y, NIGHT, 1);
-    r.blend(x, y - 1, NIGHT, 1);
-    r.blend(x, y + 1, NIGHT, 1);
-  });
-  ink((x, y) => r.blend(x, y, INK, 1));
-};
-
-const frame = (pal, k) => {
-  const r = new Raster();
-  r.rect(0, 0, W, H, NIGHT);
-  r.blend(5, 4, STAR, 0.7);
-  r.blend(82, 6, STAR, 0.7);
-  r.blend(44, 2, STAR, 0.45);
-  // The "veil": the whole tile is sky, the lit edge low, the body reaching up
-  // behind the name.
-  sky(r, pal, k, { base: 0.82, thick: 0.88, op: 0.55, glowW: 12 });
-  wordmark(r);
-  r.rect(0, 0, W, 1, EDGE);
-  r.rect(0, H - 1, W, 1, EDGE);
-  r.rect(0, 0, 1, H, EDGE);
-  r.rect(W - 1, 0, 1, H, EDGE);
-  return r.bytes();
-};
-
-// Same hue rule as the masthead: the date picks it, so a hotlinked button
-// wears the day's sky like the site does.
+// Same hue, palette and posture as the masthead, at 88×31: the sky is
+// pixelSheet's own curtains and stars, with the ray periods scaled to the
+// tile so a ray is as many pixels wide as it is in the header. The frame is
+// the day's frame colour, like every box on the site.
 export const buttonFrames = (dateStr) => {
-  // Same hue, ceiling and daily spread as the masthead: a hotlinked button
-  // wears the day's sky exactly as the site does.
-  const hue = (hashOf(dateStr) % 360000) / 1000;
-  const pal = palette(hue, { lMax: 0.8, spread: daySpread(dateStr) });
-  return Array.from({ length: N }, (_, k) => frame(pal, k));
+  const pal = palette((hashOf(dateStr) % 360000) / 1000, { lMax: 0.85, spread: daySpread(dateStr) });
+  const fill = { n: NIGHT, i: INK, d: hexRgb(pal.deep), m: hexRgb(pal.mid), g: hexRgb(pal.glow), e: hexRgb(pal.edge) };
+  const frameRgb = hexRgb(dayFrame(dateStr));
+  const sheet = pixelSheet(dateStr, {
+    W,
+    H,
+    frames: N,
+    lMax: 0.8,
+    fade: [0.55, 0.6],
+    back: { base: 0.95, thick: 0.8, n1: 9, n2: 21, env: 0.65, cell: 22 },
+    front: { base: 1.15, thick: 1.0, n1: 8, n2: 18, env: 0.65, cell: 22 },
+  });
+  return Array.from({ length: N }, (_, k) => {
+    const rgb = new Uint8Array(W * H * 3);
+    const put = (x, y, c) => {
+      if (x >= 0 && x < W && y >= 0 && y < H) rgb.set(c, (y * W + x) * 3);
+    };
+    for (let i = 0; i < W * H; i += 1) {
+      const o = (k * W * H + i) * 4;
+      rgb.set(sheet.px[o + 3] ? sheet.px.subarray(o, o + 3) : NIGHT, i * 3);
+    }
+    COMET_MARK.forEach((row, y) =>
+      [...row].forEach((c, x) => c !== "." && x >= BUTTON_CROP && put(1 + x - BUTTON_CROP, 1 + y, fill[c])),
+    );
+    for (let x = 0; x < W; x += 1) {
+      put(x, 0, frameRgb);
+      put(x, H - 1, frameRgb);
+    }
+    for (let y = 0; y < H; y += 1) {
+      put(0, y, frameRgb);
+      put(W - 1, y, frameRgb);
+    }
+    return rgb;
+  });
 };
 
 // ------------------------------------------------------------------- gif

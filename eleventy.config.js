@@ -1881,7 +1881,7 @@ export default function (eleventyConfig) {
   skyFiles.set("button.png", button.png);
   skyFiles.set("button.gif", button.gif);
 
-  // The forum signature (sig.js): one panel — wordmark, tagline, latest post,
+  // The forum signature (sig.js): one panel — comet mark, tagline, latest post,
   // latest essay, Bluesky — cut into three flush images at stable /sig/ URLs,
   // redrawn every build. Built
   // in a collection because it needs the posts; nothing reads the result. A
@@ -1890,7 +1890,7 @@ export default function (eleventyConfig) {
     try {
       const dailies = publishable(api.getFilteredByTag("dailies"))
         .sort((a, b) => b.date - a.date)
-        .map((p) => ({ date: p.date, url: p.url }));
+        .map((p) => ({ date: p.date, url: p.url, title: p.data.title }));
       const essay = [...buildEssayList(api)].sort((a, b) => b.date - a.date)[0] ?? null;
       const site = (() => {
         try {
