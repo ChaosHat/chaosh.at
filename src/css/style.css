@@ -247,8 +247,16 @@ h1, h2, h3 { line-height: 1.25; }
    incongruous beside pixel chrome once the chrome stopped being caps, and sat
    lighter than the 22px subject heads under them. Alegreya is prose only now.
    Page titles 33px (3×), list and post titles 22px (2×). Regular, not bold,
-   since 2026-10-19: the 700 doubled every stroke and the titles shouted. */
+   since 2026-10-19: the 700 doubled every stroke and the titles shouted —
+   but the 400 alone read thin. The face has no weight between, so titles
+   take the pixel-font faux semi-bold: the glyph again one pixel to the
+   right, 2px strokes to 3px. The on-aurora outline below carries the same
+   shift in its own shadow list. */
 h1 { font: 400 33px/40px var(--pixel); }
+h1,
+.post-list-title,
+.post-title,
+.essay-title { text-shadow: 1px 0 0 currentColor; }
 
 /* ---------------------------------------------------------------- the sky
    Generated cover art, one SVG per subject, built nightly. The slug seeds
@@ -1657,4 +1665,16 @@ a.sky-cover:hover { border-color: var(--accent); }
      1px 1px 0 var(--night), -1px  1px 0 var(--night),
      1px -1px 0 var(--night), -1px -1px 0 var(--night),
      0 2px 0 var(--night);
+}
+
+/* Titles on the aurora: the faux semi-bold first (it must paint over the
+   outline), and the outline's right side and drop pushed out a pixel to wrap
+   the wider glyph. */
+.entry-head .post-list-title,
+.post-head .post-title {
+  text-shadow:
+     1px 0 0 currentColor,
+     2px 1px 0 var(--night), -1px  1px 0 var(--night),
+     2px -1px 0 var(--night), -1px -1px 0 var(--night),
+     0 2px 0 var(--night), 1px 2px 0 var(--night);
 }
