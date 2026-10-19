@@ -864,15 +864,18 @@ export const ribbonSheet = (
 // "the aurora goes true pixel art"). Everything above draws at screen
 // resolution — chunky rects under a feGaussianBlur glow — and blocks beside
 // blur at another scale is a MIXED GRID, the tell that kept the masthead from
-// ever reading as pixel art. So this draws at the real resolution, 240×44,
+// ever reading as pixel art. So this draws at the real resolution, 240×60,
 // with a fixed seven-colour ramp, no alpha but on/off, and every glow and fade
 // done by 4×4 ordered dither; CSS scales it ×4 with `image-rendering:
 // pixelated`. The ladder, the spread and the determinism are unchanged: only
 // the rendering is new.
 //
-// 44 rows, not the old band's 28: at 28 the curtains squashed into parallel
-// stripes. The band is 176px now and runs past the header rule into the top
-// of the page; the home page's intro sits in a smoked box over it (style.css).
+// 60 rows, not the old band's 28: at 28 the curtains squashed into parallel
+// stripes. 44 (176px) fixed that; 60 (240px, 2026-10-19) gives the curtains
+// room to stand apart from the nav. The band runs down into the top of the
+// page and the furniture boxes sit over it in smoked glass (style.css) — the
+// content was deliberately NOT pushed down to clear it.
+// Curtain posture is in fractions of H, so the forms scale with the rows.
 //
 // Ported from the vault's silhouette lab (99_Admin/attachments/
 // chaosh-aurora-silhouette-lab.html), where the numbers were tuned at 320×96.
@@ -880,7 +883,7 @@ export const ribbonSheet = (
 // tile repeats; motion runs on the frame phase, so 8 frames loop; and the
 // vertical numbers are restated for the masthead's rows.
 export const PIXEL_W = 240;
-export const PIXEL_FH = 44;
+export const PIXEL_FH = 60;
 export const PIXEL_SCALE = 4;
 const TAU = 2 * Math.PI;
 
@@ -1070,8 +1073,8 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
 // The sheet: N frames of W×H stacked vertically, RGBA. Returns the raw pixels
 // so the build can encode them and the preview can inspect them.
 //
-// CSS MUST AGREE: the band is H×scale tall (176px), background-size is
-// (W×scale) by (N×H×scale) — 960×1408 at the defaults — `steps(N)`, and the
+// CSS MUST AGREE: the band is H×scale tall (240px), background-size is
+// (W×scale) by (N×H×scale) — 960×1920 at the defaults — `steps(N)`, and the
 // keyframe to `0 -(N×H×scale)px`.
 export const pixelSheet = (
   dateStr,
