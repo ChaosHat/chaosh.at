@@ -113,8 +113,8 @@ permalink: /shelf/
             where English couldn't order "favorite" against "loved". Unrated
             renders "pending" rather than an empty cell — a blank beside a
             filled neighbour reads as a field someone forgot. -#}
-        {% if item.canon %}<span class="cell rating badge-g b-canon" data-g="♥">canon</span>
-        {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}">{{ item.rating.title }}</span>
+        {% if item.canon %}<span class="cell rating badge-g b-canon">canon</span>
+        {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
         {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
       </span>
       <span class="shelf-caption">{{ item.title }}</span>

@@ -21,7 +21,7 @@ description: What the words under the covers mean, in order.
   <ol class="ladder">
     {%- for tag in collections.tagPages %}{% if tag.slug == "canon" %}
     <li class="rung rung-canon">
-      <a class="badge badge-g b-canon" data-g="♥" href="/t/{{ tag.slug }}/">canon</a>
+      <a class="badge badge-g b-canon" href="/t/{{ tag.slug }}/">canon</a>
       <p class="rung-desc">{{ tag.description }}</p>
       <p class="rung-count">{{ tag.members | length }} games</p>
     </li>

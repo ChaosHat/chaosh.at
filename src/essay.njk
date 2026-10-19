@@ -31,7 +31,7 @@ eleventyComputed:
       {% endif %}
     </span>
     <span class="cell badge b-{{ c.status }}">{{ c.status }}</span>
-    {% if c.canon %}<span class="cell rating badge-g b-canon" data-g="♥">canon</span>
+    {% if c.canon %}<span class="cell rating badge-g b-canon">canon</span>
     {% elif c.rating %}<span class="cell rating r-{{ c.rating.slug }}">{{ c.rating.title }}</span>
     {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
   </a>

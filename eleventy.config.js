@@ -400,6 +400,8 @@ export default function (eleventyConfig) {
   // survives their site moving and costs them no bandwidth. links.yaml points
   // at /img/buttons/<name>.
   eleventyConfig.addPassthroughCopy({ "src/img/buttons": "img/buttons" });
+  // Badge icons: pixelarticons (MIT) plus the drawn canon star.
+  eleventyConfig.addPassthroughCopy({ "src/img/icons": "img/icons" });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
   eleventyConfig.setLibrary("md", md);

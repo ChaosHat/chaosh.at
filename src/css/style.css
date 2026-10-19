@@ -81,7 +81,11 @@
   /* Was --st-dabbling's green until 2026-10-13; dabbling folded into active
      and the hue passed to owned board games. */
   --st-owned: #b9e8a0;
-  --st-backlog: #f0dda0;
+  /* Backlog took canon's old colourless --muted on 2026-10-19, when canon
+     went gold on the word as well as the frame: the pale gold it had
+     (#f0dda0) read as a second shade of canon. Unlit fits a game not yet
+     started, and the bookmark icon keeps it apart from shelved's lavender. */
+  --st-backlog: var(--muted);
   --st-shelved: #cab5f5;
   /* Was --st-abandoned; `abandoned` + `sampled` merged 2026-10-13, the
      faded-green sampled hue retired with it. */
@@ -89,9 +93,9 @@
   --st-completed: #a9d0f6;
 
   /* The canon's gold. Deliberately hotter and more saturated than
-     --st-backlog (#f0dda0), which is the only other warm tone on the site and
-     sits one tile away on the same shelf — at pale gold the two read as the
-     same mark. Matches MOON_GOLD in aurora.js, which gilds a canon subject's moon;
+     backlog's old #f0dda0, which sat one tile away on the same shelf — at
+     pale gold the two read as the same mark, and once canon's word went gold
+     too (2026-10-19) backlog gave the warm tone up entirely. Matches MOON_GOLD in aurora.js, which gilds a canon subject's moon;
      if one moves, move both. */
   --gold: #f5c86b;
   /* The rung below canon. Has to read as a metal beside gold and as a
@@ -524,7 +528,7 @@ figure,
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 5px 7px;
   font: 11px/1 var(--pixel);
   color: var(--c);
@@ -532,14 +536,34 @@ figure,
   border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
 }
 
-.badge::before { content: ""; width: 4px; height: 4px; background: currentColor; }
+/* Status icons (2026-10-19), in place of the 4px dot: pixelarticons (MIT,
+   src/img/icons/LICENSE-pixelarticons.txt), drawn on a 12px lattice with
+   2-unit pixels in a 24 viewBox, so at 12px one icon pixel is one device
+   pixel, the 11px text's own scale. A mask in currentColor, so each takes
+   its status hue. Night-sky where it fits without forcing: active is the
+   sun (what's burning now), completed the moon (the completed sky's own),
+   shelved a cloud (still up there, hidden for now). Backlog, incomplete and
+   owned keep plain marks — a new moon read as an empty radio button, a
+   falling star clashed with canon's, and owned board games are boxes. The
+   icon is the second channel beside the hue, which is what let backlog go
+   colourless. Supersedes 2026-10-05's "not a precedent for glyphing the
+   statuses" (see .badge-g): the dot was a placeholder for this. */
+.badge::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  -webkit-mask: var(--ico) center / 12px 12px no-repeat;
+  mask: var(--ico) center / 12px 12px no-repeat;
+}
 
-.b-active { --c: var(--st-active); }
-.b-owned { --c: var(--st-owned); }
-.b-backlog { --c: var(--st-backlog); }
-.b-shelved { --c: var(--st-shelved); }
-.b-incomplete { --c: var(--st-incomplete); }
-.b-completed { --c: var(--st-completed); }
+.b-active { --c: var(--st-active); --ico: url("/img/icons/active.svg"); }
+.b-owned { --c: var(--st-owned); --ico: url("/img/icons/owned.svg"); }
+.b-backlog { --c: var(--st-backlog); --ico: url("/img/icons/backlog.svg"); }
+.b-shelved { --c: var(--st-shelved); --ico: url("/img/icons/shelved.svg"); }
+.b-incomplete { --c: var(--st-incomplete); --ico: url("/img/icons/incomplete.svg"); }
+.b-completed { --c: var(--st-completed); --ico: url("/img/icons/completed.svg"); }
 
 /* The rating chip — the third axis. Told apart from a status badge by fill:
    the badge is filled in its status hue, the chip is hollow and colourless.
@@ -580,16 +604,27 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
   border-color: color-mix(in srgb, var(--muted) 30%, transparent);
 }
 
-/* Same trick on the canon badge, where ♥ is the non-colour channel carrying
-   what the gold frame says — an exception for the rare gilded ten, not a
-   precedent for glyphing the statuses. */
+/* Canon: a gold star, in gold on the word and border as well as the card's
+   frame (2026-10-19; was a muted word with a ♥ from a fallback font, since
+   ratings are colourless — canon is the one rung that isn't). The star is
+   drawn for the site, not from the pack: 11×10, a size up from the status
+   icons because these are the special ones, with two 1×2 gaps for eyes —
+   Mario's star, there for whoever looks closely. Readable as eyes at 2×;
+   at 1× it is simply a star. */
 .badge-g::before {
-  content: attr(data-g);
-  width: auto;
-  height: auto;
-  background: none;
-  font-size: 11px;
-  line-height: 1;
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+  background: currentColor;
+  -webkit-mask: url("/img/icons/canon.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/canon.svg") center / 12px 12px no-repeat;
+}
+.badge-g.badge { gap: 0; }
+.rating.b-canon {
+  color: var(--gold);
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
 }
 
 .tag-list {
@@ -1099,6 +1134,18 @@ figcaption {
   border: 0;
   border-top: 2px solid var(--dim);
 }
+
+/* Centring an odd-width label in an even-width cell puts the pixel face on a
+   half pixel. These are the words that come out odd (icon + gap is 16px, so
+   only the word's own width decides); a 1px pad moves them back onto the
+   grid. Measured 2026-10-19 — if a rating's title changes, re-measure:
+   text x % 1 on every .cell, shelf page, any width. */
+.cell.b-completed,
+.cell.b-incomplete,
+.cell.b-canon,
+.cell.r-disliked,
+.cell.r-liked:not(.partial),
+.cell.r-loved.partial { padding-left: 8px; } /* the chips pad 7px each side */
 
 .shelf-caption { display: block; margin: 9px 0 0; font: 11px/16px var(--pixel); }
 
