@@ -243,11 +243,12 @@ hr {
 }
 
 h1, h2, h3 { line-height: 1.25; }
-/* Titles are pixel, bold, on the lattice (2026-10-16): Alegreya titles read
-   as incongruous beside pixel chrome once the chrome stopped being caps, and
-   sat lighter than the 22px subject heads under them. Alegreya is prose only
-   now. Page titles 33px (3×), list and post titles 22px (2×). */
-h1 { font: 700 33px/40px var(--pixel); }
+/* Titles are pixel, on the lattice (2026-10-16): Alegreya titles read as
+   incongruous beside pixel chrome once the chrome stopped being caps, and sat
+   lighter than the 22px subject heads under them. Alegreya is prose only now.
+   Page titles 33px (3×), list and post titles 22px (2×). Regular, not bold,
+   since 2026-10-19: the 700 doubled every stroke and the titles shouted. */
+h1 { font: 400 33px/40px var(--pixel); }
 
 /* ---------------------------------------------------------------- the sky
    Generated cover art, one SVG per subject, built nightly. The slug seeds
@@ -413,6 +414,9 @@ figure,
   max-width: var(--wide);
   margin: -0.5rem 0 2rem;
   padding: 0.9rem 1rem;
+  /* The pixel face at the panels' size, so the intro reads as one of the
+     framed boxes rather than prose that wandered out of the column. */
+  font: 16.5px/26px var(--pixel);
   color: var(--muted);
   /* Framed and smoked like the strips below it (see frames): the masthead
      runs down behind the intro since the band grew to 176px (2026-10-19).
@@ -585,7 +589,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-title {
   display: block;
   margin-bottom: 0.4rem;
-  font: 700 22px/29px var(--pixel);
+  font: 400 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -828,8 +832,8 @@ figcaption {
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
-.post-date { margin: 0; font: 700 22px/29px var(--pixel); }
+.post-title { margin: 0 0 0.5rem; font: 400 33px/40px var(--pixel); }
+.post-date { margin: 0; font: 400 22px/29px var(--pixel); }
 .post-subdate { margin: 0; font: 22px/30px var(--pixel); color: var(--muted); }
 
 .post-tags {
@@ -1157,7 +1161,7 @@ figcaption {
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 0.7rem; font: 700 33px/40px var(--pixel); }
+.subject-head h1 { margin: 0 0 0.7rem; font: 400 33px/40px var(--pixel); }
 
 /* Lit-days strip: square pixels, one per day written about, lit in the
    subject's hue (--lit, set inline from its palette); short gaps stay night.
@@ -1294,7 +1298,7 @@ figcaption {
    pictogram appears without its words beside it, because the words are the
    <h1> it sits in. */
 .view-glyph { font-size: 0.8em; margin-right: 0.15em; }
-.tag-head h1 { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
+.tag-head h1 { margin: 0 0 0.5rem; font: 400 33px/40px var(--pixel); }
 .tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
 .tag-members { margin: 0; font: 11px/20px var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
@@ -1361,7 +1365,7 @@ figcaption {
 .essay-title {
   display: block;
   margin-bottom: 0.35rem;
-  font: 700 22px/29px var(--pixel);
+  font: 400 22px/29px var(--pixel);
   color: var(--ink);
   text-decoration: none;
 }
