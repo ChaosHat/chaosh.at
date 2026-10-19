@@ -1745,11 +1745,14 @@ main figure img { cursor: zoom-in; }
    beats a legible-length sliver of one. */
 /* Cover behaviour shared by every surface that shows one: 2:3 like the source
    grid, cropped not stretched, and no dither — the 4px checker belongs to
-   generated art and over a photograph it is just a dirty screen. */
+   generated art and over a photograph it is just a dirty screen. Smooth
+   scaling too: .sky went pixelated for the art, and nearest-neighbour on a
+   600x900 photo shrunk into a 2:3 tile shreds the lettering. */
 .sky-cover {
   aspect-ratio: 2 / 3;
   background-size: cover;
   background-position: center;
+  image-rendering: auto;
 }
 .sky-cover::before { content: none; }
 
