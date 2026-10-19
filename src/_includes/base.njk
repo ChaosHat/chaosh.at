@@ -145,5 +145,23 @@
       {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
       <p><a href="/feed.xml">feed</a></p>
     </footer>
+    {#- Lightbox: click a post image to see it full size. The site's only
+        script; without it the images are just images. -#}
+    <script>
+      document.querySelector("main figure img") && (() => {
+        const box = document.createElement("dialog");
+        box.className = "lightbox";
+        box.append(document.createElement("img"));
+        document.body.append(box);
+        box.addEventListener("click", () => box.close());
+        document.querySelector("main").addEventListener("click", (e) => {
+          const img = e.target.closest("figure img");
+          if (!img) return;
+          box.firstChild.src = img.currentSrc || img.src;
+          box.firstChild.alt = img.alt;
+          box.showModal();
+        });
+      })();
+    </script>
   </body>
 </html>

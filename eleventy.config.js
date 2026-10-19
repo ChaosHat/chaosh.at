@@ -217,9 +217,16 @@ md.core.ruler.push("obsidian_float_sides", (state) => {
     }
   }
   state.tokens = blocks.flat();
+  // The count restarts at every ## because a daily renders whole and is then
+  // split into fragments, each with its cover on the left: carried across
+  // sections, the Lazarus shot came in as a left float and hung over the
+  // cover card (2026-10-19). Restarting puts each section's first float on
+  // the right, and a section reads the same on the day as on its /s/ page,
+  // which renders it alone.
   let n = 0;
   for (const tok of state.tokens) {
     if (tok.level !== 0) continue;
+    if (tok.type === "heading_open" && tok.tag === "h2") n = 0;
     const cls = tok.attrGet("class") ?? "";
     const isFloat =
       (tok.type === "figure_open" && cls === "fig-float") ||

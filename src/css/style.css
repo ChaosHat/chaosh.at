@@ -787,6 +787,32 @@ figcaption {
   }
   .fig-right { float: right; margin: 5px calc(-1 * var(--hang)) 0.75rem 1.5rem; }
   .fig-left { float: left; margin: 5px 1.5rem 0.75rem calc(-1 * var(--hang)); }
+  /* In a fragment the left gutter is the cover's column, so a left float
+     there stays inside the prose instead of hanging over the card. The
+     renderer already starts each section on the right; this catches a
+     second float in a short section. Asides get the same rule below. */
+  .frag-body .fig-left { margin-left: 0; }
+}
+
+/* Lightbox (2026-10-19): a post image opens at full size over the page.
+   A native <dialog> built by the script at the end of base.njk, so Esc,
+   focus and the top layer come free; any click closes it. The image is the
+   published 1600px copy, shown at its own size, capped to the viewport. */
+main figure img { cursor: zoom-in; }
+.lightbox {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-out;
+}
+.lightbox::backdrop { background: color-mix(in oklab, var(--night) 88%, transparent); }
+.lightbox img {
+  display: block;
+  max-width: 94vw;
+  max-height: 92vh;
+  border: 2px solid var(--frame);
 }
 
 /* Asides — the renderer turns an Obsidian `> [!aside] Title` callout into
@@ -827,6 +853,7 @@ figcaption {
   }
   .aside-right { float: right; margin: 5px calc(-1 * var(--hang)) 0.75rem 1.5rem; }
   .aside-left { float: left; margin: 5px 1.5rem 0.75rem calc(-1 * var(--hang)); }
+  .frag-body .aside-left { margin-left: 0; }
 }
 
 /* Floats — figures and asides, one system (2026-10-14). The renderer deals
