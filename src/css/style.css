@@ -138,15 +138,27 @@
 
 * { box-sizing: border-box; }
 
+html {
+  position: relative;
+  background: var(--night) linear-gradient(var(--header), transparent) no-repeat;
+  background-size: 100% 26rem;
+}
+
 /* The page's own stars (aurora.js starTile): a static pixel tile at ×4, the
    same grid as the masthead, reseeded each build. Over the header gradient,
-   under everything else. */
-html {
-  background:
-    url("/img/aurora/stars.png") repeat,
-    var(--night) linear-gradient(var(--header), transparent) no-repeat;
-  background-size: 960px 960px, 100% 26rem;
+   under everything else — including the masthead, whose z-index is -1.
+   Its own layer and not a second html background, because image-rendering
+   INHERITS: set on html for the tile's sake it reached every <img>, and the
+   shelf's 600×900 covers shrank nearest-neighbour into jagged art. */
+html::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url("/img/aurora/stars.png") repeat;
+  background-size: 960px 960px;
   image-rendering: pixelated;
+  pointer-events: none;
 }
 
 body {
