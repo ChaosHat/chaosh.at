@@ -405,12 +405,18 @@ figure,
 }
 
 /* On desktop the row sits on the masthead's aurora, so each word gets its
-   own pane of the intro's smoked glass (2026-10-19). The phone row below is
-   already one smoked strip, so its words stay bare. */
+   own pane of the intro's smoked glass, in the plain frame (border and ring,
+   no inset line) that the cards wear (2026-10-19). The full double frame was
+   mocked and five of them stacked over the intro competed with it; the inset
+   line also crowds a word this small. Hover lifts the text only — the border
+   is already lit. The phone row below is one smoked strip, so its words stay
+   bare. */
 @media (min-width: 34.0625rem) {
-  .site-nav a { background: var(--smoke); border-color: var(--edge); }
-  .site-nav a:hover,
-  .site-nav a:focus-visible { border-color: var(--frame); }
+  .site-nav a {
+    background: var(--smoke);
+    border: 2px solid var(--frame);
+    box-shadow: 0 0 0 2px var(--ring);
+  }
 }
 
 .site-nav a:hover,
