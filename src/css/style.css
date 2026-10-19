@@ -2,22 +2,29 @@
    Design notes and rationale: vault, 90_Reference/91_Documentation/
    "chaosh.at Design System". Keep this file terse; the why lives there. */
 
+/* Pixelify Sans, re-gridded. Stock Pixelify draws each pixel ~1.1 grid units
+   wide, ⅔px off the origin, so no CSS size lands a stem on whole pixels and
+   every edge smears. This copy (pixelify-grid.py) snaps every point to an
+   exact 11-per-em lattice: crisp at 11px and 22px only, so those are the only
+   two sizes the chrome uses. Its 2, 5 and Z are redrawn (stock, they read as
+   Z, S and 2), and it gains pixel arrows. 700 is a pixel bold: the 400
+   OR'd one pixel right. Subset and reasoning: src/fonts/SUBSET.md. */
 @font-face {
-  font-family: "Silkscreen";
+  font-family: "Pixelify Grid";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/silkscreen-400.woff2") format("woff2");
+  src: url("/fonts/pixelify-grid-400.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Silkscreen";
+  font-family: "Pixelify Grid";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("/fonts/silkscreen-700.woff2") format("woff2");
+  src: url("/fonts/pixelify-grid-700.woff2") format("woff2");
 }
 
-/* Alegreya Sans, self-hosted on the same terms as Silkscreen: one origin, no
+/* Alegreya Sans, self-hosted on the same terms as the pixel face: one origin, no
    third-party DNS on first paint, and the site's own voice not dependent on
    someone else's CDN. Three static files — the family is not variable, so 400,
    400 italic and 700 are three faces and three loads. Nothing else ships; the
@@ -49,13 +56,13 @@
 }
 
 :root {
-  --pixel: "Silkscreen", ui-monospace, monospace;
+  --pixel: "Pixelify Grid", ui-monospace, monospace;
   /* Named for its ROLE, not its classification — it held `ui-serif, Georgia,
      "Times New Roman", serif` until 2026-09-04, which meant the body copy was
      never one thing: iPhone Safari resolved it to New York, Windows Chrome to
      Georgia, Linux to Noto Serif. Readers were seeing different sites. Why the
      prose face is a humanist sans and not a serif is argued in the design doc's
-     Type section; the short version is that Silkscreen is itself a bitmap sans,
+     Type section; the short version is that the pixel face is itself a bitmap sans,
      so a NEUTRAL sans collapses the two-voice split — a humanist one, with a
      written skeleton and a true italic, does not. */
   --prose: "Alegreya Sans", system-ui, sans-serif;
@@ -92,6 +99,21 @@
      --muted (#a9a6ce), the retired sampled green (#b6bda8), --st-completed (#a9d0f6) —
      so it is brighter and less blue than all three. */
   --silver: #cfd3e0;
+
+  /* The frame (2026-10-16, hi-bit): the chrome's one colour is the day's
+     aurora hue, set on <html> by the build (aurora.js dayFrame), so the
+     frames are green on a green day and violet on a violet one. Lavender
+     here is the fallback for a build that set none — the quietest of the
+     three candidates. --dim (the inset second line) and --fill (the panel
+     ground) are mixes of it into the night rather than their own stops, so
+     the ground stays night with a tint and never turns into a colour. The
+     rules are under "frames" below. */
+  --frame: #b6b2e0;
+  --dim: color-mix(in oklab, var(--frame) 30%, var(--night));
+  --fill: color-mix(in oklab, var(--frame) 6%, var(--night));
+  /* The 2px of night outside every frame, so a frame never touches the
+     aurora or a neighbour directly. Darker than --night on purpose. */
+  --ring: #05060e;
 
   /* Retained, unused: the per-block prose cap used until 2026-08-18. Capping
      blocks individually is what stranded headings and datelines at the shell
@@ -221,6 +243,11 @@ hr {
 }
 
 h1, h2, h3 { line-height: 1.25; }
+/* Titles are pixel, bold, on the lattice (2026-10-16): Alegreya titles read
+   as incongruous beside pixel chrome once the chrome stopped being caps, and
+   sat lighter than the 22px subject heads under them. Alegreya is prose only
+   now. Page titles 33px (3×), list and post titles 22px (2×). */
+h1 { font: 700 33px/40px var(--pixel); }
 
 /* ---------------------------------------------------------------- the sky
    Generated cover art, one SVG per subject, built nightly. The slug seeds
@@ -254,6 +281,43 @@ h1, h2, h3 { line-height: 1.25; }
 .sky-blank::before { content: none; }
 
 
+/* ---------------------------------------------------------------- frames
+   B's double line in the day's hue (2026-10-16, the hi-bit redesign): a 2px
+   border in --frame, a 2px --dim line inset 6px inside it, 2px of --ring
+   outside, a flat --fill ground. No gradient, no bevel, no drop shadow — the
+   FF6 menu window was mocked first and was far too much. Two weights:
+
+   - the full frame, double line, on boxes that hold text: the furniture
+     strips and asides.
+   - the plain frame, border and ring only, on anything that holds a picture:
+     shelf and essay cards, covers, figures. outline paints over content, so
+     the inset line would be drawn across the art. */
+
+.now,
+.aside,
+.site-intro {
+  background: var(--fill);
+  border: 2px solid var(--frame);
+  outline: 2px solid var(--dim);
+  outline-offset: -6px;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* The boxes that sit over the sky — the intro and the furniture strips, which
+   the 176px masthead and the page stars run behind — take smoked glass for a
+   ground instead of the flat fill (2026-10-19). Asides keep --fill: they sit
+   inside the reading column, which is already smoked. */
+.now,
+.site-intro { background: var(--smoke); }
+
+.shelf-card,
+figure,
+.frag > .sky-cover,
+.subject-head > .sky-cover {
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
 /* ---------------------------------------------------------------- header */
 
 .site-header {
@@ -270,7 +334,7 @@ h1, h2, h3 { line-height: 1.25; }
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font: 400 24px/1 var(--pixel);
+  font: 400 22px/1 var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -304,7 +368,7 @@ h1, h2, h3 { line-height: 1.25; }
   align-items: center;
   gap: 0.3rem;
   margin-left: auto;
-  font: 12px/1 var(--pixel);
+  font: 16.5px/1 var(--pixel);
 }
 
 .site-nav a {
@@ -317,7 +381,7 @@ h1, h2, h3 { line-height: 1.25; }
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
 
-/* On a phone five words at 12px Silkscreen run ~360px of glyphs alone, so
+/* On a phone five words at 12px Silkscreen ran ~360px of glyphs alone, so
    the row wraps at any padding — and a wrapped row over the masthead put
    the stray word on top of the aurora. So the wordmark keeps the band to
    itself and the nav drops under it, where a second line is just a second
@@ -348,15 +412,12 @@ h1, h2, h3 { line-height: 1.25; }
 .site-intro {
   max-width: var(--wide);
   margin: -0.5rem 0 2rem;
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
   color: var(--muted);
-  /* Smoked glass: the masthead runs down behind the intro since the band
-     grew to 176px (2026-10-19). Translucent night keeps the copy readable
-     and lets the aurora glow faintly through; an opaque card was the other
-     option and read as a sticker on the sky. Full shell width, like the
-     strips below it. */
-  background: var(--smoke);
-  border: 1px solid var(--edge);
+  /* Framed and smoked like the strips below it (see frames): the masthead
+     runs down behind the intro since the band grew to 176px (2026-10-19).
+     Translucent night keeps the copy readable and lets the aurora glow
+     faintly through; an opaque card read as a sticker on the sky. */
 }
 
 .site-intro span { display: block; }
@@ -365,12 +426,10 @@ h1, h2, h3 { line-height: 1.25; }
 /* ------------------------------------------- now playing / latest essays */
 
 .now {
+  /* 0.8rem clears the inset line (2px border + 4px gap + 2px line) with the
+     same air the hairline box had inside it. */
   padding: 0.8rem 0.9rem;
   margin-bottom: 2.5rem;
-  background: var(--smoke);
-  border: 1px solid var(--edge);
-  position: relative;
-  overflow: hidden;
 }
 
 /* Adjacent strips stack as one furniture unit; only the last one holds the
@@ -383,20 +442,10 @@ h1, h2, h3 { line-height: 1.25; }
   margin-bottom: 0.75rem;
 }
 
-/* Scanlines here only. Over prose they would be vandalism. */
-.now::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
-}
-
 .now-label {
   flex-shrink: 0;
-  font: 12px/1 var(--pixel);
-  color: var(--st-active);
+  font: 16.5px/1 var(--pixel);
+  color: var(--frame);
 }
 
 .now-items { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -405,7 +454,7 @@ h1, h2, h3 { line-height: 1.25; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font: 12px/1.2 var(--pixel);
+  font: 16.5px/20px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -417,16 +466,12 @@ h1, h2, h3 { line-height: 1.25; }
    meets the art first, so it has to survive the encounter. */
 .now-item .sky { width: 32px; }
 
-/* Essays wear the completed blue: finished, considered things beside the
-   active green of what's live now. */
-.essays .now-label { color: var(--st-completed); }
-
-.essay-when { color: var(--muted); font: 12px/1 var(--pixel); }
+.essay-when { color: var(--muted); font: 16.5px/1 var(--pixel); white-space: nowrap; }
 
 .essays-all {
   margin-left: auto;
   flex-shrink: 0;
-  font: 12px/1 var(--pixel);
+  font: 16.5px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -437,7 +482,7 @@ h1, h2, h3 { line-height: 1.25; }
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.45rem;
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   color: var(--c);
   background: color-mix(in srgb, var(--c) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
@@ -468,7 +513,7 @@ h1, h2, h3 { line-height: 1.25; }
   display: inline-flex;
   align-items: center;
   padding: 0.3rem 0.45rem;
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   white-space: nowrap;
   text-decoration: none;
   color: var(--muted);
@@ -517,7 +562,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
   padding: 0.3rem 0.45rem;
   background: var(--deep);
   border: 1px solid var(--edge);
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -540,8 +585,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-title {
   display: block;
   margin-bottom: 0.4rem;
-  font: 700 1.4rem/1.12 var(--prose);
-  letter-spacing: -0.018em;
+  font: 700 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -552,7 +596,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-subdate {
   display: block;
   margin: 0;
-  font: 16px/1.35 var(--pixel);
+  font: 22px/30px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -565,7 +609,7 @@ a.post-list-date:hover { color: var(--accent); }
 .entry-kind {
   display: block;
   margin-bottom: 0.55rem;
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   color: var(--st-completed);
 }
 
@@ -642,14 +686,13 @@ a.post-list-date:hover { color: var(--accent); }
 figure {
   clear: both;
   margin: 1.5rem 0;
-  border: 1px solid var(--edge);
-  background: var(--deep);
+  background: var(--fill);
 }
 figure > img { display: block; width: 100%; }
 figcaption {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid var(--edge);
-  font: 12px/1.5 var(--pixel);
+  border-top: 2px solid var(--frame);
+  font: 16.5px/24px var(--pixel);
   color: var(--muted);
   text-align: center;
 }
@@ -673,18 +716,15 @@ figcaption {
    hang at laptop widths and the full half from ~1280px). Prose wraps down its
    left side. Side comes from the renderer (obsidian_float_sides), shared with
    figures — see Floats below.
-   The wash is --tint (the first about: subject's glow, set on the article by
-   essay.njk; accent elsewhere) mixed thin into night — "all color on the
-   site is aurora" — with a stronger rule of the same hue down its inner
-   edge. The type steps down a size, the sidebar voice; the title is chrome,
+   Since 2026-10-16 it wears the full frame in the day's hue (see frames),
+   like the furniture strips. Until then it was a wash of --tint, the first
+   about: subject's glow, with a rule of that hue down its inner edge;
+   essay.njk still sets --tint, which nothing reads now. The type steps down a size, the sidebar voice; the title is chrome,
    so pixel face. On a phone the float releases and it is a full-column box,
    the same breakpoint as figures and the card. */
 .aside {
-  --t: var(--tint, var(--accent));
   margin: 1.5rem 0;
   padding: 0.9rem 1.1rem;
-  background: color-mix(in oklab, var(--t) 12%, var(--night));
-  border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -693,9 +733,8 @@ figcaption {
 .aside p { margin: 0 0 0.72em; }
 .aside .aside-title {
   margin-bottom: 0.5rem;
-  font: 12px/1.5 var(--pixel);
-  color: var(--t);
-  letter-spacing: 0.02em;
+  font: 11px/16px var(--pixel);
+  color: var(--frame);
 }
 @media (min-width: 34.01rem) {
   .aside {
@@ -704,7 +743,6 @@ figcaption {
   }
   .aside-right { float: right; margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem; }
   .aside-left { float: left; margin: 0.3rem 1.5rem 0.75rem calc(-1 * var(--hang)); }
-  .aside-left { border-left: 0; border-right: 2px solid color-mix(in oklab, var(--t) 55%, var(--night)); }
 }
 
 /* Floats — figures and asides, one system (2026-10-14). The renderer deals
@@ -739,10 +777,6 @@ figcaption {
     float: right;
     margin: 0.3rem calc(-1 * var(--hang)) 0.75rem 1.5rem;
   }
-  .essay-row-body .aside-left {
-    border-right: 0;
-    border-left: 2px solid color-mix(in oklab, var(--t) 55%, var(--night));
-  }
 }
 
 .frag-head {
@@ -767,7 +801,7 @@ figcaption {
    into every heading, where it would collide with the active badge. */
 .frag-subject {
   padding-bottom: 2px;
-  font: 700 16px/1.3 var(--pixel);
+  font: 400 22px/29px var(--pixel);
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--muted);
@@ -782,7 +816,7 @@ figcaption {
   margin-top: 1.1rem;
   padding: 0.5rem 0.7rem;
   border: 1px solid var(--edge);
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -794,9 +828,9 @@ figcaption {
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
-.post-date { margin: 0; font: 400 1.4rem/1.2 var(--prose); }
-.post-subdate { margin: 0; font: 16px/1.35 var(--pixel); color: var(--muted); }
+.post-title { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
+.post-date { margin: 0; font: 700 22px/29px var(--pixel); }
+.post-subdate { margin: 0; font: 22px/30px var(--pixel); color: var(--muted); }
 
 .post-tags {
   margin-top: 2.5rem;
@@ -818,12 +852,6 @@ figcaption {
 }
 .essay-card .shelf-cover,
 .essay-card .sky { aspect-ratio: 2 / 3; }
-.essay-card .cell {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  border-top: 0;
-}
 @media (max-width: 34rem) {
   .essay-card { float: none; margin: 0 0 1.25rem; }
 }
@@ -920,14 +948,15 @@ figcaption {
   border-bottom: 1px solid var(--edge);
 }
 
-.archive-list a { font: 12px/1.5 var(--pixel); text-decoration: none; }
+.archive-list a { font: 16.5px/24px var(--pixel); text-decoration: none; }
 
 /* The archive row's kicker, same word and blue as the home stream's. */
-.archive-kind { font: 12px/1.5 var(--pixel); color: var(--st-completed); }
+.archive-kind { font: 16.5px/24px var(--pixel); color: var(--st-completed); }
 
 .archive-note {
   margin-left: auto;
-  font: 12px/1.5 var(--pixel);
+  font: 16.5px/24px var(--pixel);
+  white-space: nowrap;
   color: var(--muted);
 }
 
@@ -944,14 +973,14 @@ figcaption {
 }
 
 .essay-list .sky { width: 24px; }
-.essay-list a { font: 12px/1.5 var(--pixel); text-decoration: none; }
+.essay-list a { font: 16.5px/24px var(--pixel); text-decoration: none; }
 
 .pagination {
   display: flex;
   align-items: baseline;
   gap: 1rem;
   margin-top: 2rem;
-  font: 10px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
 }
 
 .pagination a { text-decoration: none; }
@@ -972,7 +1001,7 @@ figcaption {
 
 /* The card is cover + two cells, and the lift takes the whole card: they are
    one object, and lifting the art alone would peel it off the label under it. */
-.shelf-card { display: block; transition: transform 0.1s steps(3); }
+.shelf-card { display: block; background: var(--fill); transition: transform 0.1s steps(3); }
 .shelf-item a:hover .shelf-card { transform: translateY(-4px); }
 .shelf-art { display: block; }
 
@@ -984,7 +1013,6 @@ figcaption {
   display: block;
   width: 100%;
   aspect-ratio: 2 / 3;
-  border: 1px solid var(--edge);
   /* Night showing through until a lazy cover arrives, so the grid never
      flashes a white or empty box against the dark page. */
   background: var(--deep);
@@ -997,21 +1025,26 @@ figcaption {
    pAR='none' just lengthens the rays, and a completed scene cover-crops from
    its tall 3:10 canvas, so the crescent never deforms. */
 .shelf-item .sky { aspect-ratio: 2 / 3; }
+/* Inside a card the frame is the only edge (see frames): the art and the
+   cells drop their own borders, and a 2px --dim line parts the art from each
+   cell, so the card still reads as cover over a two-line label. */
+.shelf-card .sky { border: 0; }
 
 /* The two cells, hung off the cover. Each takes the card's full width, so the
    longest word in either vocabulary fits at 12px with room; a side-by-side
-   pair never did at six columns. Edges are SHARED, not doubled: the cover
-   keeps its bottom edge, the status cell keeps its bottom edge, and each cell
-   drops its top — one line between every layer, so the stack reads as a
-   single card with a two-line label rather than three boxes in a pile. */
+   pair never did at six columns. One line between every layer, so the stack
+   reads as a single card with a two-line label rather than three boxes in a
+   pile — since the frame (2026-10-16) that line is --dim, and the cells keep
+   their status wash but not their own borders. */
 .shelf-card .cell {
   display: flex;
   justify-content: center;
   width: 100%;
-  border-top: 0;
+  border: 0;
+  border-top: 2px solid var(--dim);
 }
 
-.shelf-caption { display: block; margin: 0.55rem 0 0; font: 12px/1.5 var(--pixel); }
+.shelf-caption { display: block; margin: 0.55rem 0 0; font: 11px/16px var(--pixel); }
 
 /* ------------------------------------------------- shelf sort (no script)
 
@@ -1049,7 +1082,7 @@ figcaption {
 .shelf-sort legend {
   float: left; /* keeps the legend on the flex row rather than above it */
   padding: 0 0.6rem 0 0;
-  font: 12px/1.5 var(--pixel);
+  font: 11px/16px var(--pixel);
   color: var(--muted);
 }
 
@@ -1065,7 +1098,7 @@ figcaption {
 }
 
 .shelf-sort label {
-  font: 12px/1.5 var(--pixel);
+  font: 11px/16px var(--pixel);
   color: var(--muted);
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--edge);
@@ -1090,19 +1123,13 @@ figcaption {
    silver without being told — so the top two rungs of the ladder are ranked by
    metal, and the three verbs below rank themselves. Quieter glow than gold:
    it is the runner-up's frame, and it should read that way beside the ten. */
-.is-canon .sky,
-.is-canon .shelf-cover { border-color: var(--gold); }
+/* Since the frame (2026-10-16) the metal simply IS the card's frame colour:
+   gold or silver in place of the day's hue, ring and all, plus the glow. */
+.is-canon .shelf-card,
+.is-canon.shelf-card { --frame: var(--gold); box-shadow: 0 0 0 2px var(--ring), 0 0 14px -4px var(--gold); }
 
-.is-canon .shelf-card {
-  box-shadow: 0 0 0 1px var(--gold), 0 0 14px -4px var(--gold);
-}
-
-.is-favorite .sky,
-.is-favorite .shelf-cover { border-color: var(--silver); }
-
-.is-favorite .shelf-card {
-  box-shadow: 0 0 0 1px var(--silver), 0 0 10px -5px var(--silver);
-}
+.is-favorite .shelf-card,
+.is-favorite.shelf-card { --frame: var(--silver); box-shadow: 0 0 0 2px var(--ring), 0 0 10px -5px var(--silver); }
 
 .b-canon { --c: var(--gold); }
 
@@ -1110,7 +1137,7 @@ figcaption {
 .shelf-key {
   display: inline-block;
   margin: 0 0 1.5rem;
-  font: 12px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
@@ -1130,7 +1157,7 @@ figcaption {
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 0.7rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
+.subject-head h1 { margin: 0 0 0.7rem; font: 700 33px/40px var(--pixel); }
 
 /* Lit-days strip: square pixels, one per day written about, lit in the
    subject's hue (--lit, set inline from its palette); short gaps stay night.
@@ -1197,7 +1224,7 @@ figcaption {
   height: auto;
   background: none;
   padding: 0 0.35rem;
-  font: 8px/1 var(--pixel);
+  font: 11px/1 var(--pixel);
   color: var(--muted);
 }
 .lit-days span.gap::before, .lit-days span.gap::after { content: "·"; padding: 0 0.2rem; opacity: 0.6; }
@@ -1226,7 +1253,7 @@ figcaption {
   margin: 0 0 1.75rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--edge);
-  font: 400 12px/1 var(--pixel);
+  font: 400 11px/1 var(--pixel);
   color: var(--muted);
 }
 
@@ -1250,7 +1277,7 @@ figcaption {
 .fragment-date {
   display: inline-block;
   margin-bottom: 0.45rem;
-  font: 12px/1.4 var(--pixel);
+  font: 11px/15px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -1267,11 +1294,11 @@ figcaption {
    pictogram appears without its words beside it, because the words are the
    <h1> it sits in. */
 .view-glyph { font-size: 0.8em; margin-right: 0.15em; }
-.tag-head h1 { margin: 0 0 0.5rem; font: 700 1.75rem/1.03 var(--prose); letter-spacing: -0.021em; }
+.tag-head h1 { margin: 0 0 0.5rem; font: 700 33px/40px var(--pixel); }
 .tag-desc { margin: 0 0 0.6rem; color: var(--muted); }
-.tag-members { margin: 0; font: 12px/1.8 var(--pixel); color: var(--muted); }
+.tag-members { margin: 0; font: 11px/20px var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
-.tag-index { margin: 0 0 0.6rem; font: 12px/1 var(--pixel); }
+.tag-index { margin: 0 0 0.6rem; font: 11px/1 var(--pixel); }
 .tag-index a { color: var(--muted); text-decoration: none; }
 .tag-index a:hover,
 .tag-index a:focus-visible { color: var(--ink); }
@@ -1298,7 +1325,7 @@ figcaption {
 .rung > .badge,
 .rung > .rating { grid-row: 1 / span 2; justify-self: start; }
 .rung-desc { margin: 0; }
-.rung-count { margin: 0; font: 12px/1.5 var(--pixel); color: var(--muted); }
+.rung-count { margin: 0; font: 11px/16px var(--pixel); color: var(--muted); }
 @media (max-width: 34rem) {
   .rung { grid-template-columns: 1fr; }
   .rung > .badge,
@@ -1318,7 +1345,7 @@ figcaption {
 .fragment-meta .sky { width: 24px; }
 
 .fragment-subject {
-  font: 12px/1.3 var(--pixel);
+  font: 11px/14px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -1334,8 +1361,7 @@ figcaption {
 .essay-title {
   display: block;
   margin-bottom: 0.35rem;
-  font: 700 1.4rem/1.12 var(--prose);
-  letter-spacing: -0.018em;
+  font: 700 22px/29px var(--pixel);
   color: var(--ink);
   text-decoration: none;
 }
@@ -1398,7 +1424,7 @@ figcaption {
   display: flex;
   gap: 1.25rem;
   flex-wrap: wrap;
-  font: 10px/1.6 var(--pixel);
+  font: 11px/18px var(--pixel);
   color: var(--muted);
 }
 
@@ -1432,7 +1458,7 @@ figcaption {
   color: var(--muted);
 }
 
-.links-head { font: 12px/1 var(--pixel); color: var(--muted); margin: 0 0 1rem; }
+.links-head { font: 11px/1 var(--pixel); color: var(--muted); margin: 0 0 1rem; }
 
 .links-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
 .links-list > li { display: flex; align-items: center; gap: 1rem; }
@@ -1449,9 +1475,9 @@ figcaption {
    bots skip hidden fields and fill the rest. */
 
 .links-lede span { display: block; }
-.gb-note { font: 12px/1.4 var(--pixel); color: var(--muted); max-width: var(--read); margin: -0.5rem 0 1.5rem; }
+.gb-note { font: 11px/15px var(--pixel); color: var(--muted); max-width: var(--read); margin: -0.5rem 0 1.5rem; }
 .guestbook-form { display: grid; gap: 1rem; max-width: var(--read); margin: 0 0 2.5rem; }
-.guestbook-form label { display: grid; gap: 0.35rem; font: 12px/1 var(--pixel); color: var(--muted); }
+.guestbook-form label { display: grid; gap: 0.35rem; font: 11px/1 var(--pixel); color: var(--muted); }
 .gb-opt { opacity: 0.7; }
 .guestbook-form input,
 .guestbook-form textarea {
@@ -1465,7 +1491,7 @@ figcaption {
 .guestbook-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
 .guestbook-form button {
   justify-self: start; cursor: pointer;
-  font: 12px/1 var(--pixel); color: var(--night); background: var(--accent);
+  font: 11px/1 var(--pixel); color: var(--night); background: var(--accent);
   border: 1px solid var(--accent); border-radius: 0; padding: 0.7rem 1.2rem;
 }
 .guestbook-form button:hover { background: var(--ink); border-color: var(--ink); }
@@ -1478,15 +1504,22 @@ figcaption {
 .gb-name { color: var(--ink); font-weight: 700; }
 .gb-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--edge); }
 .gb-name a:hover { color: var(--accent); border-color: var(--accent); }
-.gb-meta time { font: 12px/1 var(--pixel); color: var(--muted); }
+.gb-meta time { font: 11px/1 var(--pixel); color: var(--muted); }
 .gb-message { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 .gb-empty { color: var(--muted); }
 
-/* Silkscreen is set in px, never rem, so it never lands on a fractional size.
-   Its x-height is 0.5em — half the em, against roughly 0.48 for the body
-   serif — so a nominally matching px size reads far smaller beside prose.
-   Chrome is 12px; 10px is reserved for the footer and pagination counts,
-   which are the only genuinely tertiary text on the site.
+/* The pixel face is set in px, never rem, and only at 11px or 22px: its
+   lattice is 11 pixels to the em, so any other size puts stems between
+   device pixels. Line heights are whole px for the same reason — 1.5 of 11
+   is 16.5, and a half-pixel baseline blurs the second line of every wrap.
+   Chrome, the footer and pagination are all 11px; the old 10px and 8px
+   tiers fold into it, since 10px of an 11px lattice is no longer a pixel
+   font. Datelines and subject heads are 22px, the lattice at 2×.
+   One deliberate exception: the nav, the now-playing / deep-thoughts panels,
+   figure captions and the archive and essay lists are 16.5px (1.5×), because
+   11 read too small there and 22 too loud (Hat, 2026-10-16). Off the lattice at 1×, so a font pixel
+   straddles device pixels there; on a 2× screen it is exactly 3 device
+   pixels and crisp. If those ever look fuzzy, this is why.
    Below 34rem only the art shrinks. */
 @media (max-width: 34rem) {
   .frag > .sky { width: 2.25rem; min-height: 3rem; }

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, pixelBand, pixelSheet, starTile, palette, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, pixelBand, pixelSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
 import { encodePng } from "./png.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -58,7 +58,7 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
 // and a lone image paragraph into a bare <figure>, so the CSS styles one thing
 // and feed readers get a real caption instead of two paragraphs. The wrapping
 // <em> is dropped — the italic was the signal, not the styling (the caption
-// face is Silkscreen, which has no italic); emphasis inside it survives.
+// face is the pixel face, which has no italic); emphasis inside it survives.
 // Runs after "inline" so the children are parsed. (2026-09-08, Metroid Dread.)
 //
 // Two styles, chosen by Obsidian's own width number so the vault preview
@@ -1677,7 +1677,7 @@ export default function (eleventyConfig) {
   })();
   const statusColor = (status) => cssTokens[`st-${status}`] ?? cssTokens.muted ?? "#a9a6ce";
 
-  // "18 sep 2026" — Silkscreen at card size fits ~20 characters in the text
+  // "18 sep 2026" — the pixel face at card size fits ~20 characters in the text
   // column, so the month is short. Not Intl: en-GB spells September "Sept".
   const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
   const kickerDate = (d) => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
@@ -1856,6 +1856,9 @@ export default function (eleventyConfig) {
   // The page's star tile, reseeded with the masthead every build.
   const stars = starTile(today);
   skyFiles.set("img/aurora/stars.png", encodePng(stars.px, stars.w, stars.h, 4));
+  // The chrome frame wears the masthead's hue (aurora.js dayFrame), so it
+  // rolls with the same build date. base.njk sets it on <html>.
+  eleventyConfig.addGlobalData("frame", dayFrame(today));
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —

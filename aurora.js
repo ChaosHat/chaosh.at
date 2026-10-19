@@ -41,6 +41,17 @@ const ARC_SPAN = 240;
 const ARC_END = ARC_START + ARC_SPAN;
 const arcHue = (ladderHue) => ARC_START + (ladderHue / 360) * ARC_SPAN;
 
+// Where along the day's hue run a fraction f lands (0 = rim, 1 = crown), the
+// run slid inside the arc as palette() explains below. Its own function so
+// dayFrame can ask for the body hue without restating the slide.
+const runHue = (H, spread) => {
+  const lo =
+    spread === 0
+      ? H
+      : Math.max(ARC_START, Math.min(H - 0.35 * spread, ARC_END - 8 - spread));
+  return (f) => (spread === 0 ? H : lo + f * spread);
+};
+
 // `lMax` caps perceptual lightness for a canvas where nothing is encoded in
 // brightness. On subject skies brightness IS the recency axis, so capping
 // there would compress a channel — the ceiling is for the masthead and the
@@ -97,11 +108,7 @@ export const palette = (ladderHue, { lMax = 1, spread = 0 } = {}) => {
   // week were the ones you could not see. Moving the body puts part of the run
   // on the pixels that actually carry the picture. `- 8` reserves the legacy
   // offset on `deep`, so the crown lands inside the arc rather than past it.
-  const lo =
-    spread === 0
-      ? H
-      : Math.max(ARC_START, Math.min(H - 0.35 * spread, ARC_END - 8 - spread));
-  const at = (f) => (spread === 0 ? H : lo + f * spread);
+  const at = runHue(H, spread);
   return {
     edge: oklch(L(0.9), 0.13, at(0)),
     mid: oklch(L(0.74), 0.15, at(0.35)),
@@ -123,6 +130,20 @@ export const daySpread = (dateStr) => {
   const r = (hashOf(`spread:${dateStr}`) % 100000) / 100000;
   return DAY_SPREAD_MIN + (DAY_SPREAD_MAX - DAY_SPREAD_MIN) * r ** 1.4;
 };
+
+// The chrome frame (2026-10-16, the hi-bit redesign): panels, cards, covers,
+// asides and figures are drawn in the day's aurora hue, so on a green day the
+// frames are green and on a violet day violet. It bends "the chrome stays out
+// of the argument" only by borrowing the masthead's colour, never by adding
+// one — so the hue is the masthead's BODY hue (the same 0.35 of the run that
+// palette() paints `mid` with), keyed on the same build date. Fixed
+// lightness and low chroma, so every day's frame sits at the same weight
+// against the night and only the hue moves. One colour, not three: the inset
+// line and the panel ground are mixes of it into the night, done in CSS
+// (--dim, --fill), because a dark stop computed here in OKLCH clips — a green
+// day's ground came out #001307, which is green, not night.
+export const dayFrame = (dateStr) =>
+  oklch(0.8, 0.1, runHue(arcHue((hashOf(dateStr) % 360000) / 1000), daySpread(dateStr))(0.35));
 
 const GREY = { edge: "#8d93a8", mid: "#5c6273", deep: "#3a3f4e", glow: "#6a7082" };
 

@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="en">
+{#- The day's frame colour (aurora.js dayFrame): every panel, card and cover
+    border is drawn in the masthead's hue. style.css derives --dim and --fill
+    from it and keeps a lavender fallback for a build without one. -#}
+<html lang="en"{% if frame %} style="--frame:{{ frame }}"{% endif %}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,11 +37,11 @@
     <meta name="twitter:card" content="summary_large_image">
     {%- endif %}
     {#- Both faces are fetched alongside the stylesheet rather than discovered
-        inside it. Silkscreen is 8KB and sets every page's chrome; Alegreya is
+        inside it. Pixelify Grid is 7KB and sets every page's chrome; Alegreya is
         17KB and sets every page's prose. Only the roman is preloaded of each:
         bold and italic are a minority of the glyphs on any page and can arrive
         a beat later, but the roman arriving late IS the flash. -#}
-    <link rel="preload" href="/fonts/silkscreen-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/pixelify-grid-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/alegreya-sans-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
