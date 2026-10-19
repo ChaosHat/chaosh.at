@@ -915,7 +915,7 @@ const pxUnder = (d) => (d < 1 ? 0.62 : Math.max(0, 0.3 - (d - 1) * 0.15));
 // Clustered rays for form 7: a few groups per tile, 3–6 rays each, 1–2px wide.
 // Returns how far above the envelope this column's ray reaches (0 = none).
 const pxRayExt = (c, x, th) => {
-  const CELL = 48; // 240 / 5
+  const CELL = c.cell ?? 48; // a divisor of the tile width
   const cell = Math.floor(x / CELL);
   if (ihash(cell * 7717 + c.seed) < 0.3) return 0;
   const start = cell * CELL + Math.floor(ihash(cell * 313 + c.seed) * 18);
@@ -976,10 +976,20 @@ const PIXEL_FORMS = {
 };
 export const PIXEL_FORM_NAMES = Object.keys(PIXEL_FORMS);
 
-// Picked by a hash of the date, repeats allowed (Hat: "could just be random").
-// Not the bands' ordinal sequence: that exists so two posts seen together
-// never match, and the masthead is only ever seen once a day.
-export const pixelForm = (dateStr) => PIXEL_FORM_NAMES[hashOf(`pxform:${dateStr}`) % PIXEL_FORM_NAMES.length];
+// The post bands cycle the three forms by calendar day, so two posts seen
+// together never match — the rule the SVG bands already kept (see DAY_FORMS).
+// With three forms a plain cycle is enough: adjacent days always differ.
+export const pixelBandForm = (dateStr) => PIXEL_FORM_NAMES[(((dayOrdinal(dateStr) % 3) + 3) % 3)];
+
+// The masthead is picked by a hash of the date, repeats allowed (Hat: "could
+// just be random") — but from the two forms TODAY'S BAND is not using. The
+// masthead and a same-day post share the day's hue, so the same form too
+// would show the identical weather twice, stacked. The SVG masthead ran one
+// step ahead of the band's sequence for the same reason.
+export const pixelForm = (dateStr) => {
+  const rest = PIXEL_FORM_NAMES.filter((f) => f !== pixelBandForm(dateStr));
+  return rest[hashOf(`pxform:${dateStr}`) % rest.length];
+};
 
 // The seven-step ramp: night, night2, a dusk mix, then the day's four inks.
 // The masthead draws only steps 2–6 (and stars); the two night steps are the
@@ -990,7 +1000,7 @@ const pxRamp = (pal) => {
 };
 
 // Render one frame of `form` into `px` (RGBA) at row offset `oy`.
-const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed }) => {
+const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true }) => {
   const th = (TAU * k) / N;
   const fn = PIXEL_FORMS[form];
   const star = hexRgb(STAR);
@@ -1020,7 +1030,7 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed }) => {
       // Stars: single pixels in bare sky, two brightnesses, a few blinking
       // out per frame.
       let rgb = null;
-      if (idx === 0 && best < 0.05) {
+      if (stars && idx === 0 && best < 0.05) {
         const h = ihash(x * 92821 + y * 68917 + seed);
         if (h > 0.992 && ihash(x * 31 + y * 17 + k * 7 + seed) > 0.15)
           rgb = h > 0.997 ? star : mixRgb(hexRgb(NIGHT[0]), star, 0.55);
@@ -1059,6 +1069,7 @@ export const pixelSheet = (
     back = { base: 0.62, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
     front = { base: 0.86, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
     sweep = 0.1,
+    stars = true,
   } = {},
 ) => {
   const hue = (hashOf(dateStr) % 360000) / 1000;
@@ -1077,6 +1088,55 @@ export const pixelSheet = (
   ];
   const f = form ?? pixelForm(dateStr);
   const px = new Uint8Array(W * H * N * 4);
-  for (let k = 0; k < N; k += 1) pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs, ramps, fade, seed });
+  for (let k = 0; k < N; k += 1) pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs, ramps, fade, seed, stars });
   return { px, w: W, h: H * N, form: f };
+};
+
+// The post band in pixels: the night a post was written, one static frame.
+// 240×24 shown at ×4 — a 960×96 tile, the old band's height. Static, never
+// animated: five of these breathing on the home page is the same mistake as
+// thirty shimmering shelf cards. The lit edge rides a little higher than the
+// masthead's and the top fades harder, because the band sits under a title
+// and a dateline rather than above a page. No stars: the page has its own.
+export const PIXEL_BAND_H = 24;
+export const pixelBand = (dateStr) =>
+  pixelSheet(dateStr, {
+    H: PIXEL_BAND_H,
+    frames: 1,
+    form: pixelBandForm(dateStr),
+    lMax: 0.82,
+    fade: [0.45, 0.6],
+    back: { base: 0.6, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
+    front: { base: 0.84, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
+    stars: false,
+  });
+
+// The page's own night: a static star tile behind everything, reseeded each
+// build so the sky changes nightly like the rest of it. Single pixels at two
+// brightnesses and a rare four-point "+", drawn at the same ×4 grid as the
+// aurora so a star on the page and a star in the masthead are the same size.
+// Sparse on purpose — it is texture under reading, not a scene.
+export const STAR_TILE = 240;
+export const starTile = (dateStr, { n = STAR_TILE, density = 0.0022 } = {}) => {
+  const px = new Uint8Array(n * n * 4);
+  const seed = hashOf(`stars:${dateStr}`) % 100003;
+  const bright = hexRgb(STAR);
+  const dim = mixRgb(hexRgb("#0a0c18"), bright, 0.45);
+  const mid = mixRgb(hexRgb("#0a0c18"), bright, 0.7);
+  const put = (x, y, rgb) => {
+    const o = (((y + n) % n) * n + ((x + n) % n)) * 4;
+    px.set([...rgb, 255], o);
+  };
+  for (let y = 0; y < n; y += 1)
+    for (let x = 0; x < n; x += 1) {
+      const h = ihash(x * 92821 + y * 68917 + seed);
+      if (h < 1 - density) continue;
+      const r = ihash(x * 31 + y * 17 + seed);
+      if (r > 0.97) {
+        // the rare cross: a bright core and dim arms, wrapping at the tile edge
+        put(x, y, bright);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(x + dx, y + dy, dim);
+      } else put(x, y, r > 0.75 ? mid : dim);
+    }
+  return { px, w: n, h: n };
 };

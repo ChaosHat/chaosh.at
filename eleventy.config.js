@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { subjectSvg, chipSvg, daySky, pixelSheet, palette, hashOf } from "./aurora.js";
+import { subjectSvg, chipSvg, pixelBand, pixelSheet, starTile, palette, hashOf } from "./aurora.js";
 import { encodePng } from "./png.js";
 import { buttonFiles, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -929,8 +929,11 @@ export default function (eleventyConfig) {
   // art in eleventy.after.
   eleventyConfig.addFilter("daySky", (d) => {
     const key = d.toISOString().slice(0, 10);
-    const rel = `img/aurora/day-${key}.svg`;
-    if (!skyFiles.has(rel)) skyFiles.set(rel, daySky(key));
+    const rel = `img/aurora/day-${key}.png`;
+    if (!skyFiles.has(rel)) {
+      const band = pixelBand(key);
+      skyFiles.set(rel, encodePng(band.px, band.w, band.h, 4));
+    }
     return `/${rel}`;
   });
 
@@ -1850,6 +1853,9 @@ export default function (eleventyConfig) {
   const today = new Date().toISOString().slice(0, 10);
   const sheet = pixelSheet(today);
   skyFiles.set("img/aurora/sheet.png", encodePng(sheet.px, sheet.w, sheet.h, 4));
+  // The page's star tile, reseeded with the masthead every build.
+  const stars = starTile(today);
+  skyFiles.set("img/aurora/stars.png", encodePng(stars.px, stars.w, stars.h, 4));
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —

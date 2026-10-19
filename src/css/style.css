@@ -112,9 +112,15 @@
 
 * { box-sizing: border-box; }
 
+/* The page's own stars (aurora.js starTile): a static pixel tile at ×4, the
+   same grid as the masthead, reseeded each build. Over the header gradient,
+   under everything else. */
 html {
-  background: var(--night) linear-gradient(var(--header), transparent) no-repeat;
-  background-size: 100% 26rem;
+  background:
+    url("/img/aurora/stars.png") repeat,
+    var(--night) linear-gradient(var(--header), transparent) no-repeat;
+  background-size: 960px 960px, 100% 26rem;
+  image-rendering: pixelated;
 }
 
 body {
@@ -168,6 +174,26 @@ body::before {
    above main never changes width either way. */
 main { max-width: var(--read); margin-inline: auto; }
 body.wide main { max-width: none; }
+
+/* Smoked glass behind the reading column, the intro box's treatment: the page
+   has stars since 2026-10-19 and they landed between words. Drawn on a
+   pseudo-element reaching into the gutter, so the column's layout does not
+   move. `main` is its own stacking context so the post bands (z-index -1 on
+   their headers) still draw over the smoke, not under it. Grid pages keep the
+   open sky; their cards are their own boxes. */
+body:not(.wide) main { position: relative; z-index: 0; }
+body:not(.wide) main::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1rem -1.25rem;
+  background: rgb(10 12 24 / 0.78);
+  pointer-events: none;
+}
+
+@media (min-width: 48rem) {
+  body:not(.wide) main::before { inset: -1.25rem -2rem; }
+}
 
 a { color: var(--accent); }
 
@@ -1550,9 +1576,10 @@ a.sky-cover:hover { border-color: var(--accent); }
   background-image: var(--day-sky);
   background-repeat: repeat-x;
   background-position: left bottom;
-  /* 480px fixed tile, same rule as the masthead: pixel density never varies
-     with the viewport. */
-  background-size: 480px 96px;
+  /* Pixel art at ×4 (aurora.js pixelBand, 240×24): a fixed 960px tile, same
+     rule as the masthead, so pixel density never varies with the viewport. */
+  background-size: 960px 96px;
+  image-rendering: pixelated;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
 }
