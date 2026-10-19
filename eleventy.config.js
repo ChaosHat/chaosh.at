@@ -1657,7 +1657,7 @@ export default function (eleventyConfig) {
   // ------------------------------------------------------------- link cards
   //
   // What a chaosh.at link unfurls into on Bluesky, Discord and the rest: an
-  // og:image drawn by og.js (the post's day sky, its title, the subject it
+  // og:image drawn by og.js (the post's pixel band, its title, the subject it
   // files to, that subject's cover) plus per-page text tags. Dailies and
   // essays get their own card — they are what gets shared; every other page
   // gets the one site card (2026-09-23).
@@ -1732,6 +1732,7 @@ export default function (eleventyConfig) {
       text: String(subjects[first]?.title ?? first).toLowerCase(),
       more: slugs.length - 1,
       canon,
+      status: subjects[first]?.status ?? "active",
       color: canon ? cssTokens.gold ?? "#f5c86b" : statusColor(subjects[first]?.status ?? "active"),
     };
     const withCover = slugs.find((s) => /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));

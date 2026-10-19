@@ -1,7 +1,7 @@
 // Link cards: the 1200×630 image a chaosh.at link unfurls into on Bluesky,
 // Discord and the rest. Drawn from the same parts as the site — the post's
-// day sky, the wordmark, the subject's cover — so a shared link looks like
-// the page it leads to. satori lays the card out as SVG, resvg rasterises it,
+// pixel band, the page's stars, the comet mark, the subject's cover and its
+// shelf icon — so a shared link looks like the page it leads to. satori lays the card out as SVG, resvg rasterises it,
 // jpeg-js encodes it: no browser and no native image library, the same rule
 // button.js keeps, so the build stays a pure function of its inputs.
 //
@@ -15,19 +15,18 @@ import crypto from "node:crypto";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import jpeg from "jpeg-js";
-import { daySky } from "./aurora.js";
-import { wordmarkSvg } from "./button.js";
+import { pixelSheet, pixelBandForm, starTile, dayFrame } from "./aurora.js";
+import { cometMarkSvg, COMET_ORIGIN } from "./button.js";
+import { encodePng } from "./png.js";
 
 export const OG_W = 1200;
 export const OG_H = 630;
 
 const C = {
   night: "#0a0c18",
-  header: "#07080f",
-  edge: "#2b3050",
   ink: "#eceafa",
-  muted: "#a9a6ce",
   gold: "#f5c86b",
+  ring: "#05060e",
 };
 
 // Pixelify Grid is drawn on an 11px lattice (100 units a pixel at 1100 upm),
@@ -44,26 +43,70 @@ const h = (type, style, children, props = {}) => ({ type, props: { style, childr
 const dataUri = (mime, buf) => `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
 const svgUri = (svg) => dataUri("image/svg+xml", svg);
 
-// Pixelify has no ♥ (nor does Alegreya), so canon's heart is drawn on the
-// same pixel grid as the chip text beside it, the way the wordmark is.
-const HEART = [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."];
-const heartSvg = (color) => {
-  let d = "";
-  HEART.forEach((row, y) =>
-    [...row].forEach((c, x) => {
-      if (c === "#") d += `M${x} ${y}h1v1h-1z`;
-    }),
-  );
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 6" width="${7 * PX}" height="${6 * PX}" ` +
-    `shape-rendering="crispEdges"><path fill="${color}" d="${d}"/></svg>`
-  );
+// The card's own pixel grid: 240×126 art pixels at ×5 is exactly 1200×630,
+// so the band and the stars are one image on one grid. 240 is the masthead's
+// width, so the band is the site's pixelSheet at the masthead's ray pitch.
+const GRID = 5;
+const GRID_W = OG_W / GRID;
+const GRID_H = OG_H / GRID;
+// 48 rows (240px) of aurora, the old SVG band's height, at the site's 80%.
+const BAND_ROWS = 48;
+const BAND_ALPHA = 0.8;
+const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+// The ground as one opaque PNG, already at card size: night, the page's star
+// tile, the post's band on top. Upscaled here, nearest-neighbour, so resvg
+// draws it 1:1 and never gets the chance to smooth a pixel.
+const ground = (date) => {
+  const px = new Uint8Array(GRID_W * GRID_H * 3);
+  const night = hexRgb(C.night);
+  for (let i = 0; i < GRID_W * GRID_H; i += 1) px.set(night, i * 3);
+  const st = starTile(date);
+  for (let y = 0; y < GRID_H; y += 1)
+    for (let x = 0; x < GRID_W; x += 1) {
+      const i = (y * st.w + x) * 4;
+      if (st.px[i + 3]) px.set(st.px.subarray(i, i + 3), (y * GRID_W + x) * 3);
+    }
+  // The post band's form and posture, taller, and with the masthead's stars
+  // in its bare sky (the band leaves them off because the page has its own).
+  const sky = pixelSheet(date, {
+    H: BAND_ROWS,
+    frames: 1,
+    form: pixelBandForm(date),
+    fade: [0.45, 0.6],
+    back: { base: 0.6, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
+    front: { base: 0.84, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
+  });
+  for (let i = 0; i < GRID_W * BAND_ROWS; i += 1) {
+    if (!sky.px[i * 4 + 3]) continue;
+    for (let c = 0; c < 3; c += 1) px[i * 3 + c] = Math.round(sky.px[i * 4 + c] * BAND_ALPHA + px[i * 3 + c] * (1 - BAND_ALPHA));
+  }
+  const W = OG_W;
+  const out = new Uint8Array(W * OG_H * 3);
+  for (let y = 0; y < OG_H; y += 1)
+    for (let x = 0; x < W; x += 1) {
+      const s = (Math.floor(y / GRID) * GRID_W + Math.floor(x / GRID)) * 3;
+      out.set(px.subarray(s, s + 3), (y * W + x) * 3);
+    }
+  return encodePng(out, W, OG_H, 3);
 };
 
-const wordmark = () =>
-  wordmarkSvg(4)
-    .replace('class="wordmark" ', 'xmlns="http://www.w3.org/2000/svg" ')
-    .replace("currentColor", C.ink);
+// The comet at ×5, the card grid's own scale, nudged left so the NAME (not
+// the dotted tail) starts on the text column's edge.
+const MARK_SCALE = 5;
+const mark = (date) =>
+  cometMarkSvg(date, MARK_SCALE).replace('class="wordmark comet-mark" ', 'xmlns="http://www.w3.org/2000/svg" ');
+
+// The shelf's own icons: pixelarticons for status, the eyed star for canon.
+// Read from src/img/icons and recoloured; a status with no icon gets none.
+const iconSvg = (name, color, size) => {
+  const file = path.join("src", "img", "icons", `${name}.svg`);
+  if (!fs.existsSync(file)) return null;
+  return fs
+    .readFileSync(file, "utf8")
+    .replace(/fill="#000"/g, `fill="${color}"`)
+    .replace("<svg ", `<svg width="${size}" height="${size}" `);
+};
 
 // The title is measured, not guessed from its length: laid out alone at each
 // size with a greedy wrap (satori computes a height it isn't given), it takes
@@ -99,8 +142,8 @@ const fitTitle = async (title, width, room) => {
   return { size, textWrap: "wrap", lineClamp: Math.max(1, Math.min(3, linesAt(size))) };
 };
 
-// spec: { sky, kicker?, title, chip?: { text, more?, color, canon? }, cover? }
-//   sky    — the date string (or any seed) daySky draws from
+// spec: { sky, kicker?, title, chip?: { text, more?, color, status?, canon? }, cover? }
+//   sky    — the date the band, stars, comet and frame colour are drawn from
 //   cover  — { file, canon }: a JPEG or PNG path (satori reads no webp/avif), and whether its subject is canon
 //            (gold frame). Covers are 600×900, so `cover` fit never
 //            letterboxes. Not always the chip's subject: the chip names the
@@ -110,17 +153,20 @@ const fitTitle = async (title, width, room) => {
 export const cardTree = async (spec) => {
   const { sky, kicker, title, chip, cover } = spec;
   const wide = !cover;
-  const textW = wide ? 1056 : 700;
-  // The text column runs 236 → 574 (338px). A kicker row costs 64 of it and
-  // the chip 92 (66 tall, plus the gap space-between must leave).
-  const room = 338 - (kicker ? 64 : 0) - (chip ? 92 : 0);
+  const textW = wide ? 1080 : 700;
+  // The day's frame colour, the one every box on the site wears that night.
+  const frame = dayFrame(sky);
+  // The text column runs 240 → 580 (340px). A kicker row costs 64 of it and
+  // the chip 100 (80 tall with its ring, plus the gap space-between leaves).
+  const room = 340 - (kicker ? 64 : 0) - (chip ? 100 : 0);
   const { size, ...wrap } = await fitTitle(title, textW, room);
 
   const head = [
-    kicker ? h("div", { fontFamily: "Pixelify Grid", fontSize: PIXEL, color: C.muted, marginBottom: 16 }, kicker) : null,
+    kicker ? h("div", { fontFamily: "Pixelify Grid", fontSize: PIXEL, color: frame, marginBottom: 20 }, kicker) : null,
     h("div", { ...titleStyle(size), ...wrap, color: C.ink }, title),
   ].filter(Boolean);
 
+  const icon = chip && iconSvg(chip.canon ? "canon" : chip.status ?? "active", chip.color, 12 * PX);
   const chipRow = chip
     ? h(
         "div",
@@ -132,15 +178,18 @@ export const cardTree = async (spec) => {
           fontFamily: "Pixelify Grid",
           fontSize: PIXEL,
           color: chip.color,
-          border: `${PX - 2}px solid ${chip.color}`,
+          // The plain frame, as on the site's picture boxes: border, then ring.
+          border: `${PX}px solid ${chip.color}`,
+          boxShadow: `0 0 0 ${PX}px ${C.ring}`,
+          background: C.night,
           padding: `${PX * 2}px ${PX * 3}px`,
         },
         [
-          chip.canon
+          icon
             ? h("img", { marginRight: PX * 3, flexShrink: 0 }, undefined, {
-                src: svgUri(heartSvg(chip.color)),
-                width: 7 * PX,
-                height: 6 * PX,
+                src: svgUri(icon),
+                width: 12 * PX,
+                height: 12 * PX,
               })
             : null,
           // The name gives way to the ellipsis; "+N" never does — it is the
@@ -158,21 +207,24 @@ export const cardTree = async (spec) => {
       height: OG_H,
       display: "flex",
       position: "relative",
-      background: `linear-gradient(180deg, ${C.header} 0%, ${C.night} 45%)`,
+      background: C.night,
     },
     [
-      // daySky is 480×96 (5:1), so 1200×240 is the same band undistorted.
-      h("img", { position: "absolute", left: 0, top: 0 }, undefined, { src: svgUri(daySky(sky)), width: OG_W, height: 240 }),
-      // Top-left, over the dark top of the sky, like the masthead. At the
-      // bottom (the mockup's spot) it collided with the chip.
-      h("img", { position: "absolute", left: 72, top: 56 }, undefined, { src: svgUri(wordmark()), width: 288, height: 32 }),
+      h("img", { position: "absolute", left: 0, top: 0 }, undefined, { src: dataUri("image/png", ground(sky)), width: OG_W, height: OG_H }),
+      // Top-left over the band, like the masthead. At the bottom (the first
+      // mockup's spot) it collided with the chip.
+      h("img", { position: "absolute", left: 60 - COMET_ORIGIN[0] * MARK_SCALE, top: 20 }, undefined, {
+        src: svgUri(mark(sky)),
+        width: 99 * MARK_SCALE,
+        height: 28 * MARK_SCALE,
+      }),
       h(
         "div",
         {
           position: "absolute",
-          left: 72,
-          top: 236,
-          bottom: 56,
+          left: 60,
+          top: 240,
+          bottom: 50,
           width: textW,
           display: "flex",
           flexDirection: "column",
@@ -185,19 +237,20 @@ export const cardTree = async (spec) => {
             "div",
             {
               position: "absolute",
-              right: 72,
-              top: 96,
-              width: 298,
-              height: 444,
+              right: 60,
+              top: 90,
+              width: 300,
+              height: 450,
               display: "flex",
-              border: `3px solid ${cover.canon ? C.gold : C.edge}`,
-              boxShadow: `0 0 0 6px ${C.night}`,
+              // The plain frame in the day's hue, gold for canon.
+              border: `5px solid ${cover.canon ? C.gold : frame}`,
+              boxShadow: `0 0 0 5px ${C.ring}`,
             },
             [
-              h("img", { width: 292, height: 438, objectFit: "cover" }, undefined, {
+              h("img", { width: 290, height: 440, objectFit: "cover" }, undefined, {
                 src: dataUri(/\.png$/i.test(cover.file) ? "image/png" : "image/jpeg", fs.readFileSync(cover.file)),
-                width: 292,
-                height: 438,
+                width: 290,
+                height: 440,
               }),
             ],
           )
