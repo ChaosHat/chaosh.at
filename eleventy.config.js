@@ -391,6 +391,11 @@ export default function (eleventyConfig) {
   // src/_redirects for why it's a static file and not a redirect).
   eleventyConfig.addPassthroughCopy({ "src/_redirects": "_redirects" });
   eleventyConfig.addPassthroughCopy({ "src/_headers": "_headers" });
+  // Favicons (2026-10-19): the masthead's comet, simplified — 16 hand-drawn,
+  // 32 from the same funnel drawing, 180 the 32 at ×5 on a night tile. Fixed
+  // colours (one day's sky, baked), not per-day: browsers cache these hard.
+  for (const f of ["favicon.ico", "favicon-16.png", "favicon-32.png", "apple-touch-icon.png"])
+    eleventyConfig.addPassthroughCopy({ [`src/favicon/${f}`]: f });
   eleventyConfig.addPassthroughCopy({ "src/.well-known/host-meta": ".well-known/host-meta" });
   // Post images only — src/img/manifest.json is publish.py book-keeping and
   // deliberately not copied.
