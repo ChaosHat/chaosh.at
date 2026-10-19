@@ -238,7 +238,10 @@ body:not(.wide) main::before {
   pointer-events: none;
 }
 
-@media (min-width: 48rem) {
+/* The wider reach waits until it fits: 47rem column + 2rem a side. At 48rem
+   the gutter was still the body's 1.25rem and the smoke ran 12px off-screen,
+   a sideways scroll on every page without a post band from 768 to 815px. */
+@media (min-width: 51rem) {
   body:not(.wide) main::before { inset: -1.25rem -2rem; }
 }
 
