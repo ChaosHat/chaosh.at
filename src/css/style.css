@@ -326,9 +326,8 @@ h1,
      shelf and essay cards, covers, figures. outline paints over content, so
      the inset line would be drawn across the art. */
 
-.now,
-.aside,
-.site-intro {
+.furniture,
+.aside {
   background: var(--fill);
   border: 2px solid var(--frame);
   outline: 2px solid var(--dim);
@@ -340,7 +339,7 @@ h1,
    the 240px masthead and the page stars run behind — take smoked glass for a
    ground instead of the flat fill (2026-10-19). Asides keep --fill: they sit
    inside the reading column, which is already smoked. */
-.now,
+.furniture,
 .site-intro { background: var(--smoke); }
 
 .shelf-card,
@@ -420,16 +419,21 @@ figure,
    line also crowds a word this small. Hover lifts the text only — the border
    is already lit. The phone row below is one smoked strip, so its words stay
    bare. */
+/* Dimmed 2026-10-19 (the "too loud?" pass): five lit frames over three lit
+   panels made every box shout at once. The panes keep their smoked glass and
+   ring but the border drops to --dim, so the row reads as one quiet strip of
+   links and the panels below carry the frame; hover lights a pane to the
+   full frame. */
 @media (min-width: 34.0625rem) {
   .site-nav a {
     background: var(--smoke);
-    border: 2px solid var(--frame);
+    border: 2px solid var(--dim);
     box-shadow: 0 0 0 2px var(--ring);
   }
 }
 
 .site-nav a:hover,
-.site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
+.site-nav a:focus-visible { color: var(--ink); border-color: var(--frame); }
 
 /* On a phone five words at 12px Silkscreen ran ~360px of glyphs alone, so
    the row wraps at any padding — and a wrapped row over the masthead put
@@ -467,7 +471,8 @@ figure,
      framed boxes rather than prose that wandered out of the column. */
   font: 16.5px/26px var(--pixel);
   color: var(--muted);
-  /* Framed and smoked like the strips below it (see frames): the masthead
+  /* Smoked like the panel below it but unframed since 2026-10-19, so it
+     reads as the site's tagline rather than a third box. The masthead
      runs down behind the intro since the band grew to 176px, then 240px (2026-10-19).
      Translucent night keeps the copy readable and lets the aurora glow
      faintly through; an opaque card read as a sticker on the sky. */
@@ -478,16 +483,20 @@ figure,
 
 /* ------------------------------------------- now playing / latest essays */
 
-.now {
+/* The furniture panel holds both rows (2026-10-19; until then each row was
+   its own framed strip, 10px apart). The rows split on a --dim rule, the
+   frame's own inset colour, so the divider reads as part of the frame. */
+.furniture {
   /* 0.8rem clears the inset line (2px border + 4px gap + 2px line) with the
      same air the hairline box had inside it. */
   padding: 13px 14px;
   margin-bottom: 2.5rem;
 }
-
-/* Adjacent strips stack as one furniture unit; only the last one holds the
-   full gap before the stream. Without :has both simply keep the full gap. */
-.now:has(+ .now) { margin-bottom: 10px; }
+.now + .now {
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 2px solid var(--dim);
+}
 
 .now-head {
   display: flex;
@@ -526,6 +535,25 @@ figure,
   flex-shrink: 0;
   font: 16.5px/1 var(--pixel);
   text-decoration: none;
+}
+
+/* On a phone each strip is one row that scrolls sideways (2026-10-19): wrapped,
+   the furniture ran ~850px and the first post started below the screen. The
+   right edge fades so the row reads as continuing; an essay title may still
+   wrap, inside a 70vw item, so a long one doesn't become a long scroll. */
+@media (max-width: 34rem) {
+  .furniture { margin-bottom: 1.75rem; }
+  .now-items {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+  .now-items::-webkit-scrollbar { display: none; }
+  .now-item { flex: none; }
+  .now-item:last-child { padding-right: 2rem; }
+  .essays .now-item { max-width: 70vw; }
 }
 
 /* ------------------------------------------------------- badges and tags */
@@ -1769,6 +1797,11 @@ a.sky-cover:hover { border-color: var(--accent); }
      rule as the masthead, so pixel density never varies with the viewport. */
   background-size: 960px 96px;
   image-rendering: pixelated;
+  /* At 80% since 2026-10-19: at full strength the date sat on the band's
+     brightest rows and got lost on the busier days (16 Oct's pink spikes).
+     Each day's form puts those rows at a different height, so the band
+     dims rather than the text moving. The masthead stays at full strength. */
+  opacity: 0.8;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
 }

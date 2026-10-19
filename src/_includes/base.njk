@@ -60,14 +60,17 @@
           CHAOS·HAT with the dot at the word boundary. aria-label carries
           the domain for readers and crawlers. -#}
       <a class="site-title" href="/">{{ wordmark | safe }}</a>
-      {#- Five equal words (2026-09-11). The shelves used to be promoted as the
+      {#- Deep thoughts left the row 2026-10-19: the essays panel below is on
+          every page but /essays/ and its "all →" is the same door, so the
+          word was a duplicate (and it wrapped guestbook on phones). If that
+          panel ever goes, the word comes back.
+          Five equal words (2026-09-11). The shelves used to be promoted as the
           way in, but with one shelf and a home page that already leads
           everywhere, tiering marked nothing. Archive is not here because the
           home page ends in "all posts →" — a second door to the same place.
           Feed lives in the footer: it is the one item that is not a page. -#}
       <nav class="site-nav">
         <a href="/shelf/">games</a>
-        {% if collections.essayPages | length %}<a href="/essays/">deep thoughts</a>{% endif %}
         {% if collections.pages | length %}<a href="/about/">about</a>{% endif %}
         <a href="/links/">links</a>
         <a href="/guestbook/">guestbook</a>
@@ -87,7 +90,14 @@
     {#- Both strips share one explicit shape — label row, items row — rather
         than trusting flex-wrap to land the label above the items, which it
         only did at some widths. -#}
+    {#- One framed panel holds both rows since 2026-10-19 (the "too loud?"
+        pass): two frames stacked edge to edge read as two more boxes, and
+        both rows say the same kind of thing, what's current. -#}
     {% set playing = collections.subjectPages | nowPlaying %}
+    {% set essays = collections.essayPages | sort(true, false, "date") %}
+    {% set showEssays = essays | length and page.url != "/essays/" %}
+    {% if playing | length or showEssays %}
+    <div class="furniture">
     {% if playing | length %}
     <div class="now">
       <div class="now-head">
@@ -107,11 +117,10 @@
         essays. The chip is the first cited subject's; an essay that cites
         only tags gets its first tag's chip (eleventy.config.js tagChip). Not on /essays/ itself: the list right
         under it already leads with the same two (2026-10-14). -#}
-    {% set essays = collections.essayPages | sort(true, false, "date") %}
-    {% if essays | length and page.url != "/essays/" %}
+    {% if showEssays %}
     <div class="now essays">
       <div class="now-head">
-        <span class="now-label">deep thoughts</span>
+        <span class="now-label">latest deep thoughts</span>
         <a class="essays-all" href="/essays/">all →</a>
       </div>
       <div class="now-items">
@@ -119,6 +128,8 @@
         <a class="now-item" href="{{ e.url }}">{% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}{{ e.title }}<span class="essay-when">{{ e.date | shortDate }}</span></a>
         {% endfor %}
       </div>
+    </div>
+    {% endif %}
     </div>
     {% endif %}
 
