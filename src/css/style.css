@@ -404,6 +404,15 @@ figure,
   color: var(--muted);
 }
 
+/* On desktop the row sits on the masthead's aurora, so each word gets its
+   own pane of the intro's smoked glass (2026-10-19). The phone row below is
+   already one smoked strip, so its words stay bare. */
+@media (min-width: 34.0625rem) {
+  .site-nav a { background: var(--smoke); border-color: var(--edge); }
+  .site-nav a:hover,
+  .site-nav a:focus-visible { border-color: var(--frame); }
+}
+
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--ink); border-color: var(--edge); }
 
