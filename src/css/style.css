@@ -152,6 +152,11 @@ html {
 body {
   position: relative;
   margin: 0 auto;
+  /* Centred on a WHOLE pixel. auto splits the spare width in half, and when
+     that is odd (a 15px scrollbar is enough) the whole page sits at x.5 and
+     every pixel-font glyph smears across two device pixels. round() keeps the
+     left margin integral; browsers without it keep the auto above. */
+  margin-left: max(0px, round(down, (100% - var(--wide)) / 2, 1px));
   padding: 0 1.25rem 3.5rem;
   max-width: var(--wide);
   background: transparent;
@@ -1006,8 +1011,20 @@ figcaption {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: 1.75rem 1.1rem;
+  /* Every card on a whole pixel (2026-10-19). 1fr columns and a 1.1rem gap
+     put the cards at x.61, x.73, x.84… and the pixel face blurred in whichever
+     column the browser rounded worst. So: a column count per breakpoint, each
+     column rounded DOWN to an even px (the card's 2px border then leaves an
+     even art width, and an even width keeps the 2:3 cover's height integral
+     too), and a px gap. The few spare px fall at the right edge. */
+  --n: 2;
+  grid-template-columns: repeat(var(--n), round(down, (100% - (var(--n) - 1) * 18px) / var(--n), 2px));
+  gap: 28px 18px;
 }
+
+@media (min-width: 34rem) { .shelf-grid { --n: 3; } }
+@media (min-width: 44rem) { .shelf-grid { --n: 4; } }
+@media (min-width: 52rem) { .shelf-grid { --n: 5; } }
 
 .shelf-item a { display: block; text-decoration: none; color: inherit; }
 
