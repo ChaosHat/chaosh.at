@@ -803,16 +803,28 @@ main figure img { cursor: zoom-in; }
   max-width: none;
   max-height: none;
   padding: 0;
-  border: 0;
-  background: none;
+  border: 2px solid var(--frame);
+  background: var(--fill);
   cursor: zoom-out;
 }
 .lightbox::backdrop { background: color-mix(in oklab, var(--night) 88%, transparent); }
 .lightbox img {
   display: block;
   max-width: 94vw;
-  max-height: 92vh;
-  border: 2px solid var(--frame);
+  max-height: 84vh;
+}
+/* The figure's caption comes along, in the figcaption's own cell. The image
+   is capped shorter than the viewport to leave it room; width: 0 + min-width
+   keeps a long caption from widening the box past the picture. */
+.lightbox-cap {
+  width: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-top: 2px solid var(--frame);
+  font: 16.5px/24px var(--pixel);
+  color: var(--muted);
+  text-align: center;
 }
 
 /* Asides — the renderer turns an Obsidian `> [!aside] Title` callout into

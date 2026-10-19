@@ -151,14 +151,20 @@
       document.querySelector("main figure img") && (() => {
         const box = document.createElement("dialog");
         box.className = "lightbox";
-        box.append(document.createElement("img"));
+        const big = document.createElement("img");
+        const cap = document.createElement("p");
+        cap.className = "lightbox-cap";
+        box.append(big, cap);
         document.body.append(box);
         box.addEventListener("click", () => box.close());
         document.querySelector("main").addEventListener("click", (e) => {
           const img = e.target.closest("figure img");
           if (!img) return;
-          box.firstChild.src = img.currentSrc || img.src;
-          box.firstChild.alt = img.alt;
+          big.src = img.currentSrc || img.src;
+          big.alt = img.alt;
+          const fc = img.closest("figure").querySelector("figcaption");
+          cap.innerHTML = fc ? fc.innerHTML : "";
+          cap.hidden = !fc;
           box.showModal();
         });
       })();
