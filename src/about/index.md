@@ -19,7 +19,7 @@ The auroras thing kind of just happened. I started making kind of an 8 bit sunse
 ## How it's built
 I write everything in Obsidian, in one folder of my vault. A daily post is a note named for the day. Each `##` heading in it is a game or a board game, and the site collects every heading onto that game's own page, oldest first, so the page for a game is every paragraph I've ever written under its name. Nothing gets copied or filed by hand, and it's retroactive: register a game today and everything I wrote about it last spring is already on its page. Longer pieces are essays, filed to whatever they cite.
 
-At 2am a timer on my desktop runs a Python script that checks what's ready, copies it into a public git repo, and pushes. GitHub Actions builds the site with Eleventy and serves it from GitHub Pages. The skies are SVGs seeded by the date, so each day, each game and the site button wear their own colors. The type is Silkscreen for the chrome and Alegreya Sans for the prose. There's no JavaScript on the page and no analytics.
+At 2am a timer on my desktop runs a Python script that checks what's ready, copies it into a public git repo, and pushes. GitHub Actions builds the site with Eleventy and serves it from Cloudflare Pages. The skies are pixel art drawn at build time and seeded by the date, so each day, each game and the site button wear their own colors. The type is Pixelify Grid (Pixelify Sans snapped to an exact pixel grid) for the chrome and Alegreya Sans for the prose. The only JavaScript on the page opens an image bigger when you click it, and there are no analytics.
 
 The source is at [github.com/ChaosHat/chaosh.at](https://github.com/ChaosHat/chaosh.at).
 ## Contact
