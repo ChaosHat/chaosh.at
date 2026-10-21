@@ -1,0 +1,1 @@
+A great game ultimately undone by it's own ambition and/or sloppiness. I expect this to be a game that we'll point to in the future where a lot of future ideas will come from and be refined but the experience of this is so uneven.
