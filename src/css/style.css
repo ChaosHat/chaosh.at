@@ -148,7 +148,7 @@ html {
   background-size: 100% 26rem;
 }
 
-/* The page's own stars (aurora.js starTile): a static pixel tile at ×4, the
+/* The page's own stars (aurora.js starTile): a static pixel tile at ×5, the
    same grid as the masthead, reseeded each build. Over the header gradient,
    under everything else — including the masthead, whose z-index is -1.
    Its own layer and not a second html background, because image-rendering
@@ -160,6 +160,7 @@ html::before {
   inset: 0;
   z-index: -2;
   background: url("/img/aurora/stars.png") repeat;
+  /* 192 art px at ×5. */
   background-size: 960px 960px;
   image-rendering: pixelated;
   pointer-events: none;
@@ -182,17 +183,26 @@ body {
 }
 
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
-   One 8-frame sprite sheet stepped through by background-position — sprite
-   animation, one decode, no flicker. The sheet is pixel art, 240×60 a frame,
-   shown at exactly ×4 with pixelated scaling: a fixed 960px tile with
-   repeat-x, so pixel density never changes with the viewport; the height is
-   px, not rem, because the frame window must match the 240px frame exactly or
-   neighbouring frames bleed through. At 240px the band runs well into the top
-   of the page; the intro and the strips wear smoked boxes over it.
+   Two 20-frame sprite sheets, one per curtain, stepped through together by
+   background-position — sprite animation, one decode each, no flicker. The
+   sheets are pixel art at exactly ×5 with pixelated scaling, 48 rows a frame:
+   the FRONT curtain is 192 art px wide (a 960px tile), the BACK curtain 288
+   (1440px), each with repeat-x, so pixel density never changes with the
+   viewport and the pair only repeats every 2880px — one 960px tile showed two
+   identical copies on a 1920 screen. The front is listed first, so it paints
+   over the back wherever it is drawn (the sheet leaves the rest transparent);
+   that is the back-to-front rule, in CSS. The height is px, not rem, because
+   the frame window must match the 240px frame exactly or neighbouring frames
+   bleed through. At 240px the band runs well into the top of the page; the
+   intro and the strips wear smoked boxes over it.
 
-   240, 60, ×4 and 8 are pixelSheet's contract, not free numbers — the values
-   below are derived from them (240, 960 x 8*240, steps(8), -1920px) and all
-   of them move together. The reasoning is in aurora.js. */
+   192/288, 48, ×5, 20 frames and 0.3s a frame are pixelLayers' contract
+   (PIXEL_W, PIXEL_BACK_W, PIXEL_FH, PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL),
+   not free numbers — the values below are derived from them (240; 960 and
+   1440 wide, both 20*240 tall; steps(20); -4800px; 6s) and all of them move
+   together. One keyframe list moves both layers by the same -4800px, which
+   is what keeps the two sheets in step. Nothing here moves sideways. The
+   reasoning is in aurora.js. */
 body::before {
   content: "";
   position: absolute;
@@ -203,15 +213,55 @@ body::before {
   height: 240px;
   z-index: -1;
   pointer-events: none;
-  background: url("/img/aurora/sheet.png") repeat-x;
-  background-size: 960px 1920px;
+  background: url("/img/aurora/sheet.png") repeat-x, url("/img/aurora/sheet-back.png") repeat-x;
+  background-size: 960px 4800px, 1440px 4800px;
   image-rendering: pixelated;
-  animation: aurora-roll 11.2s steps(8) infinite;
+  animation: aurora-roll 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll {
-  to { background-position: 0 -1920px; }
+  to { background-position: 0 -4800px, 0 -4800px; }
 }
+
+/* The light the aurora casts (2026-10-21, the Sea of Stars direction): two
+   more sheets, one per curtain, baked by aurora.js pixelLightSheet and
+   screened over the header so the rim's glow reaches the wordmark and nav the
+   way a scene light recolours sprites. Screen with black is a no-op, so the
+   sheets need no alpha. It is low-res light, smooth-scaled on purpose: `auto`,
+   never pixelated. Same width, frame count and timing as the sky above — 960
+   and 1440 wide, steps(20), 6s — so each light layer has its curtain's period
+   and the four sheets step together. NOT the same height: every light frame
+   carries a guard row above and below (aurora.js pixelLightSheet), so the
+   smooth scale never blends one frame into the next. A light frame is 12 rows
+   + 2 guards at 20px a row = a 280px stride, the sheet is 20 x 280 = 5600px
+   tall, and the window starts 20px down, past the top guard: 0 -20px to
+   -5620px. The 240px it shows is the sky's 240px.
+
+   z-index 1 puts it over the header and under everything lifted to 2 below:
+   the intro, the furniture panel and the reading column sit in front of the
+   light in smoked glass, as they sit in front of the sky, so the light never
+   washes out the text in them. */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 240px;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: url("/img/aurora/light.png") 0 -20px repeat-x, url("/img/aurora/light-back.png") 0 -20px repeat-x;
+  background-size: 960px 5600px, 1440px 5600px;
+  image-rendering: auto;
+  animation: aurora-roll-light 6s steps(20) infinite;
+}
+
+@keyframes aurora-roll-light {
+  to { background-position: 0 -5620px, 0 -5620px; }
+}
+.site-intro, .furniture { position: relative; z-index: 2; }
 
 /* The reading column. Everything that is prose lives in <main>, so centring
    main centres headings, dates and body together — capping each block instead
@@ -226,9 +276,11 @@ body.wide main { max-width: none; }
    has stars since 2026-10-19 and they landed between words. Drawn on a
    pseudo-element reaching into the gutter, so the column's layout does not
    move. `main` is its own stacking context so the post bands (z-index -1 on
-   their headers) still draw over the smoke, not under it. Grid pages keep the
-   open sky; their cards are their own boxes. */
-body:not(.wide) main { position: relative; z-index: 0; }
+   their headers) still draw over the smoke, not under it. z-index 2, not 0,
+   since 2026-10-21: the masthead's light layer is z-index 1 and must stay
+   behind the column. Grid pages keep the open sky; their cards are their own
+   boxes. */
+body:not(.wide) main { position: relative; z-index: 2; }
 body:not(.wide) main::before {
   content: "";
   position: absolute;
@@ -299,7 +351,7 @@ h1,
   border: 1px solid var(--edge);
   background-color: var(--deep);
   /* Natural size, top-centre, cropped by the box: the PNGs come pre-scaled
-     (×4 big, ×2 chip) and sized for the largest box each fills, with the
+     (×5 big, ×2 chip) and sized for the largest box each fills, with the
      scene in the rows every box shows. Stretching them to the box — what
      100% 100% did for the SVGs — would smear the pixels. */
   background-size: auto;
@@ -1712,7 +1764,7 @@ main figure img { cursor: zoom-in; }
 
 @media (prefers-reduced-motion: reduce) {
   .shelf-art, .spoiler { transition: none; }
-  body::before { animation: none; }
+  body::before, body::after { animation: none; }
   .lit-days span.on::before { animation: none; opacity: 0.8; }
 }
 
@@ -1799,9 +1851,10 @@ a.sky-cover:hover { border-color: var(--accent); }
   background-image: var(--day-sky);
   background-repeat: repeat-x;
   background-position: left bottom;
-  /* Pixel art at ×4 (aurora.js pixelBand, 240×24): a fixed 960px tile, same
-     rule as the masthead, so pixel density never varies with the viewport. */
-  background-size: 960px 96px;
+  /* Pixel art at ×5 (aurora.js pixelBand, 192×20): a fixed 960×100px tile,
+     same rule as the masthead, so pixel density never varies with the
+     viewport. PIXEL_BAND_H × PIXEL_SCALE = 100. */
+  background-size: 960px 100px;
   image-rendering: pixelated;
   /* At 80% since 2026-10-19: at full strength the date sat on the band's
      brightest rows and got lost on the busier days (16 Oct's pink spikes).

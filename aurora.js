@@ -8,18 +8,24 @@
 // OKLCH -> sRGB hex at build time, so the SVGs carry plain hex and owe the
 // browser nothing. Perceptual lightness is what lets one value ramp hold at
 // every hue on the arc.
-const oklch = (L, C, Hdeg) => {
+// Linear sRGB, unclamped. Split out so the pixel ramp can see when a colour
+// leaves the gamut, which the clamped hex below hides.
+const oklchLin = (L, C, Hdeg) => {
   const h = (Hdeg * Math.PI) / 180;
   const a = C * Math.cos(h);
   const b = C * Math.sin(h);
   const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  const lin = [
+  return [
     4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
     -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
     -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
   ];
+};
+
+const oklch = (L, C, Hdeg) => {
+  const lin = oklchLin(L, C, Hdeg);
   return (
     "#" +
     lin
@@ -864,27 +870,42 @@ export const ribbonSheet = (
 // "the aurora goes true pixel art"). Everything above draws at screen
 // resolution — chunky rects under a feGaussianBlur glow — and blocks beside
 // blur at another scale is a MIXED GRID, the tell that kept the masthead from
-// ever reading as pixel art. So this draws at the real resolution, 240×60,
+// ever reading as pixel art. So this draws at the real resolution, 192×48,
 // with a fixed seven-colour ramp, no alpha but on/off, and every glow and fade
-// done by 4×4 ordered dither; CSS scales it ×4 with `image-rendering:
-// pixelated`. The ladder, the spread and the determinism are unchanged: only
-// the rendering is new.
+// done by dither; CSS scales it ×5 with `image-rendering: pixelated`. The
+// ladder, the spread and the determinism are unchanged: only the rendering is
+// new.
 //
-// 60 rows, not the old band's 28: at 28 the curtains squashed into parallel
-// stripes. 44 (176px) fixed that; 60 (240px, 2026-10-19) gives the curtains
-// room to stand apart from the nav. The band runs down into the top of the
-// page and the furniture boxes sit over it in smoked glass (style.css) — the
-// content was deliberately NOT pushed down to clear it.
+// ×5 since 2026-10-21 (it was ×4 at 240×60). The tile is still 960px and the
+// band still 240px, so the CSS sizes did not move; only the pixel did. Ray
+// periods are restated per tile (round(n × W / 240)) so a ray is as many ART
+// pixels wide as it was, and the light sheet's sigmas scale by 4/5 so the glow
+// keeps its on-screen size. The curtains keep their proportions: they are
+// fractions of H.
+//
+// 48 rows, not the old band's 28: at 28 the curtains squashed into parallel
+// stripes. 44 (176px) fixed that; 60 rows at ×4 (240px, 2026-10-19) gave the
+// curtains room to stand apart from the nav, and 48 at ×5 is the same 240px.
+// The band runs down into the top of the page and the furniture boxes sit over
+// it in smoked glass (style.css) — the content was deliberately NOT pushed
+// down to clear it.
 // Curtain posture is in fractions of H, so the forms scale with the rows.
 //
 // Ported from the vault's silhouette lab (99_Admin/attachments/
 // chaosh-aurora-silhouette-lab.html), where the numbers were tuned at 320×96.
-// Three changes for the masthead: every horizontal period divides 240, so the
-// tile repeats; motion runs on the frame phase, so 8 frames loop; and the
-// vertical numbers are restated for the masthead's rows.
-export const PIXEL_W = 240;
-export const PIXEL_FH = 60;
-export const PIXEL_SCALE = 4;
+// Three changes for the masthead: every horizontal period divides the tile it
+// lives in, so the tile repeats; motion runs on the frame phase, so the frames
+// loop; and the vertical numbers are restated for the masthead's rows.
+//
+// TWO tiles, not one (2026-10-21). One 960px tile showed two identical copies
+// side by side on a 1920px screen. The curtains are now separate sheets — the
+// front 192 art px wide (960 on screen), the back 288 (1440) — stacked as two
+// backgrounds on one pseudo-element, so the pair only repeats every 2880px.
+// See pixelLayers.
+export const PIXEL_W = 192;
+export const PIXEL_BACK_W = 288;
+export const PIXEL_FH = 48;
+export const PIXEL_SCALE = 5;
 const TAU = 2 * Math.PI;
 
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
@@ -937,22 +958,61 @@ const pxSpike = (c, x, k, th, W) => {
 const pxUnder = (d) => (d < 1 ? 0.62 : Math.max(0, 0.3 - (d - 1) * 0.15));
 
 // Clustered rays for form 7: a few groups per tile, 3–6 rays each, 1–2px wide.
-// Returns how far above the envelope this column's ray reaches (0 = none).
-const pxRayExt = (c, x, th) => {
+//
+// They used to be vertical lines of one width from the rim to the top of the
+// frame, which read as scanlines (2026-10-21). Now each ray
+//   · leans: a cluster shares one direction and one slope, 1px per 5–7 rows,
+//     so a cluster fans instead of marching in step;
+//   · tapers: a 2px ray gives up its second column at 45% of its length, and
+//     past 50% the ray thins to a dither of short strokes, so the tip comes
+//     apart the way the curtain's top does instead of ending on a row;
+//   · stops short: a ray is never longer than the room between its own rim and
+//     the curtain behind's (`c.capAt`), so a front ray ends under the back
+//     curtain's lit rim rather than drawing across it.
+//
+// The rays are listed once per curtain (a ray is a few numbers) and looked up
+// per pixel. `th` is gone: geometry is frozen (see PX_WAVE), so the breathing
+// the rays once did is baked in at its th = 0 value.
+const pxRays = (c, W) => {
+  if (c.rays && c.rays.W === W) return c.rays.list;
   const CELL = c.cell ?? 48; // a divisor of the tile width
-  const cell = Math.floor(x / CELL);
-  if (ihash(cell * 7717 + c.seed) < 0.3) return 0;
-  const start = cell * CELL + Math.floor(ihash(cell * 313 + c.seed) * 18);
-  const n = 3 + Math.floor(ihash(cell * 59 + c.seed) * 4);
-  for (let i = 0; i < n; i += 1) {
-    const rx = start + i * 3 + Math.floor(ihash(cell * 17 + i + c.seed) * 2);
-    const w = ihash(cell * 23 + i * 7 + c.seed) > 0.6 ? 2 : 1;
-    if (x >= rx && x < rx + w) {
-      const breathe = 0.85 + 0.15 * Math.sin(th + cell * 1.7 + i);
-      return (0.25 + 0.55 * ihash(cell * 41 + i * 13 + c.seed)) * breathe;
+  const list = [];
+  for (let cell = 0; cell * CELL < W; cell += 1) {
+    if (ihash(cell * 7717 + c.seed) < 0.3) continue;
+    const start = cell * CELL + Math.floor(ihash(cell * 313 + c.seed) * 18);
+    const n = 3 + Math.floor(ihash(cell * 59 + c.seed) * 4);
+    const dir = ihash(cell * 191 + c.seed) < 0.5 ? -1 : 1;
+    const m = 5 + Math.floor(ihash(cell * 83 + c.seed) * 3); // rows per 1px of lean
+    for (let i = 0; i < n; i += 1) {
+      const x0 = start + i * 3 + Math.floor(ihash(cell * 17 + i + c.seed) * 2);
+      const w = ihash(cell * 23 + i * 7 + c.seed) > 0.6 ? 2 : 1;
+      const { yb, T } = pxGeom(c, x0 % W, 0, W);
+      const ext = (0.25 + 0.55 * ihash(cell * 41 + i * 13 + c.seed)) * (0.85 + 0.15 * Math.sin(cell * 1.7 + i));
+      // A ray ends inside the frame, so its taper happens where it can be
+      // seen: never past 85% of the way to the top edge. And two rows of air
+      // under the curtain behind's rim.
+      const len = Math.min(T * (1 + ext), yb * 0.85, c.capAt ? yb - c.capAt(x0 % W) - 2 : Infinity);
+      if (len >= 3) list.push({ x0, w, dir, m, yb, len });
     }
   }
-  return 0;
+  c.rays = { W, list };
+  return list;
+};
+
+// The ray's intensity at (x, y), 0 where there is none.
+const pxRayAt = (c, x, y, W) => {
+  let best = 0;
+  for (const r of pxRays(c, W)) {
+    const d = r.yb - y;
+    if (d < 0 || d >= r.len) continue;
+    const t = d / r.len;
+    // The ray's column at this height, measured from where it left the rim.
+    const dx = (((x - (r.x0 + r.dir * Math.floor(d / r.m))) % W) + W) % W;
+    if (dx >= r.w || (dx === 1 && t > 0.45)) continue;
+    if (t > 0.5 && ihash(x * 5231 + Math.floor((y + (x % 3)) / 2) * 7919 + c.seed) > 1 - sstep(0.5, 1, t)) continue;
+    best = Math.max(best, (1 - t) ** 1.1 * 0.78);
+  }
+  return best;
 };
 
 // The three masthead forms, each an intensity 0..1 at (x, y).
@@ -984,17 +1044,7 @@ const PIXEL_FORMS = {
   },
   // 7 · rayed arc: the dissolving envelope, plus clustered rays rising out of
   // the body and fading on the same profile, only longer.
-  rayed: (c, x, y, k, th, W) => {
-    const base = dissolve(c, x, y, k, th, W);
-    const ext = pxRayExt(c, x, th);
-    if (!ext) return base;
-    const { yb, T } = pxGeom(c, x, th, W);
-    const d = yb - y;
-    if (d < 0) return base;
-    const Tr = T * (1 + ext);
-    if (d > Tr) return base;
-    return Math.max(base, (1 - d / Tr) ** 1.1 * 0.78);
-  },
+  rayed: (c, x, y, k, th, W) => Math.max(dissolve(c, x, y, k, th, W), pxRayAt(c, x, y, W)),
   // 3 · dissolving top: rays are brightness only, the top fades through dither.
   dissolve,
 };
@@ -1015,26 +1065,154 @@ export const pixelForm = (dateStr) => {
   return rest[hashOf(`pxform:${dateStr}`) % rest.length];
 };
 
-// The seven-step ramp: night, night2, a dusk mix, then the day's four inks.
-// The masthead draws only steps 2–6 (and stars); the two night steps are the
-// page's own background, so bare sky is transparent.
-const pxRamp = (pal) => {
-  const n2 = hexRgb(NIGHT[2]);
-  return [hexRgb(NIGHT[0]), n2, mixRgb(n2, hexRgb(pal.deep), 0.5), ...[pal.deep, pal.mid, pal.glow, pal.edge].map(hexRgb)];
+// The pixel ramp (2026-10-21). The first port borrowed palette()'s inks, which
+// were tuned for SVG under a blur, and in pixels they spaced badly: `mid`,
+// `glow` and `edge` sat within 0.10 of each other in lightness while the steps
+// below them jumped 0.13 and 0.19, so the bright core was mush and the fade
+// under it lurched. Here the five inks are spaced EVENLY in lightness, chroma
+// peaks in the body and falls off both ways (a pale rim and a dim crown both
+// read as more saturated than they are next to a strong middle), and the hue
+// still runs rim → body → crown along the day's spread, slid inside the arc by
+// runHue exactly as palette() does. The spread gets a floor: most nights draw a
+// near-monochrome spread, and a ramp that is one hue at five lightnesses is
+// the flat, unshifted ramp hand-drawn pixel art avoids. 24° is the smallest
+// swing that still shows as two hues at ×4 (not re-measured at ×5).
+//
+// An eighth ink, `hot`, sits one small step above the rim: a 1px core on the
+// brightest crests only. It started near-white, standing in for the glow the
+// old bloom gave, and once the light layer arrived (pixelLightSheet) that was
+// glow twice over. Now the light pass does the glowing and the core is only
+// the accent that marks where it comes from — the emitter, not the light.
+//
+// Ramp layout, by index: 0–1 the night (never drawn — bare sky is
+// transparent), 2–6 the inks dusk → edge, 7 hot.
+const PX_SWING_MIN = 24;
+const PX_INKS = [
+  // [position on the rim → crown run, share of peak chroma]
+  // The two low inks stay quiet in chroma as well as lightness: faded
+  // statuses (shelved, owned, incomplete, low recency) live almost entirely
+  // on them, and a saturated low step made a shelved sky louder than an
+  // active one's body.
+  [1, 0.38], // dusk: the crown's hue, the faint top of a curtain
+  [0.7, 0.66], // deep
+  [0.4, 1], // mid: chroma peaks in the body
+  [0.18, 0.85], // glow
+  [0, 0.6], // edge: the rim, pale but still coloured
+];
+
+// Chroma is pulled in until the colour is inside sRGB rather than clamped per
+// channel, which would bend the hue — the same sick-sky failure the arc
+// exists to avoid, arriving through the gamut instead.
+const inGamut = (L, C, H) => oklchLin(L, C, H).every((v) => v >= -0.0005 && v <= 1.0005);
+const pxInk = (L, C, H) => {
+  let c = C;
+  while (c > 0 && !inGamut(L, c, H)) c -= 0.004;
+  return hexRgb(oklch(L, Math.max(0, c), H));
 };
 
+// SNES colour: 5 bits a channel, expanded back the way the hardware's DAC
+// does. Only the strict-16-bit style option uses it.
+const snes5 = (rgb) => rgb.map((v) => ((v >> 3) << 3) | (v >> 6));
+
+export const pxPalette = (
+  ladderHue,
+  { lMin = 0.4, lMax = 0.85, spread = 0, cPeak = 0.17, grey = false, snes = false } = {},
+) => {
+  // Incomplete keeps its grey ghost: a cool near-neutral with no hue run.
+  const at = grey ? () => 268 : runHue(arcHue(ladderHue), Math.max(spread, PX_SWING_MIN));
+  const cp = grey ? 0.025 : cPeak;
+  const n = PX_INKS.length - 1;
+  const inks = PX_INKS.map(([f, share], i) => pxInk(lMin + (i * (lMax - lMin)) / n, cp * share, at(f)));
+  const hot = pxInk(Math.min(0.93, lMax + 0.05), grey ? 0.008 : 0.05, at(0));
+  const ramp = [hexRgb(NIGHT[0]), hexRgb(NIGHT[2]), ...inks, hot];
+  return snes ? ramp.map(snes5) : ramp;
+};
+
+// How a frame is animated (2026-10-21). The first port moved the GEOMETRY —
+// the edge wobbled, the rays breathed, each column flickered through eight
+// states — so every frame redrew most of the curtain and a step flipped 15–34%
+// of the lit pixels at once: at a 1.4s hold that read as a slideshow. Now the
+// shape is frozen and only brightness moves, as a slow wave travelling UP the
+// rays (a real aurora's pulsing does this). Quantised to the ramp, a small
+// wave only tips the pixels already near a step boundary, so each frame
+// changes a few percent of the curtain: the 16-bit palette-cycling trick,
+// computed instead of hand-indexed.
+//
+// One cycle per loop keeps it seamless; `λ` is in art rows, so the wave
+// climbs λ rows per loop. Each column carries its own phase, keyed to its ray
+// so a ray pulses as one piece and its neighbour out of step.
+const PX_WAVE = { amp: 0.3, lambda: 18 };
+
+// What replaces full-field Bayer (2026-10-21). Bayer shaded every shallow
+// gradient with the same 4×4 crosshatch, and a fixed screen-aligned pattern is
+// the texture of 90s PC graphics, not of drawn pixel art. Hand-shaded art puts
+// its transitions in CLUSTERS, broken along the form. So each column samples
+// its curtain a few rows lower where its ray is bright and higher where it is
+// dim: the brighter inks are carried up the rays, and every step boundary
+// becomes teeth that follow the rays rather than a line that follows the rim.
+//
+// It is a shift in ROWS, not a nudge to the quantiser's threshold. The first
+// cut nudged the threshold, and where the gradient is shallow — the whole
+// upper body — a fraction of a step moved the boundary a dozen rows: flat
+// topped bars, a city skyline, the equaliser look rejected on 2026-10-05.
+// Rows bound it: a tooth is `PX_TOOTH` rows plus `PX_FAN` of a row per row of
+// depth, whatever the slope. The shift fades in over `PX_RAMP` rows above the
+// rim so the lit edge is not cut.
+//
+// The fan is the second pass at this (2026-10-21). With a tooth of constant
+// height every step in a column slid up or down together, so the steps stayed
+// parallel to one another and to the rim — contour banding, worst on the two
+// forms whose body is a smooth fade, `rayed` and `dissolve`. Growing the shift
+// with depth makes the steps of one column spread apart where its ray is
+// bright and crowd together where it is dim, so each boundary has a different
+// profile: they cut across the contour and across each other. Measured as the
+// roughness of a step's depth around its own 15-column average, `dissolve`
+// went from 1.9/2.1/1.7/1.3 rows (steps top to bottom) to 2.1/2.6/2.6/2.6.
+//
+// Bayer survives as a sliver — `PX_SEAM` is a fifth of a step — so a
+// boundary still gets a one-pixel stipple where it runs flat.
+//
+// `shortflame` keeps the first pass's numbers: its body is already flames, it
+// already measures rougher (3.0/3.8/4.4/3.8 against the others' 2.1/2.6/2.6/
+// 2.6), and the fan only broke its dim back curtain into blotches.
+// [rows of tooth, rows of fan per row of depth, rows to ramp in over]
+const PX_TEETH = { shortflame: [4, 0, 6], rayed: [3, 0.4, 3], dissolve: [3, 0.4, 3] };
+const PX_SEAM = 0.45;
+const PX_STROKE = 3;
+
 // Render one frame of `form` into `px` (RGBA) at row offset `oy`.
-const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true }) => {
+// A curtain may carry four flags for the layered masthead (pixelLayers), where
+// each sheet holds ONE curtain. `front: false` keeps a lone back curtain from
+// getting the front's hot core. `emit` is the strength its rim casts into the
+// light sheet (default: 1 for the front curtain, 0 for any other) and
+// `emitFrom` the lowest ramp step that casts (6, the rim, unless the curtain
+// is too dim to reach it). `floor` drops pixels fainter than it, so the front
+// sheet is opaque only where the single-sheet painter's order would have let
+// it cover the back.
+// `starP` is the share of bare sky that gets a star.
+const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true, starP = 0.008, dither = true, emit = null }) => {
   const th = (TAU * k) / N;
   const fn = PIXEL_FORMS[form];
+  const [tooth, fan, lead] = PX_TEETH[form];
   const star = hexRgb(STAR);
+  const live = N > 1;
+  // Per curtain, per column: the frozen edge, the crest, the ray, and the
+  // column's wave phase. The forms below are called at k = 0, th = 0 for the
+  // same reason: geometry does not move.
+  const col = cs.map((c) =>
+    Array.from({ length: W }, (_, x) => {
+      const { yb, crest } = pxGeom(c, x, 0, W);
+      const ray = pxSpike(c, x, 0, 0, W);
+      return { yb, crest, ray, ph: TAU * (0.7 * ray + 0.3 * ihash((x >> 2) * 977 + c.seed)) };
+    }),
+  );
+  const isFront = (i) => cs[i].front ?? i === cs.length - 1;
   for (let y = 0; y < H; y += 1) {
     // The wordmark and nav sit in the top half: light thins toward the top,
     // the pixel version of the old gradient mask. It scales intensity BEFORE
     // quantising, so the dimming lands as darker ramp steps, never as alpha.
     const m = fade[0] + (1 - fade[0]) * sstep(0, fade[1], y / H);
     for (let x = 0; x < W; x += 1) {
-      const b = bay(x, y);
       // Painter's order, back to front: a curtain covers what is behind it
       // wherever it is visibly there (≥ 0.16); behind its dissolving top, the
       // brighter one shows. Max-blend everywhere made the back curtain's rim
@@ -1042,22 +1220,50 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
       let best = 0;
       let who = 0;
       for (let i = 0; i < cs.length; i += 1) {
-        const I = fn(cs[i], x, y, k, th, W) * cs[i].gain * m;
+        const cc = col[i][x];
+        const d = cc.yb - y;
+        const shift = d > 0 ? (cc.ray - 0.4) * (tooth + fan * d) * Math.min(1, d / lead) : 0;
+        let I = fn(cs[i], x, y + shift, 0, 0, W) * cs[i].gain * m;
+        // The wave rides above the rim only, ramping in over three rows, so
+        // the one hard line in the drawing stays still.
+        // Weighted by the ray: a pulse runs up the bright rays and leaves the
+        // gaps alone. Spread evenly, the same wave only tipped boundary pixels
+        // chosen by the stipple — a scatter of single pixels, fizz rather
+        // than anything travelling.
+        if (live && I > 0 && d > 0)
+          I *= 1 + PX_WAVE.amp * cc.ray * Math.min(1, d / 3) * Math.sin((TAU * d) / PX_WAVE.lambda - th + cc.ph);
         if (I >= 0.16 || I > best) {
           best = I;
           who = i;
         }
       }
-      const val = best * 5.6 + (b - 0.5) * 0.55;
+      const cw = col[who][x];
+      if (best < (cs[who].floor ?? 0)) best = 0;
+      // The stipple: a short vertical stroke, not a grid cell. Held over
+      // `PX_STROKE` rows and staggered per column, so where a boundary runs
+      // flat it breaks into ragged strokes along the rays instead of a
+      // checkerboard — and a bar's flat top becomes a jagged one.
+      const sy = Math.floor((y + ((x * 5) % PX_STROKE)) / PX_STROKE);
+      const val = best * 5.6 + (dither ? (ihash(x * 7919 + sy * 104729 + seed) - 0.5) * PX_SEAM : 0);
       let idx = val >= 0.6 ? Math.min(6, 1 + Math.floor(val + 0.4)) : 0;
       if (idx < 2) idx = 0;
+      // The hot core: one row inside the front curtain's rim, on the crests.
+      if (idx === 6 && isFront(who) && cw.crest > 0.86 && Math.floor(cw.yb - 1) === y) idx = 7;
+      // The emitter map for the light layer: the front curtain's two top
+      // inks, the rim and the core. Their strength rides the same wave as the
+      // rays, at its rim phase, so the light swells as a pulse leaves the rim.
+      const eg = cs[who].emit ?? (isFront(who) ? 1 : 0);
+      if (emit && idx >= (cs[who].emitFrom ?? 6) && eg)
+        emit[(oy + y) * W + x] = eg * (idx === 7 ? 1 : 0.7) * (live ? 1 + 0.5 * cw.ray * Math.sin(cw.ph - th) : 1);
       // Stars: single pixels in bare sky, two brightnesses, a few blinking
-      // out per frame.
+      // out. They change state five times a loop, not every frame, so the
+      // sky's own twinkle stays slower than the aurora.
       let rgb = null;
       if (stars && idx === 0 && best < 0.05) {
         const h = ihash(x * 92821 + y * 68917 + seed);
-        if (h > 0.992 && ihash(x * 31 + y * 17 + k * 7 + seed) > 0.15)
-          rgb = h > 0.997 ? star : mixRgb(hexRgb(NIGHT[0]), star, 0.55);
+        const kk = Math.floor((k * 5) / N);
+        if (h > 1 - starP && ihash(x * 31 + y * 17 + kk * 7 + seed) > 0.15)
+          rgb = h > 1 - starP * 0.375 ? star : mixRgb(hexRgb(NIGHT[0]), star, 0.55);
       } else if (idx >= 2) rgb = ramps[who][idx];
       const o = ((oy + y) * W + x) * 4;
       if (rgb) {
@@ -1070,59 +1276,254 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
   }
 };
 
+// 20 frames at 0.3s (2026-10-21; was 8 at 1.4s). With only brightness moving,
+// frames are cheap — most of each one repeats the last, which deflate eats —
+// and a short dwell is what turns the steps into shimmer instead of a
+// sequence of stills.
+export const PIXEL_FRAMES = 20;
+export const PIXEL_DWELL = 0.3;
+
 // The sheet: N frames of W×H stacked vertically, RGBA. Returns the raw pixels
 // so the build can encode them and the preview can inspect them.
 //
 // CSS MUST AGREE: the band is H×scale tall (240px), background-size is
-// (W×scale) by (N×H×scale) — 960×1920 at the defaults — `steps(N)`, and the
-// keyframe to `0 -(N×H×scale)px`.
+// (W×scale) by (N×H×scale) — 960×4800 at the defaults, 1440×4800 for the back
+// sheet — `steps(N)`, the keyframe to `0 -(N×H×scale)px`, and the duration
+// N×dwell (6s).
+//
+// `dither: false` and `snes: true` are the strict-16-bit style: no stipple at
+// all, and every ink snapped to the SNES's 15-bit colour. Not the default —
+// kept as a dial for the style comparison.
+//
+// `layer` is for the masthead (pixelLayers): 'back' or 'front' draws only that
+// curtain, so the two can live in sheets of different widths. `backW` tells
+// the front layer how wide the back tile is, so its rays know where the back
+// curtain's rim can be (see pxCap). Everything else draws both curtains into
+// one sheet, which is what the button, the sig, the cards and the post bands
+// still do.
 export const pixelSheet = (
   dateStr,
   {
     W = PIXEL_W,
     H = PIXEL_FH,
-    frames: N = RIBBON_FRAMES,
+    frames: N = PIXEL_FRAMES,
     form,
     lMax = 0.85,
     fade = [0.5, 0.5],
+    dither = true,
+    snes = false,
     // Posture, in fractions of the frame height: where each lit edge rides
-    // and how tall each curtain stands. Ray periods are whole cycles per tile.
+    // and how tall each curtain stands. Ray periods are whole cycles per tile,
+    // restated from the 240-wide originals as round(n × W / 240).
     // `env` is form 8's dim fill, as a share of the curtain: the lab's 0.42
     // left deep dark notches between flames at this height, and a row of
     // notched triangles is a pine forest.
-    back = { base: 0.62, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
-    front = { base: 0.86, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
+    back = { base: 0.62, thick: 0.75, n1: 20, n2: 45, env: 0.65 },
+    front = { base: 0.86, thick: 1.0, n1: 17, n2: 39, env: 0.65 },
     sweep = 0.1,
     stars = true,
+    starP = 0.008,
+    layer = null,
+    backW = PIXEL_BACK_W,
   } = {},
 ) => {
   const hue = (hashOf(dateStr) % 360000) / 1000;
   const spread = daySpread(dateStr);
   // The back curtain gets its own ramp, 60° further along the ladder and
   // capped darker, so where the curtains overlap they separate.
-  const ramps = [palette((hue + 60) % 360, { lMax: lMax - 0.13, spread }), palette(hue, { lMax, spread })].map(pxRamp);
+  const ramps = [
+    pxPalette((hue + 60) % 360, { lMin: 0.4, lMax: lMax - 0.05, spread, snes }),
+    pxPalette(hue, { lMax, spread, snes }),
+  ];
   const dh = hashOf(`pxgeom:${dateStr}`);
   const seed = dh % 100003;
   const dph = ((dh >>> 8) % 1000) / 1000;
   const wob = (1.2 * H) / 28; // tuned at 28 rows
   // Back curtain first.
   const cs = [
-    { ...back, base: back.base * H, thick: back.thick * H, sweep: sweep * H, wob, ph: 2.4 + TAU * dph, gain: 0.55, seed: seed + 11 },
+    { ...back, base: back.base * H, thick: back.thick * H, sweep: sweep * H, wob, ph: 2.4 + TAU * dph, gain: 0.7, seed: seed + 11 },
     { ...front, base: front.base * H, thick: front.thick * H, sweep: sweep * H, wob, ph: 0.2 + TAU * dph, gain: 1.0, seed: seed + 23 },
   ];
+  // The front's rays stop at the back curtain's lit rim (pxRays). Sharing a
+  // tile that is a plain lookup. In separate tiles of different widths the
+  // front column x sits over back column (x + W·j) mod backW, with a different
+  // j in every copy of the front tile, so no one answer is the rim: the
+  // answer is the LOWEST rim of the alignments, which keeps a ray from ever
+  // crossing the back's rim and, on the copies where the rim is higher, stops
+  // it a little short.
+  const backC = cs[0];
+  if (layer === "front") {
+    const copies = backW / gcd(W, backW);
+    cs[1].capAt = (x) => {
+      let low = -Infinity;
+      for (let j = 0; j < copies; j += 1) low = Math.max(low, pxGeom(backC, (x + W * j) % backW, 0, backW).yb);
+      return low;
+    };
+  } else if (!layer) cs[1].capAt = (x) => pxGeom(backC, x, 0, W).yb;
+
   const f = form ?? pixelForm(dateStr);
+  let curtains = cs;
+  let inks = ramps;
+  if (layer === "back") {
+    // The back curtain's rim casts light too, but less: it is behind.
+    cs[0].front = false;
+    cs[0].emit = PX_BACK_EMIT;
+    // The back's gain (0.7) never reaches the top ink, so its rim is the
+    // step below.
+    cs[0].emitFrom = 5;
+    curtains = [cs[0]];
+    inks = [ramps[0]];
+  } else if (layer === "front") {
+    // Opaque wherever it is visibly there, as the painter's order had it.
+    cs[1].floor = 0.16;
+    curtains = [cs[1]];
+    inks = [ramps[1]];
+  }
   const px = new Uint8Array(W * H * N * 4);
-  for (let k = 0; k < N; k += 1) pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs, ramps, fade, seed, stars });
-  return { px, w: W, h: H * N, form: f };
+  const emit = new Float32Array(W * H * N);
+  for (let k = 0; k < N; k += 1)
+    pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs: curtains, ramps: inks, fade, seed, stars: stars && layer !== "front", starP, dither, emit });
+  // `light` is the colour the emitters cast: the front curtain's body ink,
+  // the most saturated step, so the light tints rather than whitens.
+  const own = layer === "back" ? ramps[0] : ramps[1];
+  return { px, w: W, h: H * N, form: f, emit, frames: N, light: own[4], rim: own[6] };
+};
+
+const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+// How much light the back curtain casts, against the front's 1.
+const PX_BACK_EMIT = 0.55;
+// The masthead's star share of bare sky: 0.008 at ×4 restated for ×5 (16/25),
+// so the sky has as many stars per screen pixel as it did.
+const PX_STARS = 0.0051;
+
+// The masthead, as two sheets (2026-10-21; see the note above PIXEL_W): the
+// front curtain at 192 art px wide, the back at 288. Stars live in the back
+// sheet, behind everything; the front is opaque where it is drawn.
+//
+// CSS MUST AGREE (body::before and body::after): both sheets at the same
+// frame height and frame count, so ONE animation steps them together. The
+// front is 960px wide on screen and the back 1440px.
+export const pixelLayers = (dateStr, opts = {}) => {
+  const form = opts.form ?? pixelForm(dateStr);
+  const back = pixelSheet(dateStr, {
+    ...opts,
+    form,
+    W: PIXEL_BACK_W,
+    layer: "back",
+    back: { base: 0.62, thick: 0.75, n1: 30, n2: 67, env: 0.65 },
+    starP: PX_STARS,
+  });
+  const front = pixelSheet(dateStr, { ...opts, form, W: PIXEL_W, layer: "front", backW: PIXEL_BACK_W });
+  return { back, front, form };
+};
+
+// The light layer (2026-10-21, the Sea of Stars direction): the masthead's
+// rim and core cast light over the whole header, wordmark and nav included,
+// the way a scene-wide light pass recolours hand-pixeled sprites. The pixel
+// sheet is untouched; this is a second sheet composited over it with a
+// screen blend, so black here means "no light" and nothing needs alpha.
+//
+// The blur is BAKED, not done by CSS `filter: blur()`. A runtime blur over a
+// 240px band repaints every step on every visit, which is exactly the cost a
+// phone notices; baked, the browser only composites one screen blend per
+// step. Baking also lets the light sheet be low-res — light has no edges, so
+// half the art resolution, smooth-scaled by the browser (`image-rendering:
+// auto`), loses nothing — and lets the frames carry the rim's pulse.
+//
+// Two blurs, as in the mock Hat picked: a tight spill that hugs the rim and a
+// wide halo that reaches the wordmark. Sigmas are in ART pixels (×5 on
+// screen: 2.0 and 6.8 are the mock's 10px and 34px). Horizontal blur wraps,
+// so the light tiles as seamlessly as the sky; vertical blur stops at the
+// band's edges, where the band does.
+//
+// One light sheet per sky sheet (pixelLayers): the front curtain's light has
+// the front's 960px period and the back curtain's the back's 1440, so the
+// glow does not repeat any sooner than the sky does. `down` must divide the
+// sheet's width (192 and 288 both take 4).
+//
+// GUARD ROWS (2026-10-21). The light is smooth-scaled, and a smooth scale
+// blends each row with its neighbours — across a frame boundary too, so the top
+// ~10px of every frame wore a strip of the previous frame's bottom row, which
+// is where the front rim's light is brightest. Every frame now carries one
+// guard row above and below, a copy of its own edge row: the blend at the edge
+// is between a row and itself. The cost is that the light sheet's frame is
+// (h + 2) rows, not h, which CSS must know.
+//
+// CSS MUST AGREE: the same frame count, the same width and the same steps() as
+// the sheet, but not the same height or offsets. A light frame is 12 rows plus
+// two guards, 14, and each row is 20px on screen (down × the art scale), so
+// the frame stride is 280px, the sheet 20 × 280 = 5600px tall, and the window
+// starts one row (20px) down, past the top guard: 0 -20px … -5620px. The
+// frame's visible 240px is the same 240px as the sky's.
+export const pixelLightSheet = (
+  sheet,
+  { down = 4, spill = { sigma: 2.0, gain: 1.4 }, halo = { sigma: 6.8, gain: 1.3 } } = {},
+) => {
+  const N = sheet.frames;
+  const W = sheet.w;
+  const H = sheet.h / N;
+  const w = W / down;
+  const h = H / down;
+  const blur = (src, sigma) => {
+    const s = sigma / down;
+    const r = Math.ceil(3 * s);
+    const ker = Array.from({ length: 2 * r + 1 }, (_, i) => Math.exp(-((i - r) ** 2) / (2 * s * s)));
+    const sum = ker.reduce((a, b) => a + b, 0);
+    const kn = ker.map((v) => v / sum);
+    const tmp = new Float32Array(w * h);
+    const out = new Float32Array(w * h);
+    for (let y = 0; y < h; y += 1)
+      for (let x = 0; x < w; x += 1) {
+        let v = 0;
+        for (let i = -r; i <= r; i += 1) v += kn[i + r] * src[y * w + ((((x + i) % w) + w) % w)];
+        tmp[y * w + x] = v;
+      }
+    for (let y = 0; y < h; y += 1)
+      for (let x = 0; x < w; x += 1) {
+        let v = 0;
+        for (let i = -r; i <= r; i += 1) {
+          const yy = y + i;
+          if (yy >= 0 && yy < h) v += kn[i + r] * tmp[yy * w + x];
+        }
+        out[y * w + x] = v;
+      }
+    return out;
+  };
+  // Spill takes a little of the rim's own pale colour; the halo is pure body
+  // ink, so the far light is coloured rather than milky.
+  const body = sheet.light.map((v) => v / 255);
+  const near = sheet.rim.map((v, i) => 0.4 * (v / 255) + 0.6 * body[i]);
+  // One guard row above and below every frame, copies of the frame's own edge
+  // rows (see the note above). The sheet is (h + 2) rows a frame.
+  const px = new Uint8Array(w * (h + 2) * N * 3);
+  for (let k = 0; k < N; k += 1) {
+    const src = new Float32Array(w * h);
+    for (let y = 0; y < H; y += 1)
+      for (let x = 0; x < W; x += 1)
+        src[((y / down) | 0) * w + ((x / down) | 0)] += sheet.emit[(k * H + y) * W + x] / (down * down);
+    const a = blur(src, spill.sigma);
+    const b = blur(src, halo.sigma);
+    for (let i = 0; i < w * h; i += 1)
+      for (let c = 0; c < 3; c += 1) {
+        // Soft-clipped, so a dense crest saturates toward the light's colour
+        // instead of hard-clipping a channel and shifting hue.
+        const v = a[i] * spill.gain * near[c] + b[i] * halo.gain * body[c];
+        px[(k * w * (h + 2) + w + i) * 3 + c] = Math.round(255 * (1 - Math.exp(-v)));
+      }
+    const o = k * w * (h + 2) * 3;
+    px.copyWithin(o, o + w * 3, o + w * 6); // guard above = row 0
+    px.copyWithin(o + w * (h + 1) * 3, o + w * h * 3, o + w * (h + 1) * 3); // guard below = last row
+  }
+  return { px, w, h: (h + 2) * N };
 };
 
 // The post band in pixels: the night a post was written, one static frame.
-// 240×24 shown at ×4 — a 960×96 tile, the old band's height. Static, never
+// 192×20 shown at ×5 — a 960×100 tile (it was 240×24 at ×4, 96px). Static, never
 // animated: five of these breathing on the home page is the same mistake as
 // thirty shimmering shelf cards. The lit edge rides a little higher than the
 // masthead's and the top fades harder, because the band sits under a title
 // and a dateline rather than above a page. No stars: the page has its own.
-export const PIXEL_BAND_H = 24;
+export const PIXEL_BAND_H = 20;
 export const pixelBand = (dateStr) =>
   pixelSheet(dateStr, {
     H: PIXEL_BAND_H,
@@ -1130,18 +1531,24 @@ export const pixelBand = (dateStr) =>
     form: pixelBandForm(dateStr),
     lMax: 0.82,
     fade: [0.45, 0.6],
-    back: { base: 0.6, thick: 0.75, n1: 25, n2: 56, env: 0.65 },
-    front: { base: 0.84, thick: 1.0, n1: 21, n2: 49, env: 0.65 },
+    back: { base: 0.6, thick: 0.75, n1: 20, n2: 45, env: 0.65 },
+    front: { base: 0.84, thick: 1.0, n1: 17, n2: 39, env: 0.65 },
     stars: false,
   });
 
 // The page's own night: a static star tile behind everything, reseeded each
 // build so the sky changes nightly like the rest of it. Single pixels at two
-// brightnesses and a rare four-point "+", drawn at the same ×4 grid as the
+// brightnesses and a rare four-point "+", drawn at the same ×5 grid as the
 // aurora so a star on the page and a star in the masthead are the same size.
 // Sparse on purpose — it is texture under reading, not a scene.
-export const STAR_TILE = 240;
-export const starTile = (dateStr, { n = STAR_TILE, density = 0.0022 } = {}) => {
+//
+// 192 art px at ×5 is the same 960px tile it was at 240 × 4, and the density
+// is restated per art pixel to keep the same stars per screen pixel:
+// 0.0022 × 25/16 ≈ 0.0034, which is the same ~127 stars in a tile. The cards
+// (og.js) draw on a 240-wide ×5 grid and ask for n and density themselves.
+export const STAR_TILE = 192;
+export const PX_STAR_DENSITY = 0.0034;
+export const starTile = (dateStr, { n = STAR_TILE, density = PX_STAR_DENSITY } = {}) => {
   const px = new Uint8Array(n * n * 4);
   const seed = hashOf(`stars:${dateStr}`) % 100003;
   const bright = hexRgb(STAR);
@@ -1177,12 +1584,14 @@ export const starTile = (dateStr, { n = STAR_TILE, density = 0.0022 } = {}) => {
 //
 // One image per subject, sized for the largest box it fills and cropped by
 // the rest, never stretched: a pixel image stretched to an arbitrary box
-// smears. The big sky is 52×80 art pixels and the chip 16×22; the scene
-// lives in the top rows every box shows (44 and 16), the rest is night. The
-// build pre-scales them (×4, ×2) so CSS shows them at natural size, anchored
-// top-centre, with pixelated scaling. Mocked against the SVGs for ten real
-// subjects before porting; Hat picked the pixel chips.
-export const PX_SKY = { w: 52, h: 80, scene: 44, scale: 4 };
+// smears. The big sky is 42×64 art pixels (210×320 at ×5, since 2026-10-21 —
+// it was 52×80 at ×4; the largest box is the shelf card at ~209×314, just
+// under a 704px viewport) and the chip 16×22; the scene lives in the top
+// rows every box shows (35 and 16), the rest is night. The build pre-scales
+// them (×5, ×2) so CSS shows them at natural size, anchored top-centre, with
+// pixelated scaling. Mocked against the SVGs for ten real subjects before
+// porting; Hat picked the pixel chips.
+export const PX_SKY = { w: 42, h: 64, scene: 35, scale: 5 };
 export const PX_CHIP = { w: 16, h: 22, scene: 16, scale: 2 };
 
 const pxUpscale = (px, w, h, k) => {
@@ -1216,7 +1625,7 @@ export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chi
     const n1 = chip ? 2 : 4;
     const n2 = chip ? 3 : 9;
     const ph = (seed % 628) / 100;
-    const ramp = (h, lMax) => pxRamp(status === "incomplete" ? GREY : palette(h, { lMax }));
+    const ramp = (h, lMax) => pxPalette(h, { lMin: lMax < 0.8 ? 0.36 : 0.4, lMax, grey: status === "incomplete" });
     const curt = (base, thick, nn2, phase, gain, s) => ({
       base: SH * base, thick: SH * thick, n1, n2: nn2, env: 0.65,
       sweep: SH * 0.07, wob: SH * 0.035, ph: phase, gain, seed: s,
@@ -1230,15 +1639,17 @@ export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chi
     }
     cs.push(curt(chip ? 0.62 : 0.66, chip ? 0.42 : 0.5, n2, ph, g, seed + 23));
     ramps.push(ramp(ladderHue, 0.85));
-    pxFrame(px, { W, H: SH, oy: 0, k: 0, N: 1, form, cs, ramps, fade: [1, 0.01], seed, stars: true });
+    pxFrame(px, { W, H: SH, oy: 0, k: 0, N: 1, form, cs, ramps, fade: [1, 0.01], seed, stars: chip });
   } else {
     // Completed trades the aurora for the moon: a waning crescent, the lit
     // disc less an offset one, with one dithered halo step on the big sky.
     // Gold for canon (MOON_GOLD, which tracks --gold).
     const moon = hexRgb(canon ? MOON_GOLD : MOON);
-    const r = chip ? W * 0.26 : 8;
+    // The big moon was 8 rows by 13 down at ×4; 6.4 and 10.4 are the same
+    // 32px and 52px at ×5.
+    const r = chip ? W * 0.26 : 6.4;
     const cx = W / 2;
-    const cy = chip ? SH * 0.42 : 13;
+    const cy = chip ? SH * 0.42 : 10.4;
     const ox = cx + r * 0.5;
     const oy = cy - r * 0.27;
     const halo = mixRgb(night[0], moon, 0.18);
@@ -1251,16 +1662,23 @@ export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chi
         else if (!chip && d < r * 1.55 && bay(x, y) < 1 - (d - r) / (r * 0.55)) px.set([...halo, 255], o);
       }
   }
-  // Stars wherever the sky is still bare night, the scene and below.
+  // Stars wherever the sky is still bare night, the scene and below. The big
+  // sky was 1.8% stars at ×4, eight times the page's density, and read as a
+  // snow globe (2026-10-21); it now asks for the page's own — PX_STAR_DENSITY
+  // is stars per art pixel at ×5, so a star is as common here as behind the
+  // text. The chip is two screen pixels to an art pixel and a few dozen art
+  // pixels to a side; at the page's density it would hold no stars, so it
+  // keeps its 1.5%.
   const star = hexRgb(STAR);
   const dimStar = mixRgb(night[0], star, 0.55);
+  const starP = chip ? 0.015 : PX_STAR_DENSITY;
   for (let y = 0; y < H; y += 1)
     for (let x = 0; x < W; x += 1) {
       const h = ihash(x * 92821 + y * 68917 + seed);
-      if (h <= (chip ? 0.985 : 0.982)) continue;
+      if (h <= 1 - starP) continue;
       const o = (y * W + x) * 4;
       if (night.some((c) => c[0] === px[o] && c[1] === px[o + 1] && c[2] === px[o + 2]))
-        px.set([...(h > 0.993 ? star : dimStar), 255], o);
+        px.set([...(h > (chip ? 0.993 : 1 - starP * 0.39) ? star : dimStar), 255], o);
     }
   return { px: pxUpscale(px, W, H, scale), w: W * scale, h: H * scale };
 };

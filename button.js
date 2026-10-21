@@ -10,8 +10,10 @@ import { dayFrame, daySpread, hashOf, palette, pixelSheet } from "./aurora.js";
 export const BUTTON_W = 88;
 export const BUTTON_H = 31;
 export const BUTTON_FRAMES = 8;
-// Centiseconds per frame: the masthead's own pace (8 frames over 11.2s), so
-// the button breathes like the header it came from.
+// Centiseconds per frame: 1.4s a frame, 8 frames over 11.2s. That was the
+// masthead's own pace; the masthead has since gone to 20 frames at 0.3s
+// (aurora.js PIXEL_FRAMES, PIXEL_DWELL) and the button was left at the slow
+// breath, so it no longer matches the header it came from.
 export const BUTTON_DELAY = 140;
 
 const W = BUTTON_W;

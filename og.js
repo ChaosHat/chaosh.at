@@ -44,8 +44,9 @@ const dataUri = (mime, buf) => `data:${mime};base64,${Buffer.from(buf).toString(
 const svgUri = (svg) => dataUri("image/svg+xml", svg);
 
 // The card's own pixel grid: 240×126 art pixels at ×5 is exactly 1200×630,
-// so the band and the stars are one image on one grid. 240 is the masthead's
-// width, so the band is the site's pixelSheet at the masthead's ray pitch.
+// so the band and the stars are one image on one grid. 240 was the masthead's
+// width until it went to 192 at ×5 (2026-10-21); the card keeps its own 240-wide
+// tile, and so the ray periods (25/56, 21/49) that were tuned for 240.
 const GRID = 5;
 const GRID_W = OG_W / GRID;
 const GRID_H = OG_H / GRID;
@@ -61,7 +62,7 @@ const ground = (date) => {
   const px = new Uint8Array(GRID_W * GRID_H * 3);
   const night = hexRgb(C.night);
   for (let i = 0; i < GRID_W * GRID_H; i += 1) px.set(night, i * 3);
-  const st = starTile(date);
+  const st = starTile(date, { n: GRID_W, density: 0.0022 });
   for (let y = 0; y < GRID_H; y += 1)
     for (let x = 0; x < GRID_W; x += 1) {
       const i = (y * st.w + x) * 4;
@@ -70,6 +71,7 @@ const ground = (date) => {
   // The post band's form and posture, taller, and with the masthead's stars
   // in its bare sky (the band leaves them off because the page has its own).
   const sky = pixelSheet(date, {
+    W: GRID_W,
     H: BAND_ROWS,
     frames: 1,
     form: pixelBandForm(date),

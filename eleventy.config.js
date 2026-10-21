@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { pixelSubject, pixelBand, pixelSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
-import { encodePng } from "./png.js";
+import { pixelSubject, pixelBand, pixelLayers, pixelLightSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
+import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
@@ -874,7 +874,7 @@ export default function (eleventyConfig) {
     const status = meta?.status ?? "active";
     const opts = { canon: canonSlugs.has(slug) };
     // Pixel art since 2026-10-19 (aurora.js pixelSubject): PNGs pre-scaled
-    // ×4 / ×2, shown at natural size and cropped, never stretched.
+    // ×5 / ×2, shown at natural size and cropped, never stretched.
     const big = pixelSubject(slug, hue, status, tier, opts);
     const chip = pixelSubject(slug, hue, status, tier, { ...opts, chip: true });
     skyFiles.set(`img/sky/${slug}.png`, encodePng(big.px, big.w, big.h, 4));
@@ -1865,14 +1865,25 @@ export default function (eleventyConfig) {
   });
 
   // The masthead's sky rolls its hue at each build — a different aurora every
-  // day, held all day, zero JavaScript. One 8-frame sprite sheet, drawn as
-  // true pixel art at 240×28 a frame and stepped through by CSS at ×4.
+  // day, held all day, zero JavaScript. Two 20-frame sprite sheets — the back
+  // curtain 288×48 a frame, the front 192×48 — drawn as true pixel art and
+  // stepped through together by CSS at ×5, so the pair repeats every 2880px.
   const today = new Date().toISOString().slice(0, 10);
   // The masthead's name is the comet mark (button.js): the button's wordmark
   // at 2× with a comet falling through it, coloured from today's sky.
   eleventyConfig.addGlobalData("wordmark", cometMarkSvg(today, 2));
-  const sheet = pixelSheet(today);
-  skyFiles.set("img/aurora/sheet.png", encodePng(sheet.px, sheet.w, sheet.h, 4));
+  const { front: sheet, back: sheetBack } = pixelLayers(today);
+  // Indexed: twenty mostly-repeating frames only compress once a frame fits
+  // in deflate's window (png.js).
+  skyFiles.set("img/aurora/sheet.png", encodePngIndexed(sheet.px, sheet.w, sheet.h));
+  skyFiles.set("img/aurora/sheet-back.png", encodePngIndexed(sheetBack.px, sheetBack.w, sheetBack.h));
+  // The light each curtain casts, baked from the same frames (aurora.js
+  // pixelLightSheet): body::after screens both over the header, at the same
+  // two periods as the sky.
+  const light = pixelLightSheet(sheet);
+  const lightBack = pixelLightSheet(sheetBack);
+  skyFiles.set("img/aurora/light.png", encodePng(light.px, light.w, light.h, 3));
+  skyFiles.set("img/aurora/light-back.png", encodePng(lightBack.px, lightBack.w, lightBack.h, 3));
   // The page's star tile, reseeded with the masthead every build.
   const stars = starTile(today);
   skyFiles.set("img/aurora/stars.png", encodePng(stars.px, stars.w, stars.h, 4));
