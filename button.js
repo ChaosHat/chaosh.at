@@ -5,7 +5,7 @@
 // Design record: vault, 80_Projects/"chaosh.at Design" (2026-09-05) and
 // 90_Reference/91_Documentation/"chaosh.at Design System".
 import { encodePng } from "./png.js";
-import { dayFrame, daySpread, hashOf, palette, pixelSheet } from "./aurora.js";
+import { dayFrame, daySpread, hashOf, palette, pixelLightSheet, pixelSheet, screenLight } from "./aurora.js";
 
 export const BUTTON_W = 88;
 export const BUTTON_H = 31;
@@ -172,6 +172,9 @@ export const buttonFrames = (dateStr) => {
     back: { base: 0.95, thick: 0.8, n1: 9, n2: 21, env: 0.65, cell: 22 },
     front: { base: 1.15, thick: 1.0, n1: 8, n2: 18, env: 0.65, cell: 22 },
   });
+  // The masthead's light, baked into each frame before the comet and the
+  // frame go on (2026-10-21; aurora.js screenLight).
+  const light = pixelLightSheet(sheet, { down: 1 });
   return Array.from({ length: N }, (_, k) => {
     const rgb = new Uint8Array(W * H * 3);
     const put = (x, y, c) => {
@@ -181,6 +184,7 @@ export const buttonFrames = (dateStr) => {
       const o = (k * W * H + i) * 4;
       rgb.set(sheet.px[o + 3] ? sheet.px.subarray(o, o + 3) : NIGHT, i * 3);
     }
+    screenLight(rgb, light, W, H, k);
     COMET_MARK.forEach((row, y) =>
       [...row].forEach((c, x) => c !== "." && x >= BUTTON_CROP && put(1 + x - BUTTON_CROP, 1 + y, fill[c])),
     );

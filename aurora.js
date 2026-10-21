@@ -1517,6 +1517,23 @@ export const pixelLightSheet = (
   return { px, w, h: (h + 2) * N };
 };
 
+// The same light baked into a flat image, for the surfaces that cannot stack
+// a second layer: the forum sig and the 88×31 button are single images that
+// other sites show as-is. Screen, as body::after does, applied once to frame
+// k of an RGB buffer of the sheet's own size. Pass a light sheet made at
+// `down: 1` — these images are small enough that quarter resolution would be
+// a handful of pixels — and skip its guard row, the first row of each frame.
+export const screenLight = (rgb, light, W, H, k = 0) => {
+  const o = (k * (H + 2) + 1) * W;
+  for (let i = 0; i < W * H; i += 1)
+    for (let c = 0; c < 3; c += 1) {
+      const a = rgb[i * 3 + c];
+      const b = light.px[(o + i) * 3 + c];
+      rgb[i * 3 + c] = 255 - Math.round(((255 - a) * (255 - b)) / 255);
+    }
+  return rgb;
+};
+
 // The post band in pixels: the night a post was written, one static frame.
 // 192×20 shown at ×5 — a 960×100 tile (it was 240×24 at ×4, 96px). Static, never
 // animated: five of these breathing on the home page is the same mistake as

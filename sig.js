@@ -32,7 +32,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import { dayFrame, daySpread, hashOf, palette, pixelSheet } from "./aurora.js";
+import { dayFrame, daySpread, hashOf, palette, pixelLightSheet, pixelSheet, screenLight } from "./aurora.js";
 import { COMET_MARK } from "./button.js";
 
 // Changing SIG_H means re-pasting the sig.
@@ -117,8 +117,8 @@ const shortDate = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
 const background = (dateStr, W) => {
   const bg = new Uint8Array(W * SIG_H * 3);
   for (let i = 0; i < W * SIG_H; i += 1) bg.set(NIGHT, i * 3);
-  // Ray periods scaled from the masthead's 240 columns, so a ray is as many
-  // pixels wide here as there.
+  // Ray periods scaled from the pitch tuned at 240 columns (the masthead's
+  // 192 keeps the same pitch), so a ray is as many pixels wide here as there.
   const sc = W / 240;
   const sky = pixelSheet(dateStr, {
     W,
@@ -130,6 +130,10 @@ const background = (dateStr, W) => {
     front: { base: 1.04, thick: 0.95, n1: Math.round(21 * sc), n2: Math.round(49 * sc), env: 0.65 },
   });
   for (let i = 0; i < W * SIG_H; i += 1) if (sky.px[i * 4 + 3]) bg.set(sky.px.subarray(i * 4, i * 4 + 3), i * 3);
+  // The masthead's light, baked in (2026-10-21). On the sky only: the comet
+  // and the frame go on after it, and the text is composited over all of it,
+  // so the light never lowers the type's contrast.
+  screenLight(bg, pixelLightSheet(sky, { down: 1 }), W, SIG_H);
   const put = (x, y, c) => {
     if (x >= 0 && x < W && y >= 0 && y < SIG_H) bg.set(c, (y * W + x) * 3);
   };
