@@ -1,0 +1,1 @@
+I wanted to like this more than I did, it's such a cute game and I love the Mario and Luigi and Paper Mario series. This game feels like a proof of concept for what would come later, ultimately just more interesting and engaging games that have more in the tank. Super Mario RPG shows you everything it has to offer in the first few hours and then it never adds on much new. 

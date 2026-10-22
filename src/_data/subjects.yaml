@@ -80,7 +80,8 @@ castlevania-belmonts-curse:
   title: 'Castlevania: Belmont''s Curse'
   category:
     - games
-  status: active
+  status: completed
+  rating: loved
   aliases:
     - belmont's curse
     - belmonts curse
@@ -674,6 +675,14 @@ my-time-at-sandrock:
   aliases:
     - sandrock
     - mtas
+nintendo-switch-sports-resort:
+  title: Nintendo Switch Sports Resort
+  category:
+    - games
+  status: backlog
+  aliases:
+    - switch sports resort
+    - nssr
 no-mans-sky:
   title: No Man's Sky
   category:
