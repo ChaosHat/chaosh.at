@@ -65,8 +65,9 @@ eleventyComputed:
   {#- The essay mirror of a daily's tag footer: the subjects it's about
       (about-list order), then the union of their tags plus any tag cited
       directly (tagviews order). Every view this essay appears in, linked. -#}
-  {% if (essay.cites | length) or (essay.citedTags | length) %}
+  {% if (essay.cites | length) or (essay.citedTags | length) or essay.aboutCanon %}
   <p class="tag-list post-tags">
+    {% if essay.aboutCanon %}<a class="tag-link" href="/canon/">#canon</a>{% endif %}
     {% for c in essay.cites %}<a class="tag-link" href="/s/{{ c.slug }}/">{{ c.title }}</a>{% endfor %}
     {% for t in essay.citedTags %}<a class="tag-link" href="/t/{{ t.slug }}/">#{{ t.slug }}</a>{% endfor %}
   </p>

@@ -27,14 +27,17 @@ eleventyComputed:
       </p>
       {% endif %}
       <p class="subject-meta">
-        {% if subject.canon %}<span class="badge badge-g b-canon">canon</span>{% endif %}
+        {#- Canon is the top rung, but it leads the row and goes gold, and it
+            links to /canon/ — the ten, their history, the essays about them
+            — rather than to the bare /r/canon/ view. -#}
+        {% if subject.canon %}<a class="badge badge-g b-canon" href="/canon/">canon</a>{% endif %}
         <span class="badge b-{{ subject.status }}">{{ subject.status }}</span>
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A
-            canon subject carries none: the ♥ badge above is the top rung.
+            canon subject's rung is the gold badge above, not a second chip.
             Unrated renders "pending" here too, unlinked, so a subject page
             never looks like the field was forgotten. -#}
-        {% if subject.rating %}<a class="rating r-{{ subject.rating.slug }}" href="/r/{{ subject.rating.slug }}/">{{ subject.rating.title }}</a>{% elif not subject.canon %}<a class="rating r-pending" href="/r/">pending</a>{% endif %}
+        {% if subject.canon %}{% elif subject.rating %}<a class="rating r-{{ subject.rating.slug }}" href="/r/{{ subject.rating.slug }}/">{{ subject.rating.title }}</a>{% else %}<a class="rating r-pending" href="/r/">pending</a>{% endif %}
         {#- Sidestepping to the franchise or the genre is the natural next move
             for a reader who arrived by following a title, so the tags sit in the
             meta row rather than at the foot of a long timeline. -#}

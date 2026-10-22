@@ -1,0 +1,93 @@
+---
+layout: base.njk
+wide: true
+title: The Hat Canon
+description: Ten games that say what I like in games, and a dated record of every time the list has changed.
+permalink: /canon/
+---
+{#- The canon's own page (2026-10-22): the ten, the record of how the list
+    got that way, and the essays about the canon itself. Three sources, all
+    settled in eleventy.config.js (the canonPage collection) — membership from
+    `rating: canon`, history from canon_log.yaml (publish.py appends a line on
+    any night the set changes), essays from `about: canon`. Nav word, unlike
+    a rung's /r/ view: the ten are the site's business card, and a card you
+    have to know the URL of isn't one. -#}
+{%- set canon = collections.canonPage[0] %}
+<header class="tag-head canon-head">
+  <h1>{{ title }}</h1>
+  {% if canon.description %}<p class="tag-desc">{{ canon.description }}</p>{% endif %}
+  <p class="tag-index"><a href="/r/canon/">everything written about the ten →</a></p>
+</header>
+
+{#- The hero: the ten as shelf cards, gold-framed, five by two where it fits.
+    Ordered by slot, not by status or title — a game that takes another's
+    slot takes its place here too — and the one cell under each cover says
+    since when, because on this page "canon" goes without saying. SPANs
+    inside, same as the shelf: the card is one anchor. -#}
+<ol class="shelf-grid canon-ten">
+  {% for item in canon.members %}
+  <li class="shelf-item is-canon">
+    <a href="/s/{{ item.slug }}/">
+      <span class="shelf-card">
+        <span class="shelf-art">
+          {% if item.coverUrl %}
+          <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" decoding="async">
+          {% else %}
+          <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
+          {% endif %}
+        </span>
+        <span class="cell rating badge-g b-canon">{% if item.since %}since {{ item.since | monthYear }}{% else %}canon{% endif %}</span>
+      </span>
+      <span class="shelf-caption">{{ item.title }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+
+{#- Two columns under the hero, one when they stack: the changelog first,
+    since it is the thing only this page has — the essays are on /essays/
+    too. -#}
+<div class="canon-cols">
+  <section class="canon-col">
+    <h2 class="canon-col-head">Changes</h2>
+    <ol class="canon-changes">
+      {% for c in canon.changes %}
+      <li class="canon-change">
+        <span class="archive-note">{{ c.date | readableDate }}</span>
+        <p class="canon-moves">
+          {%- if c.founding %}the first {% if c.ins | length == 10 %}ten{% else %}{{ c.ins | length }}{% endif %}
+          {%- else %}
+            {%- for g in c.ins %}<span class="canon-in">+ {% if g.known %}<a href="/s/{{ g.slug }}/">{{ g.title }}</a>{% else %}{{ g.title }}{% endif %}</span>{% endfor %}
+            {%- for g in c.outs %}<span class="canon-out">− {% if g.known %}<a href="/s/{{ g.slug }}/">{{ g.title }}</a>{% else %}{{ g.title }}{% endif %}</span>{% endfor %}
+          {%- endif %}
+          {%- if c.why %} <a class="canon-why" href="{{ c.why.url }}">→ {{ c.why.title }}</a>{% endif -%}
+        </p>
+        {#- The founding line keeps its ten on the record: after a few swaps
+            the hero no longer shows them, and this is the only place that
+            still says what the list was on day one. -#}
+        {% if c.founding %}
+        <p class="canon-first">{% for g in c.ins %}{% if g.known %}<a href="/s/{{ g.slug }}/">{{ g.title }}</a>{% else %}{{ g.title }}{% endif %}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+        {% endif %}
+      </li>
+      {% else %}
+      <li class="empty">No changes recorded yet.</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="canon-col">
+    <h2 class="canon-col-head">Essays</h2>
+    {#- /essays/'s list exactly: chip, title, date. -#}
+    <ul class="essay-list">
+      {% for e in canon.essays %}
+      <li>
+        {% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}
+        <a href="{{ e.url }}">{{ e.title }}</a>
+        <span class="archive-note">{{ e.date | readableDate }}</span>
+      </li>
+      {% else %}
+      <li class="empty">Nothing here yet.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>

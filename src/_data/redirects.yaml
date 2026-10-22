@@ -8,9 +8,17 @@
 # renamed. Entries are permanent; the cost of one is a 400-byte file.
 
 - from: /t/favorites/
-  to: /t/canon/
+  to: /r/canon/
   # Renamed 2026-09-04. A game doesn't stop being a favourite when it loses its
   # slot, so "favorite" claimed a permanence the ten-slot roster doesn't have.
+  # Pointed straight at /r/canon/ on 2026-10-22 rather than chaining through
+  # the /t/canon/ stub below.
+
+- from: /t/canon/
+  to: /r/canon/
+  # 2026-10-22: canon stopped being a tagview and became the top rung of the
+  # rating ladder. Same view — everything written about the ten — now built
+  # from `rating: canon`. The ten's own page, with its history, is /canon/.
 
 - from: /shelf/games/
   to: /shelf/

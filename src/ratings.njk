@@ -19,16 +19,13 @@ description: What the words under the covers mean, in order.
     <p class="tag-desc">Two words under every cover: what happened, and what I thought. This is the second one, top to bottom.</p>
   </header>
   <ol class="ladder">
-    {%- for tag in collections.tagPages %}{% if tag.slug == "canon" %}
-    <li class="rung rung-canon">
-      <a class="badge badge-g b-canon" href="/t/{{ tag.slug }}/">canon</a>
-      <p class="rung-desc">{{ tag.description }}</p>
-      <p class="rung-count">{{ tag.members | length }} games</p>
-    </li>
-    {%- endif %}{% endfor %}
+    {#- Canon is the first rung since 2026-10-22 (it was a tagview, printed
+        here by a special case). It keeps its gold badge, and links to
+        /canon/ — the ten's own page — not to /r/canon/. -#}
     {%- for rung in collections.ratingPages %}
     <li class="rung rung-{{ rung.slug }}">
-      <a class="rating r-{{ rung.slug }}" href="/r/{{ rung.slug }}/">{{ rung.title }}</a>
+      {% if rung.slug == "canon" %}<a class="badge badge-g b-canon" href="/canon/">canon</a>
+      {% else %}<a class="rating r-{{ rung.slug }}" href="/r/{{ rung.slug }}/">{{ rung.title }}</a>{% endif %}
       {% if rung.description %}<p class="rung-desc">{{ rung.description }}</p>{% endif %}
       <p class="rung-count">{{ rung.members | length }} game{% if rung.members | length != 1 %}s{% endif %}</p>
     </li>

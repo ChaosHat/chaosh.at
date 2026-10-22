@@ -1611,6 +1611,61 @@ main figure img { cursor: zoom-in; }
 /* Members' standing blurbs, between the tag head and the timeline. */
 .blurbs { margin-bottom: 2.5rem; }
 
+/* ----------------------------------------------------------------- canon
+
+   /canon/ (2026-10-22): the ten as a hero of shelf cards, then the roster's
+   changelog and the canon's essays side by side. A wide page, so the hero
+   takes the shell's full width and five across makes the ten a 5×2. The two
+   text columns carry their own smoke — the reading column's treatment — since
+   a wide page has none and the stars would land between words. */
+
+/* The canon badge is a link now (subject page, /r/), and a badge never
+   wanted the underline. */
+a.badge { text-decoration: none; }
+
+.canon-ten { margin: 0 0 3rem; }
+/* Two across, then straight to five: the shelf's three and four would leave
+   the ten ragged (3-3-3-1, 4-4-2), and a ragged ten is no hero. Five waits
+   for 52rem, where a card is wide enough for "since sept 2026" in one line. */
+@media (min-width: 34rem) { .canon-ten { --n: 2; } }
+@media (min-width: 52rem) { .canon-ten { --n: 5; } }
+
+.canon-cols { display: grid; gap: 1.5rem; }
+@media (min-width: 52rem) {
+  .canon-cols { grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+}
+.canon-col { background: var(--smoke); padding: 1rem 1.25rem 0.5rem; }
+.canon-col-head { margin: 0 0 0.5rem; font: 400 11px/16px var(--pixel); color: var(--muted); }
+
+.canon-changes { list-style: none; margin: 0; padding: 0; }
+.canon-change { padding: 10px 0; border-bottom: 1px solid var(--edge); }
+.canon-change:last-child,
+.canon-col .essay-list > li:last-child { border-bottom: 0; }
+/* The date as a dateline over the change, not right-aligned beside it the
+   way the archive does: a change can be two games long. */
+.canon-change .archive-note { display: block; margin: 0 0 2px; font: 11px/16px var(--pixel); }
+.canon-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin: 0;
+  font: 16.5px/24px var(--pixel);
+}
+.canon-moves a { text-decoration: none; }
+/* In is gold, the canon's own colour; out goes quiet, not red — leaving the
+   ten is a game landing on favorite, not a demotion to shout about. */
+.canon-in,
+.canon-in a { color: var(--gold); }
+.canon-out,
+.canon-out a { color: var(--muted); }
+.canon-moves a:hover,
+.canon-moves a:focus-visible { color: var(--ink); }
+.canon-moves .canon-why { color: var(--accent); }
+.canon-first { margin: 4px 0 0; font: 11px/18px var(--pixel); color: var(--muted); }
+.canon-first a { color: inherit; text-decoration: none; }
+.canon-first a:hover,
+.canon-first a:focus-visible { color: var(--ink); }
+
 /* ------------------------------------------------------------- spoilers */
 
 /* ||inline spoilers||. Focus is the reveal, which keeps the site at zero JS.

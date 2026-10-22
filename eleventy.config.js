@@ -457,6 +457,15 @@ export default function (eleventyConfig) {
   });
   eleventyConfig.addFilter("shortDate", (d) => shortDateFormat.format(d).toLowerCase());
 
+  // "sep 2026" — the canon hero's "since" cell. Month, not day: it says how
+  // long a game has held its slot, and a day of the month adds nothing.
+  const monthYearFormat = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    month: "short",
+    year: "numeric",
+  });
+  eleventyConfig.addFilter("monthYear", (d) => monthYearFormat.format(d).toLowerCase());
+
   // Dailies render in full on the home page — an excerpt hides the fact that a
   // post covers several subjects. Long days are cut at an H2 boundary so a
   // subject is never shown half-finished; "read more" appears only if cut.
@@ -601,10 +610,10 @@ export default function (eleventyConfig) {
     // Canon floats, everything else holds still. Deliberately not a re-sort:
     // below the ten it should read as the shelf you were already looking at.
     const canon = rankBy((a, b) => (b.canon === true) - (a.canon === true));
-    // The ladder, top to bottom: canon, then the rungs by rank, then the
-    // unrated. Within a rung the status order holds (stable sort), so the
+    // The ladder, top to bottom: the rungs by rank (canon is rank 0), then
+    // the unrated. Within a rung the status order holds (stable sort), so the
     // grouped shelf still reads active-first inside each band.
-    const rungOf = (s) => (s.canon ? 0 : (s.rating?.rank ?? 99));
+    const rungOf = (s) => s.rating?.rank ?? 99;
     const rating = rankBy((a, b) => rungOf(a) - rungOf(b));
 
     return items.map((s) => ({
@@ -753,33 +762,41 @@ export default function (eleventyConfig) {
   const tagLinks = (slugs) =>
     (slugs ?? []).map((t) => ({ slug: t, title: tags[t]?.title ?? t }));
 
-  // One tag is load-bearing rather than editorial: `canon` is the capped
-  // roster, and the shelf reads it for gold, for the ♥ badge, and for a sort
-  // axis. Resolved once here so nothing downstream has to know it is a tag at
-  // all — if the canon ever moves to its own file, this line is the only thing
-  // that changes. Renamed from `favorites` 2026-09-04: the roster rotates, and
-  // "favorite" claimed a permanence the mechanism does not deliver.
-  const CANON_TAG = "canon";
-  const canonSlugs = new Set(tags[CANON_TAG]?.members ?? []);
+  // The canon is the top rung of the rating ladder: `rating: canon`, capped
+  // at ten by compile_subjects.py (2026-10-22). Until then it was the `canon`
+  // tagview — older than the ladder, and never moved onto it when the ladder
+  // replaced the charms — so a swap was a tag edit plus a rating edit on the
+  // outgoing game, and forgetting the second dropped it to pending. As a rung,
+  // taking a game off the ten IS changing its rating. Resolved once here
+  // because the shelf reads it for gold, for the star cell and for a sort
+  // axis. Exact match: `canon*` is refused in ratingOf — a slot in the ten
+  // has no partial verdict. (`favorites` until 2026-09-04: the roster
+  // rotates, and "favorite" claimed a permanence it does not deliver.)
+  const CANON = "canon";
+  const canonSlugs = new Set(
+    Object.entries(subjects)
+      .filter(([, meta]) => meta?.rating === CANON)
+      .map(([slug]) => slug),
+  );
 
   // ---------------------------------------------------------------- rating
   //
-  // The third axis. Status is total and says what happened; canon is a capped
-  // ten; `rating:` is one rung from the ORDINAL ladder in ratings.yaml and says
-  // what he thought. The vocabulary is CLOSED — four rungs — and an unknown
-  // value is reported after the build, never minted, the same contract about:
-  // has. The ladder the shelf reads is canon > favorite > loved > liked >
-  // disliked, and "pending" for anything rated nothing.
+  // The third axis. Status is total and says what happened; `rating:` is one
+  // rung from the ORDINAL ladder in ratings.yaml and says what he thought. The
+  // vocabulary is CLOSED — five rungs — and an unknown value is reported after
+  // the build, never minted, the same contract about: has. The ladder is
+  // canon > favorite > loved > liked > disliked, and "pending" for anything
+  // rated nothing; canon alone is capped (ten) and takes no `*`.
   //
   // This replaced six categorical "charms" (feels.yaml, 2026-09-04, never
   // live). They were built so no mark could outrank another, and that is why
   // they failed: a reader maps someone else's taste onto their own, and that
   // needs magnitude.
   //
-  // CANON SUPERSEDES: a subject in the canon carries no rating, here rather
-  // than in the templates, so the rule holds for the tile, the subject page,
-  // the /r/ views and anything added later without each having to remember
-  // it. The tile renders "canon" in the rating cell instead.
+  // Canon used to SUPERSEDE here — a game in the ten carried no rating at
+  // all, so it could appear in no /r/ view. Dropped 2026-10-22 when canon
+  // became a rung: it is a rating like any other now, rank 0, with its own
+  // view at /r/canon/. Templates still branch on `canon` first for the gold.
   const ratingsFile = path.join("src", "_data", "ratings.yaml");
   const ratings = fs.existsSync(ratingsFile)
     ? parseYaml(fs.readFileSync(ratingsFile, "utf8")) || {}
@@ -808,7 +825,10 @@ export default function (eleventyConfig) {
       badRatings.set(slug, Array.isArray(raw) ? `[${raw}] (one slug, not a list)` : String(raw));
       return null;
     }
-    if (canonSlugs.has(slug)) return null;
+    if (partial && want === CANON) {
+      badRatings.set(slug, `${raw} (a slot in the ten has no partial verdict)`);
+      return null;
+    }
     const r = ratings[want];
     return {
       slug: want,
@@ -1013,15 +1033,25 @@ export default function (eleventyConfig) {
   // slug is typed as its literal YAML key, never fuzzed the way a heading is.
   // A slug hitting both is a naming collision: the subject wins (consistent
   // with "subjects first") but the collision itself is worth a warning.
+  //
+  // `canon` is reserved and checked first (2026-10-22): no longer a tag, it
+  // files the essay onto /canon/. An opt-in for essays ABOUT the canon — the
+  // premiere, the rubric, a swap argued — not for every essay about one of
+  // the ten, which reach those games' pages the ordinary way.
   const resolveAbout = (file, rawAbout) => {
     const citedSubjects = []; // deduped
     const citedTagsDirect = []; // deduped
     const seenSubjects = new Set();
     const seenTags = new Set();
+    let aboutCanon = false;
 
     for (const raw of asList(rawAbout)) {
       const value = String(raw).trim();
       if (!value) continue;
+      if (value === CANON) {
+        aboutCanon = true;
+        continue;
+      }
 
       const subjSlug = aliasMap.get(normalise(value));
       const tagSlug = Object.hasOwn(tags, value) ? value : null;
@@ -1048,7 +1078,7 @@ export default function (eleventyConfig) {
       aboutIssues.push({ file, slug: value, reason: "unresolved" });
     }
 
-    return { citedSubjects, citedTagsDirect };
+    return { citedSubjects, citedTagsDirect, aboutCanon };
   };
 
   // ----------------------------------------------------------------- essays
@@ -1084,8 +1114,8 @@ export default function (eleventyConfig) {
       const firstPara = stripSpoilers(raw).match(/<p>([\s\S]*?)<\/p>/i);
       const blurb = firstPara ? plainText(firstPara[1]) : null;
 
-      const { citedSubjects, citedTagsDirect } = resolveAbout(e.inputPath, e.data.about);
-      if (!citedSubjects.length && !citedTagsDirect.length) {
+      const { citedSubjects, citedTagsDirect, aboutCanon } = resolveAbout(e.inputPath, e.data.about);
+      if (!citedSubjects.length && !citedTagsDirect.length && !aboutCanon) {
         homelessEssays.push(e.inputPath);
       }
       // Citation is transitive: citing a subject also lands the essay on that
@@ -1160,7 +1190,9 @@ export default function (eleventyConfig) {
         citedSubjects,
         chipUrl: citedSubjects.length
           ? `/img/sky/${citedSubjects[0]}-chip.png`
-          : citedTagsDirect.length ? tagChip(citedTagsDirect[0]) : null,
+          : citedTagsDirect.length ? tagChip(citedTagsDirect[0])
+          : aboutCanon ? tagChip(CANON) : null,
+        aboutCanon,
         cites: subjectLinks(citedSubjects),
         // An aside is washed in the first about: subject's hue, so a primer
         // reads as belonging to the game it explains. Tag-only essays fall
@@ -1290,8 +1322,8 @@ export default function (eleventyConfig) {
           ...essays.map((e) => ({ date: e.date, words: 1000 })),
         ], meta?.status ?? "active"),
         canon: canonSlugs.has(slug),
-        // null on a canon subject by construction — see ratingOf. Templates
-        // branch on canon first, then on this, then render "pending".
+        // Templates branch on canon first (the gold), then on this, then
+        // render "pending". A canon subject's rating is the canon rung.
         rating: ratingOf(slug, meta),
         coverUrl: coverUrls.get(slug) ?? null,
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
@@ -1391,7 +1423,8 @@ export default function (eleventyConfig) {
       // Essays deliberately do NOT reach a rating view. An essay is about a
       // subject; a rating is a verdict on one, and routing essays here would
       // make /r/ a second front page for the same writing. The members'
-      // fragments are the page.
+      // fragments are the page. That holds for /r/canon/ too: essays about
+      // the canon itself opt onto /canon/ with `about: canon`.
       const entries = [];
       for (const subject of members) {
         for (const fragment of subject.fragments) {
@@ -1416,6 +1449,125 @@ export default function (eleventyConfig) {
         indexUrl: "/r/",
       };
     });
+  });
+
+  // ----------------------------------------------------------------- canon
+  //
+  // /canon/ — the ten, the dated record of how they got that way, and the
+  // essays about the canon itself (2026-10-22). Membership is `rating: canon`
+  // (canonSlugs); the HISTORY is canon_log.yaml, which publish.py appends to
+  // on any night the set changes, so a swap is still just two blurb edits and
+  // the changelog writes itself. Hand edits there are expected: a date fixed,
+  // a `why:` naming the essay that argued the change.
+  const canonLogFile = path.join("src", "_data", "canon_log.yaml");
+  const canonLog = fs.existsSync(canonLogFile)
+    ? parseYaml(fs.readFileSync(canonLogFile, "utf8")) || []
+    : [];
+  const canonProblems = []; // reported in eleventy.after
+
+  const slugList = (v) =>
+    (v == null ? [] : [].concat(v)).map((s) => String(s ?? "").trim()).filter(Boolean);
+  const logDate = (d) => (d instanceof Date ? d : new Date(String(d)));
+
+  // Where the log leaves the canon, and when each of today's ten came on.
+  // An entry's `out` frees its slots and its `in` fills them in order, extras
+  // on the end, so a one-for-one swap keeps the slot's place in the hero.
+  // Mirrors replay_canon_log() in the vault's chaosh_subjects.py, which
+  // decides what gets logged — if one changes, change both. A line that
+  // can't apply is reported and skipped, never fatal.
+  const replayCanonLog = (log) => {
+    let roster = [];
+    const joined = new Map();
+    const problems = [];
+    (Array.isArray(log) ? log : []).forEach((entry, i) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        problems.push(`entry ${i + 1} is not a mapping`);
+        return;
+      }
+      const label = entry.date ? String(entry.date instanceof Date
+        ? entry.date.toISOString().slice(0, 10) : entry.date) : `entry ${i + 1}`;
+      if (!entry.date) problems.push(`entry ${i + 1} has no date`);
+      const holes = [];
+      for (const s of slugList(entry.out)) {
+        const at = roster.indexOf(s);
+        if (at === -1) {
+          problems.push(`${label}: out ${s} was not on the canon`);
+          continue;
+        }
+        roster[at] = null;
+        holes.push(at);
+        joined.delete(s);
+      }
+      for (const s of slugList(entry.in)) {
+        if (roster.includes(s)) {
+          problems.push(`${label}: in ${s} was already on the canon`);
+          continue;
+        }
+        if (holes.length) roster[holes.shift()] = s;
+        else roster.push(s);
+        if (entry.date) joined.set(s, logDate(entry.date));
+      }
+      roster = roster.filter((s) => s !== null);
+    });
+    return { roster, joined, problems };
+  };
+
+  eleventyConfig.addCollection("canonPage", (api) => {
+    canonProblems.length = 0;
+    const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
+    const essays = buildEssayList(api);
+    const essayBySlug = new Map(essays.map((e) => [e.slug, e]));
+    const { roster, joined, problems } = replayCanonLog(canonLog);
+    canonProblems.push(...problems);
+
+    // Slot order from the log. A canon game the log hasn't caught up with —
+    // a swap made today, before the 2am run logs it, or any preview — goes
+    // on the end rather than missing: membership is the rating, not the log.
+    const order = [
+      ...roster.filter((s) => canonSlugs.has(s)),
+      ...[...canonSlugs].filter((s) => !roster.includes(s)),
+    ];
+    const members = order
+      .map((s) => bySlug.get(s))
+      .filter(Boolean)
+      .map((s) => ({ ...s, since: joined.get(s.slug) ?? null }));
+
+    const link = (s) => {
+      if (!subjects[s]) canonProblems.push(`${s} is not a registered subject`);
+      return { slug: s, title: subjects[s]?.title ?? s, known: Boolean(subjects[s]) };
+    };
+    const changes = (Array.isArray(canonLog) ? canonLog : [])
+      .filter((e) => e && typeof e === "object" && !Array.isArray(e) && e.date)
+      .map((e, i) => {
+        const ins = slugList(e.in).map(link);
+        const outs = slugList(e.out).map(link);
+        // `why:` is an essay's filename (or its /e/ slug — essaySlug of a
+        // slug is itself). Unpublished or misspelt, the line still renders,
+        // unlinked, and the build says which.
+        let why = null;
+        if (e.why != null && String(e.why).trim()) {
+          why = essayBySlug.get(essaySlug(String(e.why).trim())) ?? null;
+          if (!why) canonProblems.push(`${String(e.why)} (why:) is no published essay`);
+        }
+        return {
+          date: logDate(e.date),
+          // The founding line names no swap: it is the list as first published.
+          founding: i === 0 && !outs.length,
+          ins,
+          outs,
+          why: why && { url: why.url, title: why.title },
+        };
+      })
+      .reverse(); // newest first: a changelog is read from the top
+
+    return [
+      {
+        members,
+        changes,
+        essays: essays.filter((e) => e.aboutCanon).sort((a, b) => b.date - a.date),
+        description: ratings[CANON]?.description ?? null,
+      },
+    ];
   });
 
   // One entry per category actually in use. Categories are a soft field, so a
@@ -1816,7 +1968,7 @@ export default function (eleventyConfig) {
     // one), but their text is cheap: the blurb, else what the tile says.
     for (const [slug, meta] of Object.entries(subjects)) {
       const blurb = blurbTexts.get(slug);
-      const verdict = canonSlugs.has(slug) ? "canon" : ratingOf(slug, meta)?.title;
+      const verdict = ratingOf(slug, meta)?.title;
       ogMeta.set(`/s/${slug}/`, {
         description: clipText(
           (blurb && firstPara(md.render(blurb))) ||
@@ -1992,6 +2144,12 @@ export default function (eleventyConfig) {
     // Reported, never minted. A bad value renders the tile as "pending" AND
     // drops the game's row from its /r/ view, and both failures are invisible
     // on the page — the tile just looks like one left unrated on purpose.
+    if (canonProblems.length > 0) {
+      console.warn(`\n[chaosh.at] ${canonProblems.length} canon_log.yaml problem(s):`);
+      for (const problem of canonProblems) console.warn(`  · ${problem}`);
+      console.warn(`  /canon/ still builds; fix the line in the vault's canon_log.yaml.\n`);
+    }
+
     if (badRatings.size > 0) {
       console.warn(
         `\n[chaosh.at] ${badRatings.size} rating: value(s) not in ratings.yaml:`,
