@@ -2187,3 +2187,36 @@ main {
   .essay-page .essay-row .essay-card .cell { display: none; }
   .essay-page .essay-row-body { grid-column: 1; }
 }
+
+/* Light frames in the image column, from 58rem (2026-10-23). The column read
+   as a second heavy box beside the prose — framed pictures over filled
+   caption cells — and the page felt lopsided toward it while the art column
+   on the left sat mostly empty under its cover. A 1px --dim line round the
+   picture and the caption as a small muted italic line under it (the prose
+   face, which has an italic; the pixel cell's face doesn't) make the shots
+   sidenotes, and the framed cover anchors the left again. Tiles below 58rem
+   keep the full frame: it's what makes them read as tappable.
+   Mocked and rejected the same day, on Hat's 2560 screen: a type step to
+   20px for big screens (too big); text | media in two columns with the
+   cover on top of the media (ugly, and a spilled image pushed the next
+   section's cover away from its heading); the cover as a drop cap (a tall
+   picture leaves a stub line under it in a short paragraph, and dailies run
+   2–4 line paragraphs). Untried: equal side columns. */
+@media (min-width: 58rem) {
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > img {
+    border: 1px solid var(--dim);
+  }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > figcaption {
+    padding: 6px 2px 0;
+    border-top: 0;
+    background: transparent;
+    font: italic 0.875rem/1.4 var(--prose);
+    color: var(--muted);
+    text-align: left;
+  }
+}
