@@ -25,6 +25,11 @@ const md = new MarkdownIt({ html: true, linkify: true });
 const IMAGE_EMBED = /^!\[\[([^\]]+?)\]\]/;
 export const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|avif)$/i;
 export const imageSafeName = (name) => name.replace(/[^A-Za-z0-9._-]+/g, "-");
+// Placement hints: ![[shot.jpg|left]], |right, |full — the author's word on
+// where an image goes, overriding the automatic choice (width number, then
+// alternation). Never alt text. Same words Minimal/ITS use for image floats.
+// (2026-10-23, after the 10-22 daily's second shot was stranded.)
+const PLACE_HINT = /^(left|right|full)$/i;
 
 md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
   const m = IMAGE_EMBED.exec(state.src.slice(state.pos));
@@ -34,8 +39,10 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
   if (!IMAGE_EXT.test(name)) return false;
   if (!silent) {
     const width = parts.slice(1).map((p) => /^(\d+)(?:x\d+)?$/.exec(p)).find(Boolean);
-    const alt = parts.slice(1).find((p) => p && !/^\d+(x\d+)?$/.test(p)) ?? "";
+    const place = parts.slice(1).map((p) => PLACE_HINT.exec(p)?.[0].toLowerCase()).find(Boolean);
+    const alt = parts.slice(1).find((p) => p && !/^\d+(x\d+)?$/.test(p) && !PLACE_HINT.test(p)) ?? "";
     const token = state.push("image", "img", 0);
+    if (place) token.meta = { place };
     token.attrs = [["src", `/img/posts/${imageSafeName(name)}`], ["alt", alt]];
     if (width) token.attrs.push(["width", width[1]]);
     token.children = [];
@@ -92,11 +99,14 @@ md.core.ruler.push("obsidian_figure", (state) => {
     open.block = close.block = true;
     open.map = t[i].map;
     open.level = t[i].level;
-    const width = Number(t[i + 1].children[0].attrGet("width"));
-    if (width >= FIG_FULL_PX) {
+    const img = t[i + 1].children[0];
+    const width = Number(img.attrGet("width"));
+    const place = img.meta?.place;
+    if (place === "full" || (!place && width >= FIG_FULL_PX)) {
       open.attrSet("class", "fig-full");
     } else {
       open.attrSet("class", "fig-float");
+      if (place) open.meta = { side: place };
     }
     out.push(open, t[i + 1]);
     i += 2;
@@ -124,7 +134,9 @@ md.core.ruler.push("obsidian_figure", (state) => {
 // accepted and ignored — the page never folds. Only `aside` is claimed; any
 // other callout type stays a plain blockquote. (2026-10-14, the Fortune's
 // Weave primer.)
-const ASIDE_MARK = /^\[!aside\][+-]?[ \t]*/i;
+// `[!aside|left]` / `[!aside|right]` (Obsidian's callout-metadata slot) pins
+// the side, like an image's placement hint.
+const ASIDE_MARK = /^\[!aside(?:\|(left|right))?\][+-]?[ \t]*/i;
 md.core.ruler.push("obsidian_aside", (state) => {
   const t = state.tokens;
   for (let i = 0; i < t.length; i++) {
@@ -141,6 +153,7 @@ md.core.ruler.push("obsidian_aside", (state) => {
     }
     t[i].tag = t[j].tag = "aside";
     t[i].attrSet("class", "aside");
+    if (m[1]) t[i].meta = { side: m[1].toLowerCase() };
     first.content = first.content.slice(m[0].length);
     // The title is the first line; the rest of that paragraph is body.
     const kids = inline.children;
@@ -223,16 +236,20 @@ md.core.ruler.push("obsidian_float_sides", (state) => {
   // cover card (2026-10-19). Restarting puts each section's first float on
   // the right, and a section reads the same on the day as on its /s/ page,
   // which renders it alone.
-  let n = 0;
+  // A placement hint (|left / |right, [!aside|left]) wins; an unhinted float
+  // takes the side opposite the float before it, so the alternation carries
+  // on from wherever the author put the last one. (2026-10-23.)
+  let prev = "left";
   for (const tok of state.tokens) {
     if (tok.level !== 0) continue;
-    if (tok.type === "heading_open" && tok.tag === "h2") n = 0;
+    if (tok.type === "heading_open" && tok.tag === "h2") prev = "left";
     const cls = tok.attrGet("class") ?? "";
     const isFloat =
       (tok.type === "figure_open" && cls === "fig-float") ||
       (tok.type === "blockquote_open" && cls === "aside");
     if (!isFloat) continue;
-    const side = n++ % 2 ? "left" : "right";
+    const side = tok.meta?.side ?? (prev === "left" ? "right" : "left");
+    prev = side;
     tok.attrSet("class", `${cls} ${cls === "aside" ? "aside" : "fig"}-${side}`);
   }
 });
