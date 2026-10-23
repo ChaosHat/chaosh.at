@@ -1993,7 +1993,7 @@ a.sky-cover:hover { border-color: var(--accent); }
    characters a line, inside 45–75 for the first time (full-width daily lines
    ran 90–95). Subject and tag pages have no per-section art, so they keep the
    47rem column and reserve the right column inside it: ~65 a line there too.
-   The right column narrows with the screen. From 58rem it is a 17rem figure
+   The right column narrows with the screen. From 58rem it is a 16rem figure
    column, captions and all. Below that it is a thumbnail rail (6rem; 3.5rem
    on a phone): the shot is cropped to a tile, the caption hides, and a tap
    opens the lightbox with both. Asides can't be thumbnails, so below 58rem
@@ -2025,7 +2025,12 @@ main {
   main { --mcol: 6rem; --mgap: 24px; }
 }
 @media (min-width: 58rem) {
-  main { --mcol: 17rem; }
+  /* 16rem and 2rem/2.5rem gutters, not 17rem and 1rem/24px: at the shell's
+     width the text read boxed in between cover and images although its
+     measure was fine (Hat, on a 2560 screen). A narrower column and more
+     air on both sides, same ~70 a line. A type step for big screens was
+     mocked and rejected the same day — too big. */
+  main { --mcol: 16rem; --mgap: 2.5rem; --lgap: 2rem; }
   main:has(> .post, > .post-list) { max-width: none; }
   /* The shell is the viewport from here down to 58rem, so the smoke and the
      day bands stop at the body padding instead of running off-screen. */
