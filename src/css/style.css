@@ -849,7 +849,10 @@ a.post-list-date:hover { color: var(--accent); }
    phone (34rem, same breakpoint as the essay card) floats release and every
    figure is the column. `clear` on the full style because the essay card
    floats left through the opening paragraphs and a column-wide image landing
-   beside it would be squeezed into the gutter. */
+   beside it would be squeezed into the gutter.
+   SUPERSEDED in post prose by the margin column (end of this file,
+   2026-10-23): inside a daily, essay, home, subject or tag page these
+   floats are overridden; they survive only for an image outside one. */
 figure {
   clear: both;
   margin: 1.5rem 0;
@@ -926,7 +929,10 @@ main figure img { cursor: zoom-in; }
    about: subject's glow, with a rule of that hue down its inner edge;
    essay.njk still sets --tint, which nothing reads now. The type steps down a size, the sidebar voice; the title is chrome,
    so pixel face. On a phone the float releases and it is a full-column box,
-   the same breakpoint as figures and the card. */
+   the same breakpoint as figures and the card.
+   SUPERSEDED in post prose by the margin column (end of this file,
+   2026-10-23): inside a daily, essay, home, subject or tag page these
+   floats are overridden; they survive only for an image outside one. */
 .aside {
   margin: 1.5rem 0;
   padding: 14px 18px;
@@ -959,7 +965,10 @@ main figure img { cursor: zoom-in; }
    between two. A float that would have collided just drops below the one
    before it; the prose keeps flowing beside the earlier one meanwhile, so
    it costs placement, never a gap. In a list-essay row the left margin
-   belongs to the row's card, so every float there goes right. */
+   belongs to the row's card, so every float there goes right.
+   SUPERSEDED in post prose by the margin column (end of this file,
+   2026-10-23): inside a daily, essay, home, subject or tag page these
+   floats are overridden; they survive only for an image outside one. */
 @media (min-width: 34.01rem) {
   .fig-float, .aside { clear: both; }
   /* The block after a float starts level with it. Clearing pushes a float
@@ -1067,7 +1076,9 @@ main figure img { cursor: zoom-in; }
    shrinking to fit gets linearly worse with every cited subject (both mocked
    and rejected, 2026-10-14). Five fit a tablet's measure with nothing to
    scroll. On a phone the strip bleeds to the screen edge so a cut-off cover
-   says "swipe". */
+   says "swipe".
+   The margin column (end of file, 2026-10-23) moves essay cards into the
+   left art column from 58rem and into the right column on a phone. */
 .essay-cards {
   display: flex;
   flex-wrap: nowrap;
@@ -1116,7 +1127,9 @@ main figure img { cursor: zoom-in; }
    On a phone there is no margin, so the card column narrows beside the text
    rather than stacking — ten covers above ten paragraphs is a long scroll,
    and a 6rem cover beside 17rem of prose still reads. The footer clears the
-   floated top cards of an ordinary essay. */
+   floated top cards of an ordinary essay.
+   The margin column (end of file, 2026-10-23) moves essay cards into the
+   left art column from 58rem and into the right column on a phone. */
 .essay-row {
   --hang: max(0px, min(10rem, calc((100vw - var(--read)) / 2 - 4rem)));
   display: grid;
@@ -1964,4 +1977,180 @@ a.sky-cover:hover { border-color: var(--accent); }
      2px 1px 0 var(--night), -1px  1px 0 var(--night),
      2px -1px 0 var(--night), -1px -1px 0 var(--night),
      0 2px 0 var(--night), 1px 2px 0 var(--night);
+}
+
+/* ------------------------------------------------------- the margin column
+   Every page that carries post prose (2026-10-23). Accent images and asides
+   leave the prose for a column of their own on the right, the way covers and
+   essay cards own the left: Tufte's margin figure, after the half-hung float
+   kept stranding shots and pinching the text (the 10-22 robocobo; a left
+   float squeezing the 10-23 prose to ~40 characters a line). Nothing wraps
+   around anything any more, so placement is just "which paragraph is it
+   beside".
+   Pages whose sections carry an art column — a daily, the home stream of
+   dailies, an essay — take the whole shell from 58rem (the header frame's
+   width) and split it art | text | images, which puts the text at ~68
+   characters a line, inside 45–75 for the first time (full-width daily lines
+   ran 90–95). Subject and tag pages have no per-section art, so they keep the
+   47rem column and reserve the right column inside it: ~65 a line there too.
+   The right column narrows with the screen. From 58rem it is a 17rem figure
+   column, captions and all. Below that it is a thumbnail rail (6rem; 3.5rem
+   on a phone): the shot is cropped to a tile, the caption hides, and a tap
+   opens the lightbox with both. Asides can't be thumbnails, so below 58rem
+   they go back into the prose as a plain box. `|full` images span text and
+   column at every width. On a phone the art moves to the top of the right
+   column — two art columns don't fit — as a small card beside the title.
+   The figure floats right with a negative margin as wide as itself plus the
+   gap, so its margin box is narrower than nothing and no line box ever
+   shortens beside it — that is the Tufte CSS mechanism. The section bodies
+   are flex/grid items or contain their floats otherwise (display: flow-root
+   on .fragment), so a tall last image pushes the next section down rather
+   than overlapping it. */
+main {
+  --mcol: 3.5rem;
+  --mgap: 12px;
+  --lcol: 6rem;   /* the art column: daily cover, essay card */
+  --lgap: 1rem;
+}
+@media (min-width: 34.01rem) {
+  main { --mcol: 6rem; --mgap: 24px; }
+}
+@media (min-width: 58rem) {
+  main { --mcol: 17rem; }
+  main:has(> .post, > .post-list) { max-width: none; }
+  /* The shell is the viewport from here down to 58rem, so the smoke and the
+     day bands stop at the body padding instead of running off-screen. */
+  main:has(> .post, > .post-list)::before { inset: -1.25rem; }
+  main:has(> .post, > .post-list) :is(.post-head, .entry-head)::before { inset: 0 -1.25rem; }
+  /* A stream essay is a lede, not a section: it lines up with the dailies'
+     text column around it. */
+  .stream-essay > :not(.entry-head) {
+    margin-left: calc(var(--lcol) + var(--lgap));
+    margin-right: calc(var(--mcol) + var(--mgap));
+  }
+}
+
+/* Where the right column comes from: each section body gives it up as
+   padding — an essay as a whole, since its prose isn't wrapped. The essay's
+   band spans the full shell regardless. */
+.frag-body,
+.fragment { padding-right: calc(var(--mcol) + var(--mgap)); }
+.fragment { display: flow-root; }
+.essay-page { padding-right: calc(var(--mcol) + var(--mgap)); }
+.essay-page > .post-head { margin-right: calc(-1 * (var(--mcol) + var(--mgap))); }
+
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > :is(.fig-float, .aside) {
+  float: right;
+  clear: right;
+  width: var(--mcol);
+  margin: 4px calc(-1 * (var(--mcol) + var(--mgap))) 1rem 0;
+}
+/* The float rules above it in the file line the next paragraph up with its
+   float by clearing the far side; with nothing in the prose to line up with,
+   that would only open gaps. */
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > :not(.fig-float, .aside, .post-tags) { clear: none; }
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-full {
+  clear: both;
+  margin-right: calc(-1 * (var(--mcol) + var(--mgap)));
+}
+
+/* Essays get the daily's left column too, from 58rem: the lone card, the
+   card stack and a list essay's row cards all hang in it at the cover's
+   width, so an essay and a daily share one grid — art | text | images. */
+@media (min-width: 58rem) {
+  .essay-page { padding-left: calc(var(--lcol) + var(--lgap)); }
+  .essay-page > .post-head { margin-left: calc(-1 * (var(--lcol) + var(--lgap))); }
+  .essay-page > .essay-card {
+    width: var(--lcol);
+    margin: 6px 0 0.75rem calc(-1 * (var(--lcol) + var(--lgap)));
+  }
+  .essay-page > .essay-cards {
+    position: absolute;
+    flex-direction: column;
+    overflow: visible;
+    width: var(--lcol);
+    gap: 1.25rem;
+    margin: 6px 0 1rem calc(-1 * (var(--lcol) + var(--lgap)));
+  }
+  .essay-page > .essay-cards .essay-card { flex-basis: auto; width: var(--lcol); }
+  .essay-page .essay-row {
+    grid-template-columns: var(--lcol) 1fr;
+    gap: 0 var(--lgap);
+    margin-left: calc(-1 * (var(--lcol) + var(--lgap)));
+  }
+}
+
+@media (max-width: 57.99rem) {
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float { position: relative; }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > img { aspect-ratio: 4 / 3; object-fit: cover; }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > figcaption { display: none; }
+  /* The tap hint: the tile alone could pass for decoration. */
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float::after {
+    content: "view";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 2px 5px;
+    background: var(--fill);
+    border-top: 2px solid var(--frame);
+    border-left: 2px solid var(--frame);
+    font: 11px/14px var(--pixel);
+    color: var(--muted);
+    pointer-events: none;
+  }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .aside {
+    float: none;
+    width: auto;
+    margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 34rem) {
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > img { aspect-ratio: 1; }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float::after { content: "+"; padding: 0 4px; }
+  /* The cover moves to the top of the right column, a small 2:3 card beside
+     the title. A float the cover's height holds that spot so the first tile
+     stacks under it instead of on it. A blank sky (loose prose, no subject)
+     just goes. */
+  .frag { display: block; position: relative; }
+  .frag > .sky {
+    position: absolute;
+    top: 3px;
+    right: 0;
+    width: var(--mcol);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 2 / 3;
+    background-size: cover;
+    background-position: center top;
+  }
+  .frag > .sky-blank { display: none; }
+  .frag:not(:has(> .sky-blank)) > .frag-body::before {
+    content: "";
+    float: right;
+    width: var(--mcol);
+    aspect-ratio: 2 / 3;
+    margin: 0 calc(-1 * (var(--mcol) + var(--mgap))) 0.75rem 0;
+  }
+  /* An essay's cards do the same — the lone card and a list essay's row
+     cards go into the right column, cover only: a 3.5rem card can't carry
+     its status and rating cells. (The multi-card strip keeps its sideways
+     scroll above the prose.) */
+  .essay-page > .essay-card {
+    float: right;
+    clear: right;
+    width: var(--mcol);
+    margin: 4px calc(-1 * (var(--mcol) + var(--mgap))) 0.75rem 0;
+  }
+  .essay-page > .essay-card .cell { display: none; }
+  .essay-page .essay-row {
+    grid-template-columns: 1fr var(--mcol);
+    gap: 0 var(--mgap);
+    margin-right: calc(-1 * (var(--mcol) + var(--mgap)));
+  }
+  .essay-page .essay-row > h2 { grid-column: 1; }
+  .essay-page .essay-row .essay-card { grid-column: 2; grid-row: 1 / 3; }
+  .essay-page .essay-row .essay-card .cell { display: none; }
+  .essay-page .essay-row-body { grid-column: 1; }
 }

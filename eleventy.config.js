@@ -199,6 +199,10 @@ md.core.ruler.push("obsidian_aside", (state) => {
 // another float moves below the next paragraph or list. Never across a
 // heading: that would move it into another section. (2026-10-14, Leda's
 // picture and the Fortune's Weave primer, written one after the other.)
+// Since the margin column (style.css, 2026-10-23) post prose puts every
+// float in one right-hand column and ignores the side classes; they still
+// steer a float outside post prose, and the swaps still decide which
+// paragraph a box sits beside.
 const isFloatOpen = (tok) =>
   tok.level === 0 &&
   ((tok.type === "figure_open" && tok.attrGet("class") === "fig-float") ||
@@ -227,6 +231,16 @@ md.core.ruler.push("obsidian_float_sides", (state) => {
     if (isFloatOpen(blocks[k][0]) && isFloatOpen(blocks[k - 1][0]) && ANCHOR.has(blocks[k + 1][0].type)) {
       [blocks[k], blocks[k + 1]] = [blocks[k + 1], blocks[k]];
       k++;
+    }
+  }
+  // A float that ends its section has no prose after it to sit beside, so it
+  // hung below the last line with empty space next to it (the 10-22 robocobo
+  // shot). It moves up past the paragraph before it instead — almost always
+  // the one it was about. Never across a heading. (2026-10-23.)
+  const isSectionEnd = (b) => !b || (b[0].type === "heading_open" && b[0].tag === "h2");
+  for (let k = 1; k < blocks.length; k++) {
+    if (isFloatOpen(blocks[k][0]) && isSectionEnd(blocks[k + 1]) && ANCHOR.has(blocks[k - 1][0].type)) {
+      [blocks[k - 1], blocks[k]] = [blocks[k], blocks[k - 1]];
     }
   }
   state.tokens = blocks.flat();
