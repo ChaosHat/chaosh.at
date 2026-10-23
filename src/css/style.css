@@ -2002,10 +2002,19 @@ a.sky-cover:hover { border-color: var(--accent); }
    column — two art columns don't fit — as a small card beside the title.
    The figure floats right with a negative margin as wide as itself plus the
    gap, so its margin box is narrower than nothing and no line box ever
-   shortens beside it — that is the Tufte CSS mechanism. The section bodies
-   are flex/grid items or contain their floats otherwise (display: flow-root
-   on .fragment), so a tall last image pushes the next section down rather
-   than overlapping it. */
+   shortens beside it — that is the Tufte CSS mechanism.
+   On a wide screen a tall image runs on past its section's last line, down
+   beside the next one, instead of holding the next section down behind a
+   gap (Hat, the 10-23 Resonance shots over Switch Sports); the next
+   section's own images stack below it, since every float clears right. That
+   needs the daily sections to share one formatting context, so from 58rem a
+   .frag is a plain block with its art pinned in the left column instead of
+   a flex row (flex items always contain their floats). The day itself is
+   the container: images never cross into the next day on the home page, or
+   under the tag footer. Narrower, the tiles are small and the phone's cover
+   sits in the rail, so sections keep their images (flex, flow-root on
+   .fragment). Subject and tag pages keep each day's fragment whole too —
+   there the next fragment is another day. */
 main {
   --mcol: 3.5rem;
   --mgap: 12px;
@@ -2052,6 +2061,25 @@ main {
 :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-full {
   clear: both;
   margin-right: calc(-1 * (var(--mcol) + var(--mgap)));
+}
+
+/* The spill (see the header): daily sections stop containing their floats. */
+@media (min-width: 58rem) {
+  .frag { display: block; position: relative; }
+  .frag:has(> .sky:not(.sky-blank)) { min-height: 4rem; }
+  .frag:has(> .sky-cover) { min-height: calc(var(--lcol) * 1.5 + 3px); }
+  .frag > .sky {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--lcol);
+  }
+  .frag > .sky-cover { bottom: auto; }
+  .frag > .frag-body { margin-left: calc(var(--lcol) + var(--lgap)); }
+  .post:not(.essay-page),
+  .post-list .post-body { display: flow-root; }
+  .post > .post-tags { clear: both; }
 }
 
 /* Essays get the daily's left column too, from 58rem: the lone card, the
