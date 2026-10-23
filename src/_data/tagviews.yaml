@@ -1,16 +1,3 @@
-canon:
-  title: Canon
-  members:
-    - fire-emblem-awakening
-    - pokopia
-    - baldurs-gate-3
-    - cyberpunk-2077
-    - monster-hunter-rise
-    - final-fantasy-vii-remake
-    - crusader-kings-3
-    - metroid-dread
-    - marvels-spider-man-2
-    - paper-mario-the-thousand-year-door
 crpg:
   title: CRPG
   members:

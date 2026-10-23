@@ -1,0 +1,19 @@
+# The canon's roster changes, oldest first — rendered as the changelog on
+# /canon/. publish.py appends an entry on any night the set of `rating: canon`
+# blurbs differs from where this log leaves off, so a swap is two blurb edits
+# and this file writes itself. Hand edits are fine: fix a date, or add `why:`
+# (an essay's filename, e.g. `why: Canon Premiere`) to link the essay that
+# argued the change. `in`/`out` are subject slugs.
+- date: 2026-09-09
+  in:
+    - baldurs-gate-3
+    - cyberpunk-2077
+    - fire-emblem-awakening
+    - monster-hunter-rise
+    - metroid-dread
+    - final-fantasy-vii-remake
+    - crusader-kings-3
+    - paper-mario-the-thousand-year-door
+    - pokopia
+    - marvels-spider-man-2
+  why: Canon Premiere

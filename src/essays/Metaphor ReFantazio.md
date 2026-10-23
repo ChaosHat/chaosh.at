@@ -5,6 +5,7 @@ publish: true
 description:
 about:
   - metaphor-refantazio
+featured: true
 ---
 Battered and bruised, I've fought my way through his final dungeon and beaten all the traps to make it here. Beyond this door lies Louis for the final confrontation before time expires. I steel my party for the coming battle, burning precious, rare consumables to patch wounds and replenish mana. Now ready for the worst, I enter the final stage.
 

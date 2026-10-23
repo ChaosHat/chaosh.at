@@ -53,6 +53,7 @@ baldurs-gate-3:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - bg3
     - baldurs gate 3
@@ -145,6 +146,7 @@ crusader-kings-3:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - ck3
     - crusader kings 3
@@ -154,6 +156,7 @@ cyberpunk-2077:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - cp2077
     - '2077'
@@ -297,7 +300,7 @@ final-fantasy-resonance:
   title: Final Fantasy Resonance
   category:
     - games
-  status: backlog
+  status: active
   aliases:
     - ffr
     - ffresonance
@@ -334,6 +337,7 @@ final-fantasy-vii-remake:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - ff7r
     - ffviir
@@ -343,6 +347,7 @@ fire-emblem-awakening:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - awakening
     - fe awakening
@@ -536,6 +541,7 @@ marvels-spider-man-2:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - spider-man 2
     - spiderman 2
@@ -581,6 +587,7 @@ metroid-dread:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - dread
     - metroid dread
@@ -635,6 +642,7 @@ monster-hunter-rise:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - mh rise
     - mhr
@@ -716,6 +724,7 @@ paper-mario-the-thousand-year-door:
   category:
     - games
   status: completed
+  rating: canon
   aliases:
     - ttyd
     - thousand year door
@@ -785,6 +794,7 @@ pokopia:
   category:
     - games
   status: shelved
+  rating: canon
   aliases:
     - pokemon pokopia
 portal:

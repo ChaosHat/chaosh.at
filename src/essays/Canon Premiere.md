@@ -4,6 +4,7 @@ date: 2026-09-09
 publish: true
 description:
 about:
+  - canon
   - baldurs-gate-3
   - cyberpunk-2077
   - fire-emblem-awakening

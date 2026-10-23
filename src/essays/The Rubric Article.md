@@ -4,12 +4,13 @@ date: 2026-10-13
 publish: true
 description:
 about:
+  - canon
   - baldurs-gate-2
   - baldurs-gate-3
   - mass-effect-legendary-edition
   - fallout-new-vegas
   - pokemon-hgss
-featured:
+featured: true
 ---
 When I was [creating the canon for the site](/e/canon-premiere/), I really struggled with narrowing some of these down. My mental model for the canon, aside from just a personal exercise for fun, is something I think of as a gamer business card. I want to be able to give you this short list of games and very quickly understand where I'm coming from, what I like or value, and use that as context for the rest of my writing. 
 
