@@ -9,6 +9,7 @@ pagination:
 permalink: "{% if picks | length %}/best/{% else %}false{% endif %}"
 ---
 <h1>Best of</h1>
+<p class="tag-desc">These are the ones I like, either as places to start or because I'm proud of them, or because they meant something to me.</p>
 
 <ul class="archive-list">
   {% for post in picks %}
