@@ -128,7 +128,12 @@
      the text column narrows, and it narrows on BOTH sides so it reads as
      centred under the furniture rather than as prose that ran out early. */
   --read: 47rem;
-  --wide: 58rem;
+  /* 63rem since 2026-10-23 (58 before): with the margin column, post
+     pages split the shell art | text | images, and against NYT/Wired the
+     text read thin on a big screen — same ~62 characters a line as the NYT
+     but in 3/4 of its width. 63rem plus 19px prose (body, below) gives ~69
+     a line at a size closer to theirs. */
+  --wide: 63rem;
   /* Smoked glass: translucent night for anything that sits over the sky —
      the intro, the strips, the phone nav row, the reading column. One value
      so the boxes stay one material. */
@@ -180,6 +185,13 @@ body {
   color: var(--ink);
   font: 1.125rem/1.55 var(--prose);
   -webkit-text-size-adjust: 100%;
+}
+/* 19px prose where the margin column's three-way split applies (with the
+   63rem shell, 2026-10-23). 19px alone in the old column felt
+   claustrophobic; 20px across the board for big screens was too big. Phones
+   keep 18. */
+@media (min-width: 58rem) {
+  body { font-size: 1.1875rem; }
 }
 
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
@@ -1988,11 +2000,12 @@ a.sky-cover:hover { border-color: var(--accent); }
    around anything any more, so placement is just "which paragraph is it
    beside".
    Pages whose sections carry an art column — a daily, the home stream of
-   dailies, an essay — take the whole shell from 58rem (the header frame's
-   width) and split it art | text | images, which puts the text at ~68
-   characters a line, inside 45–75 for the first time (full-width daily lines
-   ran 90–95). Subject and tag pages have no per-section art, so they keep the
-   47rem column and reserve the right column inside it: ~65 a line there too.
+   dailies, an essay — take the whole shell (--wide, the header frame's
+   width) from a 58rem viewport and split it art | text | images, which
+   puts the text at ~69 characters a line at 19px, inside 45–75 for the
+   first time (full-width daily lines ran 90–95). Subject and tag pages have
+   no per-section art, so they keep the 47rem column and reserve the right
+   column inside it: ~60 a line there.
    The right column narrows with the screen. From 58rem it is a 16rem figure
    column, captions and all. Below that it is a thumbnail rail (6rem; 3.5rem
    on a phone): the shot is cropped to a tile, the caption hides, and a tap
