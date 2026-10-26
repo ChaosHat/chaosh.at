@@ -1100,13 +1100,21 @@ export default function (eleventyConfig) {
   // image. Rescanned per build so dropping a file in during --serve takes.
   const COVER_DIR = path.join("src", "img", "covers");
   const COVER_EXT = /^(.+)\.(jpe?g|png|webp|avif)$/i;
+  // `<slug>.px.png` is hand-made pixel art, pre-scaled ×5 like the skies:
+  // shown at natural size, never scaled, so its pixels sit on the art grid.
+  // Named rather than inferred, since covers.py can fetch an ordinary PNG.
+  const COVER_PX = /^(.+)\.px\.png$/i;
   const coverUrls = new Map(); // slug -> /img/covers/<file>
+  const coverPixels = new Set(); // slugs whose cover is pixel art
   eleventyConfig.on("eleventy.before", () => {
     coverUrls.clear();
+    coverPixels.clear();
     if (!fs.existsSync(COVER_DIR)) return;
     for (const name of fs.readdirSync(COVER_DIR)) {
-      const m = COVER_EXT.exec(name);
+      const px = COVER_PX.exec(name);
+      const m = px ?? COVER_EXT.exec(name);
       if (m) coverUrls.set(m[1], `/img/covers/${name}`);
+      if (px) coverPixels.add(px[1]);
     }
     coverBoxes.clear();
   });
@@ -1204,7 +1212,7 @@ export default function (eleventyConfig) {
       // skipped by the keyboard, present for the mouse.
       const box = coverBox(slug);
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}" href="/s/${slug}/" ` +
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(slug) ? " sky-pixel" : ""}" href="/s/${slug}/" ` +
         `style="background-image:url(${cover})" aria-hidden="true" tabindex="-1"></a>`
       );
     }
@@ -1350,6 +1358,7 @@ export default function (eleventyConfig) {
           canon: canonSlugsAll.has(s),
           rating: ratingOf(s, meta),
           coverUrl: coverUrls.get(s) ?? null,
+          coverPixel: coverPixels.has(s),
           coverBox: coverBox(s),
           skyUrl: `/img/sky/${s}.png`,
         };
@@ -1542,6 +1551,7 @@ export default function (eleventyConfig) {
         // render "pending". A canon subject's rating is the canon rung.
         rating: ratingOf(slug, meta),
         coverUrl: coverUrls.get(slug) ?? null,
+        coverPixel: coverPixels.has(slug),
         coverBox: coverBox(slug),
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
         // this is the subject's own standing paragraph, rendered in full
@@ -2074,7 +2084,8 @@ export default function (eleventyConfig) {
       status: subjects[first]?.status ?? "active",
       color: canon ? cssTokens.gold ?? "#f5c86b" : statusColor(subjects[first]?.status ?? "active"),
     };
-    const withCover = slugs.find((s) => /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));
+    // Pixel covers stay out: the card would scale them off their grid.
+    const withCover = slugs.find((s) => !coverPixels.has(s) && /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));
     const cover = withCover
       ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugsAll.has(withCover), box: coverBox(withCover) }
       : null;

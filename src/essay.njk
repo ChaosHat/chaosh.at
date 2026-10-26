@@ -25,7 +25,7 @@ eleventyComputed:
   <a class="essay-card shelf-card{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
     <span class="shelf-art">
       {% if c.coverUrl %}
-      <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
+      <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}{% if c.coverPixel %} is-pixel{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
       {% else %}
       <span class="sky" style="background-image:url({{ c.skyUrl }})" aria-hidden="true"></span>
       {% endif %}

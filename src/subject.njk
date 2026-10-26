@@ -13,7 +13,7 @@ eleventyComputed:
     {#- The subject's sky at the one size where the full three-curtain scene
         is properly legible. Small renders elsewhere use the chip variant. -#}
     {%- if subject.coverUrl %}
-    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true"></span>
+    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true"></span>
     {%- else %}
     <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
     {%- endif %}
