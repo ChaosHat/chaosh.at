@@ -843,7 +843,8 @@ export default function (eleventyConfig) {
   // medium. Essays are the exception: /essays/ is every essay (the panel's
   // "all →"), so each medium's slice lives at /essays/<medium>/, games too.
   const DEFAULT_MEDIUM = "games";
-  // `boardgames` is renamed `tabletop` in the blurbs on ship day.
+  // `boardgames` became `tabletop` in the blurbs on 2026-10-25; the alias
+  // keeps a stray old value on the right shelf.
   const MEDIUM_ALIASES = { boardgames: "tabletop" };
   const mediumOf = (meta) => {
     const first = [].concat(meta?.category ?? [])[0];
