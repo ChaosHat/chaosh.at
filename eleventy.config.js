@@ -967,7 +967,46 @@ export default function (eleventyConfig) {
       const m = COVER_EXT.exec(name);
       if (m) coverUrls.set(m[1], `/img/covers/${name}`);
     }
+    coverBoxes.clear();
   });
+
+  // Tabletop covers are box art, and boxes come square, landscape or small and
+  // tall, so they are never cropped to the games' 2:3 grid (2026-10-25). The
+  // box ratio (width / height, held to 2:3..3:2 so a long box doesn't become a
+  // sliver) rides along as `coverBox`; templates fit the box inside its slot,
+  // bottom-aligned like a box on a shelf, and the post column sizes the cover
+  // to it. Games keep coverBox null and the crop they always had.
+  const TABLETOP = new Set(["boardgames", "tabletop"]);
+  const coverBoxes = new Map(); // slug -> clamped ratio, or null
+  // Pixel size from the header alone: a PNG's IHDR, or a JPEG's first SOF.
+  const imageSize = (file) => {
+    const b = fs.readFileSync(file);
+    if (b.length > 24 && b.readUInt32BE(0) === 0x89504e47) {
+      return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+    }
+    if (b[0] !== 0xff || b[1] !== 0xd8) return null;
+    for (let i = 2; i + 9 < b.length; ) {
+      if (b[i] !== 0xff || b[i + 1] === 0xff) { i++; continue; }
+      const marker = b[i + 1];
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+        return { w: b.readUInt16BE(i + 7), h: b.readUInt16BE(i + 5) };
+      }
+      i += 2 + b.readUInt16BE(i + 2);
+    }
+    return null;
+  };
+  const coverBox = (slug) => {
+    if (coverBoxes.has(slug)) return coverBoxes.get(slug);
+    let box = null;
+    const url = coverUrls.get(slug);
+    const medium = [].concat(subjects[slug]?.category ?? [])[0];
+    if (url && TABLETOP.has(medium)) {
+      const size = imageSize(path.join("src", url));
+      if (size?.w && size?.h) box = +Math.min(1.5, Math.max(2 / 3, size.w / size.h)).toFixed(4);
+    }
+    coverBoxes.set(slug, box);
+    return box;
+  };
 
   // A blurb is the third content type: an undated, revisable paragraph that
   // stands for a subject whose thoughts never took the form of a ## heading.
@@ -1024,8 +1063,9 @@ export default function (eleventyConfig) {
       // announce: the heading beside it already links to the same page, so
       // this is the redundant-image-link case — hidden from assistive tech and
       // skipped by the keyboard, present for the mouse.
+      const box = coverBox(slug);
       return (
-        `<a class="sky sky-cover" href="/s/${slug}/" ` +
+        `<a class="sky sky-cover${box ? " sky-box" : ""}" href="/s/${slug}/" ` +
         `style="background-image:url(${cover})" aria-hidden="true" tabindex="-1"></a>`
       );
     }
@@ -1170,6 +1210,7 @@ export default function (eleventyConfig) {
           canon: canonSlugs.has(s),
           rating: ratingOf(s, meta),
           coverUrl: coverUrls.get(s) ?? null,
+          coverBox: coverBox(s),
           skyUrl: `/img/sky/${s}.png`,
         };
       });
@@ -1357,6 +1398,7 @@ export default function (eleventyConfig) {
         // render "pending". A canon subject's rating is the canon rung.
         rating: ratingOf(slug, meta),
         coverUrl: coverUrls.get(slug) ?? null,
+        coverBox: coverBox(slug),
         // Not to be confused with essay.blurb (an essay's lede on tag pages):
         // this is the subject's own standing paragraph, rendered in full
         // wherever it appears — Hat writes blurbs to fit, so there is no
@@ -1673,8 +1715,10 @@ export default function (eleventyConfig) {
   // filter: truncation still sees flat sections and still cuts on an H2.
   const FRAG_LOOSE = '<span class="sky sky-blank" aria-hidden="true"></span>';
 
-  const wrapFragment = (sky, body) =>
-    `<div class="frag">${sky}<div class="frag-body">${body}</div></div>`;
+  // A box cover's ratio goes on the fragment, not the cover: the fragment's
+  // min-height and the narrow layout's float placeholder both size from it.
+  const wrapFragment = (sky, body, box = null) =>
+    `<div class="frag"${box ? ` style="--box:${box}"` : ""}>${sky}<div class="frag-body">${body}</div></div>`;
 
   const linkSubjectsFragments = (html) => {
     const src = String(html ?? "");
@@ -1708,7 +1752,7 @@ export default function (eleventyConfig) {
         `<span class="badge b-${status}">${status}</span>` +
         `</h2>`;
 
-      out.push(wrapFragment(skyTag(slug, status), head + rest));
+      out.push(wrapFragment(skyTag(slug, status), head + rest, coverBox(slug)));
     }
     return out.join("");
   };
@@ -1920,7 +1964,7 @@ export default function (eleventyConfig) {
     };
     const withCover = slugs.find((s) => /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));
     const cover = withCover
-      ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugs.has(withCover) }
+      ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugs.has(withCover), box: coverBox(withCover) }
       : null;
     return { chip, cover };
   };

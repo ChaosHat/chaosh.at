@@ -31,7 +31,7 @@ permalink: /canon/
       <span class="shelf-card">
         <span class="shelf-art">
           {% if item.coverUrl %}
-          <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" decoding="async">
+          <img class="shelf-cover{% if item.coverBox %} is-box{% endif %}" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" decoding="async">
           {% else %}
           <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
           {% endif %}

@@ -1262,6 +1262,19 @@ main figure img { cursor: zoom-in; }
   object-fit: cover;
 }
 
+/* Tabletop box art (coverBox, see eleventy.config.js) is fitted, never
+   cropped, and stands on the slot's floor so a row of boxes shares one line
+   like a real shelf. In the mixed "all" view the slot stays 2:3 so the rows
+   line up; filtered to tabletop alone every tile is a box, so the slot goes
+   square — the common modern box — and the bands mostly go (2026-10-25). */
+.shelf-cover.is-box {
+  object-fit: contain;
+  object-position: center bottom;
+}
+.shelf-sorter:has(#show-boardgames:checked) .shelf-item.cat-boardgames :is(.shelf-cover, .sky) {
+  aspect-ratio: 1 / 1;
+}
+
 /* Covered and coverless tiles are held to the same height so a partly-covered
    shelf lays out as one clean grid rather than a ragged one: the fallback sky
    stretches to the cover's 2:3. Stretching is what these SVGs are for —
@@ -1906,6 +1919,20 @@ a.sky-cover:hover { border-color: var(--accent); }
   mask-image: none;
 }
 
+/* A tabletop box takes its own shape in the post column and the subject head
+   (--box: set on the .frag by wrapFragment, inline on the head), fitted
+   rather than cropped. Inside 2:3..3:2 that is an exact fit; a box past the
+   clamp sits on the floor of its slot over night. No neighbour to line up
+   with here, so a square box is simply a shorter cover than a game's. */
+.frag > .sky-cover.sky-box,
+.subject-head > .sky-cover.sky-box {
+  aspect-ratio: var(--box);
+  background-color: var(--deep);
+  background-size: contain;
+  background-position: center bottom;
+}
+.frag:has(> .sky-cover.sky-box) > .frag-body::before { aspect-ratio: var(--box); }
+
 /* ------------------------------------------------------- the day band
    The sky the night a post was written, seeded on the post's date. Drawn on a
    pseudo-element rather than the header itself for one reason: the band needs a
@@ -2086,6 +2113,7 @@ main {
   .frag { display: block; position: relative; }
   .frag:has(> .sky:not(.sky-blank)) { min-height: 4rem; }
   .frag:has(> .sky-cover) { min-height: calc(var(--lcol) * 1.5 + 3px); }
+  .frag:has(> .sky-cover.sky-box) { min-height: calc(var(--lcol) / var(--box) + 3px); }
   .frag > .sky {
     position: absolute;
     top: 0;

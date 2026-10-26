@@ -146,9 +146,10 @@ const fitTitle = async (title, width, room) => {
 
 // spec: { sky, kicker?, title, chip?: { text, more?, color, status?, canon? }, cover? }
 //   sky    — the date the band, stars, comet and frame colour are drawn from
-//   cover  — { file, canon }: a JPEG or PNG path (satori reads no webp/avif), and whether its subject is canon
-//            (gold frame). Covers are 600×900, so `cover` fit never
-//            letterboxes. Not always the chip's subject: the chip names the
+//   cover  — { file, canon, box? }: a JPEG or PNG path (satori reads no webp/avif), and whether its subject is canon
+//            (gold frame). Game covers are 600×900, so `cover` fit never
+//            letterboxes; a tabletop box (`box` = its width/height) gets a
+//            frame of its own shape, sitting on the same bottom line. Not always the chip's subject: the chip names the
 //            first subject, the cover is the first one that HAS a cover.
 // Every field is plain text — never HTML — and nothing is read from "today",
 // so a card changes only when its post does.
@@ -240,19 +241,19 @@ export const cardTree = async (spec) => {
             {
               position: "absolute",
               right: 60,
-              top: 90,
+              top: cover.box ? 540 - (Math.round(290 / cover.box) + 10) : 90,
               width: 300,
-              height: 450,
+              height: cover.box ? Math.round(290 / cover.box) + 10 : 450,
               display: "flex",
               // The plain frame in the day's hue, gold for canon.
               border: `5px solid ${cover.canon ? C.gold : frame}`,
               boxShadow: `0 0 0 5px ${C.ring}`,
             },
             [
-              h("img", { width: 290, height: 440, objectFit: "cover" }, undefined, {
+              h("img", { width: 290, height: cover.box ? Math.round(290 / cover.box) : 440, objectFit: "cover" }, undefined, {
                 src: dataUri(/\.png$/i.test(cover.file) ? "image/png" : "image/jpeg", fs.readFileSync(cover.file)),
                 width: 290,
-                height: 440,
+                height: cover.box ? Math.round(290 / cover.box) : 440,
               }),
             ],
           )

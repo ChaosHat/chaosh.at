@@ -96,7 +96,7 @@ permalink: /shelf/
           {#- A real <img>, unlike every sky on the site: the generated art is
               decoration and belongs in CSS, but a cover is content, it wants an
               alt, and a shelf that keeps growing wants lazy loading. -#}
-          <img class="shelf-cover" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" loading="lazy" decoding="async">
+          <img class="shelf-cover{% if item.coverBox %} is-box{% endif %}" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" loading="lazy" decoding="async">
           {% else %}
           <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
           {% endif %}
