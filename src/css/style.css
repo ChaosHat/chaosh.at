@@ -386,8 +386,8 @@ h1, h2, h3 { line-height: 1.25; }
 /* Titles are pixel, on the lattice (2026-10-16): Alegreya titles read as
    incongruous beside pixel chrome once the chrome stopped being caps, and sat
    lighter than the 22px subject heads under them. Alegreya is prose only now.
-   Page titles 32px (4×), list and post titles 24px (3×); subject heads and
-   datelines a step under at 16 (2026-10-26). Regular, not bold: the 700
+   Page titles 32px (4×), post and essay titles 24px (3×), stream titles
+   16px bold over 16px datelines, subject heads 16 (2026-10-26). Regular, not bold: the 700
    doubled every stroke and the titles shouted (2026-10-19). Pixelify's 400
    read thin and took a faux semi-bold shadow; Pixel Operator's strokes are
    already 3px at 24, so the shadow went with Pixelify. */
@@ -823,7 +823,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-title {
   display: block;
   margin-bottom: 6px;
-  font: 400 24px/32px var(--pixel);
+  font: 700 16px/24px var(--pixel); /* 24 regular read huge in the stream; bold carries the step over the 16 date (2026-10-26) */
   text-decoration: none;
   color: var(--ink);
 }
@@ -1114,7 +1114,7 @@ main figure img { cursor: zoom-in; }
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 400 32px/40px var(--pixel); }
+.post-title { margin: 0 0 0.5rem; font: 400 24px/32px var(--pixel); }
 .post-date { margin: 0; font: 400 16px/24px var(--pixel); }
 .post-subdate { margin: 0; font: 16px/24px var(--pixel); color: var(--muted); }
 
