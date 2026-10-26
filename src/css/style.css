@@ -2,26 +2,26 @@
    Design notes and rationale: vault, 90_Reference/91_Documentation/
    "chaosh.at Design System". Keep this file terse; the why lives there. */
 
-/* Pixelify Sans, re-gridded. Stock Pixelify draws each pixel ~1.1 grid units
-   wide, ⅔px off the origin, so no CSS size lands a stem on whole pixels and
-   every edge smears. This copy (pixelify-grid.py) snaps every point to an
-   exact 11-per-em lattice: crisp at 11px and 22px only, so those are the only
-   two sizes the chrome uses. Its 2, 5 and Z are redrawn (stock, they read as
-   Z, S and 2), and it gains pixel arrows. 700 is a pixel bold: the 400
-   OR'd one pixel right. Subset and reasoning: src/fonts/SUBSET.md. */
+/* Pixel Operator 8 (Jayvee Enaguas, CC0), tightened (2026-10-26, replacing
+   Pixelify Grid). Drawn on an exact 8-per-em lattice, so 8, 16, 24 and 32px
+   are crisp and nothing else is; those are the only sizes the chrome uses.
+   Unlike Pixelify's 11/22, the 8 grid has a crisp middle step: 8 small, 16
+   for nav, panels and captions, 24 for titles. pixel-operator.py takes one
+   pixel off every advance (stock sets letters two apart, a typewriter; one
+   apart is the SNES menu) and adds ← →. Subset: src/fonts/SUBSET.md. */
 @font-face {
-  font-family: "Pixelify Grid";
+  font-family: "Pixel Operator Tight";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/pixelify-grid-400.woff2") format("woff2");
+  src: url("/fonts/pixel-operator-tight-400.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Pixelify Grid";
+  font-family: "Pixel Operator Tight";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("/fonts/pixelify-grid-700.woff2") format("woff2");
+  src: url("/fonts/pixel-operator-tight-700.woff2") format("woff2");
 }
 
 /* Alegreya Sans, self-hosted on the same terms as the pixel face: one origin, no
@@ -56,7 +56,7 @@
 }
 
 :root {
-  --pixel: "Pixelify Grid", ui-monospace, monospace;
+  --pixel: "Pixel Operator Tight", ui-monospace, monospace;
   /* Named for its ROLE, not its classification — it held `ui-serif, Georgia,
      "Times New Roman", serif` until 2026-09-04, which meant the body copy was
      never one thing: iPhone Safari resolved it to New York, Windows Chrome to
@@ -377,11 +377,11 @@ h1, h2, h3 { line-height: 1.25; }
    take the pixel-font faux semi-bold: the glyph again one pixel to the
    right, 2px strokes to 3px. The on-aurora outline below carries the same
    shift in its own shadow list. */
-h1 { font: 400 33px/40px var(--pixel); }
+h1 { font: 400 32px/40px var(--pixel); }
 h1,
 .post-list-title,
 .post-title,
-.essay-title { text-shadow: 1px 0 0 currentColor; }
+.essay-title { text-shadow: none; }
 
 /* ---------------------------------------------------------------- the sky
    Generated cover art, one pixel PNG per subject (and a chip), built nightly
@@ -474,7 +474,7 @@ figure,
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font: 400 22px/1 var(--pixel);
+  font: 400 24px/1 var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -507,7 +507,7 @@ figure,
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  font: 16.5px/1 var(--pixel);
+  font: 16px/1 var(--pixel);
 }
 
 .site-nav a {
@@ -570,7 +570,7 @@ figure,
   padding: 14px 1rem;
   /* The pixel face at the panels' size, so the intro reads as one of the
      framed boxes rather than prose that wandered out of the column. */
-  font: 16.5px/26px var(--pixel);
+  font: 16px/26px var(--pixel);
   color: var(--muted);
   /* Smoked like the panel below it but unframed since 2026-10-19, so it
      reads as the site's tagline rather than a third box. The masthead
@@ -607,7 +607,7 @@ figure,
 
 .now-label {
   flex-shrink: 0;
-  font: 16.5px/1 var(--pixel);
+  font: 16px/1 var(--pixel);
   color: var(--mc);
 }
 
@@ -617,7 +617,7 @@ figure,
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font: 16.5px/20px var(--pixel);
+  font: 16px/20px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -635,12 +635,12 @@ figure,
 .now-item .sky { width: 24px; aspect-ratio: 1; }
 .now-item .mico { flex: none; width: 24px; height: 24px; }
 
-.essay-when { color: var(--muted); font: 16.5px/1 var(--pixel); white-space: nowrap; }
+.essay-when { color: var(--muted); font: 16px/1 var(--pixel); white-space: nowrap; }
 
 .essays-all {
   margin-left: auto;
   flex-shrink: 0;
-  font: 16.5px/1 var(--pixel);
+  font: 16px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -675,7 +675,7 @@ figure,
   align-items: center;
   gap: 4px;
   padding: 5px 7px;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   color: var(--c);
   background: color-mix(in srgb, var(--c) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
@@ -726,7 +726,7 @@ figure,
   display: inline-flex;
   align-items: center;
   padding: 5px 7px;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   white-space: nowrap;
   text-decoration: none;
   color: var(--muted);
@@ -786,7 +786,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
   padding: 5px 7px;
   background: var(--deep);
   border: 1px solid var(--edge);
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -809,7 +809,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-title {
   display: block;
   margin-bottom: 6px;
-  font: 400 22px/29px var(--pixel);
+  font: 400 24px/32px var(--pixel);
   text-decoration: none;
   color: var(--ink);
 }
@@ -820,7 +820,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-subdate {
   display: block;
   margin: 0;
-  font: 22px/30px var(--pixel);
+  font: 24px/32px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -833,7 +833,7 @@ a.post-list-date:hover { color: var(--accent); }
 .entry-kind {
   display: block;
   margin-bottom: 9px;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   color: var(--st-completed);
 }
 
@@ -919,7 +919,7 @@ figure > img { display: block; width: 100%; }
 figcaption {
   padding: 0.5rem 0.75rem;
   border-top: 2px solid var(--frame);
-  font: 16.5px/24px var(--pixel);
+  font: 16px/24px var(--pixel);
   color: var(--muted);
   text-align: center;
 }
@@ -965,7 +965,7 @@ main figure img { cursor: zoom-in; }
   margin: 0;
   padding: 0.5rem 0.75rem;
   border-top: 2px solid var(--frame);
-  font: 16.5px/24px var(--pixel);
+  font: 16px/24px var(--pixel);
   color: var(--muted);
   text-align: center;
 }
@@ -1001,7 +1001,7 @@ main figure img { cursor: zoom-in; }
 .aside p { margin: 0 0 0.72em; }
 .aside .aside-title {
   margin-bottom: 0.5rem;
-  font: 11px/16px var(--pixel);
+  font: 8px/16px var(--pixel);
   color: var(--frame);
 }
 @media (min-width: 34.01rem) {
@@ -1073,7 +1073,7 @@ main figure img { cursor: zoom-in; }
    into every heading, where it would collide with the active badge. */
 .frag-subject {
   padding-bottom: 2px;
-  font: 400 22px/29px var(--pixel);
+  font: 400 24px/32px var(--pixel);
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--muted);
@@ -1088,7 +1088,7 @@ main figure img { cursor: zoom-in; }
   margin-top: 18px;
   padding: 0.5rem 11px;
   border: 1px solid var(--edge);
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   text-decoration: none;
 }
 
@@ -1100,9 +1100,9 @@ main figure img { cursor: zoom-in; }
 /* ------------------------------------------------------------ post page */
 
 .post-head { margin-bottom: 2rem; }
-.post-title { margin: 0 0 0.5rem; font: 400 33px/40px var(--pixel); }
-.post-date { margin: 0; font: 400 22px/29px var(--pixel); }
-.post-subdate { margin: 0; font: 22px/30px var(--pixel); color: var(--muted); }
+.post-title { margin: 0 0 0.5rem; font: 400 32px/40px var(--pixel); }
+.post-date { margin: 0; font: 400 24px/32px var(--pixel); }
+.post-subdate { margin: 0; font: 24px/32px var(--pixel); color: var(--muted); }
 
 .post-tags {
   margin-top: 2.5rem;
@@ -1224,14 +1224,14 @@ main figure img { cursor: zoom-in; }
   border-bottom: 1px solid var(--edge);
 }
 
-.archive-list a { font: 16.5px/24px var(--pixel); text-decoration: none; }
+.archive-list a { font: 16px/24px var(--pixel); text-decoration: none; }
 
 /* The archive row's kicker, same word and blue as the home stream's. */
-.archive-kind { font: 16.5px/24px var(--pixel); color: var(--st-completed); }
+.archive-kind { font: 16px/24px var(--pixel); color: var(--st-completed); }
 
 .archive-note {
   margin-left: auto;
-  font: 16.5px/24px var(--pixel);
+  font: 16px/24px var(--pixel);
   white-space: nowrap;
   color: var(--muted);
 }
@@ -1249,14 +1249,14 @@ main figure img { cursor: zoom-in; }
 }
 
 .essay-list .sky { width: 24px; }
-.essay-list a { font: 16.5px/24px var(--pixel); text-decoration: none; }
+.essay-list a { font: 16px/24px var(--pixel); text-decoration: none; }
 
 .pagination {
   display: flex;
   align-items: baseline;
   gap: 1rem;
   margin-top: 2rem;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
 }
 
 .pagination a { text-decoration: none; }
@@ -1358,7 +1358,7 @@ main figure img { cursor: zoom-in; }
 .cell.r-liked:not(.partial),
 .cell.r-loved.partial { padding-left: 8px; } /* the chips pad 7px each side */
 
-.shelf-caption { display: block; margin: 9px 0 0; font: 11px/16px var(--pixel); }
+.shelf-caption { display: block; margin: 9px 0 0; font: 8px/16px var(--pixel); }
 
 /* ------------------------------------------------- shelf sort (no script)
 
@@ -1386,7 +1386,7 @@ main figure img { cursor: zoom-in; }
 .shelf-sort legend {
   float: left; /* keeps the legend on the flex row rather than above it */
   padding: 0 10px 0 0;
-  font: 11px/16px var(--pixel);
+  font: 8px/16px var(--pixel);
   color: var(--muted);
 }
 
@@ -1402,7 +1402,7 @@ main figure img { cursor: zoom-in; }
 }
 
 .shelf-sort label {
-  font: 11px/16px var(--pixel);
+  font: 8px/16px var(--pixel);
   color: var(--muted);
   padding: 5px 0.5rem;
   border: 1px solid var(--edge);
@@ -1441,7 +1441,7 @@ main figure img { cursor: zoom-in; }
 .shelf-key {
   display: inline-block;
   margin: 0 0 1.5rem;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
@@ -1461,7 +1461,7 @@ main figure img { cursor: zoom-in; }
 }
 
 .subject-head > .sky { width: 8rem; }
-.subject-head h1 { margin: 0 0 11px; font: 400 33px/40px var(--pixel); }
+.subject-head h1 { margin: 0 0 11px; font: 400 32px/40px var(--pixel); }
 
 /* Lit-days strip: square pixels, one per day written about, lit in the
    subject's hue (--lit, set inline from its palette); short gaps stay night.
@@ -1528,7 +1528,7 @@ main figure img { cursor: zoom-in; }
   height: auto;
   background: none;
   padding: 0 6px;
-  font: 11px/1 var(--pixel);
+  font: 8px/1 var(--pixel);
   color: var(--muted);
 }
 .lit-days span.gap::before, .lit-days span.gap::after { content: "·"; padding: 0 3px; opacity: 0.6; }
@@ -1557,7 +1557,7 @@ main figure img { cursor: zoom-in; }
   margin: 0 0 1.75rem;
   padding-bottom: 13px;
   border-bottom: 1px solid var(--edge);
-  font: 400 11px/1 var(--pixel);
+  font: 400 8px/1 var(--pixel);
   color: var(--muted);
 }
 
@@ -1581,7 +1581,7 @@ main figure img { cursor: zoom-in; }
 .fragment-date {
   display: inline-block;
   margin-bottom: 7px;
-  font: 11px/15px var(--pixel);
+  font: 8px/15px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -1598,11 +1598,11 @@ main figure img { cursor: zoom-in; }
    pictogram appears without its words beside it, because the words are the
    <h1> it sits in. */
 .view-glyph { font-size: 0.8em; margin-right: 0.15em; }
-.tag-head h1 { margin: 0 0 0.5rem; font: 400 33px/40px var(--pixel); }
+.tag-head h1 { margin: 0 0 0.5rem; font: 400 32px/40px var(--pixel); }
 .tag-desc { margin: 0 0 10px; color: var(--muted); }
-.tag-members { margin: 0; font: 11px/20px var(--pixel); color: var(--muted); }
+.tag-members { margin: 0; font: 8px/20px var(--pixel); color: var(--muted); }
 .tag-members a { text-decoration: none; }
-.tag-index { margin: 0 0 10px; font: 11px/1 var(--pixel); }
+.tag-index { margin: 0 0 10px; font: 8px/1 var(--pixel); }
 .tag-index a { color: var(--muted); text-decoration: none; }
 .tag-index a:hover,
 .tag-index a:focus-visible { color: var(--ink); }
@@ -1629,7 +1629,7 @@ main figure img { cursor: zoom-in; }
 .rung > .badge,
 .rung > .rating { grid-row: 1 / span 2; justify-self: start; }
 .rung-desc { margin: 0; }
-.rung-count { margin: 0; font: 11px/16px var(--pixel); color: var(--muted); }
+.rung-count { margin: 0; font: 8px/16px var(--pixel); color: var(--muted); }
 @media (max-width: 34rem) {
   .rung { grid-template-columns: 1fr; }
   .rung > .badge,
@@ -1649,7 +1649,7 @@ main figure img { cursor: zoom-in; }
 .fragment-meta .sky { width: 24px; }
 
 .fragment-subject {
-  font: 11px/14px var(--pixel);
+  font: 8px/14px var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
@@ -1665,7 +1665,7 @@ main figure img { cursor: zoom-in; }
 .essay-title {
   display: block;
   margin-bottom: 6px;
-  font: 400 22px/29px var(--pixel);
+  font: 400 24px/32px var(--pixel);
   color: var(--ink);
   text-decoration: none;
 }
@@ -1709,7 +1709,7 @@ a.badge { text-decoration: none; }
   .canon-cols { grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
 }
 .canon-col { background: var(--smoke); padding: 1rem 1.25rem 0.5rem; }
-.canon-col-head { margin: 0 0 0.5rem; font: 400 11px/16px var(--pixel); color: var(--muted); }
+.canon-col-head { margin: 0 0 0.5rem; font: 400 8px/16px var(--pixel); color: var(--muted); }
 
 .canon-changes { list-style: none; margin: 0; padding: 0; }
 .canon-change { padding: 10px 0; border-bottom: 1px solid var(--edge); }
@@ -1717,13 +1717,13 @@ a.badge { text-decoration: none; }
 .canon-col .essay-list > li:last-child { border-bottom: 0; }
 /* The date as a dateline over the change, not right-aligned beside it the
    way the archive does: a change can be two games long. */
-.canon-change .archive-note { display: block; margin: 0 0 2px; font: 11px/16px var(--pixel); }
+.canon-change .archive-note { display: block; margin: 0 0 2px; font: 8px/16px var(--pixel); }
 .canon-moves {
   display: flex;
   flex-wrap: wrap;
   gap: 0 1rem;
   margin: 0;
-  font: 16.5px/24px var(--pixel);
+  font: 16px/24px var(--pixel);
 }
 .canon-moves a { text-decoration: none; }
 /* In is gold, the canon's own colour; out goes quiet, not red — leaving the
@@ -1735,7 +1735,7 @@ a.badge { text-decoration: none; }
 .canon-moves a:hover,
 .canon-moves a:focus-visible { color: var(--ink); }
 .canon-moves .canon-why { color: var(--accent); }
-.canon-first { margin: 4px 0 0; font: 11px/18px var(--pixel); color: var(--muted); }
+.canon-first { margin: 4px 0 0; font: 8px/18px var(--pixel); color: var(--muted); }
 .canon-first a { color: inherit; text-decoration: none; }
 .canon-first a:hover,
 .canon-first a:focus-visible { color: var(--ink); }
@@ -1783,7 +1783,7 @@ a.badge { text-decoration: none; }
   display: flex;
   gap: 1.25rem;
   flex-wrap: wrap;
-  font: 11px/18px var(--pixel);
+  font: 8px/18px var(--pixel);
   color: var(--muted);
 }
 
@@ -1817,7 +1817,7 @@ a.badge { text-decoration: none; }
   color: var(--muted);
 }
 
-.links-head { font: 11px/1 var(--pixel); color: var(--muted); margin: 0 0 1rem; }
+.links-head { font: 8px/1 var(--pixel); color: var(--muted); margin: 0 0 1rem; }
 
 .links-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
 .links-list > li { display: flex; align-items: center; gap: 1rem; }
@@ -1834,9 +1834,9 @@ a.badge { text-decoration: none; }
    bots skip hidden fields and fill the rest. */
 
 .links-lede span { display: block; }
-.gb-note { font: 11px/15px var(--pixel); color: var(--muted); max-width: var(--read); margin: -0.5rem 0 1.5rem; }
+.gb-note { font: 8px/15px var(--pixel); color: var(--muted); max-width: var(--read); margin: -0.5rem 0 1.5rem; }
 .guestbook-form { display: grid; gap: 1rem; max-width: var(--read); margin: 0 0 2.5rem; }
-.guestbook-form label { display: grid; gap: 6px; font: 11px/1 var(--pixel); color: var(--muted); }
+.guestbook-form label { display: grid; gap: 6px; font: 8px/1 var(--pixel); color: var(--muted); }
 .gb-opt { opacity: 0.7; }
 .guestbook-form input,
 .guestbook-form textarea {
@@ -1850,7 +1850,7 @@ a.badge { text-decoration: none; }
 .guestbook-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
 .guestbook-form button {
   justify-self: start; cursor: pointer;
-  font: 11px/1 var(--pixel); color: var(--night); background: var(--accent);
+  font: 8px/1 var(--pixel); color: var(--night); background: var(--accent);
   border: 1px solid var(--accent); border-radius: 0; padding: 11px 19px;
 }
 .guestbook-form button:hover { background: var(--ink); border-color: var(--ink); }
@@ -1867,7 +1867,7 @@ a.badge { text-decoration: none; }
    prose with a fractional width (76.59px for one entry), so a date set after
    it started on a half pixel and smeared. The row's edge is whole, and so is
    an 11px pixel run's width (2026-10-26). */
-.gb-meta time { margin-left: auto; font: 11px/1 var(--pixel); color: var(--muted); }
+.gb-meta time { margin-left: auto; font: 8px/1 var(--pixel); color: var(--muted); }
 .gb-message { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 .gb-empty { color: var(--muted); }
 
@@ -2052,10 +2052,9 @@ a.sky-cover:hover { border-color: var(--accent); }
 .entry-head .post-list-title,
 .post-head .post-title {
   text-shadow:
-     1px 0 0 currentColor,
-     2px 1px 0 var(--night), -1px  1px 0 var(--night),
-     2px -1px 0 var(--night), -1px -1px 0 var(--night),
-     0 2px 0 var(--night), 1px 2px 0 var(--night);
+     1px 1px 0 var(--night), -1px  1px 0 var(--night),
+     1px -1px 0 var(--night), -1px -1px 0 var(--night),
+     0 2px 0 var(--night);
 }
 
 /* ------------------------------------------------------- the margin column
@@ -2208,7 +2207,7 @@ main {
     background: var(--fill);
     border-top: 2px solid var(--frame);
     border-left: 2px solid var(--frame);
-    font: 11px/14px var(--pixel);
+    font: 8px/14px var(--pixel);
     color: var(--muted);
     pointer-events: none;
   }
@@ -2302,7 +2301,7 @@ main {
     padding: 6px 2px 0;
     border-top: 0;
     background: transparent;
-    font: 16.5px/24px var(--pixel);
+    font: 16px/24px var(--pixel);
     color: var(--muted);
     text-align: left;
   }
@@ -2378,7 +2377,7 @@ main {
   margin: 0;
   padding: 0;
   list-style: none;
-  font: 16.5px/1 var(--pixel);
+  font: 16px/1 var(--pixel);
 }
 
 /* A tab is a radio and its label: the radio is kept for the keyboard (arrow
@@ -2451,7 +2450,7 @@ main {
   margin: 0;
   padding: 13px 18px 12px;
   list-style: none;
-  font: 16.5px/1 var(--pixel);
+  font: 16px/1 var(--pixel);
 }
 .views a {
   display: flex;

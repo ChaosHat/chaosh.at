@@ -20,7 +20,7 @@
 // (aurora.js pixelSheet, the newest post's day), the frame is the day's frame
 // hue like every box on the site, the mark is COMET_MARK at 1× in the top
 // left — its fireball stops just above the label row — and the type is
-// Pixelify Grid at 11px, its native size, with the site's one-pixel night
+// Pixel Operator Tight at 8px, its native size, with the site's one-pixel night
 // outline so it holds on any band. Labels take the day's hue, titles ink.
 //
 // The background is our own raster; satori lays out only the text, resvg
@@ -53,15 +53,15 @@ const FONT_DIR = "og-fonts";
 let fonts = null;
 const loadFonts = () =>
   (fonts ??= [
-    { name: "Pixelify Grid", weight: 400, style: "normal", data: fs.readFileSync(path.join(FONT_DIR, "pixelify-grid-400.ttf")) },
+    { name: "Pixel Operator Tight", weight: 400, style: "normal", data: fs.readFileSync(path.join(FONT_DIR, "pixel-operator-tight-400.ttf")) },
   ]);
 
 const hexRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 const h = (type, style, children, props = {}) => ({ type, props: { style, children, ...props } });
 const span = (text, style) => h("span", style, text);
-// 11px is Pixelify Grid's own pixel: one font pixel per art pixel.
+// 8px is Pixel Operator Tight's own pixel: one font pixel per art pixel.
 const line = (children, height) =>
-  h("div", { display: "flex", alignItems: "center", height, fontFamily: "Pixelify Grid", fontSize: 11, whiteSpace: "nowrap" }, children);
+  h("div", { display: "flex", alignItems: "center", height, fontFamily: "Pixel Operator Tight", fontSize: 8, whiteSpace: "nowrap" }, children);
 const widthOf = async (text) =>
   Number(/width="([\d.]+)"/.exec(await satori(line([span(text, {})], 16), { height: 16, fonts: loadFonts() }))?.[1]);
 
