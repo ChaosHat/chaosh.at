@@ -24,6 +24,20 @@
   src: url("/fonts/pixel-operator-tight-700.woff2") format("woff2");
 }
 
+/* The finer sibling: Pixel Operator Bold, drawn by the same hand on a 16px
+   grid (capitals 9 tall against the main face's 7 at 8px), tightened the
+   same way. Sharp at 16px only, where it sits between the main face's 8 and
+   16. One job: the secondary lines, never mixed with the main face inside a
+   line (2026-10-26; a 1.5x nearest-neighbour 12px cut was tried and read
+   worse). */
+@font-face {
+  font-family: "Pixel Operator Fine";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/pixel-operator-fine-700.woff2") format("woff2");
+}
+
 /* Alegreya Sans, self-hosted on the same terms as the pixel face: one origin, no
    third-party DNS on first paint, and the site's own voice not dependent on
    someone else's CDN. Three static files — the family is not variable, so 400,
@@ -57,6 +71,7 @@
 
 :root {
   --pixel: "Pixel Operator Tight", ui-monospace, monospace;
+  --pixel-fine: "Pixel Operator Fine", var(--pixel);
   /* Named for its ROLE, not its classification — it held `ui-serif, Georgia,
      "Times New Roman", serif` until 2026-09-04, which meant the body copy was
      never one thing: iPhone Safari resolved it to New York, Windows Chrome to
@@ -617,7 +632,7 @@ figure,
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font: 16px/20px var(--pixel);
+  font: 700 16px/20px var(--pixel-fine);
   text-decoration: none;
   color: var(--ink);
 }
@@ -635,7 +650,7 @@ figure,
 .now-item .sky { width: 24px; aspect-ratio: 1; }
 .now-item .mico { flex: none; width: 24px; height: 24px; }
 
-.essay-when { color: var(--muted); font: 16px/1 var(--pixel); white-space: nowrap; }
+.essay-when { color: var(--muted); font: 700 16px/1 var(--pixel-fine); white-space: nowrap; }
 
 .essays-all {
   margin-left: auto;
@@ -919,7 +934,7 @@ figure > img { display: block; width: 100%; }
 figcaption {
   padding: 0.5rem 0.75rem;
   border-top: 2px solid var(--frame);
-  font: 16px/24px var(--pixel);
+  font: 700 16px/20px var(--pixel-fine);
   color: var(--muted);
   text-align: center;
 }
@@ -965,7 +980,7 @@ main figure img { cursor: zoom-in; }
   margin: 0;
   padding: 0.5rem 0.75rem;
   border-top: 2px solid var(--frame);
-  font: 16px/24px var(--pixel);
+  font: 700 16px/20px var(--pixel-fine);
   color: var(--muted);
   text-align: center;
 }
@@ -2301,7 +2316,7 @@ main {
     padding: 6px 2px 0;
     border-top: 0;
     background: transparent;
-    font: 16px/24px var(--pixel);
+    font: 700 16px/20px var(--pixel-fine);
     color: var(--muted);
     text-align: left;
   }
