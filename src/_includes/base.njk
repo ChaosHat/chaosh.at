@@ -48,6 +48,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="stylesheet" href="/css/style.css">
+    {#- Which window the checked tab shows: one line per medium, generated
+        so a medium added to site.yaml needs no CSS edit. See style.css →
+        "the media nav". -#}
+    <style>{% for m in collections.mediumPages %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:block}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:block}</style>
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
@@ -60,33 +64,80 @@
           CHAOS·HAT with the dot at the word boundary. aria-label carries
           the domain for readers and crawlers. -#}
       <a class="site-title" href="/">{{ wordmark | safe }}</a>
-      {#- Deep thoughts left the row 2026-10-19: the essays panel below is on
-          every page but /essays/ and its "all →" is the same door, so the
-          word was a duplicate (and it wrapped guestbook on phones). If that
-          panel ever goes, the word comes back.
-          Five equal words (2026-09-11). The shelves used to be promoted as the
-          way in, but with one shelf and a home page that already leads
-          everywhere, tiering marked nothing. Archive is not here because the
-          home page ends in "all posts →" — a second door to the same place.
-          Feed lives in the footer: it is the one item that is not a page. -#}
-      <nav class="site-nav">
-        <a href="/shelf/">games</a>
-        <a href="/canon/">canon</a>
+      {#- The site's own pages stay on the logo row, top right, balancing the
+          wordmark (2026-10-25). On a phone they move into an "about" tab at
+          the end of the media row. -#}
+      <nav class="site-nav" aria-label="About this site">
         {% if collections.pages | length %}<a href="/about/">about</a>{% endif %}
         <a href="/links/">links</a>
         <a href="/guestbook/">guestbook</a>
-        {% if collections.featured | length %}<a href="/best/">best of</a>{% endif %}
       </nav>
+
+      {#- Says what the auroras mean. Written in the vault's site.yaml; empty
+          renders nothing rather than a placeholder. Home page only — it is an
+          introduction, and repeating it above every subject page would nag a
+          returning reader. In the header above the media nav since 2026-10-25:
+          between the nav's window and now playing's it read as a leftover
+          strip, and above the menu it reads as the site's tagline. Drop the
+          url test to show it everywhere. Each line of the yaml block becomes
+          its own span so the copy's line breaks survive into HTML. -#}
+      {% if site.intro and page.url == "/" %}<p class="site-intro">{% for line in site.intro.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
+
+      {#- The media nav (2026-10-25): one tab per medium that is switched on in
+          site.yaml and has a subject, games first, and a game window under the
+          open tab holding that medium's views. A view only appears once it has
+          something in it, the same rule as the tabs. The ▶ cursor marks the
+          view you're on. Drawn in style.css → "the media nav".
+
+          A tab opens its window; it doesn't navigate (Hat, 2026-10-25: "Tab
+          opens the window is correct"). Like a game menu, switching tabs shows
+          what's inside, and picking a view is the second press. No script:
+          each tab is a radio and its label, and the checked radio decides which
+          window shows (style.css, plus the per-medium lines in <head>). The
+          page's own medium starts checked: games wherever a page isn't about
+          one medium, the home page included. -#}
+      {%- set onAbout = page.url == "/about/" or page.url == "/links/" or page.url == "/guestbook/" %}
+      {%- set openId = ((medium.id if medium and medium.id) or (subject.medium if subject and subject.medium) or "") | openMedium %}
+      {%- set onView = navView and medium %}
+      {%- if collections.mediumPages | length %}
+      <nav class="media-nav" aria-label="Sections">
+        <ul class="tabs">
+          {%- for m in collections.mediumPages %}
+          <li class="tab m-{{ m.id }}">
+            <input type="radio" name="media-tab" id="mt-{{ m.id }}" class="mt-radio" aria-label="{{ m.label }}"{% if m.id == openId and not onAbout %} checked{% endif %}>
+            <label for="mt-{{ m.id }}" class="tab-label"><span class="tab-in"><span class="mico" aria-hidden="true"></span><span class="tab-word">{{ m.label }}</span></span></label>
+          </li>
+          {%- endfor %}
+          <li class="tab m-about tab-about">
+            <input type="radio" name="media-tab" id="mt-about" class="mt-radio" aria-label="about"{% if onAbout %} checked{% endif %}>
+            <label for="mt-about" class="tab-label"><span class="tab-in"><span class="mico" aria-hidden="true"></span><span class="tab-word">about</span></span></label>
+          </li>
+        </ul>
+        {%- for m in collections.mediumPages %}
+        {%- set u = m.urls %}
+        {%- set here = onView and medium.id == m.id %}
+        <div class="folder win m-{{ m.id }} f-{{ m.id }}{% if loop.first %} sq-tl f-first{% endif %}{% if m.id == openId and not onAbout %} f-default{% endif %}">
+          <ul class="views win-in">
+            {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
+            <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
+            {% if m.featured | length %}<li><a href="{{ u.best }}"{% if here and navView == "best" %} aria-current="page"{% endif %}>best of</a></li>{% endif %}
+            {% if m.essays | length %}<li><a href="{{ u.essays }}"{% if here and navView == "essays" %} aria-current="page"{% endif %}>essays</a></li>{% endif %}
+            {% if m.log | length %}<li><a href="{{ u.log }}"{% if here and navView == "log" %} aria-current="page"{% endif %}>log</a></li>{% endif %}
+          </ul>
+        </div>
+        {%- endfor %}
+        <div class="folder win m-about f-about sq-tr{% if onAbout %} f-default{% endif %}">
+          <ul class="views win-in">
+            {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
+            <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
+            <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
+            <li><a href="/feed.xml">feed</a></li>
+          </ul>
+        </div>
+      </nav>
+      {%- endif %}
     </header>
 
-    {#- Says what the auroras mean. Written in the vault's site.yaml; empty
-        renders nothing rather than a placeholder. Home page only — it is an
-        introduction, and repeating it above every subject page would nag a
-        returning reader. It sits here rather than in index.njk so it stays
-        above Now Playing: what the site is, then what is current. Drop the
-        url test to show it everywhere. Each line of the yaml block becomes
-        its own span so the copy's line breaks survive into HTML. -#}
-    {% if site.intro and page.url == "/" %}<p class="site-intro">{% for line in site.intro.split("\n") %}<span>{{ line }}</span>{% endfor %}</p>{% endif %}
 
     {#- Both strips share one explicit shape — label row, items row — rather
         than trusting flex-wrap to land the label above the items, which it
@@ -98,7 +149,9 @@
     {% set essays = collections.essayPages | sort(true, false, "date") %}
     {% set showEssays = essays | length and page.url != "/essays/" %}
     {% if playing | length or showEssays %}
-    <div class="furniture">
+    {#- A neutral game window since 2026-10-25, not the day's frame: the
+        same chrome as the media nav's folder, in the muted lavender. -#}
+    <div class="furniture win m-neutral"><div class="win-in">
     {% if playing | length %}
     <div class="now">
       <div class="now-head">
@@ -106,7 +159,9 @@
       </div>
       <div class="now-items">
         {% for item in playing %}
-        <a class="now-item" href="/s/{{ item.slug }}/"><span class="sky" style="background-image:url({{ item.chipUrl }})" aria-hidden="true"></span>{{ item.title }}</a>
+        {#- The medium's icon in its colour, not the sky chip: now playing
+            spans media, and the icon says which at a glance. -#}
+        <a class="now-item" href="/s/{{ item.slug }}/"><span class="mico m-{{ item.medium }}" role="img" aria-label="{{ item.medium | mediumNoun }}"></span>{{ item.title }}</a>
         {% endfor %}
       </div>
     </div>
@@ -126,12 +181,12 @@
       </div>
       <div class="now-items">
         {% for e in essays | limit(2) %}
-        <a class="now-item" href="{{ e.url }}">{% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}{{ e.title }}<span class="essay-when">{{ e.date | shortDate }}</span></a>
+        <a class="now-item" href="{{ e.url }}">{% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}<span class="essay-t">{{ e.title }}</span><span class="essay-when">{{ e.date | shortDate }}</span></a>
         {% endfor %}
       </div>
     </div>
     {% endif %}
-    </div>
+    </div></div>
     {% endif %}
 
     <main>

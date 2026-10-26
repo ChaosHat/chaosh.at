@@ -1,0 +1,27 @@
+---
+layout: base.njk
+pagination:
+  data: collections.mediumEssayPages
+  size: 1
+  alias: medium
+  addAllPagesToCollections: false
+navView: essays
+permalink: "{{ medium.urls.essays }}"
+eleventyComputed:
+  title: "Deep Thoughts: {{ medium.label }}"
+---
+{#- One medium's essays (2026-10-25), the essays view in the media nav. An
+    essay files under the medium of its first about: subject. /essays/ stays
+    every essay: it is the door the "latest deep thoughts" panel opens. -#}
+<h1>Deep Thoughts <span class="h1-medium">· {{ medium.label }}</span></h1>
+<p class="tag-index"><a href="/essays/">every essay →</a></p>
+
+<ul class="essay-list">
+  {% for e in medium.essays %}
+  <li>
+    {% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}
+    <a href="{{ e.url }}">{{ e.title }}</a>
+    <span class="archive-note">{{ e.date | readableDate }}</span>
+  </li>
+  {% endfor %}
+</ul>

@@ -31,7 +31,7 @@ eleventyComputed:
             links to /canon/ — the ten, their history, the essays about them
             — rather than to the bare /r/canon/ view. -#}
         {% if subject.canon %}<a class="badge badge-g b-canon" href="/canon/">canon</a>{% endif %}
-        <span class="badge b-{{ subject.status }}">{{ subject.status }}</span>
+        <span class="badge b-{{ subject.status }}">{{ subject.status | statusWord(subject.medium) }}</span>
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A
             canon subject's rung is the gold badge above, not a second chip.

@@ -1,9 +1,16 @@
 ---
 layout: base.njk
 wide: true
-title: The Hat Canon
-description: Ten games that say what I like in games, and a dated record of every time the list has changed.
-permalink: /canon/
+pagination:
+  data: collections.mediumCanonPages
+  size: 1
+  alias: medium
+  addAllPagesToCollections: false
+navView: canon
+permalink: "{{ medium.urls.canon }}"
+eleventyComputed:
+  title: "{% if medium.id == 'games' %}The Hat Canon{% else %}The Hat Canon: {{ medium.label }}{% endif %}"
+  description: "{% if medium.id == 'games' %}Ten games that say what I like in games, and a dated record of every time the list has changed.{% else %}The {{ medium.label }} that say what I like, and a dated record of every time the list has changed.{% endif %}"
 ---
 {#- The canon's own page (2026-10-22): the ten, the record of how the list
     got that way, and the essays about the canon itself. Three sources, all
@@ -11,12 +18,15 @@ permalink: /canon/
     `rating: canon`, history from canon_log.yaml (publish.py appends a line on
     any night the set changes), essays from `about: canon`. Nav word, unlike
     a rung's /r/ view: the ten are the site's business card, and a card you
-    have to know the URL of isn't one. -#}
-{%- set canon = collections.canonPage[0] %}
+    have to know the URL of isn't one.
+
+    One per medium since 2026-10-25 (/canon/ is games, /canon/<medium>/ the
+    rest), built once a medium has a canon member; games always builds. -#}
+{%- set canon = medium.canon %}
 <header class="tag-head canon-head">
   <h1>{{ title }}</h1>
   {% if canon.description %}<p class="tag-desc">{{ canon.description }}</p>{% endif %}
-  <p class="tag-index"><a href="/r/canon/">everything written about the ten →</a></p>
+  {% if medium.id == "games" %}<p class="tag-index"><a href="/r/canon/">everything written about the ten →</a></p>{% endif %}
 </header>
 
 {#- The hero: the ten as shelf cards, gold-framed, five by two where it fits.

@@ -16,11 +16,14 @@
     {% if view.description %}<p class="tag-desc">{{ view.description }}</p>{% endif %}
     {#- A rung is one step of a ladder, and a ladder is only legible whole. -#}
     {% if view.indexUrl %}<p class="tag-index"><a href="{{ view.indexUrl }}">the whole scale →</a></p>{% endif %}
+    {% if view.backUrl %}<p class="tag-index"><a href="{{ view.backUrl }}">{{ view.backLabel }}</a></p>{% endif %}
     {#- Membership IS the definition of the view, so it goes at the top rather
         than being inferred from the timeline below. -#}
     {% if view.members | length %}
     <p class="tag-members">
-      {% for member in view.members %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+      {#- A rung that spans media marks each member's medium (2026-10-25);
+          a one-medium page goes without. -#}
+      {% for member in view.members %}{% if view.mixed %}<span class="mico m-{{ member.medium }}" role="img" aria-label="{{ member.medium | mediumNoun }}"></span> {% endif %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
     </p>
     {% endif %}
   </header>
