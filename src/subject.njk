@@ -26,11 +26,17 @@ eleventyComputed:
         {%- for seg in subject.litDays.segments %}{% if seg.gap %}<span class="gap{% if seg.tail %} tail{% endif %}">{{ seg.gap }}</span>{% else %}{% for d in seg.days %}<span class="{% if d.lit %}on{% endif %}{% if d.today %} today{% endif %}"{% if d.lit %} style="--i:{{ d.i }};--h:{{ d.h }}px"{% endif %} title="{{ d.key }}{% if d.lit %} · {{ d.words }} words{% endif %}"></span>{% endfor %}{% endif %}{% endfor -%}
       </p>
       {% endif %}
+      {#- A non-media subject (mediaKnown, eleventy.config.js) has no status
+          or verdict to show, so both chips go, and the row with them unless
+          it has tags. -#}
+      {%- set isMedium = subject.medium in mediaKnown %}
+      {% if isMedium or subject.tags | length %}
       <p class="subject-meta">
         {#- Canon is the top rung, but it leads the row and goes gold, and it
             links to /canon/ — the ten, their history, the essays about them
             — rather than to the bare /r/canon/ view. -#}
         {% if subject.canon %}<a class="badge badge-g b-canon" href="/canon/">canon</a>{% endif %}
+        {% if isMedium %}
         <span class="badge b-{{ subject.status }}">{{ subject.status | statusWord(subject.medium) }}</span>
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A
@@ -38,6 +44,7 @@ eleventyComputed:
             Unrated renders "pending" here too, unlinked, so a subject page
             never looks like the field was forgotten. -#}
         {% if subject.canon %}{% elif subject.rating %}<a class="rating r-{{ subject.rating.slug }}" href="/r/{{ subject.rating.slug }}/">{{ subject.rating.title }}</a>{% else %}<a class="rating r-pending" href="/r/">pending</a>{% endif %}
+        {% endif %}
         {#- Sidestepping to the franchise or the genre is the natural next move
             for a reader who arrived by following a title, so the tags sit in the
             meta row rather than at the foot of a long timeline. -#}
@@ -47,6 +54,7 @@ eleventyComputed:
         </span>
         {% endif %}
       </p>
+      {% endif %}
       {#- The standing blurb: undated, revisable, the subject's one paragraph
           for when a whole article would be absurd but the page shouldn't read
           as blank. Lives beside the cover, above the header rule. -#}

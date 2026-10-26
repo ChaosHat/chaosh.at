@@ -876,6 +876,11 @@ export default function (eleventyConfig) {
   eleventyConfig.addGlobalData("media", MEDIA);
   const MEDIUM_NOUNS = { games: "game", tabletop: "tabletop game", movies: "movie", shows: "show", books: "book" };
   eleventyConfig.addFilter("mediumNoun", (m) => MEDIUM_NOUNS[m] ?? m);
+  // Every medium there is, switched on or not. A subject whose first category
+  // is none of these (the site's own build log, `category: site`) is not a
+  // thing with a status or a verdict, so its page drops both chips. Not
+  // mediaOn: switching a medium off shouldn't strip its live pages' ratings.
+  eleventyConfig.addGlobalData("mediaKnown", Object.keys(MEDIUM_NOUNS));
   eleventyConfig.addFilter("statusWord", (status, medium) =>
     STATUS_WORDS[medium]?.[status] ?? status);
   // The medium whose tab is open on a page: its own on a medium view or a
@@ -1850,10 +1855,13 @@ export default function (eleventyConfig) {
       const meta = subjects[slug] ?? {};
       const title = meta.title ? escapeHtml(meta.title) : inner;
       const status = meta.status ?? "active";
+      // No status chip on a non-media subject (see mediaKnown).
+      const badge = mediumOf(meta) in MEDIUM_NOUNS
+        ? `<span class="badge b-${status}">${status}</span>` : "";
       const head =
         `<h2 class="frag-head"${attrs}>` +
         `<a class="frag-subject" href="/s/${slug}/">${title}</a>` +
-        `<span class="badge b-${status}">${status}</span>` +
+        badge +
         `</h2>`;
 
       out.push(wrapFragment(skyTag(slug, status), head + rest, coverBox(slug)));
