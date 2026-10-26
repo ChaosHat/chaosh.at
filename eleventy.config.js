@@ -764,13 +764,25 @@ export default function (eleventyConfig) {
     canonProblems.length = 0;
     const all = buildSubjectPages(api);
     const essays = buildEssayList(api).slice().sort((a, b) => b.date - a.date);
-    mediumPagesMemo = MEDIA.map((m) => ({
-      ...m,
-      subjects: all.filter((s) => s.medium === m.id),
-      canon: canonFor(api, m.id),
-      featured: featuredFor(api, m.id),
-      essays: essays.filter((e) => e.medium === m.id),
-    }));
+    mediumPagesMemo = MEDIA.map((m) => {
+      const subjectsHere = all.filter((s) => s.medium === m.id);
+      return {
+        ...m,
+        subjects: subjectsHere,
+        canon: canonFor(api, m.id),
+        featured: featuredFor(api, m.id),
+        essays: essays.filter((e) => e.medium === m.id),
+        // The log (2026-10-25): the dailies filtered to one medium. A day
+        // can cover several media, so it is every ## section about this
+        // medium's subjects rather than whole posts, newest first like the
+        // home page. Same entry shape as a tag or rating view.
+        log: subjectsHere
+          .flatMap((subject) => subject.fragments.map((f) => ({
+            kind: "fragment", date: f.date, url: f.sourceUrl, subject, html: f.html,
+          })))
+          .sort((a, b) => b.date - a.date),
+      };
+    });
     return mediumPagesMemo;
   };
   eleventyConfig.on("eleventy.before", () => { mediumPagesMemo = null; });
@@ -781,6 +793,8 @@ export default function (eleventyConfig) {
     .filter((m) => m.featured.length));
   eleventyConfig.addCollection("mediumEssayPages", (api) => buildMediumPages(api)
     .filter((m) => m.essays.length));
+  eleventyConfig.addCollection("mediumLogPages", (api) => buildMediumPages(api)
+    .filter((m) => m.log.length));
 
   const featuredAll = (api) => {
     const dailies = publishable(api.getFilteredByTag("dailies")).filter(
@@ -852,8 +866,8 @@ export default function (eleventyConfig) {
   // engagement. The word "completed" reads wrong for a film.
   const STATUS_WORDS = { movies: { completed: "watched" } };
   const viewUrls = (m) => m === DEFAULT_MEDIUM
-    ? { canon: "/canon/", shelf: "/shelf/", best: "/best/", essays: `/essays/${m}/` }
-    : { canon: `/canon/${m}/`, shelf: `/shelf/${m}/`, best: `/best/${m}/`, essays: `/essays/${m}/` };
+    ? { canon: "/canon/", shelf: "/shelf/", best: "/best/", essays: `/essays/${m}/`, log: "/log/" }
+    : { canon: `/canon/${m}/`, shelf: `/shelf/${m}/`, best: `/best/${m}/`, essays: `/essays/${m}/`, log: `/log/${m}/` };
   const MEDIA = mediaListed
     .filter((m, i) => mediaListed.indexOf(m) === i && mediumCount.get(m))
     .map((m) => ({ id: m, label: m, icon: `/img/icons/media/${m}.svg`, urls: viewUrls(m) }));

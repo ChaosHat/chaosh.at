@@ -2477,5 +2477,8 @@ main {
   .mt-radio:not(:checked) + .tab-label .tab-word { display: none; }
   .tab-in { padding: 7px; gap: 6px; }
   .mt-radio:checked + .tab-label .tab-in { padding: 8px 9px 12px; }
-  .views { gap: 6px 12px; padding: 10px 12px 9px; }
+  /* Tight enough that all five views fit one line at 390px (2026-10-25,
+     when log made it five). */
+  .views { gap: 6px 6px; padding: 10px 8px 9px; }
+  .views a { gap: 4px; }
 }

@@ -16,6 +16,7 @@
     {% if view.description %}<p class="tag-desc">{{ view.description }}</p>{% endif %}
     {#- A rung is one step of a ladder, and a ladder is only legible whole. -#}
     {% if view.indexUrl %}<p class="tag-index"><a href="{{ view.indexUrl }}">the whole scale →</a></p>{% endif %}
+    {% if view.backUrl %}<p class="tag-index"><a href="{{ view.backUrl }}">{{ view.backLabel }}</a></p>{% endif %}
     {#- Membership IS the definition of the view, so it goes at the top rather
         than being inferred from the timeline below. -#}
     {% if view.members | length %}

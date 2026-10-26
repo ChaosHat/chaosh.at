@@ -122,6 +122,7 @@
             <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
             {% if m.featured | length %}<li><a href="{{ u.best }}"{% if here and navView == "best" %} aria-current="page"{% endif %}>best of</a></li>{% endif %}
             {% if m.essays | length %}<li><a href="{{ u.essays }}"{% if here and navView == "essays" %} aria-current="page"{% endif %}>essays</a></li>{% endif %}
+            {% if m.log | length %}<li><a href="{{ u.log }}"{% if here and navView == "log" %} aria-current="page"{% endif %}>log</a></li>{% endif %}
           </ul>
         </div>
         {%- endfor %}

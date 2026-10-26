@@ -1,0 +1,27 @@
+---
+layout: base.njk
+pagination:
+  data: collections.mediumLogPages
+  size: 1
+  alias: medium
+  addAllPagesToCollections: false
+navView: log
+permalink: "{{ medium.urls.log }}"
+eleventyComputed:
+  title: "Log: {{ medium.label }}"
+---
+{#- A medium's log (2026-10-25): the dailies filtered down to one medium.
+    Hat: "if someone wants to filter the dailies down to that media". A day
+    can be about several media, so this is every ## section about the
+    medium's subjects, newest first, not whole posts. The way back to the
+    whole stream is the wordmark, or "every post →" here (the archive). -#}
+{%- set view = {
+  title: "Log · " + medium.label,
+  description: null,
+  members: [],
+  entries: medium.log,
+  backUrl: "/archive/",
+  backLabel: "every post →"
+} %}
+{%- set emptyLabel = "Nothing written yet." %}
+{% include "view.njk" %}
