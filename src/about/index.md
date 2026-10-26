@@ -9,7 +9,7 @@ I'm {{ age }} years old, also a dad to two beautiful little girls, I like homela
 ## The site
 This site is a place for me to write about games I play, why I like, or don't like them and just try to sit and be reflective and analyze things and why they make me feel that way. And also it's just fun to write, to think, to flex these kinds of creative, analytical, and writing muscles I don't necessarily get to in daily life. 
 
-I like all kinds of games, video, board, ttrpgs, but I mostly expect to write about video ones. I might write about other stuff but that'll be sporadic. 
+I like all kinds of games, video, board, ttrpgs, but I mostly expect to write about video ones. I might write about other stuff but that'll be sporadic. Images are sourced from SteamGrid DB for games, BoardGameGeek for board games, and TMDB for movies/shows.
 
 The idea was to keep a daily running log of thoughts as I played to return to when I was done and ready to write so I wouldn't forget things and then I thought that might be interesting in its own right. So now you can experience the highs and lows, my initial impressions and how they change. My more structured pieces are called Deep Thoughts because ultimately I'm a Jack Handey fan. 
 
