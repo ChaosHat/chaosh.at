@@ -14,6 +14,11 @@ build inputs, like `hues.lock.json`.
 
 (`grid-400.ttf` is the output of `pixelify-grid.py`; see `src/fonts/SUBSET.md`.)
 
+Since 2026-10-26 the pixel face here is `pixel-operator-tight-400.ttf`: the
+unsubset output of `pixel-operator.py` (4 KB stock, nothing to cut). og.js
+sets it at 32px (4× its 8px lattice) and sig.js at 8px. `pixelify-grid-400.ttf`
+is kept for a revert.
+
 The regular and italic faces (`alegreya-sans-400.ttf`, `alegreya-sans-400-italic.ttf`, for sig.js) were not re-cut: it is
 `src/fonts/alegreya-sans-400{,-italic}.woff2` decompressed to TTF with fontTools
 (`f.flavor = None`), so it is the site's own subset byte-for-byte in glyphs.

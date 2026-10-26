@@ -24,7 +24,45 @@ Same for `-Italic.ttf` → `-400-italic.woff2` and `-Bold.ttf` → `-700.woff2`.
 Result: 17.0 / 17.9 / 17.0 KB, 52 KB for all three. For scale, `chrono-trigger.jpg`
 on the front page is 177 KB. Weight was never the constraint here; the covers are.
 
-# Regenerating Pixelify Grid
+# Regenerating Pixel Operator Tight and Fine (the pixel faces, since 2026-10-26)
+
+Source: Pixel Operator by Jayvee Enaguas, CC0 (dafont.com/pixel-operator.font;
+licence as `CC0-pixel-operator.txt`). Unlike stock Pixelify it is already
+drawn on an exact lattice, 100 units a pixel, so nothing is snapped.
+`pixel-operator.py` (repo root) only takes one pixel off every advance (stock
+sets letters two apart, a typewriter; one apart reads as a SNES menu), adds
+← and →, and renames the family.
+
+- **Tight** (`--pixel`): `PixelOperator8.ttf` / `-Bold.ttf`, 8 to the em
+  (UPM 800). Crisp at 8, 16, 24, 32px and nothing else.
+- **Fine** (`--pixel-fine`): `PixelOperator-Bold.ttf`, 16 to the em (UPM
+  1600): the same hand drawn finer, capitals 9 tall against Tight's 7 at 8px.
+  Crisp at 16px only; used there for the secondary lines. (`PixelOperatorHB`
+  differs in 33 glyphs and is indistinguishable at size.)
+
+    python pixel-operator.py PixelOperator8.ttf tight-400.ttf
+    python pixel-operator.py PixelOperator8-Bold.ttf tight-700.ttf
+    python pixel-operator.py PixelOperator-Bold.ttf fine-700.ttf "Pixel Operator Fine"
+
+    pyftsubset tight-400.ttf --unicodes="$RANGES" \
+      --layout-features='kern,liga,clig,calt,ccmp,locl,mark,mkmk' \
+      --flavor=woff2 --no-hinting --desubroutinize \
+      --output-file=pixel-operator-tight-400.woff2
+
+Same for `tight-700` and `fine-700`. Pixel Operator stops at Latin-1: Latin
+Extended-A (ō, ł, ő…) is absent, so those letters fall back to the system
+face. ~4 KB a file.
+
+Why it replaced Pixelify Grid: Pixelify's lattice is 11 to the em, so the
+site's middle tier (nav, panels, captions, lists) sat at 16.5px, 1.5× — off
+the lattice and soft on any 1× screen. An 8 lattice has a crisp middle step
+(16). Pixel Operator 8 was chosen over Tiny5, Silkscreen, Galmuri and ~25
+others on look: it reads as SNES Final Fantasy menu text, which suits the
+game-window nav. The full survey and the sizes tried are in the vault,
+Decisions → chaosh.at.
+
+# Regenerating Pixelify Grid (retired 2026-10-26; files kept for a revert)
+
 
 Source: `ofl/pixelifysans/PixelifySans[wght].ttf` from github.com/google/fonts
 (v1.000; the same file fonts.gstatic.com serves). It goes through

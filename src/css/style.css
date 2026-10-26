@@ -386,12 +386,11 @@ h1, h2, h3 { line-height: 1.25; }
 /* Titles are pixel, on the lattice (2026-10-16): Alegreya titles read as
    incongruous beside pixel chrome once the chrome stopped being caps, and sat
    lighter than the 22px subject heads under them. Alegreya is prose only now.
-   Page titles 33px (3×), list and post titles 22px (2×). Regular, not bold,
-   since 2026-10-19: the 700 doubled every stroke and the titles shouted —
-   but the 400 alone read thin. The face has no weight between, so titles
-   take the pixel-font faux semi-bold: the glyph again one pixel to the
-   right, 2px strokes to 3px. The on-aurora outline below carries the same
-   shift in its own shadow list. */
+   Page titles 32px (4×), list and post titles 24px (3×); subject heads and
+   datelines a step under at 16 (2026-10-26). Regular, not bold: the 700
+   doubled every stroke and the titles shouted (2026-10-19). Pixelify's 400
+   read thin and took a faux semi-bold shadow; Pixel Operator's strokes are
+   already 3px at 24, so the shadow went with Pixelify. */
 h1 { font: 400 32px/40px var(--pixel); }
 h1,
 .post-list-title,
@@ -699,7 +698,7 @@ figure,
 /* Status icons (2026-10-19), in place of the 4px dot: pixelarticons (MIT,
    src/img/icons/LICENSE-pixelarticons.txt), drawn on a 12px lattice with
    2-unit pixels in a 24 viewBox, so at 12px one icon pixel is one device
-   pixel, the 11px text's own scale. A mask in currentColor, so each takes
+   pixel, the 8px text's own scale. A mask in currentColor, so each takes
    its status hue. Night-sky where it fits without forcing: active is the
    sun (what's burning now), completed the moon (the completed sky's own),
    shelved a cloud (still up there, hidden for now). Backlog, incomplete and
@@ -1892,25 +1891,25 @@ a.badge { text-decoration: none; }
 /* The date sits at the row's right edge, not after the name: the name is
    prose with a fractional width (76.59px for one entry), so a date set after
    it started on a half pixel and smeared. The row's edge is whole, and so is
-   an 11px pixel run's width (2026-10-26). */
+   a pixel run's width at 8px (2026-10-26). */
 .gb-meta time { margin-left: auto; font: 8px/1 var(--pixel); color: var(--muted); }
 .gb-message { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 .gb-empty { color: var(--muted); }
 
-/* The pixel face is set in px, never rem, and only at 11px or 22px: its
-   lattice is 11 pixels to the em, so any other size puts stems between
-   device pixels. Line heights are whole px for the same reason — 1.5 of 11
-   is 16.5, and a half-pixel baseline blurs the second line of every wrap.
-   Chrome, the footer and pagination are all 11px; the old 10px and 8px
-   tiers fold into it, since 10px of an 11px lattice is no longer a pixel
-   font. Datelines and subject heads are 22px, the lattice at 2×.
-   One deliberate exception: the nav, the now-playing / deep-thoughts panels,
-   figure captions and the archive and essay lists are 16.5px (1.5×), because
-   11 read too small there and 22 too loud (Hat, 2026-10-16). Off the lattice at 1×, so a font pixel
-   straddles device pixels there; on a 2× screen it is exactly 3 device
-   pixels and crisp. If those ever look fuzzy, this is why.
+/* The pixel faces are set in px, never rem, and only on their lattices
+   (2026-10-26, Pixel Operator; Pixelify Grid's 11/22 before it). The main
+   face (--pixel) is 8 to the em: 8px for chrome, footer, chips and
+   pagination, 16 for the nav, panel labels, lists, datelines and subject
+   heads, 24 for list and post titles, 32 for page titles. The finer face
+   (--pixel-fine, Fine Bold) is 16 to the em and only ever 16px: the
+   now-playing and deep-thoughts rows and every caption, its one job, and
+   never inside a line of the main face. Every other size puts stems between
+   device pixels — Pixelify's 16.5 tier did, and that blur is why the face
+   changed. A size that "should" exist between 8 and 16 doesn't: 12px is
+   1.5 px a pixel and smears at 1×; a 1.5× nearest-neighbour cut was built
+   and read worse. Line heights are whole px for the same reason.
    Spacing is whole px too (2026-10-19): fractional rem in gaps and padding
-   put 11px text on half pixels even though the size was on the lattice —
+   put pixel text on half pixels even though the size was on the lattice —
    #metroidvania on a subject page blurred because the cover gap was 22.4px
    and chip padding 7.2px. Every fractional rem in spacing and widths was
    rounded to px; keep new ones whole.
@@ -2302,12 +2301,10 @@ main {
    shots sidenotes, and the framed cover anchors the left again. Tiles below
    58rem keep the full frame: it's what makes them read as tappable.
    The caption was a 14px prose italic until 2026-10-26: on a 1× screen its
-   hairlines went soft in --muted on night (Hat: "kind of soft"). Now the
-   pixel face at 16.5px like every other caption — off the lattice, so a
-   touch uneven at 1×, still far crisper than the italic; 11 was too small
-   and 22 fit three words to a line in this column. A re-gridded base (12,
-   say) buys nothing: crisp sizes are the art at 1×, 2×, 3× whatever the em
-   is called. A crisp middle size would take a second, finer pixel face.
+   hairlines went soft in --muted on night (Hat: "kind of soft"). Briefly
+   Pixelify at 16.5, then (same day) the finer pixel face, Fine Bold at
+   16/20: crisp, and narrow enough for this column, where the main face at
+   16 fit three words a line and at 8 was too faint.
    Mocked and rejected the same day, on Hat's 2560 screen: a type step to
    20px for big screens (too big); text | media in two columns with the
    cover on top of the media (ugly, and a spilled image pushed the next
