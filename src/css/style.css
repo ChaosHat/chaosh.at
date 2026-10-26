@@ -1073,7 +1073,7 @@ main figure img { cursor: zoom-in; }
    into every heading, where it would collide with the active badge. */
 .frag-subject {
   padding-bottom: 2px;
-  font: 400 24px/32px var(--pixel);
+  font: 400 16px/24px var(--pixel); /* under the 24px post title, not level with it (2026-10-26) */
   text-decoration: none;
   color: var(--ink);
   border-bottom: 1px solid var(--muted);

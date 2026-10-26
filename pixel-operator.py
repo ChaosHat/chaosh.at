@@ -11,6 +11,7 @@ Family is renamed "Pixel Operator Tight" so it can't be confused with stock.
 
     python pixel-operator.py PixelOperator8.ttf tight-400.ttf
     python pixel-operator.py PixelOperator8-Bold.ttf tight-700.ttf
+    python pixel-operator.py PixelOperator.ttf fine-400.ttf "Pixel Operator Fine"
 """
 import re
 import sys
@@ -19,6 +20,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 U = 100
 FAMILY = "Pixel Operator Tight"
+FINE = "Pixel Operator Fine"  # the 16px-grid sibling: same hand, more detail
 
 ADD = {
     "arrowright": (0x2192, ["..#..", "...#.", "#####", "...#.", "..#.."]),
@@ -36,7 +38,7 @@ def bitmap(rows, bold=False):
             pen.closePath()
     return pen.glyph()
 
-def build(src, dst):
+def build(src, dst, family=FAMILY):
     f = TTFont(src)
     bold = f["OS/2"].usWeightClass >= 600
     order = f.getGlyphOrder()
@@ -60,12 +62,12 @@ def build(src, dst):
     style = "Bold" if bold else "Regular"
     for rec in f["name"].names:
         if rec.nameID in (1, 16):
-            rec.string = FAMILY
+            rec.string = family
         elif rec.nameID == 4:
-            rec.string = f"{FAMILY} {style}" if bold else FAMILY
+            rec.string = f"{family} {style}" if bold else family
         elif rec.nameID == 6:
-            rec.string = FAMILY.replace(" ", "") + "-" + style
+            rec.string = family.replace(" ", "") + "-" + style
     f.save(dst)
 
 if __name__ == "__main__":
-    build(sys.argv[1], sys.argv[2])
+    build(sys.argv[1], sys.argv[2], *sys.argv[3:4])
