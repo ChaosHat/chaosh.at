@@ -1266,6 +1266,17 @@ main figure img { cursor: zoom-in; }
 .essay-list .sky { width: 24px; }
 .essay-list a { font: 16px/24px var(--pixel); text-decoration: none; }
 
+/* On a phone the date takes its own line under the title (2026-10-26). In
+   Pixel Operator "25 October 2026" is 166px at 16, and beside it a title
+   got a third of the row and wrapped to five lines. */
+@media (max-width: 34rem) {
+  .archive-list > li,
+  .essay-list > li { flex-wrap: wrap; row-gap: 2px; }
+  .archive-note { flex-basis: 100%; margin-left: 0; }
+  .essay-list .archive-note { padding-left: calc(24px + 0.75rem); }
+  .essay-list a { flex: 1 1 0; min-width: 0; }
+}
+
 .pagination {
   display: flex;
   align-items: baseline;
@@ -2530,8 +2541,10 @@ main {
   .mt-radio:not(:checked) + .tab-label .tab-word { display: none; }
   .tab-in { padding: 7px; gap: 6px; }
   .mt-radio:checked + .tab-label .tab-in { padding: 8px 9px 12px; }
-  /* Tight enough that all five views fit one line at 390px (2026-10-25,
-     when log made it five). */
+  /* Tight enough that all five views fit one line at 390px in Pixelify
+     (2026-10-25, when log made it five). Pixel Operator is wider, 396px
+     against ~324, so since 2026-10-26 they wrap to two rows — a menu
+     window's grid, kept over shrinking the nav or scrolling it. */
   .views { gap: 6px 6px; padding: 10px 8px 9px; }
   .views a { gap: 4px; }
 }
