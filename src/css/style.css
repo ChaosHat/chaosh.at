@@ -2269,10 +2269,16 @@ main {
    as a second heavy box beside the prose — framed pictures over filled
    caption cells — and the page felt lopsided toward it while the art column
    on the left sat mostly empty under its cover. A 1px --dim line round the
-   picture and the caption as a small muted italic line under it (the prose
-   face, which has an italic; the pixel cell's face doesn't) make the shots
-   sidenotes, and the framed cover anchors the left again. Tiles below 58rem
-   keep the full frame: it's what makes them read as tappable.
+   picture and the caption as a plain muted line under it, no cell, make the
+   shots sidenotes, and the framed cover anchors the left again. Tiles below
+   58rem keep the full frame: it's what makes them read as tappable.
+   The caption was a 14px prose italic until 2026-10-26: on a 1× screen its
+   hairlines went soft in --muted on night (Hat: "kind of soft"). Now the
+   pixel face at 16.5px like every other caption — off the lattice, so a
+   touch uneven at 1×, still far crisper than the italic; 11 was too small
+   and 22 fit three words to a line in this column. A re-gridded base (12,
+   say) buys nothing: crisp sizes are the art at 1×, 2×, 3× whatever the em
+   is called. A crisp middle size would take a second, finer pixel face.
    Mocked and rejected the same day, on Hat's 2560 screen: a type step to
    20px for big screens (too big); text | media in two columns with the
    cover on top of the media (ugly, and a spilled image pushed the next
@@ -2292,7 +2298,7 @@ main {
     padding: 6px 2px 0;
     border-top: 0;
     background: transparent;
-    font: italic 0.875rem/1.4 var(--prose);
+    font: 16.5px/24px var(--pixel);
     color: var(--muted);
     text-align: left;
   }
