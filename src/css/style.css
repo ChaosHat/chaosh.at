@@ -1863,7 +1863,11 @@ a.badge { text-decoration: none; }
 .gb-name { color: var(--ink); font-weight: 700; }
 .gb-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--edge); }
 .gb-name a:hover { color: var(--accent); border-color: var(--accent); }
-.gb-meta time { font: 11px/1 var(--pixel); color: var(--muted); }
+/* The date sits at the row's right edge, not after the name: the name is
+   prose with a fractional width (76.59px for one entry), so a date set after
+   it started on a half pixel and smeared. The row's edge is whole, and so is
+   an 11px pixel run's width (2026-10-26). */
+.gb-meta time { margin-left: auto; font: 11px/1 var(--pixel); color: var(--muted); }
 .gb-message { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 .gb-empty { color: var(--muted); }
 
