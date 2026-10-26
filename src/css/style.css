@@ -820,7 +820,7 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 .post-list-subdate {
   display: block;
   margin: 0;
-  font: 24px/32px var(--pixel);
+  font: 16px/24px var(--pixel); /* a step under the 24px title (2026-10-26) */
   color: var(--muted);
   text-decoration: none;
 }
@@ -1101,8 +1101,8 @@ main figure img { cursor: zoom-in; }
 
 .post-head { margin-bottom: 2rem; }
 .post-title { margin: 0 0 0.5rem; font: 400 32px/40px var(--pixel); }
-.post-date { margin: 0; font: 400 24px/32px var(--pixel); }
-.post-subdate { margin: 0; font: 24px/32px var(--pixel); color: var(--muted); }
+.post-date { margin: 0; font: 400 16px/24px var(--pixel); }
+.post-subdate { margin: 0; font: 16px/24px var(--pixel); color: var(--muted); }
 
 .post-tags {
   margin-top: 2.5rem;
@@ -1349,14 +1349,14 @@ main figure img { cursor: zoom-in; }
 /* Centring an odd-width label in an even-width cell puts the pixel face on a
    half pixel. These are the words that come out odd (icon + gap is 16px, so
    only the word's own width decides); a 1px pad moves them back onto the
-   grid. Measured 2026-10-19 — if a rating's title changes, re-measure:
-   text x % 1 on every .cell, shelf page, any width. */
+   grid. Re-measured 2026-10-26 for Pixel Operator Tight: the odd words are
+   active (33px), completed (53; "watched" 43 shares its class) and
+   incomplete (57); every rating word is even, and "*" adds 6. If a status
+   or rating word changes, sum its advances in the font (100 units a pixel)
+   or measure text x % 1 on every .cell, shelf page, any width. */
+.cell.b-active,
 .cell.b-completed,
-.cell.b-incomplete,
-.cell.b-canon,
-.cell.r-disliked,
-.cell.r-liked:not(.partial),
-.cell.r-loved.partial { padding-left: 8px; } /* the chips pad 7px each side */
+.cell.b-incomplete { padding-left: 8px; } /* the chips pad 7px each side */
 
 .shelf-caption { display: block; margin: 9px 0 0; font: 8px/16px var(--pixel); }
 
