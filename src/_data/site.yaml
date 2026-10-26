@@ -2,10 +2,18 @@ title: chaosh.at
 url: https://chaosh.at
 author: Hat
 description: Games, books, shows, and whatever else.
+# The media the site shows, in tab order: the off switch. A medium also needs at
+# least one subject (its first category) before its tab appears. Dropping one
+# hides its tab, its canon/shelf/best-of pages and its now-playing entries;
+# its subject pages and posts stay up. Manual.md → Media.
+media:
+  - games
+  - tabletop
+  - movies
 bluesky: chaosh.at
 fediverse: https://social.chaosh.at/@hat
 intro: |-
-  When the sky is excited, it writes an aurora for all to see. When I'm excited, I write about games on a blog.
+  When the sky is excited, it writes an aurora for all to see. When I'm excited, I write about my media consumption on a blog.
   Same thing.
 guestbook: |-
   Please, write me, say hi, give me feedback, tell me what you think about a post, or recommend me some things to play or do!

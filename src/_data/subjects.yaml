@@ -1151,10 +1151,479 @@ zelda-twilight-princess:
     - twilight princess
     - tp
     - zelda twilight princess
+android-netrunner:
+  title: 'Android: Netrunner'
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - 'android: netrunner'
+    - android netrunner
+    - netrunner
+azul:
+  title: Azul
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - azul
+concordia:
+  title: Concordia
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - concordia
+dune-imperium-uprising:
+  title: 'Dune: Imperium – Uprising'
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - 'dune: imperium – uprising'
+    - dune imperium uprising
+    - 'dune: imperium'
+    - dune imperium
 flamecraft-duals:
   title: Flamecraft Duals
   category:
-    - boardgames
+    - tabletop
   status: owned
   aliases:
     - flamecraft duals
+forest-shuffle:
+  title: Forest Shuffle
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - forest shuffle
+fromage:
+  title: Fromage
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - fromage
+heat-pedal-to-the-metal:
+  title: 'Heat: Pedal to the Metal'
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - 'heat: pedal to the metal'
+    - heat pedal to the metal
+    - heat
+hot-streak:
+  title: Hot Streak
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - hot streak
+keyflower:
+  title: Keyflower
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - keyflower
+rokoko:
+  title: Rokoko
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - rokoko
+roll-for-the-galaxy:
+  title: Roll for the Galaxy
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - roll for the galaxy
+    - rftg
+the-white-castle:
+  title: The White Castle
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - the white castle
+    - white castle
+ticket-to-ride:
+  title: Ticket to Ride
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - ticket to ride
+    - ttr
+tzolkin:
+  title: Tzolk'in
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - tzolk'in
+    - tzolkin
+wingspan:
+  title: Wingspan
+  category:
+    - tabletop
+  status: owned
+  aliases:
+    - wingspan
+alien:
+  title: Alien
+  category:
+    - movies
+  status: completed
+  aliases:
+    - alien
+aliens:
+  title: Aliens
+  category:
+    - movies
+  status: completed
+  aliases:
+    - aliens
+batman-begins:
+  title: Batman Begins
+  category:
+    - movies
+  status: completed
+  aliases:
+    - batman begins
+blade-runner-2049:
+  title: Blade Runner 2049
+  category:
+    - movies
+  status: completed
+  aliases:
+    - blade runner 2049
+    - br2049
+dune-part-one:
+  title: 'Dune: Part One'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'dune: part one'
+    - dune part one
+    - dune part 1
+dune-part-two:
+  title: 'Dune: Part Two'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'dune: part two'
+    - dune part two
+    - dune part 2
+everything-everywhere-all-at-once:
+  title: Everything Everywhere All at Once
+  category:
+    - movies
+  status: completed
+  aliases:
+    - everything everywhere all at once
+    - eeaao
+forgetting-sarah-marshall:
+  title: Forgetting Sarah Marshall
+  category:
+    - movies
+  status: completed
+  aliases:
+    - forgetting sarah marshall
+hot-rod:
+  title: Hot Rod
+  category:
+    - movies
+  status: completed
+  aliases:
+    - hot rod
+i-love-you-man:
+  title: I Love You, Man
+  category:
+    - movies
+  status: completed
+  aliases:
+    - i love you, man
+    - i love you man
+inception:
+  title: Inception
+  category:
+    - movies
+  status: completed
+  aliases:
+    - inception
+mad-max-fury-road:
+  title: 'Mad Max: Fury Road'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mad max: fury road'
+    - mad max fury road
+    - fury road
+mission-impossible:
+  title: 'Mission: Impossible'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible'
+    - mission impossible
+mission-impossible-2:
+  title: 'Mission: Impossible 2'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible 2'
+    - mission impossible 2
+    - mi2
+mission-impossible-dead-reckoning:
+  title: 'Mission: Impossible – Dead Reckoning Part One'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible – dead reckoning part one'
+    - dead reckoning
+mission-impossible-fallout:
+  title: 'Mission: Impossible – Fallout'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible – fallout'
+    - mission impossible fallout
+mission-impossible-ghost-protocol:
+  title: 'Mission: Impossible – Ghost Protocol'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible – ghost protocol'
+    - ghost protocol
+mission-impossible-iii:
+  title: 'Mission: Impossible III'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible iii'
+    - mission impossible iii
+    - mission impossible 3
+    - mi3
+mission-impossible-rogue-nation:
+  title: 'Mission: Impossible – Rogue Nation'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible – rogue nation'
+    - rogue nation
+mission-impossible-the-final-reckoning:
+  title: 'Mission: Impossible – The Final Reckoning'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'mission: impossible – the final reckoning'
+    - the final reckoning
+    - final reckoning
+office-space:
+  title: Office Space
+  category:
+    - movies
+  status: completed
+  aliases:
+    - office space
+project-hail-mary:
+  title: Project Hail Mary
+  category:
+    - movies
+  status: completed
+  aliases:
+    - project hail mary
+    - phm
+raiders-of-the-lost-ark:
+  title: Raiders of the Lost Ark
+  category:
+    - movies
+  status: completed
+  aliases:
+    - raiders of the lost ark
+    - raiders
+scott-pilgrim-vs-the-world:
+  title: Scott Pilgrim vs. the World
+  category:
+    - movies
+  status: completed
+  aliases:
+    - scott pilgrim vs. the world
+    - scott pilgrim vs the world
+    - scott pilgrim
+star-wars-a-new-hope:
+  title: 'Star Wars: A New Hope'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - a new hope
+    - 'star wars: a new hope'
+    - star wars episode iv
+    - episode iv
+star-wars-attack-of-the-clones:
+  title: 'Star Wars: Attack of the Clones'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - attack of the clones
+    - episode ii
+star-wars-return-of-the-jedi:
+  title: 'Star Wars: Return of the Jedi'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - return of the jedi
+    - rotj
+    - episode vi
+star-wars-revenge-of-the-sith:
+  title: 'Star Wars: Revenge of the Sith'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - revenge of the sith
+    - episode iii
+star-wars-the-empire-strikes-back:
+  title: 'Star Wars: The Empire Strikes Back'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the empire strikes back
+    - empire strikes back
+    - esb
+    - episode v
+star-wars-the-force-awakens:
+  title: 'Star Wars: The Force Awakens'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the force awakens
+    - force awakens
+    - episode vii
+star-wars-the-last-jedi:
+  title: 'Star Wars: The Last Jedi'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the last jedi
+    - last jedi
+    - episode viii
+star-wars-the-phantom-menace:
+  title: 'Star Wars: The Phantom Menace'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the phantom menace
+    - phantom menace
+    - episode i
+star-wars-the-rise-of-skywalker:
+  title: 'Star Wars: The Rise of Skywalker'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the rise of skywalker
+    - rise of skywalker
+    - episode ix
+the-dark-knight:
+  title: The Dark Knight
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the dark knight
+    - dark knight
+the-dark-knight-rises:
+  title: The Dark Knight Rises
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the dark knight rises
+    - dark knight rises
+the-fellowship-of-the-ring:
+  title: 'The Lord of the Rings: The Fellowship of the Ring'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the fellowship of the ring
+    - fellowship of the ring
+    - fotr
+the-invite:
+  title: The Invite
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the invite
+the-martian:
+  title: The Martian
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the martian
+the-return-of-the-king:
+  title: 'The Lord of the Rings: The Return of the King'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the return of the king
+    - return of the king
+    - rotk
+the-two-towers:
+  title: 'The Lord of the Rings: The Two Towers'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - the two towers
+    - two towers
+top-gun-maverick:
+  title: 'Top Gun: Maverick'
+  category:
+    - movies
+  status: completed
+  aliases:
+    - 'top gun: maverick'
+    - top gun maverick
+waynes-world:
+  title: Wayne's World
+  category:
+    - movies
+  status: completed
+  aliases:
+    - wayne's world
+    - waynes world
+you-can-see-everything:
+  title: You Can See Everything
+  category:
+    - movies
+  status: completed
+  aliases:
+    - ycse
