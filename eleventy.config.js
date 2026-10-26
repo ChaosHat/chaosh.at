@@ -582,10 +582,20 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
 
   // Now Playing is derived, never curated — it is the same `status: active`
-  // that groups the shelves, so the two cannot drift apart.
-  eleventyConfig.addFilter("nowPlaying", (subjects) =>
-    (subjects ?? []).filter((s) => s.status === "active"),
-  );
+  // that groups the shelves, so the two cannot drift apart. It spans every
+  // medium that is switched on. A movie has no `active` (it is watched in an
+  // evening), so the one movie that qualifies is the most recently written
+  // about, while that writing is under two weeks old.
+  const MOVIE_NOW_DAYS = 14;
+  eleventyConfig.addFilter("nowPlaying", (subjects) => {
+    const on = (subjects ?? []).filter((s) => mediaOn.has(s.medium));
+    const active = on.filter((s) => s.medium !== "movies" && s.status === "active");
+    const since = Date.now() - MOVIE_NOW_DAYS * 86400000;
+    const movie = on
+      .filter((s) => s.medium === "movies" && s.lastWrote && s.lastWrote >= since)
+      .sort((a, b) => b.lastWrote - a.lastWrote)[0];
+    return movie ? [...active, movie] : active;
+  });
 
   // Shelf order: what he's on now first, then what's queued up, then
   // finished, then owned board games, then the two kinds of stopped (paused
@@ -721,7 +731,58 @@ export default function (eleventyConfig) {
 
   // "Best of" is zero-length until Hat marks a post `featured: true`. Supporting
   // the flag now costs nothing; the page and its nav link stay hidden until then.
-  eleventyConfig.addCollection("featured", (api) => {
+  // A featured post's media: an essay's own; a daily's are those of the
+  // subjects its ## headings file to (a day can be about two media), games
+  // when it files to none.
+  const featuredFor = (api, medium) => {
+    const postMedia = new Map();
+    for (const s of buildSubjectPages(api)) {
+      for (const f of s.fragments) {
+        if (!postMedia.has(f.sourceUrl)) postMedia.set(f.sourceUrl, new Set());
+        postMedia.get(f.sourceUrl).add(s.medium);
+      }
+    }
+    const essayMedium = new Map(buildEssayList(api).map((e) => [e.url, e.medium]));
+    return featuredAll(api).filter((p) => {
+      if (essayMedium.has(p.url)) return essayMedium.get(p.url) === medium;
+      const media = postMedia.get(p.url);
+      return media?.size ? media.has(medium) : medium === DEFAULT_MEDIUM;
+    });
+  };
+
+  // Every medium's views in one place: a page per medium per view, each
+  // template paginating over this. Only media that are switched on and have
+  // a subject (MEDIA) get pages.
+  //
+  // Memoised like the fan-out, and the view collections below are slices of
+  // it: a view with nothing in it gets no page (a computed `false` permalink
+  // does not skip a paginated page, so the skipping happens here). Games'
+  // canon always builds: /canon/ is a nav word and a business card.
+  let mediumPagesMemo = null;
+  const buildMediumPages = (api) => {
+    if (mediumPagesMemo) return mediumPagesMemo;
+    canonProblems.length = 0;
+    const all = buildSubjectPages(api);
+    const essays = buildEssayList(api).slice().sort((a, b) => b.date - a.date);
+    mediumPagesMemo = MEDIA.map((m) => ({
+      ...m,
+      subjects: all.filter((s) => s.medium === m.id),
+      canon: canonFor(api, m.id),
+      featured: featuredFor(api, m.id),
+      essays: essays.filter((e) => e.medium === m.id),
+    }));
+    return mediumPagesMemo;
+  };
+  eleventyConfig.on("eleventy.before", () => { mediumPagesMemo = null; });
+  eleventyConfig.addCollection("mediumPages", buildMediumPages);
+  eleventyConfig.addCollection("mediumCanonPages", (api) => buildMediumPages(api)
+    .filter((m) => m.id === DEFAULT_MEDIUM || m.canon.members.length));
+  eleventyConfig.addCollection("mediumBestPages", (api) => buildMediumPages(api)
+    .filter((m) => m.featured.length));
+  eleventyConfig.addCollection("mediumEssayPages", (api) => buildMediumPages(api)
+    .filter((m) => m.essays.length));
+
+  const featuredAll = (api) => {
     const dailies = publishable(api.getFilteredByTag("dailies")).filter(
       (p) => p.data.featured === true,
     );
@@ -734,7 +795,8 @@ export default function (eleventyConfig) {
       .map((e) => ({ url: e.url, date: e.date, data: { title: e.title } }));
 
     return [...dailies, ...essays].sort((a, b) => b.date - a.date);
-  });
+  };
+  eleventyConfig.addCollection("featured", featuredAll);
 
   // ---------------------------------------------------------------- fan-out
   //
@@ -747,6 +809,64 @@ export default function (eleventyConfig) {
   const subjects = fs.existsSync(subjectsFile)
     ? parseYaml(fs.readFileSync(subjectsFile, "utf8")) || {}
     : {};
+
+  // ---------------------------------------------------------------- media
+  //
+  // The site is multi-medium since 2026-10-25, and games stay first. A
+  // subject's medium is its FIRST category; each medium gets its own tab, its
+  // own canon, shelf, best-of and essays views, and its own slice of
+  // canon_log.yaml. Mirrors medium_of() in the vault's chaosh_subjects.py —
+  // if one changes, change both.
+  //
+  // Which media show, and in what order, is `media:` in site.yaml: the off
+  // switch. A medium also needs at least one subject before its tab appears,
+  // so a listed medium with nothing in it shows nothing. Dropping a medium
+  // hides its tab, its views and its now-playing entries; its subject pages
+  // and the posts that mention it stay up, because subject URLs are flat.
+  //
+  // Games keep the bare URLs (/canon/, /shelf/, /best/); every other medium
+  // nests under the view (/canon/movies/), because the view carries the
+  // medium. Essays are the exception: /essays/ is every essay (the panel's
+  // "all →"), so each medium's slice lives at /essays/<medium>/, games too.
+  const DEFAULT_MEDIUM = "games";
+  // `boardgames` is renamed `tabletop` in the blurbs on ship day.
+  const MEDIUM_ALIASES = { boardgames: "tabletop" };
+  const mediumOf = (meta) => {
+    const first = [].concat(meta?.category ?? [])[0];
+    const m = first ? String(first) : DEFAULT_MEDIUM;
+    return MEDIUM_ALIASES[m] ?? m;
+  };
+  const siteFile = path.join("src", "_data", "site.yaml");
+  const siteData = fs.existsSync(siteFile)
+    ? parseYaml(fs.readFileSync(siteFile, "utf8")) || {}
+    : {};
+  const mediaListed = Array.isArray(siteData.media) && siteData.media.length
+    ? siteData.media.map(String)
+    : [DEFAULT_MEDIUM];
+  const mediumCount = new Map();
+  for (const meta of Object.values(subjects)) {
+    const m = mediumOf(meta);
+    mediumCount.set(m, (mediumCount.get(m) ?? 0) + 1);
+  }
+  // Movies are watched or not yet; the other statuses are about long
+  // engagement. The word "completed" reads wrong for a film.
+  const STATUS_WORDS = { movies: { completed: "watched" } };
+  const viewUrls = (m) => m === DEFAULT_MEDIUM
+    ? { canon: "/canon/", shelf: "/shelf/", best: "/best/", essays: `/essays/${m}/` }
+    : { canon: `/canon/${m}/`, shelf: `/shelf/${m}/`, best: `/best/${m}/`, essays: `/essays/${m}/` };
+  const MEDIA = mediaListed
+    .filter((m, i) => mediaListed.indexOf(m) === i && mediumCount.get(m))
+    .map((m) => ({ id: m, label: m, icon: `/img/icons/media/${m}.svg`, urls: viewUrls(m) }));
+  const mediaOn = new Set(MEDIA.map((m) => m.id));
+  eleventyConfig.addGlobalData("media", MEDIA);
+  const MEDIUM_NOUNS = { games: "game", tabletop: "tabletop game", movies: "movie", shows: "show", books: "book" };
+  eleventyConfig.addFilter("mediumNoun", (m) => MEDIUM_NOUNS[m] ?? m);
+  eleventyConfig.addFilter("statusWord", (status, medium) =>
+    STATUS_WORDS[medium]?.[status] ?? status);
+  // The medium whose tab is open on a page: its own on a medium view or a
+  // subject page, games everywhere else (the home page included).
+  eleventyConfig.addFilter("openMedium", (medium) =>
+    mediaOn.has(medium) ? medium : (MEDIA[0]?.id ?? DEFAULT_MEDIUM));
 
   // Tags are a curated VIEW over several subjects — /t/final-fantasy/ gathers
   // every fragment ever written about any Final Fantasy game onto one page.
@@ -804,7 +924,8 @@ export default function (eleventyConfig) {
   // has no partial verdict. (`favorites` until 2026-09-04: the roster
   // rotates, and "favorite" claimed a permanence it does not deliver.)
   const CANON = "canon";
-  const canonSlugs = new Set(
+  // Every medium's canon; canonFor() narrows it to one.
+  const canonSlugsAll = new Set(
     Object.entries(subjects)
       .filter(([, meta]) => meta?.rating === CANON)
       .map(([slug]) => slug),
@@ -923,7 +1044,7 @@ export default function (eleventyConfig) {
   const registerSky = (slug, meta, tier) => {
     const hue = subjectHues.get(slug) ?? 0;
     const status = meta?.status ?? "active";
-    const opts = { canon: canonSlugs.has(slug) };
+    const opts = { canon: canonSlugsAll.has(slug) };
     // Pixel art since 2026-10-19 (aurora.js pixelSubject): PNGs pre-scaled
     // ×5 / ×2, shown at natural size and cropped, never stretched.
     const big = pixelSubject(slug, hue, status, tier, opts);
@@ -1166,8 +1287,9 @@ export default function (eleventyConfig) {
         return {
           slug: s,
           title: meta.title ?? s,
+          medium: mediumOf(meta),
           status: meta.status ?? "active",
-          canon: canonSlugs.has(s),
+          canon: canonSlugsAll.has(s),
           rating: ratingOf(s, meta),
           coverUrl: coverUrls.get(s) ?? null,
           skyUrl: `/img/sky/${s}.png`,
@@ -1219,6 +1341,9 @@ export default function (eleventyConfig) {
           ? e.data.description.trim()
           : null,
         citedSubjects,
+        // The medium whose essays view lists it: the first about: subject's.
+        // An essay citing only tags, or only the canon, files under games.
+        medium: citedSubjects.length ? mediumOf(subjects[citedSubjects[0]]) : DEFAULT_MEDIUM,
         chipUrl: citedSubjects.length
           ? `/img/sky/${citedSubjects[0]}-chip.png`
           : citedTagsDirect.length ? tagChip(citedTagsDirect[0])
@@ -1339,6 +1464,7 @@ export default function (eleventyConfig) {
       return {
         slug,
         ...meta,
+        medium: mediumOf(meta),
         status: meta?.status ?? "active",
         ...art,
         // Both of these exist for the shelf's sort axes. lastWrote is the same
@@ -1352,7 +1478,7 @@ export default function (eleventyConfig) {
           // An essay day is a big day: straight to the ray cap.
           ...essays.map((e) => ({ date: e.date, words: 1000 })),
         ], meta?.status ?? "active"),
-        canon: canonSlugs.has(slug),
+        canon: canonSlugsAll.has(slug),
         // Templates branch on canon first (the gold), then on this, then
         // render "pending". A canon subject's rating is the canon rung.
         rating: ratingOf(slug, meta),
@@ -1476,6 +1602,8 @@ export default function (eleventyConfig) {
         rank: meta?.rank ?? null,
         description: meta?.description ?? null,
         members,
+        // Medium icons show on a rung's cards only when the rung spans media.
+        mixed: new Set(members.map((s) => s.medium)).size > 1,
         entries,
         indexUrl: "/r/",
       };
@@ -1506,7 +1634,10 @@ export default function (eleventyConfig) {
   // Mirrors replay_canon_log() in the vault's chaosh_subjects.py, which
   // decides what gets logged — if one changes, change both. A line that
   // can't apply is reported and skipped, never fatal.
-  const replayCanonLog = (log) => {
+  // One medium's entries only: a line without `medium:` is games, which is
+  // every line from before the multi-medium build.
+  const logMedium = (entry) => String(entry?.medium ?? DEFAULT_MEDIUM);
+  const replayCanonLog = (log, medium = DEFAULT_MEDIUM) => {
     let roster = [];
     const joined = new Map();
     const problems = [];
@@ -1515,6 +1646,7 @@ export default function (eleventyConfig) {
         problems.push(`entry ${i + 1} is not a mapping`);
         return;
       }
+      if (logMedium(entry) !== medium) return;
       const label = entry.date ? String(entry.date instanceof Date
         ? entry.date.toISOString().slice(0, 10) : entry.date) : `entry ${i + 1}`;
       if (!entry.date) problems.push(`entry ${i + 1} has no date`);
@@ -1543,13 +1675,15 @@ export default function (eleventyConfig) {
     return { roster, joined, problems };
   };
 
-  eleventyConfig.addCollection("canonPage", (api) => {
-    canonProblems.length = 0;
+  // One canon per medium (2026-10-25), ten-ish rather than a strict ten.
+  // Called once per medium by the mediumPages collection.
+  const canonFor = (api, medium) => {
     const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
     const essays = buildEssayList(api);
     const essayBySlug = new Map(essays.map((e) => [e.slug, e]));
-    const { roster, joined, problems } = replayCanonLog(canonLog);
-    canonProblems.push(...problems);
+    const { roster, joined, problems } = replayCanonLog(canonLog, medium);
+    canonProblems.push(...problems.map((p) => medium === DEFAULT_MEDIUM ? p : `${medium}: ${p}`));
+    const canonSlugs = new Set([...canonSlugsAll].filter((s) => mediumOf(subjects[s]) === medium));
 
     // Slot order from the log. A canon game the log hasn't caught up with —
     // a swap made today, before the 2am run logs it, or any preview — goes
@@ -1568,7 +1702,8 @@ export default function (eleventyConfig) {
       return { slug: s, title: subjects[s]?.title ?? s, known: Boolean(subjects[s]) };
     };
     const changes = (Array.isArray(canonLog) ? canonLog : [])
-      .filter((e) => e && typeof e === "object" && !Array.isArray(e) && e.date)
+      .filter((e) => e && typeof e === "object" && !Array.isArray(e) && e.date
+        && logMedium(e) === medium)
       .map((e, i) => {
         const ins = slugList(e.in).map(link);
         const outs = slugList(e.out).map(link);
@@ -1591,61 +1726,17 @@ export default function (eleventyConfig) {
       })
       .reverse(); // newest first: a changelog is read from the top
 
-    return [
-      {
-        members,
-        changes,
-        essays: essays.filter((e) => e.aboutCanon).sort((a, b) => b.date - a.date),
-        description: ratings[CANON]?.description ?? null,
-      },
-    ];
-  });
-
-  // One entry per category actually in use. Categories are a soft field, so a
-  // filter chip appears on /shelf/ the moment a subject claims it and
-  // disappears when none do — no separate list to keep in step.
-  // Insertion order IS the chip order — games first because it is what the
-  // site is mostly about. A category with no entry here still gets a chip
-  // (categories are a soft field); it just sorts to the end, alphabetically,
-  // among its own kind.
-  //
-  // The key lives in subjects.yaml; the label is only what the chip says.
-  // Until 2026-09-11 each category was its own page (/shelf/<category>/) and
-  // its own nav link, promoted at 16px; with 110 games to one board game the
-  // second shelf was a nav item leading to a single tile, so the shelves
-  // merged into one page under a "games" nav word and the categories became
-  // a filter beside the sort. The old URLs redirect (redirects.yaml). Labels
-  // are lowercase to match the sort chips they sit beside, and "video" rather
-  // than "games" because the page itself is called Games.
-  const SHELF_LABELS = {
-    games: "video",
-    boardgames: "tabletop",
-    books: "books",
-    shows: "shows",
-    life: "life",
+    return {
+      members,
+      changes,
+      // `about: canon` is the games canon's: essays about the canon itself
+      // predate the other media's, and no other medium has one yet.
+      essays: medium === DEFAULT_MEDIUM
+        ? essays.filter((e) => e.aboutCanon).sort((a, b) => b.date - a.date)
+        : [],
+      description: medium === DEFAULT_MEDIUM ? ratings[CANON]?.description ?? null : null,
+    };
   };
-  const SHELF_ORDER = Object.keys(SHELF_LABELS);
-
-  eleventyConfig.addCollection("shelves", (api) => {
-    const counts = new Map();
-    for (const meta of Object.values(subjects)) {
-      for (const cat of meta.category ?? []) {
-        counts.set(cat, (counts.get(cat) ?? 0) + 1);
-      }
-    }
-    return [...counts.entries()]
-      .map(([category, count]) => ({
-        category,
-        label: SHELF_LABELS[category] ?? category,
-        count,
-      }))
-      .sort((a, b) => {
-        const ai = SHELF_ORDER.indexOf(a.category);
-        const bi = SHELF_ORDER.indexOf(b.category);
-        if (ai !== bi) return (ai < 0 ? Infinity : ai) - (bi < 0 ? Infinity : bi);
-        return a.label.localeCompare(b.label);
-      });
-  });
 
   // A subject heading in a daily post becomes a link to its subject page, and is
   // rewritten to the canonical title from subjects.yaml — so "## dqxis" can be
@@ -1910,7 +2001,7 @@ export default function (eleventyConfig) {
   const cardSubjects = (slugs) => {
     if (!slugs.length) return {};
     const first = slugs[0];
-    const canon = canonSlugs.has(first);
+    const canon = canonSlugsAll.has(first);
     const chip = {
       text: String(subjects[first]?.title ?? first).toLowerCase(),
       more: slugs.length - 1,
@@ -1920,7 +2011,7 @@ export default function (eleventyConfig) {
     };
     const withCover = slugs.find((s) => /\.(jpe?g|png)$/i.test(coverUrls.get(s) ?? ""));
     const cover = withCover
-      ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugs.has(withCover) }
+      ? { file: path.join("src", coverUrls.get(withCover)), canon: canonSlugsAll.has(withCover) }
       : null;
     return { chip, cover };
   };

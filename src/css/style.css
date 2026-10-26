@@ -104,6 +104,43 @@
      so it is brighter and less blue than all three. */
   --silver: #cfd3e0;
 
+  /* The media (2026-10-25): each medium's colour is its window colour in the
+     media nav and its icon's colour wherever the icon appears. Hues only from
+     the aurora's own arc (aurora.js ARC_START, 140° to 380°), never the
+     orange-olive quarter it skips; chroma 0.10, the day frame's; and each on
+     its own OKLCH lightness step (0.80, 0.75, 0.70, 0.66, 0.62), so no two
+     are told apart by hue alone. The status colours above sit paler, at
+     0.81-0.88. Games is 0.060 ΔE from --st-completed: seen beside a
+     completed badge in the mock and kept. */
+  --m-games: #73cbf0;
+  --m-books: #78c192;
+  --m-tabletop: #d58487;
+  --m-movies: #b57baf;
+  --m-shows: #7a7fc1;
+  --m-about: #b6b2e0;
+
+  /* Pixel corners (2026-10-25): stepped staircases in 2px cells. A window is
+     two layers, an outer one in the frame colour and an inner fill inset
+     2px whose corner is one step smaller, because border-radius only draws
+     curves. The frame is a RING (evenodd: the outer staircase with the inner
+     one cut out), so a see-through fill shows the sky behind it rather than
+     frame colour. The -tl/-tr sets square one top corner, where a tab sits
+     flush on the window's edge. Generated, not hand-written: the mock's
+     clip(). */
+  /* Opacity of the nav and now-playing windows' fill and frame, 0-1. 0.9
+     (Hat, 2026-10-25, tuned live on the preview): the aurora glows through
+     the windows that sit on the masthead without costing the text. */
+  --win-fill-a: 0.9;
+  --win-frame-a: 0.9;
+  --px-win-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
+  --px-win-tl-ring: polygon(evenodd, 0 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
+  --px-win-tr-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 4px, 4px 4px, 4px 2px, calc(100% - 2px) 2px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
+  --px-tab-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 100%, 0 100%, 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 100%, 2px 100%);
+  --px-win-in: polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
+  --px-win-tl-in: polygon(0 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
+  --px-win-tr-in: polygon(0 2px, 2px 2px, 2px 0, 100% 0, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
+  --px-tab-in: polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% 100%, 0 100%);
+
   /* The frame (2026-10-16, hi-bit): the chrome's one colour is the day's
      aurora hue, set on <html> by the build (aurora.js dayFrame), so the
      frames are green on a green day and violet on a violet one. Lavender
@@ -393,7 +430,6 @@ h1,
      shelf and essay cards, covers, figures. outline paints over content, so
      the inset line would be drawn across the art. */
 
-.furniture,
 .aside {
   background: var(--fill);
   border: 2px solid var(--frame);
@@ -406,7 +442,6 @@ h1,
    the 240px masthead and the page stars run behind — take smoked glass for a
    ground instead of the flat fill (2026-10-19). Asides keep --fill: they sit
    inside the reading column, which is already smoked. */
-.furniture,
 .site-intro { background: var(--smoke); }
 
 .shelf-card,
@@ -424,9 +459,12 @@ figure,
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 1.25rem;
-  padding: 1.75rem 0 1rem;
-  /* 4px + the 16px padding: the strips hang under the nav as one unit
-     rather than floating a band's width below it (2026-10-19). */
+  padding: 1.75rem 0 4px;
+  /* 8px between the nav window and the panel window (2026-10-25): one menu
+     screen of several windows, each with its own job, the way an SNES pause
+     menu sets a party window beside its command window. Closer read as one
+     docked window that should change with the tab; the old 20px read as two
+     unrelated boxes. */
   margin-bottom: 4px;
   /* No rule under the header since 2026-10-19: with the band behind it the
      line cut the aurora in two, and the nav panes already mark the row. */
@@ -510,15 +548,11 @@ figure,
    1.75rem padding + 16px wordmark, and the header's own row gap adds the
    rest. */
 @media (max-width: 34rem) {
-  .site-title { flex-basis: 100%; }
-  /* Since the band grew past 176px the dropped row lands on the brightest
-     rows of the aurora, so it wears the intro's smoked glass. */
-  .site-nav {
-    margin-left: 0; margin-top: 2.75rem; gap: 0 3px;
-    background: var(--smoke);
-    border: 1px solid var(--edge);
-  }
-  .site-nav a { padding-inline: 6px; }
+  /* The wordmark is centred on a phone (2026-10-25) and the site's own
+     pages move into the media row's "about" tab, so the logo row is the
+     logo alone. */
+  .site-title { flex-basis: 100%; justify-content: center; }
+  .site-nav { display: none; }
 }
 
 /* ----------------------------------------------------------------- intro
@@ -546,6 +580,10 @@ figure,
 }
 
 .site-intro span { display: block; }
+/* In the header since 2026-10-25, on its own row between the wordmark and
+   the media nav. */
+.site-header > .site-intro { flex-basis: 100%; margin: 0.25rem 0 0; }
+.site-intro + .media-nav { margin-top: 0.75rem; }
 .site-intro span + span:last-child { margin-top: 0.5em; }
 
 /* ------------------------------------------- now playing / latest essays */
@@ -553,16 +591,12 @@ figure,
 /* The furniture panel holds both rows (2026-10-19; until then each row was
    its own framed strip, 10px apart). The rows split on a --dim rule, the
    frame's own inset colour, so the divider reads as part of the frame. */
-.furniture {
-  /* 0.8rem clears the inset line (2px border + 4px gap + 2px line) with the
-     same air the hairline box had inside it. */
-  padding: 13px 14px;
-  margin-bottom: 2.5rem;
-}
+.furniture { margin-bottom: 2.5rem; }
+.furniture > .win-in { padding: 13px 14px; }
 .now + .now {
   margin-top: 13px;
   padding-top: 13px;
-  border-top: 2px solid var(--dim);
+  border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
 }
 
 .now-head {
@@ -574,7 +608,7 @@ figure,
 .now-label {
   flex-shrink: 0;
   font: 16.5px/1 var(--pixel);
-  color: var(--frame);
+  color: var(--mc);
 }
 
 .now-items { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -593,7 +627,13 @@ figure,
 /* 32px, not smaller. Below this a chip's curtain renders under 2px per column
    and reads as coloured lines, not sky — and this strip is where a stranger
    meets the art first, so it has to survive the encounter. */
-.now-item .sky { width: 32px; }
+/* Both rows of the panel at one height (2026-10-25): now playing's medium
+   icons at 24px (a clean 2x of their 12-cell grid) and the essay chips
+   cropped to a 24px square from the top of their scene, where the curtain
+   is. Until then the chips were 32px wide at 3:4 (~43px tall) beside 12px
+   icons, and the essays row sat visibly heavier than now playing. */
+.now-item .sky { width: 24px; aspect-ratio: 1; }
+.now-item .mico { flex: none; width: 24px; height: 24px; }
 
 .essay-when { color: var(--muted); font: 16.5px/1 var(--pixel); white-space: nowrap; }
 
@@ -620,7 +660,12 @@ figure,
   .now-items::-webkit-scrollbar { display: none; }
   .now-item { flex: none; }
   .now-item:last-child { padding-right: 2rem; }
-  .essays .now-item { max-width: 70vw; }
+  /* One line, cut with an ellipsis (2026-10-25): a wrapped title made the
+     essays row taller than now playing's. It was a 70vw item that wrapped
+     until then, so a long title wouldn't become a long scroll; it still
+     can't, at 70vw. */
+  .essays .now-item { max-width: 70vw; min-width: 0; }
+  .essays .essay-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 /* ------------------------------------------------------- badges and tags */
@@ -1313,16 +1358,6 @@ main figure img { cursor: zoom-in; }
 .shelf-sorter:has(#sort-recent:checked) .shelf-item { order: var(--o-recent); }
 .shelf-sorter:has(#sort-canon:checked) .shelf-item { order: var(--o-canon); }
 .shelf-sorter:has(#sort-rating:checked) .shelf-item { order: var(--o-rating); }
-
-/* The category filter, same trick with display instead of order. "all" is
-   the checked default and needs no rule. One line per category in
-   SHELF_LABELS (eleventy.config.js); a category added there without a line
-   here gets a chip that hides nothing, which is visible at once. */
-.shelf-sorter:has(#show-games:checked) .shelf-item:not(.cat-games) { display: none; }
-.shelf-sorter:has(#show-boardgames:checked) .shelf-item:not(.cat-boardgames) { display: none; }
-.shelf-sorter:has(#show-books:checked) .shelf-item:not(.cat-books) { display: none; }
-.shelf-sorter:has(#show-shows:checked) .shelf-item:not(.cat-shows) { display: none; }
-.shelf-sorter:has(#show-life:checked) .shelf-item:not(.cat-life) { display: none; }
 
 .shelf-sort {
   border: 0;
@@ -2232,4 +2267,215 @@ main {
     color: var(--muted);
     text-align: left;
   }
+}
+
+
+/* ------------------------------------------------------------- media nav
+   2026-10-25. One tab per medium (games first) joined to a game window
+   holding that medium's views, the SNES/GBA turn: a 2px frame in the
+   medium's colour, a fill that runs light to dark, a 2px bevel inside the
+   frame (lit top-left, shadowed bottom-right), stepped pixel corners, and a
+   ▶ cursor on the view you're on. Chose this over a Final Fantasy command
+   window with a nested sub-window: "1 is definitely clearer what nav
+   you're on." The 2026-10-16 note on frames says an FF6 window was too much
+   for the panels; this is the nav and now playing only, and the medium
+   colour is quieter (chroma 0.10) than that mock's blue. Mocks and the why:
+   chaosh.at Decisions, 2026-10-25. */
+
+.m-games { --mc: var(--m-games); --mico: url("/img/icons/media/games.svg"); }
+.m-tabletop { --mc: var(--m-tabletop); --mico: url("/img/icons/media/tabletop.svg"); }
+.m-movies { --mc: var(--m-movies); --mico: url("/img/icons/media/movies.svg"); }
+.m-shows { --mc: var(--m-shows); --mico: url("/img/icons/media/shows.svg"); }
+.m-books { --mc: var(--m-books); --mico: url("/img/icons/media/books.svg"); }
+.m-about { --mc: var(--m-about); --mico: url("/img/icons/media/about.svg"); }
+/* Now playing's window: no medium of its own. */
+.m-neutral { --mc: var(--muted); }
+
+/* A medium icon: pixelarticons on the 12-cell lattice, so 12px is 1:1 like
+   the status icons and 24px (the tabs) is a clean 2x. A mask in the
+   medium's colour. */
+.mico {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+  background: var(--mc, currentColor);
+  -webkit-mask: var(--mico) center / 100% 100% no-repeat;
+  mask: var(--mico) center / 100% 100% no-repeat;
+}
+
+/* The window: a frame ring and a fill, each cut to its staircase and each
+   with its own opacity (--win-frame-a, --win-fill-a). */
+.win { position: relative; padding: 2px; }
+.win::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--mc) calc(var(--win-frame-a) * 100%), transparent);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
+}
+.win > .win-in {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, color-mix(in oklab, var(--mc) 24%, var(--night)) calc(var(--win-fill-a) * 100%), transparent),
+    color-mix(in srgb, color-mix(in oklab, var(--mc) 9%, var(--night)) calc(var(--win-fill-a) * 100%), transparent));
+  box-shadow:
+    inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+    inset -2px -2px 0 rgb(0 0 0 / 0.45);
+  clip-path: var(--px-win-in);
+}
+.win.sq-tl::before { clip-path: var(--px-win-tl-ring); }
+.win.sq-tl > .win-in { clip-path: var(--px-win-tl-in); }
+.win.sq-tr::before { clip-path: var(--px-win-tr-ring); }
+.win.sq-tr > .win-in { clip-path: var(--px-win-tr-in); }
+
+.media-nav { flex-basis: 100%; margin-top: 1.25rem; }
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap; /* wraps, never scrolls: a scroll box clips the tab's overlap */
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 16.5px/1 var(--pixel);
+}
+
+/* A tab is a radio and its label: the radio is kept for the keyboard (arrow
+   keys move between tabs, like a menu) and hidden from sight. */
+.mt-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.tab-label {
+  /* --tf frame, --tfill fill: dim when closed, the medium's when open. */
+  --tf: var(--edge);
+  --tfill: var(--header);
+  position: relative;
+  display: block;
+  padding: 2px 2px 0;
+  cursor: pointer;
+}
+.tab-label::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--tf) calc(var(--win-frame-a) * 100%), transparent);
+  clip-path: var(--px-tab-ring);
+  pointer-events: none;
+}
+.tab-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 7px;
+  background: color-mix(in srgb, var(--tfill) calc(var(--win-fill-a) * 100%), transparent);
+  color: var(--muted);
+  clip-path: var(--px-tab-in);
+}
+.tab .mico { width: 24px; height: 24px; vertical-align: 0; }
+.tab-label:hover .tab-in { color: var(--ink); }
+.mt-radio:focus-visible + .tab-label .tab-in { color: var(--ink); text-decoration: underline; }
+
+/* The open tab takes the window's top colour and overlaps it by 4px, which
+   covers the frame and the bevel line, so tab and window read as one shape. */
+.mt-radio:checked + .tab-label {
+  --tf: var(--mc);
+  --tfill: color-mix(in oklab, var(--mc) 24%, var(--night));
+  z-index: 1;
+  margin-bottom: -4px;
+}
+.mt-radio:checked + .tab-label .tab-in {
+  padding: 8px 16px 13px;
+  box-shadow:
+    inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+    inset -2px 0 0 rgb(0 0 0 / 0.45);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* One window per tab; the checked tab's shows (the per-medium lines are in
+   base.njk's <head>, generated from the media list). f-default is the page's
+   own window, so a browser without :has() still gets one. */
+.folder { display: none; }
+.folder.f-default { display: block; }
+.media-nav:has(.mt-radio:checked) .folder { display: none; }
+
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 0;
+  padding: 13px 18px 12px;
+  list-style: none;
+  font: 16.5px/1 var(--pixel);
+}
+.views a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  text-decoration: none;
+}
+/* Every view keeps a 12px cursor slot, so the cursor moving never shifts
+   the row. */
+.views a::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+.views a:hover,
+.views a:focus-visible,
+.views a[aria-current] { color: var(--ink); }
+.views a[aria-current]::before {
+  background: var(--ink);
+  -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  animation: cursor-bob 0.8s steps(1) infinite;
+}
+@keyframes cursor-bob { 50% { transform: translateX(2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .views a[aria-current]::before { animation: none; }
+}
+
+/* The about tab is the phone's: on a desktop the site's pages are on the
+   logo row instead, so an about page there opens the first medium's window
+   and the about window never shows. */
+@media (min-width: 34.0625rem) {
+  .tab-about { display: none; }
+  .media-nav:has(#mt-about:checked) .folder.f-first { display: block; }
+  .media-nav:has(#mt-about:checked) .folder.f-about { display: none; }
+  .media-nav:has(#mt-about:checked) .tab:first-child .tab-label {
+    --tf: var(--mc);
+    --tfill: color-mix(in oklab, var(--mc) 24%, var(--night));
+    z-index: 1;
+    margin-bottom: -4px;
+  }
+  .media-nav:has(#mt-about:checked) .tab:first-child .tab-in {
+    padding: 8px 16px 13px;
+    box-shadow:
+      inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+      inset -2px 0 0 rgb(0 0 0 / 0.45);
+    color: var(--ink);
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 34rem) {
+  /* Below the band, the same 2.75rem the dropped nav row used. */
+  .media-nav { margin-top: 2.75rem; }
+  .site-header > .site-intro { margin-top: 2.75rem; }
+  .site-intro + .media-nav { margin-top: 1rem; }
+  .tabs { gap: 3px; }
+  .tab-about { margin-left: auto; }
+  /* A closed tab is its icon; the open one adds its word. */
+  .mt-radio:not(:checked) + .tab-label .tab-word { display: none; }
+  .tab-in { padding: 7px; gap: 6px; }
+  .mt-radio:checked + .tab-label .tab-in { padding: 8px 9px 12px; }
+  .views { gap: 6px 12px; padding: 10px 12px 9px; }
 }

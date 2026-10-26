@@ -6,6 +6,14 @@ Status icons except canon.svg are from pixelarticons 1.8.1
   incomplete.svg <- close.svg
   shelved.svg <- cloud.svg
   owned.svg <- archive.svg
+Medium icons (2026-10-25), in media/, renamed by medium:
+  media/games.svg <- gamepad.svg
+  media/tabletop.svg <- dice.svg
+  media/movies.svg <- movie.svg
+  media/shows.svg <- device-tv.svg
+  media/books.svg <- book-open.svg
+  media/about.svg <- user.svg
+cursor.svg (the nav's menu cursor) is drawn for the site, not from the pack.
 
 MIT License
 

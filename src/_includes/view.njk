@@ -20,7 +20,9 @@
         than being inferred from the timeline below. -#}
     {% if view.members | length %}
     <p class="tag-members">
-      {% for member in view.members %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+      {#- A rung that spans media marks each member's medium (2026-10-25);
+          a one-medium page goes without. -#}
+      {% for member in view.members %}{% if view.mixed %}<span class="mico m-{{ member.medium }}" role="img" aria-label="{{ member.medium | mediumNoun }}"></span> {% endif %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
     </p>
     {% endif %}
   </header>

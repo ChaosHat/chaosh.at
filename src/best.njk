@@ -2,12 +2,16 @@
 layout: base.njk
 title: Best of
 pagination:
-  data: collections.featured
-  size: 100
-  alias: picks
+  data: collections.mediumBestPages
+  size: 1
+  alias: medium
   addAllPagesToCollections: false
-permalink: "{% if picks | length %}/best/{% else %}false{% endif %}"
+navView: best
+permalink: "{{ medium.urls.best }}"
 ---
+{#- One per medium (2026-10-25). A featured essay counts for its own medium;
+    a featured daily for every medium its ## headings file to. -#}
+{%- set picks = medium.featured %}
 <h1>Best of</h1>
 <p class="tag-desc">These are the ones I like, either as places to start or because I'm proud of them, or because they meant something to me.</p>
 

@@ -23,6 +23,7 @@
 - from: /shelf/games/
   to: /shelf/
 - from: /shelf/boardgames/
-  to: /shelf/
+  to: /shelf/tabletop/
+  # Retargeted 2026-10-25: tabletop has its own shelf again, as a medium.
   # Merged 2026-09-11. One shelf, category as a filter chip beside the sort;
   # the second shelf had one tile and a nav link of its own.
