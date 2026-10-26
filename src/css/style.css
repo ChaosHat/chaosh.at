@@ -1312,7 +1312,7 @@ main figure img { cursor: zoom-in; }
    like a real shelf. Where a box sits among games (an essay's cards) the slot
    stays 2:3 so the row lines up; on the tabletop shelf every tile is a box,
    so the slot goes square, the common modern box, and the bands mostly go
-   (2026-10-25; keyed on the shelf filter until the per-medium shelves). */
+   (2026-10-25). */
 .shelf-cover.is-box {
   object-fit: contain;
   object-position: center bottom;
