@@ -1627,3 +1627,14 @@ you-can-see-everything:
   status: completed
   aliases:
     - ycse
+sausage:
+  title: Aurora Watch
+  category:
+    - site
+  status: active
+  aliases:
+    - aurora watch
+    - sausage
+    - the sausage
+    - chaosh.at
+    - the site
