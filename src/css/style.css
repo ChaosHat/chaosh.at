@@ -1118,7 +1118,8 @@ main figure img { cursor: zoom-in; }
 .post-date { margin: 0; font: 400 16px/24px var(--pixel); }
 .post-subdate { margin: 0; font: 16px/24px var(--pixel); color: var(--muted); }
 
-.post-tags {
+/* `.post >` outranks `.post > p`, which would otherwise zero the margin. */
+.post > .post-tags {
   margin-top: 2.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--edge);
