@@ -1,0 +1,1 @@
+A fantastic game with beautiful design, fun platforming, and great combat. The music here was good, and it was a delight essentially from start to finish. I would have liked to see a bit more nudging and signposting but this stands at the top of the genre. 
