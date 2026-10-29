@@ -1,0 +1,1 @@
+This game is fun but I've bounced off it a few times, it feels a little punishing and I'd like a bit more of a relaxed pace for a game like this. Not enough time in the day!

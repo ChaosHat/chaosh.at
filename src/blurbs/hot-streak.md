@@ -1,0 +1,1 @@
+This is the best party game. It just looks fun with that presentation, it's easy to understand, and has the right amount of randomness to keep everyone invested in the game regardless of skill level. 

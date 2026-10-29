@@ -1,0 +1,1 @@
+Like most board gamers, I'm a sucker for a beautiful game with a unique theme. It's light, but still a gateway+ but it moves quickly and has plenty to think about without bogging the table down. 

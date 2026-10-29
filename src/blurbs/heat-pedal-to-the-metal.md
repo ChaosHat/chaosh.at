@@ -1,0 +1,1 @@
+Who doesn't love a classy race game themed around old timey F1 cars? It plays great, is easy to teach, and the tournament mode is so fun if you've got some extra time (or somewhere to store the board in between rounds).

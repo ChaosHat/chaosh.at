@@ -1,0 +1,1 @@
+A great tableau builder with variable use cards. Any time you have to discard cards to play cards, I'm interested in that Sophie's choice.

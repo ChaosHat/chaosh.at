@@ -1,0 +1,1 @@
+This is D&D but mostly better. It has a variety of flaws but overall it's a better package for all but the most diehard of min maxers and character builders (and they'd be better off with Pathfinder anyways). 

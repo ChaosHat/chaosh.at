@@ -1,0 +1,1 @@
+It's got a fun gimmick with the dungeon puzzles and I might return to it, but the combat is pretty flat.

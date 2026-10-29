@@ -1,0 +1,1 @@
+The greatest constructed deck building card game *of all time.*

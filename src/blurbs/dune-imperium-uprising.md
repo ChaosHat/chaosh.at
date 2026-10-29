@@ -1,0 +1,1 @@
+Deckbuilding and worker placement combines two of my favorite mechanics. This is a great game that I wish got to the table more often and also I wish it didn't require a dummy player at the two player count. 

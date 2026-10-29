@@ -1,0 +1,1 @@
+When I read about how few turns you get in this game I thought it wasn't enough. I was right. But that's what makes it so good. So few actions, such a huge impact. Each action really matters and it's agonizing. In the best way possible.

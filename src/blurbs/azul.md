@@ -1,0 +1,1 @@
+A quick and easy classic that's been enjoyed at every table I've played it at. It's simple yet very satisfying (and kind of shockingly mean sometimes).

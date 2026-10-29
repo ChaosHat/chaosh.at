@@ -1,0 +1,1 @@
+This game is fun but can result in some crippling analysis paralysis. What should be light and breezy can routinely grind to a halt.

@@ -1,0 +1,1 @@
+A master class in board game design. Absolutely elegant. 

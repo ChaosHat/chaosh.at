@@ -66,6 +66,15 @@ borderlands-4:
   aliases:
     - bl4
     - borderlands
+burnout-3-takedown:
+  title: 'Burnout 3: Takedown'
+  category:
+    - games
+  status: active
+  rating: loved
+  aliases:
+    - burnout 3
+    - b3
 castlevania-aria-of-sorrow:
   title: 'Castlevania: Aria of Sorrow'
   category:
@@ -514,6 +523,7 @@ lufia-2:
   category:
     - games
   status: incomplete
+  rating: liked*
   aliases:
     - lufia 2
     - lufia ii
@@ -766,7 +776,7 @@ pokemon-lazarus:
   title: Pokémon Lazarus
   category:
     - games
-  status: active
+  status: incomplete
   aliases:
     - pokemon lazarus
     - lazarus
@@ -863,7 +873,7 @@ sovereign-tower:
   title: Sovereign Tower
   category:
     - games
-  status: active
+  status: shelved
   aliases:
     - sovereign
 split-fiction:
@@ -1156,15 +1166,36 @@ android-netrunner:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - 'android: netrunner'
     - android netrunner
     - netrunner
+arboretum:
+  title: Arboretum
+  category:
+    - tabletop
+  status: owned
+  rating: canon
+  aliases:
+    - arboretum
+arkham-horror-lcg:
+  title: 'Arkham Horror: The Card Game'
+  category:
+    - tabletop
+  status: owned
+  rating: canon
+  aliases:
+    - arkham horror lcg
+    - arkham lcg
+    - 'arkham horror: the card game'
+    - arkham horror the card game
 azul:
   title: Azul
   category:
     - tabletop
   status: owned
+  rating: loved
   aliases:
     - azul
 concordia:
@@ -1172,23 +1203,48 @@ concordia:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - concordia
+daggerheart:
+  title: Daggerheart
+  category:
+    - tabletop
+  status: shelved
+  rating: canon
+  aliases:
+    - daggerheart
 dune-imperium-uprising:
   title: 'Dune: Imperium – Uprising'
   category:
     - tabletop
   status: owned
+  rating: favorite
   aliases:
     - 'dune: imperium – uprising'
     - dune imperium uprising
     - 'dune: imperium'
     - dune imperium
+dungeons-and-dragons-2024:
+  title: Dungeons & Dragons (2024)
+  category:
+    - tabletop
+  status: active
+  rating: loved
+  aliases:
+    - d&d
+    - dnd
+    - d&d 5.5e
+    - dnd 5.5e
+    - 5.5e
+    - player's handbook
+    - phb
 flamecraft-duals:
   title: Flamecraft Duals
   category:
     - tabletop
   status: owned
+  rating: liked
   aliases:
     - flamecraft duals
 forest-shuffle:
@@ -1196,6 +1252,7 @@ forest-shuffle:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - forest shuffle
 fromage:
@@ -1203,6 +1260,7 @@ fromage:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - fromage
 heat-pedal-to-the-metal:
@@ -1210,6 +1268,7 @@ heat-pedal-to-the-metal:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - 'heat: pedal to the metal'
     - heat pedal to the metal
@@ -1219,6 +1278,7 @@ hot-streak:
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - hot streak
 keyflower:
@@ -1226,13 +1286,24 @@ keyflower:
   category:
     - tabletop
   status: owned
+  rating: loved
   aliases:
     - keyflower
+river-valley-glassworks:
+  title: River Valley Glassworks
+  category:
+    - tabletop
+  status: owned
+  rating: canon
+  aliases:
+    - river valley glassworks
+    - glassworks
 rokoko:
   title: Rokoko
   category:
     - tabletop
   status: owned
+  rating: canon
   aliases:
     - rokoko
 roll-for-the-galaxy:
@@ -1240,14 +1311,27 @@ roll-for-the-galaxy:
   category:
     - tabletop
   status: owned
+  rating: loved
   aliases:
     - roll for the galaxy
     - rftg
+star-wars-rpg-ffg:
+  title: Star Wars RPG (FFG)
+  category:
+    - tabletop
+  status: completed
+  rating: loved
+  aliases:
+    - star wars rpg
+    - ffg star wars
+    - edge of the empire
+    - eote
 the-white-castle:
   title: The White Castle
   category:
     - tabletop
   status: owned
+  rating: loved
   aliases:
     - the white castle
     - white castle
@@ -1256,6 +1340,7 @@ ticket-to-ride:
   category:
     - tabletop
   status: owned
+  rating: favorite
   aliases:
     - ticket to ride
     - ttr
@@ -1264,6 +1349,7 @@ tzolkin:
   category:
     - tabletop
   status: owned
+  rating: favorite
   aliases:
     - tzolk'in
     - tzolkin
@@ -1272,6 +1358,7 @@ wingspan:
   category:
     - tabletop
   status: owned
+  rating: loved
   aliases:
     - wingspan
 alien:

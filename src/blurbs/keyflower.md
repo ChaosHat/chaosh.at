@@ -1,0 +1,1 @@
+Still one of my favorite worker placement games, using the workers as an auction bid is so smart. I also love the two ways you can use the tiles, you can either try to add them to your tableau, or keep it permanently. 

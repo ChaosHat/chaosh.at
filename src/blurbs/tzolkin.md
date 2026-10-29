@@ -1,0 +1,1 @@
+A classic and old favorite. It'll make you feel like your head is exploding until you wrap your mind around the timing and cadence of putting workers on, taking them off, and oh, making sure you feed your workers. Once you have it, the mastery loop feels so satisfying.

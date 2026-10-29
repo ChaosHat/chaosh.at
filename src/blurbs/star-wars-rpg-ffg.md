@@ -1,0 +1,1 @@
+This system is really fun and does a fantastic job of capturing Star Wars. The dice are annoying to understand but once you do it offers a wide variety of outcomes which is exciting. It's also pretty fast and cinematic which is exactly what you want given the theme. 
