@@ -488,7 +488,7 @@ export default function (eleventyConfig) {
   });
   eleventyConfig.addFilter("shortDate", (d) => shortDateFormat.format(d).toLowerCase());
 
-  // "sep 2026" — the canon hero's "since" cell. Month, not day: it says how
+  // "sept 2026" — the canon hero's "since" cell. Month, not day: it says how
   // long a game has held its slot, and a day of the month adds nothing.
   const monthYearFormat = new Intl.DateTimeFormat("en-GB", {
     timeZone: "UTC",
@@ -496,6 +496,14 @@ export default function (eleventyConfig) {
     year: "numeric",
   });
   eleventyConfig.addFilter("monthYear", (d) => monthYearFormat.format(d).toLowerCase());
+
+  // True when a lowercase label set in Pixel Operator Tight at 8px comes out
+  // an odd number of pixels wide — the .cell centring trap (see .is-odd in
+  // style.css). Of a–z, 0–9 and space, only f, t (5px) and space (3px) have
+  // odd advances, so the parity is the parity of their count. For labels that
+  // change on their own, like "since oct 2026" (75px); the fixed status words
+  // stay a hand list in the CSS.
+  eleventyConfig.addFilter("pxOdd", (s) => (String(s).match(/[ft ]/g) || []).length % 2 === 1);
 
   // Dailies render in full on the home page — an excerpt hides the fact that a
   // post covers several subjects. Long days are cut at an H2 boundary so a

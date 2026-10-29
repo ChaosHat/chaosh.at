@@ -46,7 +46,8 @@ eleventyComputed:
           <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
           {% endif %}
         </span>
-        <span class="cell rating badge-g b-canon">{% if item.since %}since {{ item.since | monthYear }}{% else %}canon{% endif %}</span>
+        {%- set label = ("since " + (item.since | monthYear)) if item.since else "canon" %}
+        <span class="cell rating badge-g b-canon{% if label | pxOdd %} is-odd{% endif %}">{{ label }}</span>
       </span>
       <span class="shelf-caption">{{ item.title }}</span>
     </a>

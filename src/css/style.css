@@ -1379,10 +1379,14 @@ main figure img { cursor: zoom-in; }
    active (33px), completed (53; "watched" 43 shares its class) and
    incomplete (57); every rating word is even, and "*" adds 6. If a status
    or rating word changes, sum its advances in the font (100 units a pixel)
-   or measure text x % 1 on every .cell, shelf page, any width. */
+   or measure text x % 1 on every .cell, shelf page, any width. Labels that
+   change on their own — the canon's "since oct 2026" — are measured at build
+   instead (the pxOdd filter) and carry .is-odd; until 2026-10-29 they went
+   unmeasured and two canon pages sat on the half pixel. */
 .cell.b-active,
 .cell.b-completed,
-.cell.b-incomplete { padding-left: 8px; } /* the chips pad 7px each side */
+.cell.b-incomplete,
+.cell.is-odd { padding-left: 8px; } /* the chips pad 7px each side */
 
 .shelf-caption { display: block; margin: 9px 0 0; font: 8px/16px var(--pixel); }
 
