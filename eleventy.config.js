@@ -7,6 +7,7 @@ import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
 import { assignSlots, huesFrom, readLock } from "./hues.js";
+import { cloudHtml, cloudStack, cloudYear, vocabulary } from "./wordcloud.js";
 
 // One markdown-it instance renders everything: whole daily posts, the fragments
 // sliced out of them, and standing essays. Same instance => a fragment on a
@@ -1577,6 +1578,102 @@ export default function (eleventyConfig) {
   };
 
   eleventyConfig.addCollection("subjectPages", buildSubjectPages);
+
+  // The about page's clouds — see wordcloud.js. Built as a collection because
+  // that is where the posts are; the shortcode below only reads the result.
+  // Text is what a reader can see: spoilers, code and headings out (a ##
+  // heading is a subject name, which the subject cloud already counts).
+  const SUBJECT_WORDS = new Set();
+  for (const [slug, meta] of Object.entries(subjects)) {
+    for (const name of [slug, meta.title, ...(meta.aliases ?? [])]) {
+      for (const w of String(name ?? "").toLowerCase().match(/[a-z][a-z']*[a-z]/g) ?? []) {
+        SUBJECT_WORDS.add(w);
+      }
+    }
+  }
+  const readerText = (html) =>
+    plainText(
+      stripSpoilers(html)
+        .replace(CODE_REGION, " ")
+        .replace(/<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>/gi, " ")
+        .replace(/\[spoiler\]/g, " ")
+        .replace(/<\/(p|li|blockquote|figcaption|td|th)>/gi, "$&\n"),
+    );
+  // A daily minus its sections on page-only subjects: Aurora Watch is the
+  // site's build log, and its fonts and frames are not how Hat talks about
+  // games.
+  const mediaProse = (raw) => {
+    let keep = true;
+    return String(raw).split("\n").filter((line) => {
+      const m = /^##(?!#)\s*(.*)$/.exec(line);
+      if (m) {
+        const slug = aliasMap.get(normalise(m[1].trim()));
+        keep = !slug || mediumOf(subjects[slug]) in MEDIUM_NOUNS;
+      }
+      return keep;
+    }).join("\n");
+  };
+  let clouds = "";
+  eleventyConfig.addCollection("clouds", (api) => {
+    const docs = [
+      ...publishable(api.getFilteredByTag("dailies")).map((p) => ({
+        date: p.date, text: readerText(md.render(mediaProse(p.rawInput))),
+      })),
+      ...buildEssayList(api)
+        .filter((e) => !e.citedSubjects.length
+          || e.citedSubjects.some((s) => mediumOf(subjects[s]) in MEDIUM_NOUNS))
+        .map((e) => ({ date: e.date, text: readerText(e.feedHtml), essay: e })),
+    ];
+    const year = cloudYear(docs);
+    const inYear = (d) => d.date.getUTCFullYear() === year;
+    // Nothing written before the shown year: the two clouds would be the same
+    // cloud, so there is one, captioned as both.
+    const periods = docs.every(inYear)
+      ? [[`${year} · all time`, () => true]]
+      : [[String(year), inYear], ["all time", () => true]];
+    // A tab names its period only when there is more than one.
+    const tab = (kind, caption) => (periods.length > 1 ? `${kind} · ${caption}` : kind);
+
+    const skip = [].concat(siteData.cloud_skip ?? []);
+    const words = periods.map(([caption, keep]) => ({
+      label: tab("words", caption),
+      kind: "words",
+      html: cloudHtml(
+        vocabulary(docs.filter(keep), { exclude: SUBJECT_WORDS, skip }),
+        { caption, seed: `words:${caption}:${today}` },
+      ),
+    }));
+
+    // Words written under each subject's ## headings, plus every essay about
+    // it in full. Media subjects only: Aurora Watch is the build log, not
+    // something written about.
+    const essayWords = new Map(docs.filter((d) => d.essay)
+      .map((d) => [d.essay.slug, d.text.split(/\s+/).length]));
+    const subjectCloud = (keep) => buildSubjectPages(api)
+      .filter((s) => s.medium in MEDIUM_NOUNS)
+      .map((s) => ({
+        label: s.title ?? s.slug,
+        href: `/s/${s.slug}/`,
+        color: palette(subjectHues.get(s.slug) ?? 0).glow,
+        weight: s.fragments.filter(keep).reduce((n, f) => n + f.words, 0)
+          + s.essays.filter(keep).reduce((n, e) => n + (essayWords.get(e.slug) ?? 0), 0),
+      }))
+      .filter((s) => s.weight > 0)
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 30);
+    const subjectPanels = periods.map(([caption, keep]) => ({
+      label: tab("subjects", caption),
+      kind: "subjects",
+      html: cloudHtml(subjectCloud(keep), {
+        caption, seed: `subjects:${caption}:${today}`, maxStep: 3,
+      }),
+    }));
+
+    clouds = cloudStack([...words, ...subjectPanels]);
+    return [];
+  });
+  // {% wordcloud %} in About.md: every cloud, in one tabbed window.
+  eleventyConfig.addShortcode("wordcloud", () => clouds);
 
   // A tag page is the subject fan-out widened: every member's fragments on one
   // timeline, oldest-first to match a subject page, each entry labelled with
