@@ -122,16 +122,17 @@
   /* The media (2026-10-25): each medium's colour is its window colour in the
      media nav and its icon's colour wherever the icon appears. Hues only from
      the aurora's own arc (aurora.js ARC_START, 140° to 380°), never the
-     orange-olive quarter it skips; chroma 0.10, the day frame's; and each on
-     its own OKLCH lightness step (0.80, 0.75, 0.70, 0.66, 0.62), so no two
-     are told apart by hue alone. The status colours above sit paler, at
-     0.81-0.88. Games is 0.060 ΔE from --st-completed: seen beside a
-     completed badge in the mock and kept. */
-  --m-games: #73cbf0;
-  --m-books: #78c192;
-  --m-tabletop: #d58487;
-  --m-movies: #b57baf;
-  --m-shows: #7a7fc1;
+     orange-olive quarter it skips. Pastel since 2026-10-31: at chroma 0.10
+     they were more saturated than the sky's own bright pixels (the rim ink
+     is L 0.85, C 0.078) and read as shiny, so they take the rim's recipe:
+     chroma 0.072 at L 0.85, 0.83, 0.81, 0.78, 0.75. Games and tabletop now
+     sit about 0.027 ΔE from --st-completed and --st-incomplete; seen and
+     accepted, the icons' shapes tell them apart. */
+  --m-games: #9bd8f3;
+  --m-books: #a2d6b3;
+  --m-tabletop: #ecafaf;
+  --m-movies: #d2a7ce;
+  --m-shows: #a4a9db;
   --m-about: #b6b2e0;
 
   /* Pixel corners (2026-10-25): stepped staircases in 2px cells. A window is
@@ -144,7 +145,11 @@
      clip(). */
   /* Opacity of the nav and now-playing windows' fill and frame, 0-1. 0.9
      (Hat, 2026-10-25, tuned live on the preview): the aurora glows through
-     the windows that sit on the masthead without costing the text. */
+     the windows that sit on the masthead without costing the text. The nav
+     overrides it to 1 since 2026-10-31; see .media-nav. */
+  /* The cards' 2px --ring for a clipped shape, which box-shadow can't follow
+     around a staircase: a hard shadow each way (2026-10-31). */
+  --px-keyline: drop-shadow(2px 0 0 var(--ring)) drop-shadow(-2px 0 0 var(--ring)) drop-shadow(0 2px 0 var(--ring)) drop-shadow(0 -2px 0 var(--ring));
   --win-fill-a: 0.9;
   --win-frame-a: 0.9;
   --px-win-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
@@ -543,16 +548,38 @@ figure,
    ring but the border drops to --dim, so the row reads as one quiet strip of
    links and the panels below carry the frame; hover lights a pane to the
    full frame. */
+/* Stepped since 2026-10-31, the windows' corners on a dark keyline, so the
+   logo row and the media nav are one family; a ring and an inset fill, the
+   same two layers as .win. */
 @media (min-width: 34.0625rem) {
+  .site-nav { filter: var(--px-keyline); }
   .site-nav a {
-    background: var(--smoke);
-    border: 2px solid var(--dim);
-    box-shadow: 0 0 0 2px var(--ring);
+    position: relative;
+    z-index: 0;
+    border: 0;
+    padding: calc(0.5rem + 2px) 12px;
   }
+  .site-nav a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--dim);
+    clip-path: var(--px-win-ring);
+  }
+  .site-nav a::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    z-index: -1;
+    background: var(--night);
+    clip-path: var(--px-win-in);
+  }
+  .site-nav a:hover::before,
+  .site-nav a:focus-visible::before { background: var(--frame); }
 }
 
 .site-nav a:hover,
-.site-nav a:focus-visible { color: var(--ink); border-color: var(--frame); }
+.site-nav a:focus-visible { color: var(--ink); }
 
 /* On a phone five words at 12px Silkscreen ran ~360px of glyphs alone, so
    the row wraps at any padding — and a wrapped row over the masthead put
@@ -2351,14 +2378,19 @@ main {
 /* ------------------------------------------------------------- media nav
    2026-10-25. One tab per medium (games first) joined to a game window
    holding that medium's views, the SNES/GBA turn: a 2px frame in the
-   medium's colour, a fill that runs light to dark, a 2px bevel inside the
-   frame (lit top-left, shadowed bottom-right), stepped pixel corners, and a
-   ▶ cursor on the view you're on. Chose this over a Final Fantasy command
+   medium's colour, a night ground, a 2px bevel inside the frame (lit
+   top-left, shadowed bottom-right), stepped pixel corners, and a ▶ cursor
+   on the view you're on. Chose this over a Final Fantasy command
    window with a nested sub-window: "1 is definitely clearer what nav
    you're on." The 2026-10-16 note on frames says an FF6 window was too much
    for the panels; this is the nav and now playing only, and the medium
    colour is quieter (chroma 0.10) than that mock's blue. Mocks and the why:
-   chaosh.at Decisions, 2026-10-25. */
+   chaosh.at Decisions, 2026-10-25.
+
+   Pulled back toward the site 2026-10-31: the fill no longer turns the
+   ground into a colour ("the ground stays night with a tint"), the window
+   hugs its menu instead of running the shell as a tab bar, and it wears the
+   cards' keyline. Same Decisions file, that date. */
 
 .m-games { --mc: var(--m-games); --mico: url("/img/icons/media/games.svg"); }
 .m-tabletop { --mc: var(--m-tabletop); --mico: url("/img/icons/media/tabletop.svg"); }
@@ -2394,11 +2426,9 @@ main {
   pointer-events: none;
 }
 .win > .win-in {
-  background: linear-gradient(180deg,
-    color-mix(in srgb, color-mix(in oklab, var(--mc) 24%, var(--night)) calc(var(--win-fill-a) * 100%), transparent),
-    color-mix(in srgb, color-mix(in oklab, var(--mc) 9%, var(--night)) calc(var(--win-fill-a) * 100%), transparent));
+  background: color-mix(in srgb, color-mix(in oklab, var(--mc) 7%, var(--night)) calc(var(--win-fill-a) * 100%), transparent);
   box-shadow:
-    inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+    inset 2px 2px 0 color-mix(in srgb, var(--mc) 16%, transparent),
     inset -2px -2px 0 rgb(0 0 0 / 0.45);
   clip-path: var(--px-win-in);
 }
@@ -2406,8 +2436,20 @@ main {
 .win.sq-tl > .win-in { clip-path: var(--px-win-tl-in); }
 .win.sq-tr::before { clip-path: var(--px-win-tr-ring); }
 .win.sq-tr > .win-in { clip-path: var(--px-win-tr-in); }
+/* Now playing keeps the medium-less window but not a lit frame: one lit
+   window per screen, the nav's (2026-10-31, the 10-19 "every box shouted"
+   rule again). --dim rather than --mc so the labels keep --muted. */
+.furniture.win::before { background: var(--dim); }
 
-.media-nav { flex-basis: 100%; margin-top: 1.25rem; }
+/* Opaque, unlike the panel: a fixed medium hue over the day's sky mixes to
+   mud at any other value. */
+.media-nav {
+  --win-fill-a: 1;
+  --win-frame-a: 1;
+  flex-basis: 100%;
+  margin-top: 1.25rem;
+  filter: var(--px-keyline);
+}
 
 .tabs {
   display: flex;
@@ -2463,14 +2505,14 @@ main {
    covers the frame and the bevel line, so tab and window read as one shape. */
 .mt-radio:checked + .tab-label {
   --tf: var(--mc);
-  --tfill: color-mix(in oklab, var(--mc) 24%, var(--night));
+  --tfill: color-mix(in oklab, var(--mc) 7%, var(--night));
   z-index: 1;
   margin-bottom: -4px;
 }
 .mt-radio:checked + .tab-label .tab-in {
   padding: 8px 16px 13px;
   box-shadow:
-    inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+    inset 2px 2px 0 color-mix(in srgb, var(--mc) 16%, transparent),
     inset -2px 0 0 rgb(0 0 0 / 0.45);
   color: var(--ink);
   font-weight: 700;
@@ -2492,11 +2534,14 @@ main {
   list-style: none;
   font: 16px/1 var(--pixel);
 }
+/* Every word is ink and the cursor alone marks your place, as in an SNES
+   menu (2026-10-31). --muted is the label colour, and in the panel right
+   below it that's what it means. */
 .views a {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--muted);
+  color: var(--ink);
   text-decoration: none;
 }
 /* Every view keeps a 12px cursor slot, so the cursor moving never shifts
@@ -2507,9 +2552,8 @@ main {
   width: 12px;
   height: 12px;
 }
-.views a:hover,
-.views a:focus-visible,
-.views a[aria-current] { color: var(--ink); }
+.views a:hover::before,
+.views a:focus-visible::before,
 .views a[aria-current]::before {
   background: var(--ink);
   -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
@@ -2518,6 +2562,8 @@ main {
 }
 @keyframes cursor-bob { 50% { transform: translateX(2px); } }
 @media (prefers-reduced-motion: reduce) {
+  .views a:hover::before,
+  .views a:focus-visible::before,
   .views a[aria-current]::before { animation: none; }
 }
 
@@ -2525,19 +2571,32 @@ main {
    logo row instead, so an about page there opens the first medium's window
    and the about window never shows. */
 @media (min-width: 34.0625rem) {
+  /* The window hugs its menu (2026-10-31): the column is the tabs or the
+     views, whichever is wider, so five words stop being a 966px strip and
+     the sky keeps the rest of the row. f-last: the last tab lands flush on
+     that edge, so the window's corner there goes square, like sq-tl. */
+  .media-nav { display: grid; grid-template-columns: max-content; }
+  .folder.f-last::before { clip-path: var(--px-win-tr-ring); }
+  .folder.f-last > .win-in { clip-path: var(--px-win-tr-in); }
+  /* The words start on the panel's left edge; the cursor hangs in the
+     gutter before each one instead of holding a slot that indents the row
+     22px past everything else on the page. */
+  .views { padding-left: 17px; padding-right: 20px; gap: 6px 30px; }
+  .views a { position: relative; }
+  .views a::before { position: absolute; right: calc(100% + 3px); }
   .tab-about { display: none; }
   .media-nav:has(#mt-about:checked) .folder.f-first { display: block; }
   .media-nav:has(#mt-about:checked) .folder.f-about { display: none; }
   .media-nav:has(#mt-about:checked) .tab:first-child .tab-label {
     --tf: var(--mc);
-    --tfill: color-mix(in oklab, var(--mc) 24%, var(--night));
+    --tfill: color-mix(in oklab, var(--mc) 7%, var(--night));
     z-index: 1;
     margin-bottom: -4px;
   }
   .media-nav:has(#mt-about:checked) .tab:first-child .tab-in {
     padding: 8px 16px 13px;
     box-shadow:
-      inset 2px 2px 0 color-mix(in srgb, var(--mc) 38%, transparent),
+      inset 2px 2px 0 color-mix(in srgb, var(--mc) 16%, transparent),
       inset -2px 0 0 rgb(0 0 0 / 0.45);
     color: var(--ink);
     font-weight: 700;

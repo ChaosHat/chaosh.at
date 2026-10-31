@@ -116,7 +116,7 @@
         {%- for m in collections.mediumPages %}
         {%- set u = m.urls %}
         {%- set here = onView and medium.id == m.id %}
-        <div class="folder win m-{{ m.id }} f-{{ m.id }}{% if loop.first %} sq-tl f-first{% endif %}{% if m.id == openId and not onAbout %} f-default{% endif %}">
+        <div class="folder win m-{{ m.id }} f-{{ m.id }}{% if loop.first %} sq-tl f-first{% endif %}{% if loop.last %} f-last{% endif %}{% if m.id == openId and not onAbout %} f-default{% endif %}">
           <ul class="views win-in">
             {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
             <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
