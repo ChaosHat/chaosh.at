@@ -719,10 +719,14 @@ export default function (eleventyConfig) {
   // surfaces disagreed about what was new. The pin-atop-the-stream idea was
   // rejected (2026-08-13) because a pin goes stale between rare essays; an
   // entry at its own date scrolls off like a daily and never can. On a
-  // same-day tie the essay leads: it is the considered piece, the daily the
-  // running log. Lede + link only — full text keeps its one home at /e/.
+  // same-day tie the daily leads. An essay ships ON its date and its daily the
+  // 2am after (publish.py), so the daily is always the later arrival; until
+  // 2026-10-31 the essay led (the considered piece) and so buried the newly
+  // arrived daily beneath an essay already a day on top. Daily first keeps
+  // whatever landed last on top. Lede + link only — full text keeps its one
+  // home at /e/.
   eleventyConfig.addCollection("stream", (api) => {
-    const rank = { essay: 0, daily: 1 };
+    const rank = { daily: 0, essay: 1 };
     const dailies = publishable(api.getFilteredByTag("dailies")).map((post) => ({
       kind: "daily",
       date: post.date,
