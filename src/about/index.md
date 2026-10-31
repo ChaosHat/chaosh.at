@@ -16,6 +16,10 @@ The idea was to keep a daily running log of thoughts as I played to return to wh
 A good starting point is the canon, that's kind of the quick get to know you gaming business card, here's ten games I really like and describe what I like and where I'm at. Favorites are the games that are basically canon adjacent, I'll return to them and I really love them but they didn't quite make it for a variety of reasons. I'm not trying to make reviews or anything, it's just how I feel. Disliked games aren't a statement of quality (or lack thereof), it's just not for me! 
 
 The auroras thing kind of just happened. I started making kind of an 8 bit sunset thing and figured that was a bit played. I was playing FFVII Remake and was inspired by something lifestream-y and thought that looked like an aurora, and those are cool. They're unique to each day and everything that's posted remains the aurora header from the day it was made. 
+
+Here are some word clouds to see the things I talk about, weighed against [wordfreq](https://github.com/rspeer/wordfreq)'s English frequencies.
+
+{% wordcloud %}
 ## How it's built
 I write everything in Obsidian, in one folder of my vault. A daily post is a note named for the day. Each `##` heading in it is a game or a board game, and the site collects every heading onto that game's own page, oldest first, so the page for a game is every paragraph I've ever written under its name. Nothing gets copied or filed by hand, and it's retroactive: register a game today and everything I wrote about it last spring is already on its page. Longer pieces are essays, filed to whatever they cite.
 
