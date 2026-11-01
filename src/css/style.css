@@ -140,7 +140,9 @@
      2px whose corner is one step smaller, because border-radius only draws
      curves. The frame is a RING (evenodd: the outer staircase with the inner
      one cut out), so a see-through fill shows the sky behind it rather than
-     frame colour. The -tl/-tr sets square one top corner, where a tab sits
+     frame colour. Each staircase closes on itself and the two join along one
+     seam walked both ways (2026-11-01): jumping between them on a diagonal
+     crossed the left edge and evenodd cut slivers out of it. The -tl/-tr sets square one top corner, where a tab sits
      flush on the window's edge. Generated, not hand-written: the mock's
      clip(). */
   /* Opacity of the nav and now-playing windows' fill and frame, 0-1. 0.9
@@ -152,10 +154,10 @@
   --px-keyline: drop-shadow(2px 0 0 var(--ring)) drop-shadow(-2px 0 0 var(--ring)) drop-shadow(0 2px 0 var(--ring)) drop-shadow(0 -2px 0 var(--ring));
   --win-fill-a: 0.9;
   --win-frame-a: 0.9;
-  --px-win-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
-  --px-win-tl-ring: polygon(evenodd, 0 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
-  --px-win-tr-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 2px 4px, 4px 4px, 4px 2px, calc(100% - 2px) 2px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px));
-  --px-tab-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 100%, 0 100%, 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 100%, 2px 100%);
+  --px-win-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px 4px);
+  --px-win-tl-ring: polygon(evenodd, 0 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 0, 2px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px 2px);
+  --px-win-tr-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 4px 4px, 4px 2px, calc(100% - 2px) 2px, calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px 4px);
+  --px-tab-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 100%, 0 100%, 0 4px, 2px 4px, 4px 4px, 4px 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 100%, 2px 100%, 2px 4px);
   --px-win-in: polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
   --px-win-tl-in: polygon(0 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
   --px-win-tr-in: polygon(0 2px, 2px 2px, 2px 0, 100% 0, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px));
@@ -2503,6 +2505,9 @@ main {
 
 /* The open tab takes the window's top colour and overlaps it by 4px, which
    covers the frame and the bevel line, so tab and window read as one shape. */
+/* The frame stops on the window's frame line: the tab overlaps by 4px, the
+   line is 2px, so 2px of ring would hang below the corner. */
+.mt-radio:checked + .tab-label::before { bottom: 2px; }
 .mt-radio:checked + .tab-label {
   --tf: var(--mc);
   --tfill: color-mix(in oklab, var(--mc) 7%, var(--night));
@@ -2587,6 +2592,7 @@ main {
   .tab-about { display: none; }
   .media-nav:has(#mt-about:checked) .folder.f-first { display: block; }
   .media-nav:has(#mt-about:checked) .folder.f-about { display: none; }
+  .media-nav:has(#mt-about:checked) .tab:first-child .tab-label::before { bottom: 2px; }
   .media-nav:has(#mt-about:checked) .tab:first-child .tab-label {
     --tf: var(--mc);
     --tfill: color-mix(in oklab, var(--mc) 7%, var(--night));
