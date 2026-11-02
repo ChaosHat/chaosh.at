@@ -2500,9 +2500,12 @@ main {
   .views a[aria-current]::before { animation: none; }
 }
 @media (min-width: 34.0625rem) {
-  /* The view words start on the window's left edge; the cursor hangs in the
-     gutter before each one instead of holding a slot that indents the row
-     22px past the media words above it. */
+  /* The cursor hangs in the gutter before each view word instead of holding
+     a slot, and the row is padded so that gutter is the media row's cursor
+     column: 17px edge + 12px slot + 3px gap. The two ▶s share a column and
+     the view words start at the icon column, a sub-menu under its parent
+     (2026-11-02; until then the words sat under the media ▶). */
+  .views { padding-left: 32px; }
   .views a { position: relative; }
   .views a::before { position: absolute; right: calc(100% + 3px); }
 }
