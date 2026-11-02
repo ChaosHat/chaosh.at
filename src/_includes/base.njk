@@ -211,6 +211,12 @@
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
       {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
       <p><a href="/feed.xml">feed</a></p>
+      {#- Not By AI's "Written by Human" badge: true of every word of prose
+          here; it makes no claim about the code. Their file,
+          unmodified — their guidelines forbid altering it and set a 42px
+          minimum height, so it's the one non-pixel object in the footer.
+          Hosted, not hotlinked, like the friends' buttons. -#}
+      <p class="footer-badge"><a href="https://notbyai.fyi"><img src="/img/buttons/written-by-human.svg" alt="Written by a Human, Not by AI" width="131" height="42"></a></p>
     </footer>
     {#- Lightbox: click a post image to see it full size. The site's only
         script; without it the images are just images. -#}

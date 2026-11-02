@@ -1852,6 +1852,12 @@ a.badge { text-decoration: none; }
 .site-footer data { display: none; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--accent); }
+/* The Not By AI badge rides the right end of the row at 42px, the minimum
+   height their guidelines allow, centred against the 18px text lines. When
+   the row wraps on a phone it drops to its own line, still pushed right. */
+.site-footer { align-items: center; }
+.site-footer .footer-badge { margin-left: auto; }
+.footer-badge img { display: block; }
 
 /* ----------------------------------------------------------------- links
    The site button and the people who link back. Buttons are 88×31 pixel
