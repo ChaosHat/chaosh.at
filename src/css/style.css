@@ -332,7 +332,7 @@ body::after {
 @keyframes aurora-roll-light {
   to { background-position: 0 -5620px, 0 -5620px; }
 }
-.site-intro, .furniture { position: relative; z-index: 2; }
+.furniture { position: relative; z-index: 2; }
 
 /* The reading column. Everything that is prose lives in <main>, so centring
    main centres headings, dates and body together — capping each block instead
@@ -459,11 +459,11 @@ h1,
   box-shadow: 0 0 0 2px var(--ring);
 }
 
-/* The boxes that sit over the sky — the intro and the furniture strips, which
-   the 240px masthead and the page stars run behind — take smoked glass for a
-   ground instead of the flat fill (2026-10-19). Asides keep --fill: they sit
-   inside the reading column, which is already smoked. */
-.site-intro { background: var(--smoke); }
+/* The boxes that sit over the sky — the furniture strips, and the intro until
+   it moved to the footer (2026-11-02) — which the 240px masthead and the page
+   stars run behind, take smoked glass for a ground instead of the flat fill
+   (2026-10-19). Asides keep --fill: they sit inside the reading column, which
+   is already smoked. */
 
 .shelf-card,
 figure,
@@ -599,62 +599,72 @@ figure,
 }
 
 /* ----------------------------------------------------------------- intro
-   Standing lines under the masthead saying what the auroras are. The art
-   encodes status and recency and nothing on the page decoded it, so a first
-   visitor read the covers as arbitrary coloured lines. Prose, not chrome:
-   it is the one thing a stranger actually needs to read. Renders only when
-   site.intro is set. Each line is a span; the last gets a breath of space
-   above it so the punchline lands on its own beat — the sibling selector
-   keeps a single-line intro unaffected. */
+   The lines saying what the auroras are. The art encodes status and recency
+   and nothing on the page decoded it, so a first visitor read the covers as
+   arbitrary coloured lines. Prose, not chrome. Renders only when site.intro
+   is set. Each line is a span; the last gets a breath of space above it so
+   the punchline lands on its own beat — the sibling selector keeps a
+   single-line intro unaffected.
+   Under the masthead from 2026-10-19 (smoked box, home only), in the header
+   above the media nav from 2026-10-25, and in the footer since 2026-11-02,
+   on every page: it was the biggest block before the writing (114px on a
+   desktop, 190px on a phone) and the one thing a blog's top doesn't usually
+   carry — a boxed paragraph is a landing page's hero, a blog's tagline is a
+   line. The footer row is 8px; this sits above it a size up, so it reads
+   as a sign-off rather than one more footer link. */
 
 .site-intro {
-  max-width: var(--wide);
-  margin: 0 0 10px; /* the strips' own stacking gap: intro + strips read as one unit */
-  padding: 14px 1rem;
-  /* The pixel face at the panels' size, so the intro reads as one of the
-     framed boxes rather than prose that wandered out of the column. */
-  font: 16px/26px var(--pixel);
+  flex: 0 0 100%; /* its own row; the measure is capped on the lines, not the box, or the links would fit beside it */
+  margin: 0 0 8px;
+  font: 16px/24px var(--pixel);
   color: var(--muted);
-  /* Smoked like the panel below it but unframed since 2026-10-19, so it
-     reads as the site's tagline rather than a third box. The masthead
-     runs down behind the intro since the band grew to 176px, then 240px (2026-10-19).
-     Translucent night keeps the copy readable and lets the aurora glow
-     faintly through; an opaque card read as a sticker on the sky. */
 }
 
-.site-intro span { display: block; }
-/* In the header since 2026-10-25, on its own row between the wordmark and
-   the media nav. */
-.site-header > .site-intro { flex-basis: 100%; margin: 0.25rem 0 0; }
-.site-intro + .media-nav { margin-top: 0.75rem; }
+.site-intro span { display: block; max-width: var(--read); }
 .site-intro span + span:last-child { margin-top: 0.5em; }
 
 /* ------------------------------------------- now playing / latest essays */
 
 /* The furniture panel holds both rows (2026-10-19; until then each row was
    its own framed strip, 10px apart). The rows split on a --dim rule, the
-   frame's own inset colour, so the divider reads as part of the frame. */
+   frame's own inset colour, so the divider reads as part of the frame.
+   Each row is one line with its label inline at the left since 2026-11-02
+   (the labels were a row of their own above the items): the panel went from
+   ~200px to ~105px and the day's first words moved up by that much. The
+   labels share a min-width so the two item columns start on one edge, the
+   way a menu's values line up past its keys. */
 .furniture { margin-bottom: 2.5rem; }
-.furniture > .win-in { padding: 13px 14px; }
+.furniture > .win-in { padding: 9px 14px 10px; }
+.now { display: flex; align-items: center; gap: 1rem; }
 .now + .now {
-  margin-top: 13px;
-  padding-top: 13px;
+  margin-top: 8px;
+  padding-top: 9px;
   border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
 }
 
-.now-head {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 0.75rem;
-}
-
 .now-label {
-  flex-shrink: 0;
+  flex: none;
+  min-width: 108px;
   font: 16px/1 var(--pixel);
   color: var(--mc);
 }
 
-.now-items { display: flex; gap: 1rem; flex-wrap: wrap; }
+.now-items { display: flex; flex: 1; min-width: 0; gap: 0.5rem 1rem; flex-wrap: wrap; }
+
+/* The ticker (script in base.njk): when now playing overflows its line the
+   row becomes a sideways scroll box, scrollbar hidden, both ends faded, and
+   the script drifts it while idle. Two .track copies make the loop. Without
+   the class, or with the items fitting, the row wraps like any other. */
+.now-items.tick {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+}
+.now-items.tick::-webkit-scrollbar { display: none; }
+.tick .track { display: flex; flex: none; gap: 1rem; padding-right: 1rem; }
 
 .now-item {
   display: flex;
@@ -682,7 +692,7 @@ figure,
 
 .essays-all {
   margin-left: auto;
-  flex-shrink: 0;
+  flex: none;
   font: 16px/1 var(--pixel);
   text-decoration: none;
 }
@@ -690,9 +700,15 @@ figure,
 /* On a phone each strip is one row that scrolls sideways (2026-10-19): wrapped,
    the furniture ran ~850px and the first post started below the screen. The
    right edge fades so the row reads as continuing; an essay title may still
-   wrap, inside a 70vw item, so a long one doesn't become a long scroll. */
+   wrap, inside a 70vw item, so a long one doesn't become a long scroll.
+   The inline labels give up their shared width (2026-11-02): at 350px the
+   row is label, then whatever fits, and "all →" goes — the nav's essays
+   word is the same door. */
 @media (max-width: 34rem) {
   .furniture { margin-bottom: 1.75rem; }
+  .now { gap: 0.75rem; }
+  .now-label { min-width: 0; }
+  .essays-all { display: none; }
   .now-items {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -2618,8 +2634,6 @@ main {
 @media (max-width: 34rem) {
   /* Below the band, the same 2.75rem the dropped nav row used. */
   .media-nav { margin-top: 2.75rem; }
-  .site-header > .site-intro { margin-top: 2.75rem; }
-  .site-intro + .media-nav { margin-top: 1rem; }
   .tabs { gap: 3px; }
   .tab-about { margin-left: auto; }
   /* A closed tab is its icon; the open one adds its word. */
