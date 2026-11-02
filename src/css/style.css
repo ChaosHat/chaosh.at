@@ -990,6 +990,18 @@ main figure img { cursor: zoom-in; }
   font: 8px/16px var(--pixel);
   color: var(--frame);
 }
+
+/* Plain `>` quotes (any callout but aside): a bar in the frame hue over the
+   aside's faint wash, so a quoted exchange reads as quoted without the browser's
+   40px double indent (2026-11-02). */
+blockquote:not(.aside) {
+  margin: 1.5rem 0;
+  padding: 10px 16px;
+  background: var(--fill);
+  border-left: 3px solid var(--frame);
+}
+blockquote:not(.aside) > :first-child { margin-top: 0; }
+blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 @media (min-width: 34.01rem) {
   .aside {
     --hang: max(0px, min(25%, calc((100vw - var(--read)) / 2 - 4rem)));
