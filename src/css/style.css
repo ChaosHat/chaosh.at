@@ -588,6 +588,10 @@ figure,
 }
 .now-items.tick::-webkit-scrollbar { display: none; }
 .tick .track { display: flex; flex: none; gap: 1rem; padding-right: 1rem; }
+/* A mouse can scrub the ticker (the script's drag); the hand says so. */
+.now-items.tick { cursor: grab; }
+.now-items.tick.scrub { cursor: grabbing; user-select: none; }
+.now-items.tick.scrub a { pointer-events: none; }
 
 .now-item {
   display: flex;

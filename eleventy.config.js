@@ -596,17 +596,19 @@ export default function (eleventyConfig) {
   // evening), so the one movie that qualifies is the most recently written
   // about, while that writing is under two weeks old.
   const MOVIE_NOW_DAYS = 14;
-  // Returned in site.yaml's media order, titles alphabetical within a
-  // medium, the movie last, and the first title of each medium flagged
-  // groupFirst: the panel draws the medium icon once per group (2026-11-02),
-  // so the order is what makes the groups. Copies, not the subject objects —
-  // the flag belongs to this view, not to the subject.
+  // Returned in site.yaml's media order, most recently written about first
+  // within a medium (Hat, 2026-11-02: recency, not the alphabet — the row
+  // says what's current, and the ticker shows its head first), the movie
+  // last, and the first title of each medium flagged groupFirst: the panel
+  // draws the medium icon once per group, so the order is what makes the
+  // groups. Copies, not the subject objects — the flag belongs to this
+  // view, not to the subject.
   eleventyConfig.addFilter("nowPlaying", (subjects) => {
     const on = (subjects ?? []).filter((s) => mediaOn.has(s.medium));
     const rank = (m) => MEDIA.findIndex((x) => x.id === m);
     const active = on
       .filter((s) => s.medium !== "movies" && s.status === "active")
-      .sort((a, b) => rank(a.medium) - rank(b.medium) || String(a.title).localeCompare(String(b.title)));
+      .sort((a, b) => rank(a.medium) - rank(b.medium) || (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || String(a.title).localeCompare(String(b.title)));
     const since = Date.now() - MOVIE_NOW_DAYS * 86400000;
     const movie = on
       .filter((s) => s.medium === "movies" && s.lastWrote && s.lastWrote >= since)

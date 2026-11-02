@@ -222,14 +222,17 @@
     {#- The now-playing ticker (2026-11-02). The row is a plain wrapping
         list without this. When the titles don't fit one line the script
         makes the row a sideways scroll box (.tick), doubles the items so
-        the loop wraps seamlessly, and drifts it at 40px/s while nobody is
-        touching it; a hand on it — hover, wheel, drag, touch, keyboard
+        the loop wraps seamlessly, and drifts it at SPEED px/s while nobody
+        is touching it; a hand on it — hover, wheel, drag, touch, keyboard
         focus — takes over, and it resumes 3s after the last touch (0.8s
-        after the pointer leaves). A CSS marquee was rejected: it fights a
-        reader scrolling by hand. Reduced-motion readers get the plain
-        scroll row. The site's second script, after the lightbox. -#}
+        after the pointer leaves). A mouse can scrub it: drag anywhere on
+        the row (a drag of more than 6px swallows the click it would have
+        landed on a title). A CSS marquee was rejected: it fights a reader
+        scrolling by hand. Reduced-motion readers get the plain scroll row.
+        The site's second script, after the lightbox. -#}
     <script>
       (() => {
+        const SPEED = 24; /* px/s; 40 read as hurried (Hat, 2026-11-02) */
         const row = document.querySelector(".now.playing .now-items");
         if (!row || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const items = [...row.children];
@@ -258,10 +261,25 @@
         for (const e of ["pointerenter", "pointerdown", "wheel", "touchstart", "focusin"]) row.addEventListener(e, () => hold(3000), { passive: true });
         row.addEventListener("pointerleave", () => hold(800));
         row.addEventListener("scroll", () => { if (performance.now() - lastAuto > 100) { hold(3000); pos = row.scrollLeft; } }, { passive: true });
+        let drag = null;
+        row.addEventListener("pointerdown", (e) => {
+          if (e.pointerType !== "mouse" || e.button !== 0) return;
+          drag = { x: e.clientX, left: row.scrollLeft, moved: false };
+        });
+        row.addEventListener("pointermove", (e) => {
+          if (!drag) return;
+          const dx = e.clientX - drag.x;
+          if (Math.abs(dx) > 6) { drag.moved = true; row.setPointerCapture(e.pointerId); row.classList.add("scrub"); }
+          if (drag.moved) { row.scrollLeft = drag.left - dx; hold(3000); }
+        });
+        const drop = () => { if (drag?.moved) setTimeout(() => row.classList.remove("scrub"), 0); drag = null; };
+        row.addEventListener("pointerup", drop);
+        row.addEventListener("pointercancel", drop);
+        row.addEventListener("click", (e) => { if (row.classList.contains("scrub")) e.preventDefault(); }, true);
         const step = (now) => {
           if (on && now > idle) {
             const w = track.offsetWidth;
-            pos += Math.min(50, now - last) * 0.04;
+            pos += Math.min(50, now - last) * SPEED / 1000;
             if (pos >= w) pos -= w;
             lastAuto = now;
             row.scrollLeft = pos;
