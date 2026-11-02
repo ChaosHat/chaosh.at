@@ -51,7 +51,7 @@
     {#- Which window the checked tab shows: one line per medium, generated
         so a medium added to site.yaml needs no CSS edit. See style.css →
         "the media nav". -#}
-    <style>{% for m in collections.mediumPages %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:block}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:block}</style>
+    <style>{% for m in collections.mediumPages %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:flex}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:flex}</style>
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
@@ -64,71 +64,64 @@
           CHAOS·HAT with the dot at the word boundary. aria-label carries
           the domain for readers and crawlers. -#}
       <a class="site-title" href="/">{{ wordmark | safe }}</a>
-      {#- The site's own pages stay on the logo row, top right, balancing the
-          wordmark (2026-10-25). On a phone they move into an "about" tab at
-          the end of the media row. -#}
-      <nav class="site-nav" aria-label="About this site">
-        {% if collections.pages | length %}<a href="/about/">about</a>{% endif %}
-        <a href="/links/">links</a>
-        <a href="/guestbook/">guestbook</a>
-      </nav>
+      {#- The logo row is the wordmark alone since 2026-11-02. The site's
+          own pages (about · links · guestbook) sat top right as three panes
+          from 2026-10-25; they're the last word of the media row now, on
+          every width, as the phone already had them. The intro (what the
+          auroras mean) sat under the wordmark, home page only, from
+          2026-10-25 to 2026-11-02; it's in the footer now, every page. -#}
 
-      {#- The intro (what the auroras mean) sat here, home page only, from
-          2026-10-25 to 2026-11-02. It's in the footer now, every page: see
-          there. -#}
+      {#- The media nav: one window, two rows. The media row is one word per
+          medium that is switched on in site.yaml and has a subject, games
+          first, then about; the ▶ cursor marks the open one. Under a rule,
+          the open medium's views. A view only appears once it has something
+          in it, the same rule as the media. Drawn in style.css → "media nav".
 
-      {#- The media nav (2026-10-25): one tab per medium that is switched on in
-          site.yaml and has a subject, games first, and a game window under the
-          open tab holding that medium's views. A view only appears once it has
-          something in it, the same rule as the tabs. The ▶ cursor marks the
-          view you're on. Drawn in style.css → "the media nav".
-
-          A tab opens its window; it doesn't navigate (Hat, 2026-10-25: "Tab
-          opens the window is correct"). Like a game menu, switching tabs shows
-          what's inside, and picking a view is the second press. No script:
-          each tab is a radio and its label, and the checked radio decides which
-          window shows (style.css, plus the per-medium lines in <head>). The
-          page's own medium starts checked: games wherever a page isn't about
-          one medium, the home page included. -#}
+          A medium word opens its views; it doesn't navigate (Hat,
+          2026-10-25: "Tab opens the window is correct"). Like a game menu,
+          picking the medium shows what's inside, and picking a view is the
+          second press. No script: each medium is a radio and its label, and
+          the checked radio decides which views list shows (style.css, plus
+          the per-medium lines in <head>). The page's own medium starts
+          checked: games wherever a page isn't about one medium, the home
+          page included; about on the site's own pages.
+          Folder tabs joined to a window from 2026-10-25 to 2026-11-02; the
+          cursor row replaced them (Decisions, 2026-11-02). -#}
       {%- set onAbout = page.url == "/about/" or page.url == "/links/" or page.url == "/guestbook/" %}
       {%- set openId = ((medium.id if medium and medium.id) or (subject.medium if subject and subject.medium) or "") | openMedium %}
       {%- set onView = navView and medium %}
       {%- if collections.mediumPages | length %}
-      <nav class="media-nav" aria-label="Sections">
-        <ul class="tabs">
+      <nav class="media-nav win" aria-label="Sections"><div class="win-in">
+        <ul class="media">
           {%- for m in collections.mediumPages %}
-          <li class="tab m-{{ m.id }}">
+          <li class="med m-{{ m.id }}">
             <input type="radio" name="media-tab" id="mt-{{ m.id }}" class="mt-radio" aria-label="{{ m.label }}"{% if m.id == openId and not onAbout %} checked{% endif %}>
-            <label for="mt-{{ m.id }}" class="tab-label"><span class="tab-in"><span class="mico" aria-hidden="true"></span><span class="tab-word">{{ m.label }}</span></span></label>
+            <label for="mt-{{ m.id }}" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">{{ m.label }}</span></label>
           </li>
           {%- endfor %}
-          <li class="tab m-about tab-about">
+          <li class="med m-about med-about">
             <input type="radio" name="media-tab" id="mt-about" class="mt-radio" aria-label="about"{% if onAbout %} checked{% endif %}>
-            <label for="mt-about" class="tab-label"><span class="tab-in"><span class="mico" aria-hidden="true"></span><span class="tab-word">about</span></span></label>
+            <label for="mt-about" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></label>
           </li>
         </ul>
         {%- for m in collections.mediumPages %}
         {%- set u = m.urls %}
         {%- set here = onView and medium.id == m.id %}
-        <div class="folder win m-{{ m.id }} f-{{ m.id }}{% if loop.first %} sq-tl f-first{% endif %}{% if loop.last %} f-last{% endif %}{% if m.id == openId and not onAbout %} f-default{% endif %}">
-          <ul class="views win-in">
-            {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
-            <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
-            {% if m.featured | length %}<li><a href="{{ u.best }}"{% if here and navView == "best" %} aria-current="page"{% endif %}>best of</a></li>{% endif %}
-            {% if m.essays | length %}<li><a href="{{ u.essays }}"{% if here and navView == "essays" %} aria-current="page"{% endif %}>essays</a></li>{% endif %}
-            {% if m.log | length %}<li><a href="{{ u.log }}"{% if here and navView == "log" %} aria-current="page"{% endif %}>log</a></li>{% endif %}
-          </ul>
-        </div>
+        <ul class="views f-{{ m.id }}{% if m.id == openId and not onAbout %} f-default{% endif %}">
+          {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
+          <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
+          {% if m.featured | length %}<li><a href="{{ u.best }}"{% if here and navView == "best" %} aria-current="page"{% endif %}>best of</a></li>{% endif %}
+          {% if m.essays | length %}<li><a href="{{ u.essays }}"{% if here and navView == "essays" %} aria-current="page"{% endif %}>essays</a></li>{% endif %}
+          {% if m.log | length %}<li><a href="{{ u.log }}"{% if here and navView == "log" %} aria-current="page"{% endif %}>log</a></li>{% endif %}
+        </ul>
         {%- endfor %}
-        <div class="folder win m-about f-about sq-tr{% if onAbout %} f-default{% endif %}">
-          <ul class="views win-in">
-            {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
-            <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
-            <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
-            <li><a href="/feed.xml">feed</a></li>
-          </ul>
-        </div>
-      </nav>
+        <ul class="views f-about{% if onAbout %} f-default{% endif %}">
+          {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
+          <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
+          <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
+          <li><a href="/feed.xml">feed</a></li>
+        </ul>
+      </div></nav>
       {%- endif %}
     </header>
 

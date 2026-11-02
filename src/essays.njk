@@ -1,9 +1,13 @@
 ---
 layout: base.njk
-title: Deep Thoughts
+title: Essays
 permalink: /essays/
 ---
-<h1>Deep Thoughts</h1>
+{#- "Essays" everywhere the site points here (the nav word, the panel's
+    "latest essays") since 2026-11-02; the name Hat calls them lives on the
+    page itself. -#}
+<h1>Essays</h1>
+<p class="essays-aka">aka my deep thoughts</p>
 
 <ul class="essay-list">
   {% for e in collections.essayPages | sort(true, false, "date") %}
