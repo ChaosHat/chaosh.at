@@ -20,7 +20,12 @@ description: Everything else I write about, busiest first.
 
     Sort, in CSS, the shelf's way: each row carries its rank on every axis
     (etcRanks), and the checked radio picks which one `order` reads. DOM
-    order is the score order, so the default needs no rule. -#}
+    order is the score order, so the default needs no rule.
+
+    A group with a shelf lists only the subjects it has writing on, and
+    points the rest at its shelf: movies has 43 films and writing on two, and
+    a list of 41 "nothing yet" rows buried every other group. A group with
+    no shelf lists every subject, since nowhere else does. -#}
 {%- set groups = collections.etcGroups %}
 <article class="tag etc-page">
   <header class="tag-head group-head">
@@ -45,13 +50,18 @@ description: Everything else I write about, busiest first.
         <h2 class="etc-group-head"><a href="{{ g.homeUrl }}">{% if g.hasIcon %}<span class="mico m-{{ g.id }}" aria-hidden="true"></span>{% endif %}{{ g.label }}</a></h2>
         {% if g.description %}<p class="tag-desc">{{ g.description }}</p>{% endif %}
         <ul class="essay-list etc-subjects">
-          {% for s in g.subjects %}
+          {%- set listed = (g.subjects | selectattr("written") | list) if g.hasShelf else g.subjects %}
+          {% for s in listed %}
           <li style="--o-score:{{ s.oScore }};--o-recent:{{ s.oRecent }};--o-written:{{ s.oWritten }}">
             <span class="sky" style="background-image:url({{ s.chipUrl }})" aria-hidden="true"></span>
             <a href="/s/{{ s.slug }}/">{{ s.title }}</a>
             <span class="archive-note">{% if s.lastWrote %}{{ s.written }} {% if s.written == 1 %}entry{% else %}entries{% endif %} · last {{ s.lastWrote | shortDate }}{% else %}nothing yet{% endif %}</span>
           </li>
           {% endfor %}
+          {%- set rest = (g.subjects | length) - (listed | length) %}
+          {% if rest > 0 %}
+          <li class="etc-more"><a href="{{ g.urls.shelf }}">{{ rest }} more on the shelf →</a></li>
+          {% endif %}
         </ul>
       </li>
       {% endfor %}

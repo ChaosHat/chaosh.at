@@ -2532,8 +2532,15 @@ main {
      row is games · tabletop · etc · about, which fits a 390px phone. A
      longer row wraps. */
   .media-nav { width: auto; align-self: stretch; margin-top: 2.75rem; }
-  .media { gap: 6px 14px; padding: 10px 8px 9px; }
+  .media { gap: 6px 8px; padding: 10px 8px 9px; }
   .med-label { gap: 6px; }
+  /* Only the open tab keeps a cursor slot: four slots were the 40px that
+     pushed about onto a second row. */
+  .med-label:not(.is-open)::before { display: none; }
+  /* About is its icon unless it's open (the old rule for every closed tab,
+     kept for the last one): with every word the row ran ~36px over at
+     390px, and the person icon at the row's end reads on its own. */
+  .med-about .med-label:not(.is-open) .med-word { display: none; }
   .med-about { margin-left: auto; }
   /* Tight enough that all five views fit one line at 390px in Pixelify
      (2026-10-25, when log made it five). Pixel Operator is wider, 396px
@@ -2627,6 +2634,9 @@ main {
 .etc-group-head a:focus-visible { color: var(--accent); }
 .etc-group-head .mico { width: 24px; height: 24px; vertical-align: 0; }
 .etc-subjects { display: flex; flex-direction: column; }
+/* The "N more on the shelf" row stays last whatever the sort. */
+.etc-subjects > .etc-more { order: 9999; border-bottom: 0; }
+.etc-more a { font: 8px/16px var(--pixel); color: var(--muted); }
 .etc-sorter:has(#etc-recent:checked) :is(.etc-group, .etc-subjects > li) { order: var(--o-recent); }
 .etc-sorter:has(#etc-written:checked) :is(.etc-group, .etc-subjects > li) { order: var(--o-written); }
 

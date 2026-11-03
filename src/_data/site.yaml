@@ -63,10 +63,11 @@ groups:
 # The groups with a nav spot, in order. Every declared group not listed here
 # lands in etc. Dropping one is a demotion, never a disappearance: nothing it
 # built goes away. Promotion and demotion are always this hand edit.
+# Movies moved into etc 2026-11-03 (43 subjects, 2 daily sections ever): its
+# canon, shelf and now playing stay, reached from /movies/.
 tabs:
   - games
   - tabletop
-  - movies
 bluesky: chaosh.at
 fediverse: https://social.chaosh.at/@hat
 intro: |-
