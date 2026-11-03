@@ -2001,6 +2001,18 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("linkSubjects", linkSubjectsFragments);
 
+  // The same art, for a template that builds its own .frag: the view pages'
+  // timelines (/log/, /t/, /r/) since 2026-11-03, when they took the daily's
+  // shell with each fragment's cover in the art column. Hat: on the log "it's
+  // hard to see what game is being written about" — the log mixes subjects,
+  // so the cover IS the label. A filter over skyTag rather than markup in the
+  // template so a view's art and a daily's cannot drift: same cover link, same
+  // generated-tile fallback, same completed crop. The --box ratio goes on the
+  // .frag, as wrapFragment does — the template reads it off the subject.
+  eleventyConfig.addFilter("subjectSky", (slug) =>
+    skyTag(slug, subjects[slug]?.status ?? "active"),
+  );
+
   // The tag footer on a daily post: the union of the tags of every subject that
   // post files to. Read off the rendered HTML rather than the raw markdown so
   // it sees exactly the headings that became sections, with no second parser to

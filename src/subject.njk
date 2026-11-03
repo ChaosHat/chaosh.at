@@ -11,7 +11,12 @@ eleventyComputed:
 <article class="subject">
   <header class="subject-head{% if subject.essays | length %} no-rule{% endif %}">
     {#- The subject's sky at the one size where the full three-curtain scene
-        is properly legible. Small renders elsewhere use the chip variant. -#}
+        is properly legible. Small renders elsewhere use the chip variant.
+        From 58rem the page takes the daily's shell (2026-11-03) and this is
+        its lone card in the art column, the way an essay's is: the header's
+        text, the essays and the fragments all start at the daily's text
+        column, so the two kinds of page read at one width (style.css, the
+        margin column). Below 58rem it stays the cover beside the title. -#}
     {%- if subject.coverUrl %}
     <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true"></span>
     {%- else %}

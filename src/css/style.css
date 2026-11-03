@@ -1591,7 +1591,8 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 
 .fragment { max-width: none; }
 
-.fragment + .fragment { margin-top: 2rem; }
+.fragment + .fragment,
+:is(.timeline, .blurbs) > .frag + .frag { margin-top: 2rem; }
 .fragment > :last-child { margin-bottom: 0; }
 
 .fragment-date {
@@ -1652,7 +1653,8 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   .rung > .rating { grid-row: auto; }
 }
 
-/* This timeline mixes subjects, so each entry carries its own sky. */
+/* A view's dateline and subject label. The 24px chip that led it went on
+   2026-11-03: the row's cover in the art column says which game now. */
 .fragment-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1662,7 +1664,6 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 }
 
 .fragment-meta .fragment-date { margin-bottom: 0; }
-.fragment-meta .sky { width: 24px; }
 
 .fragment-subject {
   font: 8px/14px var(--pixel);
@@ -2101,9 +2102,14 @@ a.sky-cover:hover { border-color: var(--accent); }
    dailies, an essay — take the whole shell (--wide, the header frame's
    width) from a 58rem viewport and split it art | text | images, which
    puts the text at ~69 characters a line at 19px, inside 45–75 for the
-   first time (full-width daily lines ran 90–95). Subject and tag pages have
-   no per-section art, so they keep the 47rem column and reserve the right
-   column inside it: ~60 a line there.
+   first time (full-width daily lines ran 90–95). Subject and view pages
+   (/s/, and /log/, /t/, /r/) take the same shell since 2026-11-03: they
+   kept the 47rem column, with no art and ~60 a line, until Hat on the log —
+   "it's hard to see what game is being written about", and its text ran
+   narrower than the front page's. A view's fragments carry their subject's
+   cover in the art column now, a subject page its own cover as a lone card
+   (below, after the essays). Any change to the daily's shell has to be
+   checked on those pages too, or they drift apart again.
    The right column narrows with the screen. From 58rem it is a 16rem figure
    column, captions and all. Below that it is a thumbnail rail (6rem; 3.5rem
    on a phone): the shot is cropped to a tile, the caption hides, and a tap
@@ -2142,10 +2148,10 @@ main {
      air on both sides, same ~70 a line. A type step for big screens was
      mocked and rejected the same day — too big. */
   main { --mcol: 16rem; --mgap: 2.5rem; --lgap: 2rem; }
-  main:has(> .post, > .post-list) { max-width: none; }
+  main:has(> .post, > .post-list, > .tag, > .subject) { max-width: none; }
   /* The shell is the viewport from here down to 58rem, so the smoke and the
      day bands stop at the body padding instead of running off-screen. */
-  main:has(> .post, > .post-list)::before { inset: -1.25rem; }
+  main:has(> .post, > .post-list, > .tag, > .subject)::before { inset: -1.25rem; }
   main:has(> .post, > .post-list) :is(.post-head, .entry-head)::before { inset: 0 -1.25rem; }
   /* A stream essay is a lede, not a section: it lines up with the dailies'
      text column around it. */
@@ -2223,6 +2229,26 @@ main {
     gap: 0 var(--lgap);
     margin-left: calc(-1 * (var(--lcol) + var(--lgap)));
   }
+}
+
+/* View and subject pages on the daily's grid (2026-11-03, see the header).
+   A view's rows are .frags (view.njk), so the rules above place their art
+   at every width with nothing added here but containment: each row is
+   another day, so its images stop at its own foot rather than spilling
+   beside the next — the spill is for sections of one day. A subject page
+   copies the essay: the text column is padding, and the head hangs its
+   cover back into the art column at the cover's width. The blurb is prose,
+   so it keeps out of the image column like the fragments under it; the
+   title, the lit days and the chips take the row's full width. */
+@media (min-width: 58rem) {
+  :is(.timeline, .blurbs) > .frag { display: flow-root; }
+  .subject { padding-left: calc(var(--lcol) + var(--lgap)); }
+  .subject-head {
+    gap: var(--lgap);
+    margin-left: calc(-1 * (var(--lcol) + var(--lgap)));
+  }
+  .subject-head > .sky { width: var(--lcol); }
+  .subject-blurb { margin-right: calc(var(--mcol) + var(--mgap)); }
 }
 
 @media (max-width: 57.99rem) {
