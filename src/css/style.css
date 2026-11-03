@@ -119,21 +119,25 @@
      so it is brighter and less blue than all three. */
   --silver: #cfd3e0;
 
-  /* The media (2026-10-25): each medium's colour is its window colour in the
-     media nav and its icon's colour wherever the icon appears. Hues only from
-     the aurora's own arc (aurora.js ARC_START, 140° to 380°), never the
-     orange-olive quarter it skips. Pastel since 2026-10-31: at chroma 0.10
-     they were more saturated than the sky's own bright pixels (the rim ink
-     is L 0.85, C 0.078) and read as shiny, so they take the rim's recipe:
-     chroma 0.072 at L 0.85, 0.83, 0.81, 0.78, 0.75. Games and tabletop now
-     sit about 0.027 ΔE from --st-completed and --st-incomplete; seen and
-     accepted, the icons' shapes tell them apart. */
-  --m-games: #9bd8f3;
-  --m-books: #a2d6b3;
-  --m-tabletop: #ecafaf;
-  --m-movies: #d2a7ce;
-  --m-shows: #a4a9db;
+  /* The tab colours (2026-10-25): each group's colour is its icon's colour
+     wherever the icon appears. Hues only from the aurora's own arc
+     (aurora.js ARC_START, 140° to 380°), never the orange-olive quarter it
+     skips. Pastel since 2026-10-31: at chroma 0.10 they were more saturated
+     than the sky's own bright pixels (the rim ink is L 0.85, C 0.078) and
+     read as shiny, so they take the rim's recipe: chroma 0.072 at L 0.85,
+     0.83, 0.81, 0.78, 0.75. Games and tabletop sit about 0.027 ΔE from
+     --st-completed and --st-incomplete; seen and accepted, the icons' shapes
+     tell them apart. Since 2026-11-03 a group's colour is `color:` on the
+     group in site.yaml (games #9bd8f3, tabletop #ecafaf, movies #d2a7ce,
+     shows #a4a9db, books #a2d6b3), so a new group needs no CSS; base.njk
+     writes the .m-<group> classes from it. About and etc aren't groups, and
+     keep theirs here. */
   --m-about: #b6b2e0;
+  /* Etc (2026-11-03): the arc's one wide unused gap, teal-aqua at hue ≈200°
+     on the 10-31 recipe (L 0.80, C 0.072). Gold was floated and is the open
+     alternative; it would read as canon here (--gold is canon on this site)
+     and sits in the quarter the arc skips. One variable to swap. */
+  --m-etc: #84ccd0;
 
   /* Pixel corners (2026-10-25): stepped staircases in 2px cells. A window is
      two layers, an outer one in the frame colour and an inner fill inset
@@ -2367,14 +2371,14 @@ main {
 
 
 /* ------------------------------------------------------------- media nav
-   One window, two rows (2026-11-02): the media — icon and word per medium
-   that is on in site.yaml and has a subject, games first, about last — with
-   the ▶ cursor on the open one, and under a rule the open medium's views.
-   Each medium is a hidden radio and its label, so a word opens its views
-   without navigating (Hat, 2026-10-25: "Tab opens the window is correct")
-   and the arrow keys walk the row; the checked radio decides which views
-   list shows (the per-medium :has() lines in base.njk's <head>, generated
-   from the media list; .f-default for a browser without :has()).
+   One window, two rows (2026-11-02): the tabs — icon and word per tabbed
+   group with a subject, then etc, then about — with the ▶ cursor on the
+   one you're inside, and under a rule that tab's views. Since 2026-11-03
+   a tab is a link to its group's page and the views row shows only inside
+   a group (navState, eleventy.config.js); until then each word was a
+   hidden radio that opened its views without navigating (Hat, 2026-10-25:
+   "Tab opens the window is correct"), which stopped being right once a
+   group had a page to go to.
 
    From 2026-10-25 to 11-02 each medium was a folder tab joined to its
    window: a 2px frame in the medium's colour, a bevel, a 4px overlap, the
@@ -2387,12 +2391,10 @@ main {
    like every other frame on the page; the medium colour lives in the icons
    here and in now playing. Mocks and the why: chaosh.at Decisions,
    2026-10-25, 10-31, 11-02. */
-.m-games { --mc: var(--m-games); --mico: url("/img/icons/media/games.svg"); }
-.m-tabletop { --mc: var(--m-tabletop); --mico: url("/img/icons/media/tabletop.svg"); }
-.m-movies { --mc: var(--m-movies); --mico: url("/img/icons/media/movies.svg"); }
-.m-shows { --mc: var(--m-shows); --mico: url("/img/icons/media/shows.svg"); }
-.m-books { --mc: var(--m-books); --mico: url("/img/icons/media/books.svg"); }
+/* A group's .m-<group> class (its colour and icon) is written into each
+   page's <head> from site.yaml (groupStyle, eleventy.config.js). */
 .m-about { --mc: var(--m-about); --mico: url("/img/icons/media/about.svg"); }
+.m-etc { --mc: var(--m-etc); --mico: url("/img/icons/media/etc.svg"); }
 /* Now playing's window: no medium of its own. */
 .m-neutral { --mc: var(--muted); }
 /* A medium icon: pixelarticons on the 12-cell lattice, so 12px is 1:1 like
@@ -2450,21 +2452,14 @@ main {
   font: 16px/1 var(--pixel);
 }
 .media { align-items: center; gap: 6px 30px; padding: 12px 20px 11px 17px; }
-/* A medium is a radio and its label: the radio is kept for the keyboard
-   (arrow keys move along the row, like a menu) and hidden from sight. */
-.mt-radio {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
+/* A tab is a link since 2026-11-03 (a radio and its label before: the word
+   opened a window rather than going anywhere). */
 .med-label {
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  cursor: pointer;
+  text-decoration: none;
 }
 /* The cursor slot sits in the row before each icon and holds the ▶ on the
    open medium. In-flow, unlike the views' (which hang in the gutter): the
@@ -2472,26 +2467,21 @@ main {
 .med-label::before { content: ""; flex: none; width: 12px; height: 12px; margin-right: -2px; }
 .media .mico { width: 24px; height: 24px; vertical-align: 0; }
 .med-label:hover { color: var(--ink); }
-.mt-radio:focus-visible + .med-label { color: var(--ink); text-decoration: underline; }
-.mt-radio:checked + .med-label { color: var(--ink); font-weight: 700; }
-.mt-radio:checked + .med-label::before {
+.med-label:focus-visible { color: var(--ink); text-decoration: underline; outline: none; }
+.med-label.is-open { color: var(--ink); font-weight: 700; }
+.med-label.is-open::before {
   background: var(--ink);
   -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   animation: cursor-bob 0.8s steps(1) infinite;
 }
-/* One views list per medium; the checked radio's shows (the per-medium
-   lines are in base.njk's <head>). f-default is the page's own, so a
-   browser without :has() still gets one. The rule above the row is the
-   panel's divider, the frame's own colour at 30%. */
+/* The views row, rendered only where there's one to show (navState). The
+   rule above it is the panel's divider, the frame's own colour at 30%. */
 .views {
-  display: none;
   gap: 6px 30px;
   padding: 11px 20px 12px 17px;
   border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
 }
-.views.f-default { display: flex; }
-.media-nav:has(.mt-radio:checked) .views { display: none; }
 /* Every word is ink and the cursor alone marks your place, as in an SNES
    menu (2026-10-31). --muted is the label colour, and in the panel right
    below it that's what it means. */
@@ -2520,7 +2510,7 @@ main {
 }
 @keyframes cursor-bob { 50% { transform: translateX(2px); } }
 @media (prefers-reduced-motion: reduce) {
-  .mt-radio:checked + .med-label::before,
+  .med-label.is-open::before,
   .views a:hover::before,
   .views a:focus-visible::before,
   .views a[aria-current]::before { animation: none; }
@@ -2537,12 +2527,13 @@ main {
 }
 @media (max-width: 34rem) {
   /* Below the band, the same 2.75rem the dropped nav row used (2026-10-25);
-     the window runs the column. A closed medium is its icon; the open one
-     adds its word; about sits at the right end. */
+     the window runs the column, about at its right end. Every tab keeps its
+     word since 2026-11-03 (only the open one did): with movies in etc the
+     row is games · tabletop · etc · about, which fits a 390px phone. A
+     longer row wraps. */
   .media-nav { width: auto; align-self: stretch; margin-top: 2.75rem; }
-  .media { gap: 6px 10px; padding: 10px 8px 9px; }
+  .media { gap: 6px 14px; padding: 10px 8px 9px; }
   .med-label { gap: 6px; }
-  .mt-radio:not(:checked) + .med-label .med-word { display: none; }
   .med-about { margin-left: auto; }
   /* Tight enough that all five views fit one line at 390px in Pixelify
      (2026-10-25, when log made it five). Pixel Operator is wider, 396px
@@ -2551,14 +2542,99 @@ main {
   .views { gap: 6px 6px; padding: 10px 8px 9px; }
   .views a { gap: 4px; }
 }
+/* ---------------------------------------------------------------- groups
+   A group's landing page, the band at its head, the cards, and the small
+   links that tie subjects to their group (2026-11-03; the model is in
+   eleventy.config.js → groups, the why in chaosh.at Decisions). The page is
+   a view page (.tag) in the daily's shell; everything here is what it adds. */
+
+/* "movies ›" over a subject's title: the way back to its group. */
+.group-link {
+  display: inline-block;
+  margin: 0 0 6px;
+  font: 8px/16px var(--pixel);
+  color: var(--muted);
+  text-decoration: none;
+}
+.group-link:hover,
+.group-link:focus-visible { color: var(--ink); }
+/* A section that wore a face, named beside its date on the subject page. */
+.fragment-face { font: 8px/14px var(--pixel); color: var(--muted); }
+
+.group-head h1 { display: flex; align-items: center; gap: 12px; }
+.group-head h1 .mico { width: 24px; height: 24px; vertical-align: 0; }
+
+/* The band: one strip of the shelf's cards under a heading line that names
+   it and links the fuller views. One row at every width — the shelf grid's
+   own column count (2 to 5, see .shelf-grid) — so it reads as a taste, not
+   a second shelf; the eleventy side caps it at five. */
+.group-band { margin: 0 0 2.5rem; }
+.band-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin: 0 0 14px;
+  font: 400 16px/1 var(--pixel);
+}
+.band-link { font: 8px/16px var(--pixel); color: var(--muted); text-decoration: none; }
+.band-link:hover,
+.band-link:focus-visible { color: var(--ink); }
+.band-strip > :nth-child(n + 3) { display: none; }
+@media (min-width: 34rem) { .band-strip > :nth-child(3) { display: block; } }
+@media (min-width: 44rem) { .band-strip > :nth-child(4) { display: block; } }
+@media (min-width: 52rem) { .band-strip > :nth-child(5) { display: block; } }
+
+/* A bandless group's subjects as words (nfl · mlb · nba · nhl). */
+.group-subjects { margin: 0 0 2.5rem; font: 16px/24px var(--pixel); color: var(--muted); }
+.group-subjects a { text-decoration: none; }
+
+/* A card's two lines where a subject card has its cells: the vibe in plain
+   ink, two lines at most and left-set (a centred wrapped line can't be kept
+   on whole pixels), then the date Hat typed it, muted. */
+.shelf-card .cell.vibe {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  padding: 5px 7px;
+  font: 8px/14px var(--pixel);
+  color: var(--ink);
+  text-align: left;
+}
+.shelf-card .cell.as-of { padding: 5px 7px; font: 8px/1 var(--pixel); color: var(--muted); }
+.card-static { display: block; color: inherit; }
+
+/* A card with its prose, heading the subject page it belongs to. */
+.team-cards { display: grid; gap: 1.75rem; margin: 0 0 2.75rem; }
+.team-card { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0 1.25rem; align-items: start; }
+.team-tile.shelf-grid { grid-template-columns: 1fr; }
+.team-name { margin: 0 0 6px; font: 400 24px/32px var(--pixel); }
+.team-vibe { margin: 0 0 10px; }
+.team-why > :last-child { margin-bottom: 0; }
+@media (max-width: 34rem) {
+  .team-card { grid-template-columns: 6rem 1fr; }
+}
+
 /* ---------------------------------------------------------------- clouds
    The about page's word clouds (wordcloud.js, 2026-10-30): one window, one
-   cloud showing, a tab per cloud. The radios are the media tabs' (.mt-radio,
+   cloud showing, a tab per cloud. The radios are .mt-radio (the nav's, once;
    hidden but keyboard-reachable) and sit first in .clouds so `:checked ~`
    reaches the tabs and the panels alike. Four sizes on the pixel face's 8px
    lattice, c1 (the 16px body size) to c4 (40px); the vocabulary steps from
    muted to ink to accent with its size, the subjects wear their own hue. */
 .clouds { margin: 1.5rem 0 2rem; }
+/* The tab radios, kept for the keyboard (arrow keys walk the tabs) and
+   hidden from sight. The nav's tabs used the same class until they became
+   links (2026-11-03); the rule lives here now. */
+.mt-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 .cloud-tabs {
   display: flex;
   flex-wrap: wrap;

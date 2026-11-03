@@ -48,11 +48,14 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="stylesheet" href="/css/style.css">
-    {#- Which window the checked tab shows: one line per medium, generated
-        so a medium added to site.yaml needs no CSS edit. See style.css →
-        "the media nav". -#}
-    <style>{{ groupStyle | safe }}{% for m in collections.groupPages | selectattr("tabbed") %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:flex}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:flex}</style>
+    {#- Each group's colour and icon, from site.yaml (groupStyle). -#}
+    <style>{{ groupStyle | safe }}</style>
+    {#- Two feeds (2026-11-03), in this order on every page: a reader's
+        subscribe button takes the first alternate, and the first must be the
+        whole blog, so nobody lands on the narrow one by accident. Titled so
+        a reader that lists both shows "chaosh.at" and "chaosh.at · essays". -#}
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
+    <link rel="alternate" type="application/atom+xml" href="/essays/feed.xml" title="{{ site.title }} · essays">
   </head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
       whole shell; everything else gets the narrower, centred reading column.
@@ -71,60 +74,52 @@
           auroras mean) sat under the wordmark, home page only, from
           2026-10-25 to 2026-11-02; it's in the footer now, every page. -#}
 
-      {#- The media nav: one window, two rows. The media row is one word per
-          medium that is switched on in site.yaml and has a subject, games
-          first, then about; the ▶ cursor marks the open one. Under a rule,
-          the open medium's views. A view only appears once it has something
-          in it, the same rule as the media. Drawn in style.css → "media nav".
+      {#- The nav: one window, at most two rows. The tab row is one word per
+          tabbed group (site.yaml `tabs:`, each once it has a subject), then
+          etc (once an untabbed group has one), then about. Each word is a
+          link to its page (2026-11-03: /<group>/, /etc/, /about/) — it
+          reverses 10-25's "tab opens, doesn't navigate", because there is
+          now a page to go to — and the ▶ cursor marks the tab you're
+          inside. Nothing is lit on the home page.
 
-          A medium word opens its views; it doesn't navigate (Hat,
-          2026-10-25: "Tab opens the window is correct"). Like a game menu,
-          picking the medium shows what's inside, and picking a view is the
-          second press. No script: each medium is a radio and its label, and
-          the checked radio decides which views list shows (style.css, plus
-          the per-medium lines in <head>). The page's own medium starts
-          checked: games wherever a page isn't about one medium, the home
-          page included; about on the site's own pages.
-          Folder tabs joined to a window from 2026-10-25 to 2026-11-02; the
-          cursor row replaced them (Decisions, 2026-11-02). -#}
-      {%- set onAbout = page.url == "/about/" or page.url == "/links/" or page.url == "/guestbook/" %}
-      {%- set tabGroups = collections.groupPages | selectattr("tabbed") | list %}
+          The views row appears only inside something (navState in
+          eleventy.config.js): inside a tabbed group it is the group's bands
+          as words (canon · shelf · best of · essays · log, each hidden until
+          it has content); inside etc it is the busiest etc groups, then
+          "all →"; on the site's own pages, me · links · guestbook · feed.
+          Home, dailies, the archive, essays, tags and ratings get the one
+          row: the fold-height goal 11-02 started. Folder tabs joined to a
+          window from 2026-10-25 to 2026-11-02, radios that opened a window
+          until 2026-11-03 (Decisions, those dates). -#}
       {%- set gid = (group.id if group and group.id) or (subject.group if subject and subject.group) or "" %}
-      {%- set openId = tabGroups | openTab(gid) %}
-      {%- set onView = navView and group %}
-      {%- if tabGroups | length %}
+      {%- set nav = collections.groupPages | navState(gid, page.url, navView) %}
+      {%- set etcLive = collections.groupPages | rejectattr("tabbed") | list | length %}
+      {%- set aboutUrl = "/about/" if collections.pages | length else "/links/" %}
       <nav class="media-nav win" aria-label="Sections"><div class="win-in">
         <ul class="media">
-          {%- for m in tabGroups %}
-          <li class="med m-{{ m.id }}">
-            <input type="radio" name="media-tab" id="mt-{{ m.id }}" class="mt-radio" aria-label="{{ m.label }}"{% if m.id == openId and not onAbout %} checked{% endif %}>
-            <label for="mt-{{ m.id }}" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">{{ m.label }}</span></label>
-          </li>
+          {%- for m in tabs %}
+          <li class="med m-{{ m.id }}"><a class="med-label{% if nav.tab == m.id %} is-open{% endif %}" href="{{ m.urls.home }}"{% if page.url == m.urls.home %} aria-current="page"{% endif %}><span class="mico" aria-hidden="true"></span><span class="med-word">{{ m.label }}</span></a></li>
           {%- endfor %}
-          <li class="med m-about med-about">
-            <input type="radio" name="media-tab" id="mt-about" class="mt-radio" aria-label="about"{% if onAbout %} checked{% endif %}>
-            <label for="mt-about" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></label>
-          </li>
+          {%- if etcLive %}
+          <li class="med m-etc"><a class="med-label{% if nav.tab == 'etc' %} is-open{% endif %}" href="/etc/"{% if page.url == '/etc/' %} aria-current="page"{% endif %}><span class="mico" aria-hidden="true"></span><span class="med-word">etc</span></a></li>
+          {%- endif %}
+          <li class="med m-about med-about"><a class="med-label{% if nav.tab == 'about' %} is-open{% endif %}" href="{{ aboutUrl }}"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></a></li>
         </ul>
-        {%- for m in tabGroups %}
-        {%- set u = m.urls %}
-        {%- set here = onView and group.id == m.id %}
-        <ul class="views f-{{ m.id }}{% if m.id == openId and not onAbout %} f-default{% endif %}">
-          {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
-          <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
-          {% if m.featured | length %}<li><a href="{{ u.best }}"{% if here and navView == "best" %} aria-current="page"{% endif %}>best of</a></li>{% endif %}
-          {% if m.essays | length %}<li><a href="{{ u.essays }}"{% if here and navView == "essays" %} aria-current="page"{% endif %}>essays</a></li>{% endif %}
-          {% if m.log | length %}<li><a href="{{ u.log }}"{% if here and navView == "log" %} aria-current="page"{% endif %}>log</a></li>{% endif %}
+        {%- if nav.row == "list" and nav.items | length %}
+        <ul class="views">
+          {%- for it in nav.items %}
+          <li><a href="{{ it.url }}"{% if it.current %} aria-current="page"{% endif %}>{{ it.label }}</a></li>
+          {%- endfor %}
         </ul>
-        {%- endfor %}
-        <ul class="views f-about{% if onAbout %} f-default{% endif %}">
+        {%- elif nav.row == "about" %}
+        <ul class="views">
           {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
           <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
           <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
           <li><a href="/feed.xml">feed</a></li>
         </ul>
+        {%- endif %}
       </div></nav>
-      {%- endif %}
     </header>
 
 

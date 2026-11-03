@@ -962,6 +962,11 @@ export default function (eleventyConfig) {
   eleventyConfig.addCollection("groupLogPages", (api) => buildGroupPages(api)
     .filter((g) => g.log.length));
 
+  // A subject's cards: every card in its group naming it as `subject:`.
+  eleventyConfig.addFilter("cardsFor", (subject, groupPages) =>
+    (groupPages ?? []).find((g) => g.id === subject?.group)?.cards
+      .filter((c) => c.subject === subject.slug) ?? []);
+
   // The etc groups, busiest first, for /etc/ and the etc views row. Each
   // carries its rank on every sort axis the page offers, the shelf's trick:
   // CSS can't sort, but it can read a number (see shelfRanks).
@@ -2055,8 +2060,9 @@ export default function (eleventyConfig) {
           entries.push({
             kind: "fragment",
             date: fragment.date,
-            url: fragment.sourceUrl,
+            url: fragment.anchorUrl,
             subject,
+            face: fragment.face,
             html: fragment.html,
           });
         }
@@ -2118,8 +2124,9 @@ export default function (eleventyConfig) {
           entries.push({
             kind: "fragment",
             date: fragment.date,
-            url: fragment.sourceUrl,
+            url: fragment.anchorUrl,
             subject,
+            face: fragment.face,
             html: fragment.html,
           });
         }

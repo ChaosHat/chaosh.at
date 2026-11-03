@@ -23,6 +23,11 @@ eleventyComputed:
     <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
     {%- endif %}
     <div>
+      {#- The way from a subject back to its group (2026-11-03): for a
+          demoted group's subject the only path to its canon and shelf, which
+          hang off the group's page. -#}
+      {%- set g = groupInfo[subject.group] %}
+      {% if g %}<a class="group-link" href="{{ g.urls.home }}">{{ g.label }} ›</a>{% endif %}
       <h1>{{ subject.title }}</h1>
       {#- One square per day written about, long gaps folded into a labelled
           break, running on to today on active subjects. See foldStrip. -#}
@@ -31,19 +36,20 @@ eleventyComputed:
         {%- for seg in subject.litDays.segments %}{% if seg.gap %}<span class="gap{% if seg.tail %} tail{% endif %}">{{ seg.gap }}</span>{% else %}{% for d in seg.days %}<span class="{% if d.lit %}on{% endif %}{% if d.today %} today{% endif %}"{% if d.lit %} style="--i:{{ d.i }};--h:{{ d.h }}px"{% endif %} title="{{ d.key }}{% if d.lit %} · {{ d.words }} words{% endif %}"></span>{% endfor %}{% endif %}{% endfor -%}
       </p>
       {% endif %}
-      {#- A non-media subject (mediaKnown, eleventy.config.js) has no status
-          or verdict to show, so both chips go, and the row with them unless
-          it has tags. -#}
-      {%- set g = groupInfo[subject.group] %}
+      {#- The chips follow the group's bands: status where it has a shelf,
+          the verdict where it has a canon. A bandless subject (Aurora
+          Watch, a league) has neither, and the row goes unless it has tags. -#}
       {%- set isMedium = g and (g.hasShelf or g.hasCanon) %}
       {% if isMedium or subject.tags | length %}
       <p class="subject-meta">
         {#- Canon is the top rung, but it leads the row and goes gold, and it
             links to /canon/ — the ten, their history, the essays about them
             — rather than to the bare /r/canon/ view. -#}
-        {% if subject.canon %}<a class="badge badge-g b-canon" href="/canon/">canon</a>{% endif %}
-        {% if isMedium %}
+        {% if subject.canon %}<a class="badge badge-g b-canon" href="{{ g.urls.canon if g else '/canon/' }}">canon</a>{% endif %}
+        {% if g and g.hasShelf %}
         <span class="badge b-{{ subject.status }}">{{ subject.status | statusWord(subject.group) }}</span>
+        {% endif %}
+        {% if g and g.hasCanon %}
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A
             canon subject's rung is the gold badge above, not a second chip.
@@ -70,6 +76,18 @@ eleventyComputed:
     </div>
   </header>
 
+  {#- A cards group's cards head the page of the subject they belong to
+      (2026-11-03: the Bears and their vibe line on NFL, the Cubs on MLB):
+      the card, then why Hat follows them. Anchored, so the group page's
+      band can link straight to one. -#}
+  {%- from "cards.njk" import row %}
+  {%- set myCards = subject | cardsFor(collections.groupPages) %}
+  {% if myCards | length %}
+  <section class="team-cards">
+    {% for c in myCards %}{{ row(c) }}{% endfor %}
+  </section>
+  {% endif %}
+
   {#- Essays pinned first: the most considered writing on the page shouldn't
       sit buried under a replay's fragments. Lede + link only — full text has
       exactly one home, the essay's own /e/ page. Subject pages pin; tag views
@@ -93,7 +111,9 @@ eleventyComputed:
     {% if subject.essays | length %}<h2 class="section-head">Along the way</h2>{% endif %}
     {% for fragment in subject.fragments %}
     <div class="fragment">
-      <a class="fragment-date" href="{{ fragment.sourceUrl }}">{{ fragment.date | readableDate }}</a>
+      {#- Back to the section in its day. A section that wore a face (`##
+          Bears` on NFL's page) says so beside its date. -#}
+      <a class="fragment-date" href="{{ fragment.anchorUrl }}">{{ fragment.date | readableDate }}</a>{% if fragment.face %} <span class="fragment-face">{{ fragment.face.title }}</span>{% endif %}
       {{ fragment.html | safe }}
     </div>
     {% endfor %}

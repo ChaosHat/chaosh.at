@@ -1,0 +1,92 @@
+---
+layout: base.njk
+pagination:
+  data: collections.groupPages
+  size: 1
+  alias: group
+  addAllPagesToCollections: false
+navView: home
+permalink: "{{ group.urls.home }}"
+eleventyComputed:
+  title: "{{ group.label | capitalize }}"
+  description: "{{ group.description | safe if group.description else '' }}"
+---
+{#- A group's landing page (2026-11-03), one per group with a subject, tab
+    or not, at the bare /<group>/. Flat: one scroll, no second menu beyond
+    the views row — the same idea as a subject page one level up. The group
+    says who it is, shows its taste in one strip, names its subjects when
+    there's no shelf to find them on, then everything written about it,
+    newest first. Every band hides until it has something in it. -#}
+{%- from "cards.njk" import tile %}
+<article class="tag group-page">
+  <header class="tag-head group-head">
+    <h1>{% if group.hasIcon %}<span class="mico m-{{ group.id }}" aria-hidden="true"></span>{% endif %}{{ group.label }}</h1>
+    {% if group.description %}<p class="tag-desc">{{ group.description }}</p>{% endif %}
+  </header>
+
+  {#- The card band: one strip, the group's "here's my taste" (see BAND_MAX
+      in eleventy.config.js for what fills it). The CSS keeps it to the row
+      that fits, so it never wraps into a shelf. The fuller views it stands
+      for sit on its heading line — for a group in etc, whose views row is
+      etc's, the only way to its canon and shelf. -#}
+  {% if group.band or group.bandLinks | length %}
+  <section class="group-band band-{{ group.band.kind if group.band else 'none' }}">
+    <h2 class="band-head">
+      {% if group.band %}<span class="band-title">{{ group.band.title }}</span>{% endif %}
+      {% for l in group.bandLinks %}<a class="band-link" href="{{ l.url }}">{{ l.label }} →</a>{% endfor %}
+    </h2>
+    {% if group.band %}
+    <ul class="shelf-grid band-strip{% if group.coverFit %} shelf-fit{% endif %}">
+      {% for item in group.band.items %}
+      {% if group.band.kind == "cards" %}
+      {{ tile(item, ("/s/" + item.subject + "/#" + item.anchor) if item.subject else false) }}
+      {% else %}
+      <li class="shelf-item{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}">
+        <a href="/s/{{ item.slug }}/">
+          <span class="shelf-card">
+            <span class="shelf-art">
+              {% if item.coverUrl %}
+              <img class="shelf-cover{% if item.coverBox %} is-box{% endif %}" src="{{ item.coverUrl }}" alt="{{ item.title }} cover art" decoding="async">
+              {% else %}
+              <span class="sky" style="background-image:url({{ item.skyUrl }})" aria-hidden="true"></span>
+              {% endif %}
+            </span>
+            {#- The canon strip says canon once per card, like /canon/; the
+                shelf strip carries the shelf's two cells. -#}
+            {% if group.band.kind == "canon" %}
+            <span class="cell rating badge-g b-canon">canon</span>
+            {% else %}
+            <span class="cell badge b-{{ item.status }}">{{ item.status | statusWord(item.group) }}</span>
+            {% if item.canon %}<span class="cell rating badge-g b-canon">canon</span>
+            {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
+            {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
+            {% endif %}
+          </span>
+          <span class="shelf-caption">{{ item.title }}</span>
+        </a>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {#- Several subjects and no shelf to browse them on (sports' leagues): the
+      subjects as a word row, busiest first. -#}
+  {% if group.subjectRow | length %}
+  <p class="group-subjects">{% for s in group.subjectRow %}<a href="/s/{{ s.slug }}/">{{ s.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+  {% endif %}
+
+  {#- The log: every ## section about the group's subjects, newest first,
+      each with its subject's cover in the art column; essays at their date,
+      lede and link. The view pages' timeline, verbatim. -#}
+  {% if group.stream | length %}
+  <section class="timeline">
+    {%- set entries = group.stream %}
+    {% include "timeline.njk" %}
+  </section>
+  {% else %}
+  <p class="empty">Nothing written yet.</p>
+  {% endif %}
+</article>
