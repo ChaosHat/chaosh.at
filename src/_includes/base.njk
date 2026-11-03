@@ -212,11 +212,6 @@
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
       {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
       <p><a href="/feed.xml">feed</a></p>
-      {#- The XXIIVV webring (2026-11-02). Their icon, inlined rather than
-          hotlinked so it strokes in currentColor: the stock black.svg
-          vanishes on this sky and white.svg would outshine the muted links.
-          Sized to the 18px text line. The hash is our id in their index. -#}
-      <p class="footer-ring"><a href="https://webring.xxiivv.com/#chaosh" target="_blank" rel="noopener" aria-label="XXIIVV webring" title="XXIIVV webring"><svg viewBox="0 0 300 300" width="18" height="18" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="28" aria-hidden="true"><path d="M201.962 210a60 60 0 10-103.924-60l-50 86.603M98.038 210a60 60 0 10103.924-60l-50-86.603M150 120a60 60 0 100 120h100"/></svg></a></p>
       {#- Not By AI's "Written by Human" badge: true of every word of prose
           here; it makes no claim about the code. Their file,
           unmodified — their guidelines forbid altering it and set a 42px
