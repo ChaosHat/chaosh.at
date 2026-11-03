@@ -1183,9 +1183,6 @@ export default function (eleventyConfig) {
     .filter((g) => g.color || g.hasIcon)
     .map((g) => `.m-${g.id}{${g.color ? `--mc:${g.color};` : ""}${g.hasIcon ? `--mico:url("${g.icon}")` : ""}}`)
     .join(""));
-  // Step-2 nav (radios): the page's own tab if it is one, else the first.
-  eleventyConfig.addFilter("openTab", (tabs, gid) =>
-    (tabs ?? []).some((t) => t.id === gid) ? gid : tabs?.[0]?.id ?? DEFAULT_GROUP);
   eleventyConfig.addFilter("groupNoun", (g) => GROUP.get(g)?.noun ?? g);
   eleventyConfig.addFilter("statusWord", (status, g) =>
     GROUP.get(g)?.statusWords?.[status] ?? status);
@@ -2218,8 +2215,8 @@ export default function (eleventyConfig) {
     return { roster, joined, problems };
   };
 
-  // One canon per medium (2026-10-25), ten-ish rather than a strict ten.
-  // Called once per medium by the mediumPages collection.
+  // One canon per group with a canon band (per medium from 2026-10-25),
+  // ten-ish rather than a strict ten. Called once per group by groupPages.
   const canonFor = (api, medium) => {
     const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
     const essays = buildEssayList(api);
