@@ -51,7 +51,7 @@
     {#- Which window the checked tab shows: one line per medium, generated
         so a medium added to site.yaml needs no CSS edit. See style.css →
         "the media nav". -#}
-    <style>{% for m in collections.mediumPages %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:flex}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:flex}</style>
+    <style>{{ groupStyle | safe }}{% for m in collections.groupPages | selectattr("tabbed") %}.media-nav:has(#mt-{{ m.id }}:checked) .f-{{ m.id }}{display:flex}{% endfor %}.media-nav:has(#mt-about:checked) .f-about{display:flex}</style>
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
   </head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
@@ -88,12 +88,14 @@
           Folder tabs joined to a window from 2026-10-25 to 2026-11-02; the
           cursor row replaced them (Decisions, 2026-11-02). -#}
       {%- set onAbout = page.url == "/about/" or page.url == "/links/" or page.url == "/guestbook/" %}
-      {%- set openId = ((medium.id if medium and medium.id) or (subject.medium if subject and subject.medium) or "") | openMedium %}
-      {%- set onView = navView and medium %}
-      {%- if collections.mediumPages | length %}
+      {%- set tabGroups = collections.groupPages | selectattr("tabbed") | list %}
+      {%- set gid = (group.id if group and group.id) or (subject.group if subject and subject.group) or "" %}
+      {%- set openId = tabGroups | openTab(gid) %}
+      {%- set onView = navView and group %}
+      {%- if tabGroups | length %}
       <nav class="media-nav win" aria-label="Sections"><div class="win-in">
         <ul class="media">
-          {%- for m in collections.mediumPages %}
+          {%- for m in tabGroups %}
           <li class="med m-{{ m.id }}">
             <input type="radio" name="media-tab" id="mt-{{ m.id }}" class="mt-radio" aria-label="{{ m.label }}"{% if m.id == openId and not onAbout %} checked{% endif %}>
             <label for="mt-{{ m.id }}" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">{{ m.label }}</span></label>
@@ -104,9 +106,9 @@
             <label for="mt-about" class="med-label"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></label>
           </li>
         </ul>
-        {%- for m in collections.mediumPages %}
+        {%- for m in tabGroups %}
         {%- set u = m.urls %}
-        {%- set here = onView and medium.id == m.id %}
+        {%- set here = onView and group.id == m.id %}
         <ul class="views f-{{ m.id }}{% if m.id == openId and not onAbout %} f-default{% endif %}">
           {% if m.canon.members | length %}<li><a href="{{ u.canon }}"{% if here and navView == "canon" %} aria-current="page"{% endif %}>canon</a></li>{% endif %}
           <li><a href="{{ u.shelf }}"{% if here and navView == "shelf" %} aria-current="page"{% endif %}>shelf</a></li>
@@ -150,7 +152,7 @@
           when it overflows. -#}
       <div class="now-items">
         {% for item in playing %}
-        <a class="now-item" href="/s/{{ item.slug }}/">{% if item.groupFirst %}<span class="mico m-{{ item.medium }}" role="img" aria-label="{{ item.medium | mediumNoun }}"></span>{% endif %}{{ item.title }}</a>
+        <a class="now-item" href="/s/{{ item.slug }}/">{% if item.groupFirst %}<span class="mico m-{{ item.group }}" role="img" aria-label="{{ item.group | groupNoun }}"></span>{% endif %}{{ item.title }}</a>
         {% endfor %}
       </div>
     </div>

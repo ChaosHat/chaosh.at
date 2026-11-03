@@ -1329,7 +1329,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   object-fit: contain;
   object-position: center bottom;
 }
-.shelf-grid.shelf-tabletop :is(.shelf-cover, .sky) {
+.shelf-grid.shelf-fit :is(.shelf-cover, .sky) {
   aspect-ratio: 1 / 1;
 }
 

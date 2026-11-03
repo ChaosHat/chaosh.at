@@ -10,7 +10,9 @@ layout: base.njk
     <h1 class="post-date">{{ page.date | readableDate }}</h1>
     {% endif %}
   </header>
-  {{ content | linkSubjects | spoilers | safe }}
+  {#- linkSubjects(true): each section gets its anchor (eleventy.config.js,
+      sectionAnchors), on this page only. -#}
+  {{ content | linkSubjects(true) | spoilers | safe }}
   {#- Day-scoped: the union of the tags of every subject this post files to.
       Only on the full post — the home page shows truncated bodies, where a
       footer covering sections that were cut would be a lie. -#}

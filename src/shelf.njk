@@ -2,20 +2,20 @@
 layout: base.njk
 wide: true
 pagination:
-  data: collections.mediumPages
+  data: collections.groupShelfPages
   size: 1
-  alias: medium
+  alias: group
   addAllPagesToCollections: false
 navView: shelf
-permalink: "{{ medium.urls.shelf }}"
+permalink: "{{ group.urls.shelf }}"
 eleventyComputed:
-  title: "{{ medium.label | capitalize }}"
+  title: "{{ group.label | capitalize }}"
 ---
 {#- One shelf per medium (2026-10-25): /shelf/ is games, /shelf/<medium>/
     every other. From 2026-09-11 until then it was one shelf for everything
     with a category filter chip beside the sort; the media tabs replaced the
     filter. -#}
-{% set items = medium.subjects | shelveSort | shelfRanks %}
+{% set items = group.subjects | shelveSort | shelfRanks %}
 
 <h1>{{ title }}</h1>
 
@@ -77,7 +77,7 @@ eleventyComputed:
     one falls back to its generated tile, stretched by CSS to the cover's 2:3,
     so the original guarantee holds (no shelf goes blank waiting on an image)
     and a half-covered shelf still lays out as one even grid. -#}
-<ul class="shelf-grid shelf-{{ medium.id }}">
+<ul class="shelf-grid shelf-{{ group.id }}{% if group.coverFit %} shelf-fit{% endif %}">
   {% for item in items %}
   <li class="shelf-item st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
     <a href="/s/{{ item.slug }}/">
@@ -96,7 +96,7 @@ eleventyComputed:
             inside an <a> is invalid — the parser closes the outer one early
             and the tile's layout comes apart. The rung's view is one click
             further, from the subject page. -#}
-        <span class="cell badge b-{{ item.status }}">{{ item.status | statusWord(item.medium) }}</span>
+        <span class="cell badge b-{{ item.status }}">{{ item.status | statusWord(item.group) }}</span>
         {#- The rating cell. Canon supersedes (ratingOf returns null for the
             ten) and takes the cell itself, gold with the ♥, so the top of the
             ladder is read in the same place as every other rung. The rung

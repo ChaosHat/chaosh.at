@@ -34,7 +34,8 @@ eleventyComputed:
       {#- A non-media subject (mediaKnown, eleventy.config.js) has no status
           or verdict to show, so both chips go, and the row with them unless
           it has tags. -#}
-      {%- set isMedium = subject.medium in mediaKnown %}
+      {%- set g = groupInfo[subject.group] %}
+      {%- set isMedium = g and (g.hasShelf or g.hasCanon) %}
       {% if isMedium or subject.tags | length %}
       <p class="subject-meta">
         {#- Canon is the top rung, but it leads the row and goes gold, and it
@@ -42,7 +43,7 @@ eleventyComputed:
             — rather than to the bare /r/canon/ view. -#}
         {% if subject.canon %}<a class="badge badge-g b-canon" href="/canon/">canon</a>{% endif %}
         {% if isMedium %}
-        <span class="badge b-{{ subject.status }}">{{ subject.status | statusWord(subject.medium) }}</span>
+        <span class="badge b-{{ subject.status }}">{{ subject.status | statusWord(subject.group) }}</span>
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A
             canon subject's rung is the gold badge above, not a second chip.
