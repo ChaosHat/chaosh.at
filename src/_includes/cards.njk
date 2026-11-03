@@ -24,14 +24,14 @@
 </li>
 {% endmacro %}
 
-{#- A card with its prose, on the subject page it belongs to: the tile in the
-    art column, why Hat follows them beside it. -#}
+{#- A card with its prose, on the subject page it belongs to: the tile (with
+    its vibe and date) on the left, the name and why Hat follows them beside
+    it. -#}
 {% macro row(c) %}
 <div class="team-card" id="{{ c.anchor }}">
   <ul class="shelf-grid team-tile">{{ tile(c, false) }}</ul>
   <div class="team-why">
     <h2 class="team-name">{{ c.title }}</h2>
-    {% if c.vibe %}<p class="team-vibe">{{ c.vibe }}{% if c.asOf %} <span class="archive-note">as of {{ c.asOf | shortDate }}</span>{% endif %}</p>{% endif %}
     {% if c.whyHtml %}{{ c.whyHtml | safe }}{% endif %}
   </div>
 </div>

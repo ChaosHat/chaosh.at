@@ -1333,7 +1333,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   object-fit: contain;
   object-position: center bottom;
 }
-.shelf-grid.shelf-fit :is(.shelf-cover, .sky) {
+.shelf-grid.shelf-tabletop :is(.shelf-cover, .sky) {
   aspect-ratio: 1 / 1;
 }
 
@@ -2532,11 +2532,13 @@ main {
      row is games · tabletop · etc · about, which fits a 390px phone. A
      longer row wraps. */
   .media-nav { width: auto; align-self: stretch; margin-top: 2.75rem; }
-  .media { gap: 6px 8px; padding: 10px 8px 9px; }
-  .med-label { gap: 6px; }
-  /* Only the open tab keeps a cursor slot: four slots were the 40px that
-     pushed about onto a second row. */
-  .med-label:not(.is-open)::before { display: none; }
+  .media { gap: 6px 7px; padding: 10px 6px 9px; }
+  .med-label { gap: 4px; }
+  /* No cursor slot in the tab row on a phone (2026-11-03): four slots
+     were the 40px that pushed about onto a second row, and even the open
+     tab's one slot did. The open tab is still bold and in ink; the views
+     row under it keeps its cursor. */
+  .med-label::before { display: none; }
   /* About is its icon unless it's open (the old rule for every closed tab,
      kept for the last one): with every word the row ran ~36px over at
      390px, and the person icon at the row's end reads on its own. */
@@ -2612,13 +2614,14 @@ main {
 }
 .shelf-card .cell.as-of { padding: 5px 7px; font: 8px/1 var(--pixel); color: var(--muted); }
 .card-static { display: block; color: inherit; }
+/* A fitted logo centres in its slot; a box stands on the slot's floor. */
+.card-item .shelf-cover.is-box { object-position: center; }
 
 /* A card with its prose, heading the subject page it belongs to. */
 .team-cards { display: grid; gap: 1.75rem; margin: 0 0 2.75rem; }
 .team-card { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0 1.25rem; align-items: start; }
 .team-tile.shelf-grid { grid-template-columns: 1fr; }
 .team-name { margin: 0 0 6px; font: 400 24px/32px var(--pixel); }
-.team-vibe { margin: 0 0 10px; }
 .team-why > :last-child { margin-bottom: 0; }
 @media (max-width: 34rem) {
   .team-card { grid-template-columns: 6rem 1fr; }

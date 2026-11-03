@@ -77,7 +77,7 @@ eleventyComputed:
     one falls back to its generated tile, stretched by CSS to the cover's 2:3,
     so the original guarantee holds (no shelf goes blank waiting on an image)
     and a half-covered shelf still lays out as one even grid. -#}
-<ul class="shelf-grid shelf-{{ group.id }}{% if group.coverFit %} shelf-fit{% endif %}">
+<ul class="shelf-grid shelf-{{ group.id }}">
   {% for item in items %}
   <li class="shelf-item st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
     <a href="/s/{{ item.slug }}/">

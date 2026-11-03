@@ -60,6 +60,15 @@ groups:
   site:
     label: site
     description: Everything about tinkering with and building the site you see here.
+  # Sports (2026-11-03): subjects are leagues (NFL, NBA, MLB, NHL), Bears is
+  # a face of NFL, and the teams are cards in teams.yaml. No canon, shelf or
+  # ratings. Starts in etc; promote by frequency.
+  sports:
+    noun: league
+    bands: [cards]
+    cards: teams
+    covers: hand
+    cover_fit: true
 # The groups with a nav spot, in order. Every declared group not listed here
 # lands in etc. Dropping one is a demotion, never a disappearance: nothing it
 # built goes away. Promotion and demotion are always this hand edit.

@@ -36,7 +36,9 @@ eleventyComputed:
       {% for l in group.bandLinks %}<a class="band-link" href="{{ l.url }}">{{ l.label }} →</a>{% endfor %}
     </h2>
     {% if group.band %}
-    <ul class="shelf-grid band-strip{% if group.coverFit %} shelf-fit{% endif %}">
+    {#- shelf-<group>: the band takes its shelf's slot shape (tabletop's
+        boxes stand in square slots, everything else is 2:3). -#}
+    <ul class="shelf-grid band-strip shelf-{{ group.id }}">
       {% for item in group.band.items %}
       {% if group.band.kind == "cards" %}
       {{ tile(item, ("/s/" + item.subject + "/#" + item.anchor) if item.subject else false) }}
