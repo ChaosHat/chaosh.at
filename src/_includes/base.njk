@@ -212,6 +212,13 @@
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
       {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
       <p><a href="/feed.xml">feed</a></p>
+      {#- The IndieWeb Webring (2026-11-02), joined by signing in with the
+          Bluesky handle. Their snippet as given: the ring now resolves
+          neighbours from the Referer, so the links carry no member slug, and
+          strict-origin-when-cross-origin still sends https://chaosh.at. Its
+          checker wants both links on the homepage; the footer is on every
+          page, so that's met. -#}
+      <p><a href="https://xn--sr8hvo.ws/previous">&larr;</a> an <a href="https://xn--sr8hvo.ws">IndieWeb Webring</a> 🕸💍 <a href="https://xn--sr8hvo.ws/next">&rarr;</a></p>
       {#- Not By AI's "Written by Human" badge: true of every word of prose
           here; it makes no claim about the code. Their file,
           unmodified — their guidelines forbid altering it and set a 42px
