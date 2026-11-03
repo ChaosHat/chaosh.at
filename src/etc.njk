@@ -1,0 +1,60 @@
+---
+layout: base.njk
+pagination:
+  data: collections.etcPage
+  size: 1
+  alias: etcPage
+  addAllPagesToCollections: false
+permalink: /etc/
+title: etc
+description: Everything else I write about, busiest first.
+---
+{#- The etc tab's page (2026-11-03): every group not in `tabs:`, each with
+    its subjects under it, ranked by frecency (eleventy.config.js → frecency:
+    recent writing weighs most, an essay three times a section). The tab
+    links here, so nothing in etc is ever out of reach, however many groups
+    it holds — the views row shows the busiest few, this shows all of them
+    (Hat: "I don't want to exceed the limit and forget for three months and
+    then a bunch of things aren't accessible"). A one-subject group's name
+    goes straight to that subject's page; a bigger one's to its group page.
+
+    Sort, in CSS, the shelf's way: each row carries its rank on every axis
+    (etcRanks), and the checked radio picks which one `order` reads. DOM
+    order is the score order, so the default needs no rule. -#}
+{%- set groups = collections.etcGroups %}
+<article class="tag etc-page">
+  <header class="tag-head group-head">
+    <h1><span class="mico m-etc" aria-hidden="true"></span>etc</h1>
+    <p class="tag-desc">{{ description }}</p>
+  </header>
+  <div class="etc-sorter">
+    {% if groups | length > 1 %}
+    <fieldset class="shelf-sort">
+      <legend>sort</legend>
+      <input type="radio" name="etc-sort" id="etc-score" checked>
+      <label for="etc-score">busiest</label>
+      <input type="radio" name="etc-sort" id="etc-recent">
+      <label for="etc-recent">most recent</label>
+      <input type="radio" name="etc-sort" id="etc-written">
+      <label for="etc-written">most written</label>
+    </fieldset>
+    {% endif %}
+    <ol class="etc-groups">
+      {% for g in groups %}
+      <li class="etc-group" style="--o-score:{{ g.oScore }};--o-recent:{{ g.oRecent }};--o-written:{{ g.oWritten }}">
+        <h2 class="etc-group-head"><a href="{{ g.homeUrl }}">{% if g.hasIcon %}<span class="mico m-{{ g.id }}" aria-hidden="true"></span>{% endif %}{{ g.label }}</a></h2>
+        {% if g.description %}<p class="tag-desc">{{ g.description }}</p>{% endif %}
+        <ul class="essay-list etc-subjects">
+          {% for s in g.subjects %}
+          <li style="--o-score:{{ s.oScore }};--o-recent:{{ s.oRecent }};--o-written:{{ s.oWritten }}">
+            <span class="sky" style="background-image:url({{ s.chipUrl }})" aria-hidden="true"></span>
+            <a href="/s/{{ s.slug }}/">{{ s.title }}</a>
+            <span class="archive-note">{% if s.lastWrote %}{{ s.written }} {% if s.written == 1 %}entry{% else %}entries{% endif %} · last {{ s.lastWrote | shortDate }}{% else %}nothing yet{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</article>

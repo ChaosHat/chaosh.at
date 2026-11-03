@@ -987,6 +987,10 @@ export default function (eleventyConfig) {
   };
   eleventyConfig.addCollection("etcGroups", (api) => etcRanks(buildGroupPages(api).filter((g) => !g.tabbed))
     .map((g) => ({ ...g, subjects: etcRanks(g.subjects) })));
+  // /etc/ builds once etc has a subject (hidden until content): a one-page
+  // pagination over this, which is empty until then.
+  eleventyConfig.addCollection("etcPage", (api) =>
+    buildGroupPages(api).some((g) => !g.tabbed) ? [{ url: "/etc/" }] : []);
 
   // base.njk's one question about the nav: which tab is open, and what the
   // views row under it holds. A group's views row is its bands as words,

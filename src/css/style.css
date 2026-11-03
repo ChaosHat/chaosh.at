@@ -2617,6 +2617,19 @@ main {
   .team-card { grid-template-columns: 6rem 1fr; }
 }
 
+/* /etc/: every etc group with its subjects under it. The sort is the
+   shelf's (radios, a rank per axis per row, `order` reads the checked one),
+   applied to the groups and to the subjects inside each. */
+.etc-groups { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2.25rem; }
+.etc-group-head { margin: 0 0 6px; font: 400 24px/32px var(--pixel); }
+.etc-group-head a { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.etc-group-head a:hover,
+.etc-group-head a:focus-visible { color: var(--accent); }
+.etc-group-head .mico { width: 24px; height: 24px; vertical-align: 0; }
+.etc-subjects { display: flex; flex-direction: column; }
+.etc-sorter:has(#etc-recent:checked) :is(.etc-group, .etc-subjects > li) { order: var(--o-recent); }
+.etc-sorter:has(#etc-written:checked) :is(.etc-group, .etc-subjects > li) { order: var(--o-written); }
+
 /* ---------------------------------------------------------------- clouds
    The about page's word clouds (wordcloud.js, 2026-10-30): one window, one
    cloud showing, a tab per cloud. The radios are .mt-radio (the nav's, once;
