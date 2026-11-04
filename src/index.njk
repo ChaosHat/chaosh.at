@@ -1,6 +1,9 @@
 ---
 layout: base.njk
 ---
+{#- The newest entry wears no band (2026-11-04): the masthead stands in for
+    it, daily or essay. It stays tonight's sky, not that post's — nothing
+    here claims they're the same. Every entry after keeps its band. -#}
 <ul class="post-list">
   {% for entry in collections.stream | limit(5) %}
   {% if entry.kind == "essay" %}
@@ -9,7 +12,7 @@ layout: base.njk
       since a titled daily wears the same head. -#}
   {% set e = entry.essay %}
   <li class="stream-essay">
-    <div class="entry-head" style="--day-sky:url({{ e.date | daySky }})">
+    <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ e.date | daySky }})"{% endif %}>
       <span class="entry-kind">deep thoughts</span>
       <a class="post-list-title" href="{{ e.url }}">{{ e.title }}</a>
       <p class="post-list-subdate">{{ e.date | readableDate }}</p>
@@ -23,7 +26,7 @@ layout: base.njk
       "||" and leave the opening one unpaired, which renders the words plainly. -#}
   {% set body = post.content | spoilers | homeBody %}
   <li>
-    <div class="entry-head" style="--day-sky:url({{ post.date | daySky }})">
+    <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ post.date | daySky }})"{% endif %}>
       {% if post.data.title %}
       <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
       <p class="post-list-subdate">{{ post.date | readableDate }}</p>

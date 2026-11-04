@@ -366,6 +366,13 @@ body:not(.wide) main::before {
   inset: -1rem -1.25rem;
   background: var(--smoke);
   pointer-events: none;
+  /* The glass comes up out of the sky rather than starting on a line
+     (2026-11-04). The masthead's light now runs ~80px past its sky
+     (PIXEL_LIGHT_BELOW) and the glass sits over it, so a square top cut the
+     glow on a ruled edge — the line the curtain fix had just removed. 6rem
+     is about where the light has gone. The masthead itself is not faded. */
+  -webkit-mask-image: linear-gradient(transparent, #000 6rem);
+  mask-image: linear-gradient(transparent, #000 6rem);
 }
 
 /* The wider reach waits until it fits: 47rem column + 2rem a side. At 48rem
