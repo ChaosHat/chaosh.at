@@ -504,7 +504,11 @@ figure,
      menu sets a party window beside its command window. Closer read as one
      docked window that should change with the tab; the old 20px read as two
      unrelated boxes. */
-  margin-bottom: 4px;
+  margin-bottom: 12px;
+  /* 12px, not 4 (2026-11-04): with the views window open, 8px from its
+     bottom to the panel read as tight, so the panel moved 8px down and
+     took the 8px out of the gap under it (.furniture) — the first post
+     starts where it did. */
   /* No rule under the header since 2026-10-19: with the band behind it the
      line cut the aurora in two, and the nav panes already mark the row. */
 }
@@ -617,7 +621,7 @@ figure,
    ~200px to ~105px and the day's first words moved up by that much. The
    labels share a min-width so the two item columns start on one edge, the
    way a menu's values line up past its keys. */
-.furniture { margin-bottom: 2.5rem; }
+.furniture { margin-bottom: 32px; } /* 2.5rem less the 8px the header took (above) */
 .furniture > .win-in { padding: 9px 14px 10px; }
 .now { display: flex; align-items: center; gap: 1rem; }
 .now + .now {
