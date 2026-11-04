@@ -536,8 +536,11 @@ figure,
    name at the left and the nav window at the right, ~45px off the header.
    A grid rather than the wrapping row the mock used: the views window sits
    in row 2 of the nav's column, so it offsets from the nav's own left edge,
-   and row 1 is only as tall as the nav, so the name centres on the tabs and
-   not on the tabs plus their pop-out. 52rem is where the row fits: the name
+   and row 1 is only as tall as the nav, so the pop-out costs only its own
+   height. The nav sits at the top (16px) and the name stays where it always
+   was (28px), not centred on the tabs: centred, the row started 30px lower
+   and with the pop-out open the gap down to now playing read as goofy (Hat,
+   2026-11-04). The comet's fireball still clears the panel on home. 52rem is where the row fits: the name
    is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
    gap — 801px — with a little to spare. Narrower, the column above (nav
    under the name) until the phone layout takes over at 34rem: deliberate,
