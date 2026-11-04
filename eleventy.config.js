@@ -978,9 +978,15 @@ export default function (eleventyConfig) {
   // where the etc tab is the open one. /etc/'s own are the etc groups,
   // highest score first: the page is the list too, but a tab with no
   // sub-menu read as broken next to every other tab that has one (Hat,
-  // 2026-11-04, reversing the handoff's "none"). The site's own pages keep
-  // the about row. Everywhere else —
-  // home, dailies, the archive, essays, tags, ratings — no tab is open and
+  // 2026-11-04, reversing the handoff's "none"). Essays is a tab since the
+  // 11-04 header pass: /essays/ and each group's slice (/essays/<group>/)
+  // open it, its items all · and each group with an essay, and a group's
+  // own views no longer list essays. The rule: links may repeat, the ▶ may
+  // not, and a sub-menu item never moves you out of its tab — so a page
+  // lives under what it is a list of (/essays/games/ is a list of essays),
+  // and an essay's own page under its group (base.njk passes essay.group,
+  // like a subject's). The site's own pages keep the about row. Everywhere
+  // else — home, dailies, the archive, tags, ratings — no tab is open and
   // there is no views window.
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
     if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
@@ -992,6 +998,15 @@ export default function (eleventyConfig) {
         .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
         .map((x) => ({ label: x.label, url: x.homeUrl, current: false })),
     };
+    if (url === "/essays/" || pages.some((x) => x.essays.length && x.urls.essays === url)) return {
+      tab: "essays",
+      row: "list",
+      items: [
+        { label: "all", url: "/essays/", current: url === "/essays/" },
+        ...pages.filter((x) => x.essays.length)
+          .map((x) => ({ label: x.label, url: x.urls.essays, current: url === x.urls.essays })),
+      ],
+    };
     const g = pages.find((x) => x.id === groupId);
     if (!g) return { tab: null, row: null };
     const at = (view) => navView === view;
@@ -1002,7 +1017,6 @@ export default function (eleventyConfig) {
         g.canon.members.length && { label: "canon", url: g.urls.canon, current: at("canon") },
         g.hasShelf && { label: "shelf", url: g.urls.shelf, current: at("shelf") },
         g.featured.length && { label: "best of", url: g.urls.best, current: at("best") },
-        g.essays.length && { label: "essays", url: g.urls.essays, current: at("essays") },
         g.log.length && { label: "log", url: g.urls.log, current: at("log") },
       ].filter(Boolean),
     };

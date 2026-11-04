@@ -79,27 +79,61 @@
           auroras mean) sat under the wordmark, home page only, from
           2026-10-25 to 2026-11-02; it's in the footer now, every page. -#}
 
-      {#- The nav: one window, at most two rows. The tab row is one word per
-          tabbed group (site.yaml `tabs:`, each once it has a subject), then
-          etc (once an untabbed group has one), then about. Each word is a
-          link to its page (2026-11-03: /<group>/, /etc/, /about/) — it
+      {#- Now playing (2026-10-19), inside the header since 2026-11-04 (the
+          header pass, layout C): beside the wordmark from 52rem, under it
+          narrower, with the nav below. One row, label inline at the left
+          (2026-11-02). It held a second row, latest essays, until 2026-11-04:
+          essays are a tab now, and the signpost it was ("there is a
+          second body of writing") is the tab's word on every page. Absent
+          when nothing is playing. A neutral game window since 2026-10-25,
+          not the day's frame: the same chrome as the media nav's window, in
+          the muted lavender. -#}
+      {%- set playing = collections.subjectPages | nowPlaying %}
+      {%- if playing | length %}
+      <div class="furniture win m-neutral"><div class="win-in">
+        <div class="now playing">
+          <span class="now-label">now playing</span>
+          {#- The items are sorted by medium (nowPlaying) and the icon is drawn
+              once per medium, at the head of its group, not on every title
+              (2026-11-02): the row has to hold ten actives — a few games, a
+              campaign, a show, a book — and an icon on each cost ~32px a title.
+              The script at the end of the page turns this row into the ticker
+              when it overflows. -#}
+          <div class="now-items">
+            {%- for item in playing %}
+            <a class="now-item" href="/s/{{ item.slug }}/">{% if item.groupFirst %}<span class="mico m-{{ item.group }}" role="img" aria-label="{{ item.group | groupNoun }}"></span>{% endif %}{{ item.title }}</a>
+            {%- endfor %}
+          </div>
+        </div>
+      </div></div>
+      {%- endif %}
+
+      {#- The nav: one window. The tab row is one word per tabbed group
+          (site.yaml `tabs:`, each once it has a subject), then etc (once an
+          untabbed group has one), essays (once there is one; a fixed tab
+          since 2026-11-04, when the latest-essays row left the panel), then
+          about. Six tabs at most, and a promotion is a swap: the weakest tab
+          drops into etc (the 360px phone fits six cells). Each word is a
+          link to its page (2026-11-03: /<group>/, /etc/, /essays/, /about/) — it
           reverses 10-25's "tab opens, doesn't navigate", because there is
           now a page to go to — and the ▶ cursor marks the tab you're
           inside. Nothing is lit on the home page.
 
           The views appear only inside something (navState in
           eleventy.config.js): inside a group, tabbed or etc, they are the
-          group's bands as words (canon · shelf · best of · essays · log,
-          each hidden until it has content); on the site's own pages, me ·
-          links · guestbook · feed. Home, dailies, the archive, essays, tags,
-          ratings and /etc/ get none: the fold-height goal 11-02 started.
+          group's bands as words (canon · shelf · best of · log, each hidden
+          until it has content); on /etc/, the etc groups; under essays, all
+          · and each group with an essay; on the site's own pages, me ·
+          links · guestbook · feed. An essay's page opens its group. Home,
+          dailies, the archive, tags and ratings get none: the fold-height
+          goal 11-02 started.
           Since 2026-11-04 they are their own window, popped out under the
           nav and overlapping its bottom edge, offset down and in — the FF
           "a new window opens" cascade — rather than a second row inside
           it. Folder tabs joined to a window from 2026-10-25 to 2026-11-02,
           radios that opened a window until 2026-11-03, a views row in the
           nav's frame until 2026-11-04 (Decisions, those dates). -#}
-      {%- set gid = (group.id if group and group.id) or (subject.group if subject and subject.group) or "" %}
+      {%- set gid = (group.id if group and group.id) or (subject.group if subject and subject.group) or (essay.group if essay and essay.group) or "" %}
       {%- set nav = collections.groupPages | navState(gid, page.url, navView) %}
       {%- set etcLive = collections.groupPages | rejectattr("tabbed") | list | length %}
       {%- set aboutUrl = "/about/" if collections.pages | length else "/links/" %}
@@ -110,6 +144,9 @@
           {%- endfor %}
           {%- if etcLive %}
           <li class="med m-etc"><a class="med-label{% if nav.tab == 'etc' %} is-open{% endif %}" href="/etc/"{% if page.url == '/etc/' %} aria-current="page"{% endif %}><span class="mico" aria-hidden="true"></span><span class="med-word">etc</span></a></li>
+          {%- endif %}
+          {%- if collections.essayPages | length %}
+          <li class="med m-essays"><a class="med-label{% if nav.tab == 'essays' %} is-open{% endif %}" href="/essays/"{% if page.url == '/essays/' %} aria-current="page"{% endif %}><span class="mico" aria-hidden="true"></span><span class="med-word">essays</span></a></li>
           {%- endif %}
           <li class="med m-about med-about"><a class="med-label{% if nav.tab == 'about' %} is-open{% endif %}" href="{{ aboutUrl }}"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></a></li>
         </ul>
@@ -134,59 +171,6 @@
       {%- endif %}
     </header>
 
-
-    {#- One framed panel holds both rows since 2026-10-19 (the "too loud?"
-        pass): two frames stacked edge to edge read as two more boxes, and
-        both rows say the same kind of thing, what's current. Each row is one
-        line since 2026-11-02, label inline at the left: with the label on
-        its own line the panel ran ~200px and the day's first words started
-        ~575px down at 1280 (below the fold on a phone). -#}
-    {% set playing = collections.subjectPages | nowPlaying %}
-    {% set essays = collections.essayPages | sort(true, false, "date") %}
-    {% set showEssays = essays | length and page.url != "/essays/" %}
-    {% if playing | length or showEssays %}
-    {#- A neutral game window since 2026-10-25, not the day's frame: the
-        same chrome as the media nav's window, in the muted lavender. -#}
-    <div class="furniture win m-neutral"><div class="win-in">
-    {% if playing | length %}
-    <div class="now playing">
-      <span class="now-label">now playing</span>
-      {#- The items are sorted by medium (nowPlaying) and the icon is drawn
-          once per medium, at the head of its group, not on every title
-          (2026-11-02): the row has to hold ten actives — a few games, a
-          campaign, a show, a book — and an icon on each cost ~32px a title.
-          The script at the end of the page turns this row into the ticker
-          when it overflows. -#}
-      <div class="now-items">
-        {% for item in playing %}
-        <a class="now-item" href="/s/{{ item.slug }}/">{% if item.groupFirst %}<span class="mico m-{{ item.group }}" role="img" aria-label="{{ item.group | groupNoun }}"></span>{% endif %}{{ item.title }}</a>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    {#- The essays signpost. Essays are rare, so recency is the wrong axis —
-        the strip exists so a visitor learns the second body of writing is
-        there at all, and it is furniture, so it does not go stale between
-        essays. The chip is the first cited subject's; an essay that cites
-        only tags gets its first tag's chip (eleventy.config.js tagChip). Not on /essays/ itself: the list right
-        under it already leads with the same two (2026-10-14). Labelled
-        "latest essays" since 2026-11-02 (was "latest deep thoughts"): the
-        nav says essays, and two names for one thing read as two doors.
-        "Deep thoughts" is the /essays/ page's own heading. -#}
-    {% if showEssays %}
-    <div class="now essays">
-      <span class="now-label">latest essays</span>
-      <div class="now-items">
-        {% for e in essays | limit(2) %}
-        <a class="now-item" href="{{ e.url }}">{% if e.chipUrl %}<span class="sky" style="background-image:url({{ e.chipUrl }})" aria-hidden="true"></span>{% endif %}<span class="essay-t">{{ e.title }}</span><span class="essay-when">{{ e.date | shortDate }}</span></a>
-        {% endfor %}
-      </div>
-      <a class="essays-all" href="/essays/">all →</a>
-    </div>
-    {% endif %}
-    </div></div>
-    {% endif %}
 
     <main>
       {{ content | safe }}

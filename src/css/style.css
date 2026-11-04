@@ -138,6 +138,11 @@
      alternative; it would read as canon here (--gold is canon on this site)
      and sits in the quarter the arc skips. One variable to swap. */
   --m-etc: #84ccd0;
+  /* Essays (2026-11-04, the header pass): the arc's widest clean gap, rose
+     at hue ≈354 between movies (329) and tabletop (19), on the 10-31 recipe
+     (L 0.80, C 0.072). Not gold: that's canon. A placeholder pick, like the
+     icon; one variable to swap. */
+  --m-essays: #e3abc3;
 
   /* Pixel corners (2026-10-25): stepped staircases in 2px cells. A window is
      two layers, an outer one in the frame colour and an inner fill inset
@@ -270,6 +275,14 @@ body {
    curtains' tips were cut flat at the top of the page, and drawing them
    moves the sky 60px down, onto the first post's title.
 
+   From 52rem the band starts 45px above the page (--sky-top, 9 art rows),
+   both layers, sky and light (2026-11-04, the header pass): layout C moved
+   home's first title ~67px up, into the curtain, and the rim has to meet
+   it. Phones keep 0: their header didn't shrink as much, and at 390 the
+   title already sat on the rim. The tips run off the top again there, as
+   the sky above a screen's edge does; drawing them still decides what the
+   upper rows hold. A page offset only: nothing in the sheets moves.
+
    192/288, 12 + 48 + 4, ×5, 20 frames and 0.3s a frame are pixelLayers'
    contract (PIXEL_W, PIXEL_BACK_W, PIXEL_PAD_TOP + PIXEL_FH + PIXEL_PAD,
    PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL), not free numbers — the values
@@ -284,7 +297,7 @@ body {
 body::before {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sky-top, 0px);
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
@@ -296,6 +309,8 @@ body::before {
   image-rendering: pixelated;
   animation: aurora-roll 6s steps(20) infinite;
 }
+
+@media (min-width: 52rem) { :root { --sky-top: -45px; } }
 
 @keyframes aurora-roll {
   to { background-position: 0 -6400px, 0 -6400px; }
@@ -324,7 +339,7 @@ body::before {
 body::after {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sky-top, 0px);
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
@@ -499,19 +514,16 @@ figure,
   flex-direction: column;
   align-items: flex-start;
   padding: 1.75rem 0 4px;
-  /* 8px between the nav window and the panel window (2026-10-25): one menu
-     screen of several windows, each with its own job, the way an SNES pause
-     menu sets a party window beside its command window. Closer read as one
-     docked window that should change with the tab; the old 20px read as two
-     unrelated boxes. */
-  margin-bottom: 12px;
-  /* 12px, not 4 (2026-11-04): with the views window open, 8px from its
-     bottom to the panel read as tight, so the panel moved 8px down and
-     took the 8px out of the gap under it (.furniture) — the first post
-     starts where it did. */
+  /* The header holds every window since 2026-11-04 (layout C): the name,
+     now playing, the nav, the pop-out. Its margin is the gap to the first
+     post, which the panel's own margin used to be. One menu screen of
+     several windows, each with its own job, the way an SNES pause menu sets
+     a party window beside its command window (2026-10-25). */
+  margin-bottom: 32px;
   /* No rule under the header since 2026-10-19: with the band behind it the
      line cut the aurora in two, and the nav panes already mark the row. */
 }
+.site-header .furniture { margin: 1.75rem 0 0; align-self: stretch; min-width: 0; }
 
 .site-title {
   display: inline-flex;
@@ -538,43 +550,34 @@ figure,
   margin: -12px -26px -28px -28px;
 }
 
-/* The nav beside the wordmark (2026-11-04, mock option 3): one row, the
-   name at the left and the nav window at the right, ~45px off the header.
-   A grid rather than the wrapping row the mock used: the views window sits
-   in row 2 of the nav's column, so it offsets from the nav's own left edge,
-   and row 1 is only as tall as the nav, so the name centres exactly on the
-   tab row. Row 2 is the pop-out's room on every page (36px: its 43px less
-   the 7px overlap), so the panel under the header never moves: its items
-   are links into groups, and a click on one that opened the pop-out used
-   to shove the panel down under the cursor (Hat, 2026-11-04). With nothing
-   in it the row is the gap between two groups — navigation above, the
-   signposts below — not a slot. The first try at this the same day also
-   centred the name on nav + pop-out, which aligned it with nothing and made
-   the gap read as missing; the name stays on the tab row. 52rem is where the row fits: the name
-   is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
-   gap — 801px — with a little to spare. Narrower, the column above (nav
-   under the name) until the phone layout takes over at 34rem: deliberate,
-   rather than leaving flex-wrap to drop the nav mid-range. */
+/* Layout C (the header pass, 2026-11-04): row 1 the name and now playing,
+   row 2 the nav on the column's left edge, row 3 the pop-out where there is
+   one, so the pop-out offsets from the nav's own left edge. The panel takes
+   whatever row 1 leaves (the ticker shrinks freely), so the name and the
+   window share a row from 52rem without crowding: the ticker keeps its
+   label and two or three titles. The same morning had the nav beside the
+   name (mock option 3) with the panel under the header and a reserved 36px
+   row so the panel never moved when the pop-out opened; with the panel
+   above the nav nothing under the pop-out but the post, so the row went.
+   First content at 1280: home 241 → 174px, a group page 241 → 210. Why,
+   the panel and the rejected layouts: chaosh.at Decisions, 2026-11-04
+   (later). Narrower, a column (name, panel, nav, pop-out) until the phone
+   layout takes over at 34rem. */
 @media (min-width: 52rem) {
   .site-header {
     display: grid;
-    grid-template-columns: auto max-content;
-    grid-template-rows: auto minmax(36px, auto);
-    justify-content: space-between;
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    justify-content: stretch;
     align-items: center;
+    column-gap: 32px;
     padding-top: 16px;
   }
   .site-title { grid-area: 1 / 1; }
+  .site-header .furniture { grid-area: 1 / 2; margin: 0; }
   /* .site-header for weight: .media-nav's own margin-top comes later. */
-  .site-header .media-nav { grid-area: 1 / 2; margin-top: 0; }
-  .views-pop { grid-area: 2 / 2; justify-self: start; }
-}
-
-/* The same room in the column (34-52rem), as a placeholder where there's
-   no pop-out. Phones don't hold it: there the pop-out wraps to two lines,
-   and ~55px on every page is the fold height 11-02 fought for. */
-@media (min-width: 34.0625rem) and (max-width: 51.99rem) {
-  .site-header:not(:has(.views-pop))::after { content: ""; height: 36px; }
+  .site-header .media-nav { grid-area: 2 / 1 / 3 / 3; justify-self: start; }
+  .views-pop { grid-area: 3 / 1 / 4 / 3; justify-self: start; }
 }
 
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
@@ -611,28 +614,17 @@ figure,
 .site-intro span { display: block; max-width: var(--read); }
 .site-intro span + span:last-child { margin-top: 0.5em; }
 
-/* ------------------------------------------- now playing / latest essays */
+/* ----------------------------------------------------------- now playing */
 
-/* The furniture panel holds both rows (2026-10-19; until then each row was
-   its own framed strip, 10px apart). The rows split on a --dim rule, the
-   frame's own inset colour, so the divider reads as part of the frame.
-   Each row is one line with its label inline at the left since 2026-11-02
-   (the labels were a row of their own above the items): the panel went from
-   ~200px to ~105px and the day's first words moved up by that much. The
-   labels share a min-width so the two item columns start on one edge, the
-   way a menu's values line up past its keys. */
-.furniture { margin-bottom: 32px; } /* 2.5rem less the 8px the header took (above) */
+/* The furniture panel: now playing, one line, label inline at the left
+   (2026-11-02). It held a second row, latest essays, from 2026-10-19 to
+   2026-11-04, when essays became a tab and the panel moved into the header
+   (layout C, above). */
 .furniture > .win-in { padding: 9px 14px 10px; }
 .now { display: flex; align-items: center; gap: 1rem; }
-.now + .now {
-  margin-top: 8px;
-  padding-top: 9px;
-  border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
-}
 
 .now-label {
   flex: none;
-  min-width: 108px;
   font: 16px/1 var(--pixel);
   color: var(--mc);
 }
@@ -648,8 +640,14 @@ figure,
   overflow-x: auto;
   scrollbar-width: none;
   gap: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+}
+/* The fade, both ends, a fixed 28px on every width (2026-11-04): 3% was
+   ~25px at 1280 and nothing much on a phone, which faded the right end
+   only; three panel reviewers read the hard-clipped left edge as a bug. */
+.now-items.tick,
+.now-items {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
 }
 .now-items.tick::-webkit-scrollbar { display: none; }
 .tick .track { display: flex; flex: none; gap: 1rem; padding-right: 1rem; }
@@ -669,54 +667,23 @@ figure,
 
 .now-item:hover { color: var(--accent); }
 
-/* 32px, not smaller. Below this a chip's curtain renders under 2px per column
-   and reads as coloured lines, not sky — and this strip is where a stranger
-   meets the art first, so it has to survive the encounter. */
-/* Both rows of the panel at one height (2026-10-25): now playing's medium
-   icons at 24px (a clean 2x of their 12-cell grid) and the essay chips
-   cropped to a 24px square from the top of their scene, where the curtain
-   is. Until then the chips were 32px wide at 3:4 (~43px tall) beside 12px
-   icons, and the essays row sat visibly heavier than now playing. */
-.now-item .sky { width: 24px; aspect-ratio: 1; }
+/* The medium icons at 24px, a clean 2x of their 12-cell grid (2026-10-25). */
 .now-item .mico { flex: none; width: 24px; height: 24px; }
 
-.essay-when { color: var(--muted); font: 700 16px/1 var(--pixel-fine); white-space: nowrap; }
-
-.essays-all {
-  margin-left: auto;
-  flex: none;
-  font: 16px/1 var(--pixel);
-  text-decoration: none;
-}
-
-/* On a phone each strip is one row that scrolls sideways (2026-10-19): wrapped,
-   the furniture ran ~850px and the first post started below the screen. The
-   right edge fades so the row reads as continuing; an essay title may still
-   wrap, inside a 70vw item, so a long one doesn't become a long scroll.
-   The inline labels give up their shared width (2026-11-02): at 350px the
-   row is label, then whatever fits, and "all →" goes — the nav's essays
-   word is the same door. */
+/* On a phone the row scrolls sideways (2026-10-19): wrapped, the panel ran
+   ~850px and the first post started below the screen. */
 @media (max-width: 34rem) {
-  .furniture { margin-bottom: 1.75rem; }
+  .site-header { margin-bottom: 1.75rem; }
+  .site-header .furniture { margin-top: 2.75rem; }
   .now { gap: 0.75rem; }
-  .now-label { min-width: 0; }
-  .essays-all { display: none; }
   .now-items {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
-    mask-image: linear-gradient(to right, #000 85%, transparent);
   }
   .now-items::-webkit-scrollbar { display: none; }
   .now-item { flex: none; }
   .now-item:last-child { padding-right: 2rem; }
-  /* One line, cut with an ellipsis (2026-10-25): a wrapped title made the
-     essays row taller than now playing's. It was a 70vw item that wrapped
-     until then, so a long title wouldn't become a long scroll; it still
-     can't, at 70vw. */
-  .essays .now-item { max-width: 70vw; min-width: 0; }
-  .essays .essay-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 /* ------------------------------------------------------- badges and tags */
@@ -2458,6 +2425,7 @@ main {
    page's <head> from site.yaml (groupStyle, eleventy.config.js). */
 .m-about { --mc: var(--m-about); --mico: url("/img/icons/media/about.svg"); }
 .m-etc { --mc: var(--m-etc); --mico: url("/img/icons/media/etc.svg"); }
+.m-essays { --mc: var(--m-essays); --mico: url("/img/icons/media/essays.svg"); }
 /* Now playing's window: no medium of its own. */
 .m-neutral { --mc: var(--muted); }
 /* A medium icon: pixelarticons on the 12-cell lattice, so 12px is 1:1 like
@@ -2502,7 +2470,7 @@ main {
   --win-frame-a: 1;
   width: max-content;
   max-width: 100%;
-  margin-top: 1.75rem; /* the old 1.25rem plus the header's dropped 0.5rem row gap */
+  margin-top: 24px; /* under the panel (layout C, 2026-11-04) */
   filter: var(--px-keyline);
 }
 .media,
@@ -2604,27 +2572,28 @@ main {
   .views a::before { position: absolute; right: calc(100% + 3px); }
 }
 @media (max-width: 34rem) {
-  /* Below the band, the same 2.75rem the dropped nav row used (2026-10-25);
-     the window runs the column, about at its right end. Every tab keeps its
-     word since 2026-11-03 (only the open one did): with movies in etc the
-     row is games · tabletop · etc · about, which fits a 390px phone. A
-     longer row wraps. */
-  .media-nav { width: auto; align-self: stretch; margin-top: 2.75rem; }
-  .media { gap: 6px 7px; padding: 10px 6px 9px; }
-  .med-label { gap: 4px; }
-  /* No cursor slot in the tab row on a phone (2026-11-03): four slots
-     were the 40px that pushed about onto a second row, and even the open
-     tab's one slot did. The open tab is still bold and in ink; the views
-     row under it keeps its cursor. */
+  /* 16px under the panel; the window runs the column. */
+  .media-nav { width: auto; align-self: stretch; margin-top: 16px; }
+  /* A tab bar of equal cells, icon over an 8px word (2026-11-04, the header
+     pass): five words on one line didn't fit 390px once essays joined, and
+     about had already lost its word to make four fit. One cell per tab, as
+     many columns as tabs. Measured at 360px: the words are 17-44px against
+     a 293px row, so six cells (~49px) fit — the six-tab cap. Every tab
+     keeps its word; no icon-only tabs. The open cell is tinted in the
+     frame's colour as well as bold and in ink. */
+  .media {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0;
+    padding: 4px;
+  }
+  .med-label { flex-direction: column; justify-content: center; gap: 6px; padding: 7px 0 6px; }
+  .med-word { font: 8px/8px var(--pixel); }
+  .med-label.is-open { background: color-mix(in oklab, var(--frame) 20%, transparent); }
+  /* No cursor slot in the tab row on a phone (2026-11-03): the tint and the
+     bold mark the open cell; the views under it keep their cursor. */
   .med-label::before { display: none; }
-  /* About is its icon unless it's open (the old rule for every closed tab,
-     kept for the last one): with every word the row ran ~36px over at
-     390px, and the person icon at the row's end reads on its own. */
-  /* Open too since 2026-11-04: its word wrapped the tab row to two lines
-     on the site's own pages. Open, the icon goes to ink and the pop-out
-     under it says where you are. */
-  .med-about .med-word { display: none; }
-  .med-about { margin-left: auto; }
   /* Tight enough that all five views fit one line at 390px in Pixelify
      (2026-10-25, when log made it five). Pixel Operator is wider, 396px
      against ~324, so since 2026-10-26 they wrap to two rows — a menu
@@ -2642,6 +2611,8 @@ main {
     padding: 2px 10px;
   }
   .views a { padding: 10px 0; }
+  /* Four views make a 2x2, not three and a stray (2026-11-04). */
+  .views:has(> li:nth-child(4):last-child) { grid-template-columns: repeat(2, max-content); column-gap: 32px; }
   /* Under the stretched nav, in less. */
   .views-pop { max-width: calc(100% - 24px); margin: -10px 0 0 24px; }
 }
