@@ -547,10 +547,12 @@ figure,
     display: grid;
     grid-template-columns: auto max-content;
     justify-content: space-between;
-    align-items: center;
+    align-items: start;
+    padding-top: 16px;
   }
-  .site-title { grid-area: 1 / 1; }
-  .media-nav { grid-area: 1 / 2; margin-top: 0; }
+  .site-title { grid-area: 1 / 1; margin-top: 12px; }
+  /* .site-header for weight: .media-nav's own margin-top comes later. */
+  .site-header .media-nav { grid-area: 1 / 2; margin-top: 0; }
   .views-pop { grid-area: 2 / 2; justify-self: start; }
 }
 
