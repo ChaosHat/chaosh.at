@@ -852,20 +852,12 @@ export default function (eleventyConfig) {
     return fragments.reduce((n, f) => n + w(f.date), 0)
       + FRECENCY_ESSAY * essays.reduce((n, e) => n + w(e.date), 0);
   };
-  // The etc views row: the top ETC_ROW etc groups, then "all →" whenever
-  // there are more (Hat: "groups to start, this seems like something free to
-  // change later" — etcRow is the one place that picks what the row lists).
-  const ETC_ROW = 5;
-
-  // The card band on a group's landing page: one strip, the group's "here's
-  // my taste". Canon covers where the group has a canon with members; failing
-  // that, the shelf minus what's unplayed or stopped, rated first then
-  // alphabetical (2026-11-03 — "most recently written about" would be two
-  // covers for movies, and raw shelf order would lead with an unwatched film
-  // the day one is added); a cards band's cards, in Hat's order. Capped at
-  // BAND_MAX, and the CSS shows only the row that fits, so it stays a strip.
-  const BAND_MAX = 5;
-  const BAND_SKIP = new Set(["backlog", "shelved", "incomplete"]);
+  // The card band on a group's landing page: a cards band's cards, in Hat's
+  // order (sports' teams), and the CSS shows only the row that fits, so it
+  // stays a strip. The canon strip and the shelf fallback that stood in for
+  // it went on 2026-11-04 (from 11-03), with the "full canon → · full shelf
+  // → · best of →" line over them: the views window under the nav carries
+  // those views now, on every group's pages, etc's too.
 
   // Every group's pages in one place: its landing page, and a page per view
   // per band, each template paginating over this. Every group with a
@@ -905,17 +897,9 @@ export default function (eleventyConfig) {
         .sort((a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay"));
       const cards = loadCards(g);
       const featured = featuredFor(api, g.id);
-      const rankOf = (s) => s.canon ? 0 : s.rating?.rank ?? 99;
       const band = g.hasCards && cards.length
         ? { kind: "cards", title: g.cardsFile.replace(/^./, (c) => c.toUpperCase()), items: cards }
-        : canon.members.length
-          ? { kind: "canon", title: "Canon", items: canon.members.slice(0, BAND_MAX) }
-          : g.hasShelf
-            ? { kind: "shelf", title: "From the shelf", items: subjectsHere
-              .filter((s) => !BAND_SKIP.has(s.status))
-              .sort((a, b) => rankOf(a) - rankOf(b) || String(a.title).localeCompare(String(b.title)))
-              .slice(0, BAND_MAX) }
-            : null;
+        : null;
       const score = subjectsHere.reduce((n, s) => n + s.score, 0);
       const lastWrote = subjectsHere.map((s) => s.lastWrote).filter(Boolean).sort((a, b) => b - a)[0] ?? null;
       const byScore = subjectsHere.slice()
@@ -930,13 +914,7 @@ export default function (eleventyConfig) {
         log,
         stream,
         cards,
-        band: band?.items.length ? band : null,
-        // The fuller views the band points at, on its heading line.
-        bandLinks: [
-          canon.members.length && { label: "full canon", url: g.urls.canon },
-          g.hasShelf && subjectsHere.length && { label: "full shelf", url: g.urls.shelf },
-          featured.length && { label: "best of", url: g.urls.best },
-        ].filter(Boolean),
+        band,
         // Several subjects and no shelf to browse them on: they go as a word
         // row under the band (nfl · mlb · nba · nhl).
         subjectRow: !g.hasShelf && subjectsHere.length > 1 ? byScore : [],
@@ -994,30 +972,21 @@ export default function (eleventyConfig) {
     buildGroupPages(api).some((g) => !g.tabbed) ? [{ url: "/etc/" }] : []);
 
   // base.njk's one question about the nav: which tab is open, and what the
-  // views row under it holds. A group's views row is its bands as words,
+  // views window under it holds. A group's views are its bands as words,
   // shown only inside the group — its landing page, its views, its subjects'
-  // pages. Inside etc (/etc/, an etc group's pages, their subjects) the row
-  // is the busiest etc groups instead, then "all →". The site's own pages
-  // keep the about row. Everywhere else — home, dailies, the archive,
-  // essays, tags, ratings — no tab is open and there is no second row.
+  // pages — for an etc group too since 2026-11-04 (movies: shelf · log),
+  // where the etc tab is the open one. /etc/ itself gets none: the page is
+  // the list. The site's own pages keep the about row. Everywhere else —
+  // home, dailies, the archive, essays, tags, ratings — no tab is open and
+  // there is no views window.
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
-    const pages = groupPages ?? [];
     if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
-    const etcGroups = pages.filter((g) => !g.tabbed).sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
-    const etcRow = () => {
-      const items = etcGroups.slice(0, ETC_ROW).map((g) => ({
-        label: g.label, url: g.homeUrl, current: g.id === groupId,
-      }));
-      if (etcGroups.length > ETC_ROW) items.push({ label: "all →", url: "/etc/", current: url === "/etc/" });
-      return items;
-    };
-    if (url === "/etc/") return { tab: "etc", row: "list", items: etcRow() };
-    const g = pages.find((x) => x.id === groupId);
+    if (url === "/etc/") return { tab: "etc", row: null };
+    const g = (groupPages ?? []).find((x) => x.id === groupId);
     if (!g) return { tab: null, row: null };
-    if (!g.tabbed) return { tab: "etc", row: "list", items: etcRow() };
     const at = (view) => navView === view;
     return {
-      tab: g.id,
+      tab: g.tabbed ? g.id : "etc",
       row: "list",
       items: [
         g.canon.members.length && { label: "canon", url: g.urls.canon, current: at("canon") },

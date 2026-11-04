@@ -532,6 +532,28 @@ figure,
   margin: -12px -26px -28px -28px;
 }
 
+/* The nav beside the wordmark (2026-11-04, mock option 3): one row, the
+   name at the left and the nav window at the right, ~45px off the header.
+   A grid rather than the wrapping row the mock used: the views window sits
+   in row 2 of the nav's column, so it offsets from the nav's own left edge,
+   and row 1 is only as tall as the nav, so the name centres on the tabs and
+   not on the tabs plus their pop-out. 52rem is where the row fits: the name
+   is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
+   gap — 801px — with a little to spare. Narrower, the column above (nav
+   under the name) until the phone layout takes over at 34rem: deliberate,
+   rather than leaving flex-wrap to drop the nav mid-range. */
+@media (min-width: 52rem) {
+  .site-header {
+    display: grid;
+    grid-template-columns: auto max-content;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .site-title { grid-area: 1 / 1; }
+  .media-nav { grid-area: 1 / 2; margin-top: 0; }
+  .views-pop { grid-area: 2 / 2; justify-self: start; }
+}
+
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
    2026-11-02: five equal words (09-11), smoked panes (10-19), stepped panes
    on a keyline (10-31). They're the last word of the media row now, on every
@@ -2493,12 +2515,27 @@ main {
   mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   animation: cursor-bob 0.8s steps(1) infinite;
 }
-/* The views row, rendered only where there's one to show (navState). The
-   rule above it is the panel's divider, the frame's own colour at 30%. */
+/* The views window, rendered only where there's one to show (navState):
+   its own window since 2026-11-04, popped out of the nav rather than a
+   second row inside its frame. It overlaps the nav's bottom edge, offset
+   down and in, the way a new window cascades open over the one that opened
+   it in an FF menu — later in the DOM, so it paints over the nav with no
+   z-index. 7px of overlap: Hat had the mock's 12px go "sliiiiightly lower".
+   The day's frame and an opaque fill, like the nav: the same kind of
+   window, one level down. */
+.views-pop {
+  --mc: var(--frame);
+  --win-fill-a: 1;
+  --win-frame-a: 1;
+  align-self: flex-start;
+  width: max-content;
+  max-width: calc(100% - 44px);
+  margin: -7px 0 0 44px;
+  filter: var(--px-keyline);
+}
 .views {
   gap: 6px 30px;
   padding: 11px 20px 12px 17px;
-  border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
 }
 /* Every word is ink and the cursor alone marks your place, as in an SNES
    menu (2026-10-31). --muted is the label colour, and in the panel right
@@ -2568,6 +2605,9 @@ main {
      window's grid, kept over shrinking the nav or scrolling it. */
   .views { gap: 6px 6px; padding: 10px 8px 9px; }
   .views a { gap: 4px; }
+  /* Under the stretched nav, in less: the five words wrap to two lines
+     inside it, which is fine (the mock). */
+  .views-pop { max-width: calc(100% - 24px); margin: -10px 0 0 24px; }
 }
 /* ---------------------------------------------------------------- groups
    A group's landing page, the band at its head, the cards, and the small
@@ -2591,10 +2631,10 @@ main {
 .group-head h1 { display: flex; align-items: center; gap: 12px; }
 .group-head h1 .mico { width: 24px; height: 24px; vertical-align: 0; }
 
-/* The band: one strip of the shelf's cards under a heading line that names
-   it and links the fuller views. One row at every width — the shelf grid's
-   own column count (2 to 5, see .shelf-grid) — so it reads as a taste, not
-   a second shelf; the eleventy side caps it at five. */
+/* The band: one strip of a group's cards (sports' teams) under its name.
+   One row at every width — the shelf grid's own column count (2 to 5, see
+   .shelf-grid) — so it reads as a taste, not a second shelf. The canon and
+   shelf strips and their view links went on 2026-11-04 (the views window). */
 .group-band { margin: 0 0 2.5rem; }
 .band-head {
   display: flex;
@@ -2604,9 +2644,6 @@ main {
   margin: 0 0 14px;
   font: 400 16px/1 var(--pixel);
 }
-.band-link { font: 8px/16px var(--pixel); color: var(--muted); text-decoration: none; }
-.band-link:hover,
-.band-link:focus-visible { color: var(--ink); }
 .band-strip > :nth-child(n + 3) { display: none; }
 @media (min-width: 34rem) { .band-strip > :nth-child(3) { display: block; } }
 @media (min-width: 44rem) { .band-strip > :nth-child(4) { display: block; } }

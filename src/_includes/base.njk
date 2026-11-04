@@ -87,15 +87,18 @@
           now a page to go to — and the ▶ cursor marks the tab you're
           inside. Nothing is lit on the home page.
 
-          The views row appears only inside something (navState in
-          eleventy.config.js): inside a tabbed group it is the group's bands
-          as words (canon · shelf · best of · essays · log, each hidden until
-          it has content); inside etc it is the busiest etc groups, then
-          "all →"; on the site's own pages, me · links · guestbook · feed.
-          Home, dailies, the archive, essays, tags and ratings get the one
-          row: the fold-height goal 11-02 started. Folder tabs joined to a
-          window from 2026-10-25 to 2026-11-02, radios that opened a window
-          until 2026-11-03 (Decisions, those dates). -#}
+          The views appear only inside something (navState in
+          eleventy.config.js): inside a group, tabbed or etc, they are the
+          group's bands as words (canon · shelf · best of · essays · log,
+          each hidden until it has content); on the site's own pages, me ·
+          links · guestbook · feed. Home, dailies, the archive, essays, tags,
+          ratings and /etc/ get none: the fold-height goal 11-02 started.
+          Since 2026-11-04 they are their own window, popped out under the
+          nav and overlapping its bottom edge, offset down and in — the FF
+          "a new window opens" cascade — rather than a second row inside
+          it. Folder tabs joined to a window from 2026-10-25 to 2026-11-02,
+          radios that opened a window until 2026-11-03, a views row in the
+          nav's frame until 2026-11-04 (Decisions, those dates). -#}
       {%- set gid = (group.id if group and group.id) or (subject.group if subject and subject.group) or "" %}
       {%- set nav = collections.groupPages | navState(gid, page.url, navView) %}
       {%- set etcLive = collections.groupPages | rejectattr("tabbed") | list | length %}
@@ -110,21 +113,25 @@
           {%- endif %}
           <li class="med m-about med-about"><a class="med-label{% if nav.tab == 'about' %} is-open{% endif %}" href="{{ aboutUrl }}"><span class="mico" aria-hidden="true"></span><span class="med-word">about</span></a></li>
         </ul>
-        {%- if nav.row == "list" and nav.items | length %}
+      </div></nav>
+      {%- if nav.row == "list" and nav.items | length %}
+      <nav class="views-pop win" aria-label="Views"><div class="win-in">
         <ul class="views">
           {%- for it in nav.items %}
           <li><a href="{{ it.url }}"{% if it.current %} aria-current="page"{% endif %}>{{ it.label }}</a></li>
           {%- endfor %}
         </ul>
-        {%- elif nav.row == "about" %}
+      </div></nav>
+      {%- elif nav.row == "about" %}
+      <nav class="views-pop win" aria-label="About"><div class="win-in">
         <ul class="views">
           {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
           <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
           <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
           <li><a href="/feed.xml">feed</a></li>
         </ul>
-        {%- endif %}
       </div></nav>
+      {%- endif %}
     </header>
 
 
