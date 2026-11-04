@@ -1718,10 +1718,38 @@ sausage:
   title: Aurora Watch
   category:
     - site
-  status: active
   aliases:
     - aurora watch
     - sausage
     - the sausage
     - chaosh.at
     - the site
+mlb:
+  title: MLB
+  category:
+    - sports
+  aliases:
+    - baseball
+nba:
+  title: NBA
+  category:
+    - sports
+  aliases:
+    - basketball
+nfl:
+  title: NFL
+  category:
+    - sports
+  aliases:
+    - football
+    - bears
+  faces:
+    bears:
+      title: Bears
+      cover: bears
+nhl:
+  title: NHL
+  category:
+    - sports
+  aliases:
+    - hockey

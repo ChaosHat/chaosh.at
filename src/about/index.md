@@ -7,7 +7,7 @@ I love rpgs, crpgs, jrpgs, tactical ones, but I like a lot of other stuff too. T
 
 I'm {{ age }} years old, also a dad to two beautiful little girls, I like homelab stuff and sports (basically every Chicago team if you were wondering). 
 ## The site
-This site is a place for me to write about games I play, why I like, or don't like them and just try to sit and be reflective and analyze things and why they make me feel that way. And also it's just fun to write, to think, to flex these kinds of creative, analytical, and writing muscles I don't necessarily get to in daily life. 
+This site is a place for me to write about the things I play, read, see, listen to, or think about, why I like, or don't like them and just try to sit and be reflective and analyze things and why they make me feel that way. And also it's just fun to write, to think, to flex these kinds of creative, analytical, and writing muscles I don't necessarily get to in daily life. 
 
 I like all kinds of games, video, board, ttrpgs, but I mostly expect to write about video ones. I might write about other stuff but that'll be sporadic. Images are sourced from SteamGrid DB for games, BoardGameGeek for board games, and TMDB for movies/shows. This product uses the [TMDB](https://www.themoviedb.org) API but is not endorsed or certified by TMDB.
 

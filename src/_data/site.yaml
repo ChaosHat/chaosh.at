@@ -10,6 +10,73 @@ media:
   - games
   - tabletop
   - movies
+# Groups (2026-11-03): everything a subject can belong to. A subject's first
+# category names its group. `bands` says what a group has beyond its log and
+# essays: shelf (subjects carry status), canon (subjects may carry rating),
+# cards (a hand-edited card list, `cards: <file>` names <file>.yaml). The
+# compile refuses a field a band doesn't license. A group slug is a public URL
+# (/<slug>/), guarded like a subject slug: removing or renaming one needs
+# `compile_subjects.py --forget-group <slug>` plus a redirects.yaml entry.
+# Icon + color are required once a group is tabbed or now_playing isn't off.
+# Manual.md → Groups. `media:` above stays until the groups branch merges.
+groups:
+  games:
+    noun: game
+    description: Video games, old and new, played to the end or not.
+    bands: [canon, shelf]
+    covers: steamgriddb
+    now_playing: status
+    color: "#9bd8f3"
+  tabletop:
+    noun: tabletop game
+    description: Board games, card games and tabletop RPGs.
+    bands: [canon, shelf]
+    covers: bgg
+    cover_fit: true
+    now_playing: status
+    color: "#ecafaf"
+    aliases: [boardgames]
+  movies:
+    noun: movie
+    description: Films, mostly in the order I happen to watch them.
+    bands: [canon, shelf]
+    statuses: [completed, backlog]
+    status_words: {completed: watched}
+    covers: tmdb
+    now_playing: recent
+    color: "#d2a7ce"
+  shows:
+    noun: show
+    bands: [canon, shelf]
+    covers: tmdb-tv
+    now_playing: status
+    color: "#a4a9db"
+  books:
+    noun: book
+    bands: [canon, shelf]
+    covers: hardcover
+    now_playing: status
+    color: "#a2d6b3"
+  site:
+    label: site
+    description: Everything about tinkering with and building the site you see here.
+  # Sports (2026-11-03): subjects are leagues (NFL, NBA, MLB, NHL), Bears is
+  # a face of NFL, and the teams are cards in teams.yaml. No canon, shelf or
+  # ratings. Starts in etc; promote by frequency.
+  sports:
+    noun: league
+    bands: [cards]
+    cards: teams
+    covers: hand
+    cover_fit: true
+# The groups with a nav spot, in order. Every declared group not listed here
+# lands in etc. Dropping one is a demotion, never a disappearance: nothing it
+# built goes away. Promotion and demotion are always this hand edit.
+# Movies moved into etc 2026-11-03 (43 subjects, 2 daily sections ever): its
+# canon, shelf and now playing stay, reached from /movies/.
+tabs:
+  - games
+  - tabletop
 bluesky: chaosh.at
 fediverse: https://social.chaosh.at/@hat
 intro: |-

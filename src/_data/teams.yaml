@@ -1,0 +1,40 @@
+# The sports group's cards (site.yaml → groups: sports, `cards: teams`), in
+# the order they show: the Cubs first, on purpose. Hand-edited here; publish.py
+# carries it to the site nightly. Each card:
+#   title    the name under the logo
+#   subject  the league whose page the card heads (nfl, mlb, nba, nhl)
+#   cover    the logo's name in the repo's src/img/covers/, no extension;
+#            place it with  covers.py --set <cover> --file <path>
+#   vibe     one line, about five words, how it's going ("fire the coach plz")
+#   as_of    the day you typed the vibe, YYYY-MM-DD. Change it with the vibe:
+#            it's the only thing telling a reader how old the line is.
+#   why      a paragraph or two: why you follow them, what they mean to you
+# A blank vibe, date or why just doesn't show.
+- title: Cubs
+  slug: cubs
+  subject: mlb
+  cover: cubs
+  vibe:
+  as_of:
+  why:
+- title: Bears
+  slug: bears
+  subject: nfl
+  cover: bears
+  vibe:
+  as_of:
+  why:
+- title: Bulls
+  slug: bulls
+  subject: nba
+  cover: bulls
+  vibe:
+  as_of:
+  why:
+- title: Blackhawks
+  slug: blackhawks
+  subject: nhl
+  cover: blackhawks
+  vibe:
+  as_of:
+  why:
