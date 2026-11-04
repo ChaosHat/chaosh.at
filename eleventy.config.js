@@ -988,6 +988,11 @@ export default function (eleventyConfig) {
   // like a subject's). The site's own pages keep the about row. Everywhere
   // else — home, dailies, the archive, tags, ratings — no tab is open and
   // there is no views window.
+  // /etc/'s pop-out holds the six highest-scoring etc groups, the tab cap's
+  // number (2026-11-04): it reorders itself every build as the writing
+  // moves, and the rest are on the page under it. No "all →", because that
+  // would be a link to the page you're on.
+  const ETC_POP = 6;
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
     if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
     const pages = groupPages ?? [];
@@ -996,6 +1001,7 @@ export default function (eleventyConfig) {
       row: "list",
       items: pages.filter((x) => !x.tabbed)
         .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
+        .slice(0, ETC_POP)
         .map((x) => ({ label: x.label, url: x.homeUrl, current: false })),
     };
     if (url === "/essays/" || pages.some((x) => x.essays.length && x.urls.essays === url)) return {
