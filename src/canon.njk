@@ -2,15 +2,15 @@
 layout: base.njk
 wide: true
 pagination:
-  data: collections.mediumCanonPages
+  data: collections.groupCanonPages
   size: 1
-  alias: medium
+  alias: group
   addAllPagesToCollections: false
 navView: canon
-permalink: "{{ medium.urls.canon }}"
+permalink: "{{ group.urls.canon }}"
 eleventyComputed:
-  title: "{% if medium.id == 'games' %}The Hat Canon{% else %}The Hat Canon: {{ medium.label }}{% endif %}"
-  description: "{% if medium.id == 'games' %}Ten games that say what I like in games, and a dated record of every time the list has changed.{% else %}The {{ medium.label }} that say what I like, and a dated record of every time the list has changed.{% endif %}"
+  title: "{% if group.id == 'games' %}The Hat Canon{% else %}The Hat Canon: {{ group.label }}{% endif %}"
+  description: "{% if group.id == 'games' %}Ten games that say what I like in games, and a dated record of every time the list has changed.{% else %}The {{ group.label }} that say what I like, and a dated record of every time the list has changed.{% endif %}"
 ---
 {#- The canon's own page (2026-10-22): the ten, the record of how the list
     got that way, and the essays about the canon itself. Three sources, all
@@ -22,11 +22,11 @@ eleventyComputed:
 
     One per medium since 2026-10-25 (/canon/ is games, /canon/<medium>/ the
     rest), built once a medium has a canon member; games always builds. -#}
-{%- set canon = medium.canon %}
+{%- set canon = group.canon %}
 <header class="tag-head canon-head">
   <h1>{{ title }}</h1>
   {% if canon.description %}<p class="tag-desc">{{ canon.description }}</p>{% endif %}
-  {% if medium.id == "games" %}<p class="tag-index"><a href="/r/canon/">everything written about the ten →</a></p>{% endif %}
+  {% if group.id == "games" %}<p class="tag-index"><a href="/r/canon/">everything written about the ten →</a></p>{% endif %}
 </header>
 
 {#- The hero: the ten as shelf cards, gold-framed, five by two where it fits.

@@ -23,7 +23,7 @@
     <p class="tag-members">
       {#- A rung that spans media marks each member's medium (2026-10-25);
           a one-medium page goes without. -#}
-      {% for member in view.members %}{% if view.mixed %}<span class="mico m-{{ member.medium }}" role="img" aria-label="{{ member.medium | mediumNoun }}"></span> {% endif %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+      {% for member in view.members %}{% if view.mixed %}<span class="mico m-{{ member.group }}" role="img" aria-label="{{ member.group | groupNoun }}"></span> {% endif %}<a href="/s/{{ member.slug }}/">{{ member.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
     </p>
     {% endif %}
   </header>
@@ -62,38 +62,8 @@
 
   {% if view.entries | length %}
   <section class="timeline">
-    {% for entry in view.entries %}
-    {#- The art repeats here because this is the one timeline that MIXES
-        subjects: the cover says which game before the label has been read.
-        An essay is its own thing, not a subject — its row carries its title
-        over a blank art column (the daily's FRAG_LOOSE, which keeps loose
-        prose in line with its neighbours), and its lede links to its /e/
-        page, the full text's one home. Rating views carry no essays at all
-        (an essay is about a game, not a verdict on one), so this branch
-        simply never fires there — no conditional needed. -#}
-    {% if entry.kind == "essay" %}
-    <div class="frag">
-      <span class="sky sky-blank" aria-hidden="true"></span>
-      <div class="frag-body">
-        <a class="essay-title" href="{{ entry.url }}">{{ entry.title }}</a>
-        <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-        <p class="tag-essay">{{ entry.blurb }}</p>
-        <a class="more" href="{{ entry.url }}">read →</a>
-      </div>
-    </div>
-    {% else %}
-    <div class="frag"{% if entry.subject.coverBox %} style="--box:{{ entry.subject.coverBox }}"{% endif %}>
-      {{ entry.subject.slug | subjectSky | safe }}
-      <div class="frag-body">
-        <p class="fragment-meta">
-          <a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a>
-          <a class="fragment-subject" href="/s/{{ entry.subject.slug }}/">{{ entry.subject.title }}</a>
-        </p>
-        {{ entry.html | safe }}
-      </div>
-    </div>
-    {% endif %}
-    {% endfor %}
+    {%- set entries = view.entries %}
+    {% include "timeline.njk" %}
   </section>
   {% elif not (blurbed | length) %}
     {% if view.members | length %}

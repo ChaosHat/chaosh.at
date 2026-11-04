@@ -1,0 +1,38 @@
+{#- The cards band (2026-11-03): a card is a shelf card with one vibe line
+    where a subject has its status and rating cells — plain ink, about five
+    words, two lines at most — and the date Hat typed it, so it ages in the
+    open. `href` false renders the card without a link (on the subject page
+    it heads, it would point at itself). -#}
+{% macro tile(c, href) %}
+<li class="shelf-item card-item">
+  {% if href %}<a href="{{ href }}">{% else %}<span class="card-static">{% endif %}
+    <span class="shelf-card">
+      <span class="shelf-art">
+        {% if c.coverUrl %}
+        <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} logo" loading="lazy" decoding="async">
+        {% elif c.skyUrl %}
+        <span class="sky" style="background-image:url({{ c.skyUrl }})" aria-hidden="true"></span>
+        {% else %}
+        <span class="sky sky-blank" aria-hidden="true"></span>
+        {% endif %}
+      </span>
+      {% if c.vibe %}<span class="cell vibe">{{ c.vibe }}</span>{% endif %}
+      {%- if c.asOf %}{% set asOf = "as of " + (c.asOf | shortDate) %}<span class="cell as-of{% if asOf | pxOdd %} is-odd{% endif %}">{{ asOf }}</span>{% endif %}
+    </span>
+    <span class="shelf-caption">{{ c.title }}</span>
+  {% if href %}</a>{% else %}</span>{% endif %}
+</li>
+{% endmacro %}
+
+{#- A card with its prose, on the subject page it belongs to: the tile (with
+    its vibe and date) on the left, the name and why Hat follows them beside
+    it. -#}
+{% macro row(c) %}
+<div class="team-card" id="{{ c.anchor }}">
+  <ul class="shelf-grid team-tile">{{ tile(c, false) }}</ul>
+  <div class="team-why">
+    <h2 class="team-name">{{ c.title }}</h2>
+    {% if c.whyHtml %}{{ c.whyHtml | safe }}{% endif %}
+  </div>
+</div>
+{% endmacro %}

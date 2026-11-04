@@ -578,8 +578,8 @@ export default function (eleventyConfig) {
     const cut = sections.slice(i).map((section) => {
       const m = /^<h2[^>]*>([\s\S]*?)<\/h2>/i.exec(section.trim());
       const heading = m ? plainText(m[1]) : "";
-      const slug = aliasMap.get(normalise(heading));
-      return subjects[slug]?.title ?? heading;
+      const { slug, face } = resolveHeading(heading);
+      return slug ? headingTitle(slug, face) : heading;
     });
 
     // Counted, not measured by string length: `sections` drops whitespace-only
@@ -590,31 +590,42 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
 
-  // Now Playing is derived, never curated — it is the same `status: active`
-  // that groups the shelves, so the two cannot drift apart. It spans every
-  // medium that is switched on. A movie has no `active` (it is watched in an
-  // evening), so the one movie that qualifies is the most recently written
-  // about, while that writing is under two weeks old.
-  const MOVIE_NOW_DAYS = 14;
-  // Returned in site.yaml's media order, most recently written about first
-  // within a medium (Hat, 2026-11-02: recency, not the alphabet — the row
-  // says what's current, and the ticker shows its head first), the movie
-  // last, and the first title of each medium flagged groupFirst: the panel
-  // draws the medium icon once per group, so the order is what makes the
-  // groups. Copies, not the subject objects — the flag belongs to this
-  // view, not to the subject.
+  // Now Playing is derived, never curated. Each group says how (2026-11-03,
+  // `now_playing:` in site.yaml): `status` lists its subjects at `status:
+  // active` — the same status that groups the shelves, so the two cannot
+  // drift apart — and `recent` lists the one subject most recently written
+  // about, while that writing is under NOW_PLAYING_DAYS old (movies' rule:
+  // a film has no `active`, it is watched in an evening). `off`, the
+  // default, lists nothing. Placement doesn't enter into it: a demoted group
+  // keeps its now playing (movies kept `recent` when it moved into etc).
+  // One site-wide window; per group only if a second `recent` group ever
+  // needs its own.
+  const NOW_PLAYING_DAYS = 14;
+  // Returned tabs first in tab order, then the other groups in site.yaml
+  // order; most recently written about first within a group (Hat,
+  // 2026-11-02: recency, not the alphabet — the row says what's current, and
+  // the ticker shows its head first). The first title of each group is
+  // flagged groupFirst: the panel draws the group icon once per group, so
+  // the order is what makes the groups. Copies, not the subject objects —
+  // the flag belongs to this view, not to the subject.
   eleventyConfig.addFilter("nowPlaying", (subjects) => {
-    const on = (subjects ?? []).filter((s) => mediaOn.has(s.medium));
-    const rank = (m) => MEDIA.findIndex((x) => x.id === m);
-    const active = on
-      .filter((s) => s.medium !== "movies" && s.status === "active")
-      .sort((a, b) => rank(a.medium) - rank(b.medium) || (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || String(a.title).localeCompare(String(b.title)));
-    const since = Date.now() - MOVIE_NOW_DAYS * 86400000;
-    const movie = on
-      .filter((s) => s.medium === "movies" && s.lastWrote && s.lastWrote >= since)
-      .sort((a, b) => b.lastWrote - a.lastWrote)[0];
-    const list = movie ? [...active, movie] : active;
-    return list.map((s, i) => ({ ...s, groupFirst: i === 0 || list[i - 1].medium !== s.medium }));
+    const order = [...TABS, ...LIVE.filter((g) => !g.tabbed)];
+    const since = Date.now() - NOW_PLAYING_DAYS * 86400000;
+    const list = [];
+    for (const g of order) {
+      const here = (subjects ?? []).filter((s) => s.group === g.id);
+      if (g.nowPlaying === "status") {
+        list.push(...here
+          .filter((s) => s.status === "active")
+          .sort((a, b) => (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || String(a.title).localeCompare(String(b.title))));
+      } else if (g.nowPlaying === "recent") {
+        const top = here
+          .filter((s) => s.lastWrote && s.lastWrote >= since)
+          .sort((a, b) => b.lastWrote - a.lastWrote)[0];
+        if (top) list.push(top);
+      }
+    }
+    return list.map((s, i) => ({ ...s, groupFirst: i === 0 || list[i - 1].group !== s.group }));
   });
 
   // Shelf order: what he's on now first, then what's queued up, then
@@ -755,70 +766,267 @@ export default function (eleventyConfig) {
 
   // "Best of" is zero-length until Hat marks a post `featured: true`. Supporting
   // the flag now costs nothing; the page and its nav link stay hidden until then.
-  // A featured post's media: an essay's own; a daily's are those of the
-  // subjects its ## headings file to (a day can be about two media), games
+  // A featured post's groups: an essay's own; a daily's are those of the
+  // subjects its ## headings file to (a day can be about two groups), games
   // when it files to none.
-  const featuredFor = (api, medium) => {
-    const postMedia = new Map();
+  const featuredFor = (api, group) => {
+    const postGroups = new Map();
     for (const s of buildSubjectPages(api)) {
       for (const f of s.fragments) {
-        if (!postMedia.has(f.sourceUrl)) postMedia.set(f.sourceUrl, new Set());
-        postMedia.get(f.sourceUrl).add(s.medium);
+        if (!postGroups.has(f.sourceUrl)) postGroups.set(f.sourceUrl, new Set());
+        postGroups.get(f.sourceUrl).add(s.group);
       }
     }
-    const essayMedium = new Map(buildEssayList(api).map((e) => [e.url, e.medium]));
+    const essayGroup = new Map(buildEssayList(api).map((e) => [e.url, e.group]));
     return featuredAll(api).filter((p) => {
-      if (essayMedium.has(p.url)) return essayMedium.get(p.url) === medium;
-      const media = postMedia.get(p.url);
-      return media?.size ? media.has(medium) : medium === DEFAULT_MEDIUM;
+      if (essayGroup.has(p.url)) return essayGroup.get(p.url) === group;
+      const here = postGroups.get(p.url);
+      return here?.size ? here.has(group) : group === DEFAULT_GROUP;
     });
   };
 
-  // Every medium's views in one place: a page per medium per view, each
-  // template paginating over this. Only media that are switched on and have
-  // a subject (MEDIA) get pages.
+  // ---------------------------------------------------------------- cards
+  //
+  // The `cards` band (2026-11-03, sports first): a hand-edited list, not
+  // subjects. Each card is a title, a cover file, one free-text `vibe:` line
+  // in place of the status and rating cells, an `as_of:` date Hat types
+  // (never a file age: publish copies nightly and git keeps no mtime, so the
+  // typed date is the only thing keeping a card honest), `subject:` — the
+  // subject whose page shows the card — and `why:`, a paragraph or two of
+  // prose. In the vault (`cards: teams` reads 70_chaosh.at/teams.yaml),
+  // carried by publish.py like the other data files. In Hat's order, which
+  // is the order they show in. No ladder, no rung, no nag.
+  const cardProblems = [];
+  const loadCards = (g) => {
+    if (!g.hasCards || !g.cardsFile) return [];
+    const file = path.join("src", "_data", `${g.cardsFile}.yaml`);
+    let raw;
+    try {
+      raw = fs.existsSync(file) ? parseYaml(fs.readFileSync(file, "utf8")) : [];
+    } catch (err) {
+      cardProblems.push(`${g.cardsFile}.yaml: ${err.message.split("\n")[0]}`);
+      return [];
+    }
+    if (!Array.isArray(raw)) {
+      cardProblems.push(`${g.cardsFile}.yaml is not a list`);
+      return [];
+    }
+    return raw.flatMap((c, i) => {
+      if (!c || typeof c !== "object" || !c.title) {
+        cardProblems.push(`${g.cardsFile}.yaml card ${i + 1} has no title`);
+        return [];
+      }
+      const slug = String(c.slug ?? essaySlug(String(c.title)));
+      const stem = String(c.cover ?? slug);
+      const subject = c.subject != null ? aliasMap.get(normalise(c.subject)) ?? null : null;
+      if (c.subject != null && !subject) cardProblems.push(`${g.cardsFile}.yaml ${slug}: subject ${c.subject} is no subject`);
+      const asOf = c.as_of ? new Date(c.as_of instanceof Date ? c.as_of : `${String(c.as_of)}T00:00:00Z`) : null;
+      return [{
+        slug,
+        anchor: `card-${slug}`,
+        title: String(c.title),
+        subject,
+        coverUrl: coverUrls.get(stem) ?? null,
+        coverPixel: coverPixels.has(stem),
+        coverBox: coverBoxOf(stem, typeof c.cover_fit === "boolean" ? c.cover_fit : g.coverFit),
+        vibe: typeof c.vibe === "string" && c.vibe.trim() ? c.vibe.trim() : null,
+        asOf: asOf && !Number.isNaN(asOf.getTime()) ? asOf : null,
+        whyHtml: typeof c.why === "string" && c.why.trim() ? revealSpoilers(md.render(c.why)) : null,
+        skyUrl: subject ? `/img/sky/${subject}.png` : null,
+      }];
+    });
+  };
+
+  // ---------------------------------------------------------------- frecency
+  //
+  // How the etc tab ranks (2026-11-03): each ## section about a subject
+  // weighs 0.5 ^ (age in days / FRECENCY_HALF_LIFE), each essay about it
+  // FRECENCY_ESSAY times that ("so much effort in them"), summed per subject;
+  // a group's score is its subjects'. Recomputed every nightly build, so a
+  // thread that goes quiet sinks on its own. Nothing cleverer.
+  const FRECENCY_HALF_LIFE = 30;
+  const FRECENCY_ESSAY = 3;
+  const frecency = (fragments, essays, now = Date.now()) => {
+    const w = (d) => 0.5 ** ((now - d.getTime()) / DAY_MS / FRECENCY_HALF_LIFE);
+    return fragments.reduce((n, f) => n + w(f.date), 0)
+      + FRECENCY_ESSAY * essays.reduce((n, e) => n + w(e.date), 0);
+  };
+  // The etc views row: the top ETC_ROW etc groups, then "all →" whenever
+  // there are more (Hat: "groups to start, this seems like something free to
+  // change later" — etcRow is the one place that picks what the row lists).
+  const ETC_ROW = 5;
+
+  // The card band on a group's landing page: one strip, the group's "here's
+  // my taste". Canon covers where the group has a canon with members; failing
+  // that, the shelf minus what's unplayed or stopped, rated first then
+  // alphabetical (2026-11-03 — "most recently written about" would be two
+  // covers for movies, and raw shelf order would lead with an unwatched film
+  // the day one is added); a cards band's cards, in Hat's order. Capped at
+  // BAND_MAX, and the CSS shows only the row that fits, so it stays a strip.
+  const BAND_MAX = 5;
+  const BAND_SKIP = new Set(["backlog", "shelved", "incomplete"]);
+
+  // Every group's pages in one place: its landing page, and a page per view
+  // per band, each template paginating over this. Every group with a
+  // subject gets its pages, tab or not (LIVE).
   //
   // Memoised like the fan-out, and the view collections below are slices of
   // it: a view with nothing in it gets no page (a computed `false` permalink
   // does not skip a paginated page, so the skipping happens here). Games'
-  // canon always builds: /canon/ is a nav word and a business card.
-  let mediumPagesMemo = null;
-  const buildMediumPages = (api) => {
-    if (mediumPagesMemo) return mediumPagesMemo;
+  // canon always builds: /canon/ is a business card.
+  let groupPagesMemo = null;
+  const buildGroupPages = (api) => {
+    if (groupPagesMemo) return groupPagesMemo;
     canonProblems.length = 0;
+    cardProblems.length = 0;
     const all = buildSubjectPages(api);
     const essays = buildEssayList(api).slice().sort((a, b) => b.date - a.date);
-    mediumPagesMemo = MEDIA.map((m) => {
-      const subjectsHere = all.filter((s) => s.medium === m.id);
+    groupPagesMemo = LIVE.map((g) => {
+      const subjectsHere = all.filter((s) => s.group === g.id);
+      const canon = g.hasCanon ? canonFor(api, g.id) : { members: [], changes: [], essays: [], description: null };
+      const essaysHere = essays.filter((e) => e.group === g.id);
+      // The log (2026-10-25): the dailies filtered to one group. A day can
+      // cover several groups, so it is every ## section about this group's
+      // subjects rather than whole posts, newest first like the home page.
+      // Same entry shape as a tag or rating view.
+      const log = subjectsHere
+        .flatMap((subject) => subject.fragments.map((f) => ({
+          kind: "fragment", date: f.date, url: f.anchorUrl, subject, face: f.face, html: f.html,
+        })))
+        .sort((a, b) => b.date - a.date);
+      // The landing page's log: the same, with essays slotted in at their
+      // date (lede + link, as on the home page). A same-day tie puts the
+      // daily first, as the home stream does.
+      const essayIds = new Set();
+      const stream = [...log, ...essaysHere
+        .filter((e) => !essayIds.has(e.slug) && essayIds.add(e.slug))
+        .map((e) => ({ kind: "essay", date: e.date, url: e.url, title: e.title, blurb: e.blurb }))]
+        .sort((a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay"));
+      const cards = loadCards(g);
+      const featured = featuredFor(api, g.id);
+      const rankOf = (s) => s.canon ? 0 : s.rating?.rank ?? 99;
+      const band = g.hasCards && cards.length
+        ? { kind: "cards", title: g.cardsFile.replace(/^./, (c) => c.toUpperCase()), items: cards }
+        : canon.members.length
+          ? { kind: "canon", title: "Canon", items: canon.members.slice(0, BAND_MAX) }
+          : g.hasShelf
+            ? { kind: "shelf", title: "From the shelf", items: subjectsHere
+              .filter((s) => !BAND_SKIP.has(s.status))
+              .sort((a, b) => rankOf(a) - rankOf(b) || String(a.title).localeCompare(String(b.title)))
+              .slice(0, BAND_MAX) }
+            : null;
+      const score = subjectsHere.reduce((n, s) => n + s.score, 0);
+      const lastWrote = subjectsHere.map((s) => s.lastWrote).filter(Boolean).sort((a, b) => b - a)[0] ?? null;
+      const byScore = subjectsHere.slice()
+        .sort((a, b) => b.score - a.score || String(a.title).localeCompare(String(b.title)));
       return {
-        ...m,
+        ...g,
         subjects: subjectsHere,
-        canon: canonFor(api, m.id),
-        featured: featuredFor(api, m.id),
-        essays: essays.filter((e) => e.medium === m.id),
-        // The log (2026-10-25): the dailies filtered to one medium. A day
-        // can cover several media, so it is every ## section about this
-        // medium's subjects rather than whole posts, newest first like the
-        // home page. Same entry shape as a tag or rating view.
-        log: subjectsHere
-          .flatMap((subject) => subject.fragments.map((f) => ({
-            kind: "fragment", date: f.date, url: f.sourceUrl, subject, html: f.html,
-          })))
-          .sort((a, b) => b.date - a.date),
+        byScore,
+        canon,
+        featured,
+        essays: essaysHere,
+        log,
+        stream,
+        cards,
+        band: band?.items.length ? band : null,
+        // The fuller views the band points at, on its heading line.
+        bandLinks: [
+          canon.members.length && { label: "full canon", url: g.urls.canon },
+          g.hasShelf && subjectsHere.length && { label: "full shelf", url: g.urls.shelf },
+          featured.length && { label: "best of", url: g.urls.best },
+        ].filter(Boolean),
+        // Several subjects and no shelf to browse them on: they go as a word
+        // row under the band (nfl · mlb · nba · nhl).
+        subjectRow: !g.hasShelf && subjectsHere.length > 1 ? byScore : [],
+        // Where the group's name goes: a one-subject group's is its subject's
+        // page (the group page would only repeat it), anything else its own.
+        homeUrl: subjectsHere.length === 1 ? `/s/${subjectsHere[0].slug}/` : g.urls.home,
+        score,
+        lastWrote,
+        written: subjectsHere.reduce((n, s) => n + s.written, 0),
       };
     });
-    return mediumPagesMemo;
+    return groupPagesMemo;
   };
-  eleventyConfig.on("eleventy.before", () => { mediumPagesMemo = null; });
-  eleventyConfig.addCollection("mediumPages", buildMediumPages);
-  eleventyConfig.addCollection("mediumCanonPages", (api) => buildMediumPages(api)
-    .filter((m) => m.id === DEFAULT_MEDIUM || m.canon.members.length));
-  eleventyConfig.addCollection("mediumBestPages", (api) => buildMediumPages(api)
-    .filter((m) => m.featured.length));
-  eleventyConfig.addCollection("mediumEssayPages", (api) => buildMediumPages(api)
-    .filter((m) => m.essays.length));
-  eleventyConfig.addCollection("mediumLogPages", (api) => buildMediumPages(api)
-    .filter((m) => m.log.length));
+  eleventyConfig.on("eleventy.before", () => { groupPagesMemo = null; });
+  eleventyConfig.addCollection("groupPages", buildGroupPages);
+  eleventyConfig.addCollection("groupCanonPages", (api) => buildGroupPages(api)
+    .filter((g) => g.hasCanon && (g.id === DEFAULT_GROUP || g.canon.members.length)));
+  eleventyConfig.addCollection("groupShelfPages", (api) => buildGroupPages(api)
+    .filter((g) => g.hasShelf));
+  eleventyConfig.addCollection("groupBestPages", (api) => buildGroupPages(api)
+    .filter((g) => g.featured.length));
+  eleventyConfig.addCollection("groupEssayPages", (api) => buildGroupPages(api)
+    .filter((g) => g.essays.length));
+  eleventyConfig.addCollection("groupLogPages", (api) => buildGroupPages(api)
+    .filter((g) => g.log.length));
+
+  // A subject's cards: every card in its group naming it as `subject:`.
+  eleventyConfig.addFilter("cardsFor", (subject, groupPages) =>
+    (groupPages ?? []).find((g) => g.id === subject?.group)?.cards
+      .filter((c) => c.subject === subject.slug) ?? []);
+
+  // The etc groups, busiest first, for /etc/ and the etc views row. Each
+  // carries its rank on every sort axis the page offers, the shelf's trick:
+  // CSS can't sort, but it can read a number (see shelfRanks).
+  const etcRanks = (items) => {
+    const byTitle = (a, b) => String(a.label ?? a.title).localeCompare(String(b.label ?? b.title));
+    const rankBy = (cmp) => {
+      const order = new Map();
+      items.slice().sort(cmp).forEach((x, i) => order.set(x, i));
+      return order;
+    };
+    const score = rankBy((a, b) => b.score - a.score || byTitle(a, b));
+    const recent = rankBy((a, b) => (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || byTitle(a, b));
+    const written = rankBy((a, b) => b.written - a.written || byTitle(a, b));
+    return items
+      .slice()
+      .sort((a, b) => score.get(a) - score.get(b))
+      .map((x) => ({ ...x, oScore: score.get(x), oRecent: recent.get(x), oWritten: written.get(x) }));
+  };
+  eleventyConfig.addCollection("etcGroups", (api) => etcRanks(buildGroupPages(api).filter((g) => !g.tabbed))
+    .map((g) => ({ ...g, subjects: etcRanks(g.subjects) })));
+  // /etc/ builds once etc has a subject (hidden until content): a one-page
+  // pagination over this, which is empty until then.
+  eleventyConfig.addCollection("etcPage", (api) =>
+    buildGroupPages(api).some((g) => !g.tabbed) ? [{ url: "/etc/" }] : []);
+
+  // base.njk's one question about the nav: which tab is open, and what the
+  // views row under it holds. A group's views row is its bands as words,
+  // shown only inside the group — its landing page, its views, its subjects'
+  // pages. Inside etc (/etc/, an etc group's pages, their subjects) the row
+  // is the busiest etc groups instead, then "all →". The site's own pages
+  // keep the about row. Everywhere else — home, dailies, the archive,
+  // essays, tags, ratings — no tab is open and there is no second row.
+  eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
+    const pages = groupPages ?? [];
+    if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
+    const etcGroups = pages.filter((g) => !g.tabbed).sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+    const etcRow = () => {
+      const items = etcGroups.slice(0, ETC_ROW).map((g) => ({
+        label: g.label, url: g.homeUrl, current: g.id === groupId,
+      }));
+      if (etcGroups.length > ETC_ROW) items.push({ label: "all →", url: "/etc/", current: url === "/etc/" });
+      return items;
+    };
+    if (url === "/etc/") return { tab: "etc", row: "list", items: etcRow() };
+    const g = pages.find((x) => x.id === groupId);
+    if (!g) return { tab: null, row: null };
+    if (!g.tabbed) return { tab: "etc", row: "list", items: etcRow() };
+    const at = (view) => navView === view;
+    return {
+      tab: g.id,
+      row: "list",
+      items: [
+        g.canon.members.length && { label: "canon", url: g.urls.canon, current: at("canon") },
+        g.hasShelf && { label: "shelf", url: g.urls.shelf, current: at("shelf") },
+        g.featured.length && { label: "best of", url: g.urls.best, current: at("best") },
+        g.essays.length && { label: "essays", url: g.urls.essays, current: at("essays") },
+        g.log.length && { label: "log", url: g.urls.log, current: at("log") },
+      ].filter(Boolean),
+    };
+  });
 
   const featuredAll = (api) => {
     const dailies = publishable(api.getFilteredByTag("dailies")).filter(
@@ -848,69 +1056,138 @@ export default function (eleventyConfig) {
     ? parseYaml(fs.readFileSync(subjectsFile, "utf8")) || {}
     : {};
 
-  // ---------------------------------------------------------------- media
+  // ---------------------------------------------------------------- groups
   //
-  // The site is multi-medium since 2026-10-25, and games stay first. A
-  // subject's medium is its FIRST category; each medium gets its own tab, its
-  // own canon, shelf, best-of and essays views, and its own slice of
-  // canon_log.yaml. Mirrors medium_of() in the vault's chaosh_subjects.py —
-  // if one changes, change both.
+  // Three levels since 2026-11-03: tab → group → subject. A subject is what
+  // Hat writes under (`## NFL`); its FIRST category names its group; a tab
+  // is a group with a nav spot. A group is defined by the BANDS it has, not
+  // by a type: every group has a log (its subjects' ## sections) and essays
+  // (essays about its subjects); `shelf` adds statuses and the shelf page,
+  // `canon` ratings and the canon, `cards` a hand-edited card list. Games is
+  // the maximal case, Aurora Watch's `site` the minimal one. Declared in
+  // site.yaml `groups:` — mirrors groups_from_site() in the vault's
+  // chaosh_subjects.py, which also refuses what this would only warn about
+  // (compile_subjects.py check_groups). If one changes, change both.
   //
-  // Which media show, and in what order, is `media:` in site.yaml: the off
-  // switch. A medium also needs at least one subject before its tab appears,
-  // so a listed medium with nothing in it shows nothing. Dropping a medium
-  // hides its tab, its views and its now-playing entries; its subject pages
-  // and the posts that mention it stay up, because subject URLs are flat.
+  // Placement is one list, `tabs:`. Every declared group not listed lands in
+  // the etc tab. Dropping a group from tabs: is a demotion, never a
+  // disappearance: its canon, shelf and log pages build regardless of where
+  // it sits, gated only by its bands. (Until 2026-11-03 `media:` was an off
+  // switch that hid a medium's views; that behaviour went, because it broke
+  // links.)
   //
-  // Games keep the bare URLs (/canon/, /shelf/, /best/); every other medium
-  // nests under the view (/canon/movies/), because the view carries the
-  // medium. Essays are the exception: /essays/ is every essay (the panel's
-  // "all →"), so each medium's slice lives at /essays/<medium>/, games too.
-  const DEFAULT_MEDIUM = "games";
-  // `boardgames` became `tabletop` in the blurbs on 2026-10-25; the alias
-  // keeps a stray old value on the right shelf.
-  const MEDIUM_ALIASES = { boardgames: "tabletop" };
-  const mediumOf = (meta) => {
-    const first = [].concat(meta?.category ?? [])[0];
-    const m = first ? String(first) : DEFAULT_MEDIUM;
-    return MEDIUM_ALIASES[m] ?? m;
-  };
+  // Games stays the special child: it keeps the bare view URLs (/canon/,
+  // /shelf/, /best/, /log/) where every other group nests (/canon/movies/),
+  // and a category-less subject lands there. A games privilege, not a tab
+  // privilege — it survives demotion and is never extended to a second
+  // group (Hat: "if anyone deserves to be special, it's games"). Essays are
+  // the exception, as before: /essays/ is every essay, so each group's slice
+  // lives at /essays/<group>/, games too. A group's own landing page is the
+  // bare /<group>/, for every group; the compile's clash check keeps the
+  // slug off every other top-level path.
+  const DEFAULT_GROUP = "games";
   const siteFile = path.join("src", "_data", "site.yaml");
   const siteData = fs.existsSync(siteFile)
     ? parseYaml(fs.readFileSync(siteFile, "utf8")) || {}
     : {};
-  const mediaListed = Array.isArray(siteData.media) && siteData.media.length
-    ? siteData.media.map(String)
-    : [DEFAULT_MEDIUM];
-  const mediumCount = new Map();
+  // An old site.yaml has `media:` and no `groups:`: each medium stands in as
+  // a canon+shelf group with the rules it had.
+  const LEGACY_GROUPS = {
+    games: { noun: "game", covers: "steamgriddb", now_playing: "status", color: "#9bd8f3" },
+    tabletop: { noun: "tabletop game", covers: "bgg", cover_fit: true, now_playing: "status", color: "#ecafaf", aliases: ["boardgames"] },
+    movies: { noun: "movie", covers: "tmdb", now_playing: "recent", color: "#d2a7ce", statuses: ["completed", "backlog"], status_words: { completed: "watched" } },
+    shows: { noun: "show", covers: "tmdb-tv", now_playing: "status", color: "#a4a9db" },
+    books: { noun: "book", covers: "hardcover", now_playing: "status", color: "#a2d6b3" },
+  };
+  const listOf = (v) => (v == null ? [] : [].concat(v)).map(String).filter((x) => x.trim());
+  const declaredGroups = (() => {
+    const raw = siteData.groups;
+    if (raw && typeof raw === "object" && !Array.isArray(raw) && Object.keys(raw).length) {
+      return Object.entries(raw).map(([id, g]) => [String(id), g && typeof g === "object" ? g : {}]);
+    }
+    const media = listOf(siteData.media);
+    return (media.length ? media : [DEFAULT_GROUP])
+      .map((m) => [m, { bands: ["canon", "shelf"], ...LEGACY_GROUPS[m] }]);
+  })();
+  const GROUP_ALIASES = {};
+  for (const [id, g] of declaredGroups) for (const a of listOf(g.aliases)) GROUP_ALIASES[a] = id;
+  const groupOf = (meta) => {
+    const first = [].concat(meta?.category ?? [])[0];
+    const g = first ? String(first) : DEFAULT_GROUP;
+    return GROUP_ALIASES[g] ?? g;
+  };
+  const groupCount = new Map();
   for (const meta of Object.values(subjects)) {
-    const m = mediumOf(meta);
-    mediumCount.set(m, (mediumCount.get(m) ?? 0) + 1);
+    const g = groupOf(meta);
+    groupCount.set(g, (groupCount.get(g) ?? 0) + 1);
   }
-  // Movies are watched or not yet; the other statuses are about long
-  // engagement. The word "completed" reads wrong for a film.
-  const STATUS_WORDS = { movies: { completed: "watched" } };
-  const viewUrls = (m) => m === DEFAULT_MEDIUM
-    ? { canon: "/canon/", shelf: "/shelf/", best: "/best/", essays: `/essays/${m}/`, log: "/log/" }
-    : { canon: `/canon/${m}/`, shelf: `/shelf/${m}/`, best: `/best/${m}/`, essays: `/essays/${m}/`, log: `/log/${m}/` };
-  const MEDIA = mediaListed
-    .filter((m, i) => mediaListed.indexOf(m) === i && mediumCount.get(m))
-    .map((m) => ({ id: m, label: m, icon: `/img/icons/media/${m}.svg`, urls: viewUrls(m) }));
-  const mediaOn = new Set(MEDIA.map((m) => m.id));
-  eleventyConfig.addGlobalData("media", MEDIA);
-  const MEDIUM_NOUNS = { games: "game", tabletop: "tabletop game", movies: "movie", shows: "show", books: "book" };
-  eleventyConfig.addFilter("mediumNoun", (m) => MEDIUM_NOUNS[m] ?? m);
-  // Every medium there is, switched on or not. A subject whose first category
-  // is none of these (the site's own build log, `category: site`) is not a
-  // thing with a status or a verdict, so its page drops both chips. Not
-  // mediaOn: switching a medium off shouldn't strip its live pages' ratings.
-  eleventyConfig.addGlobalData("mediaKnown", Object.keys(MEDIUM_NOUNS));
-  eleventyConfig.addFilter("statusWord", (status, medium) =>
-    STATUS_WORDS[medium]?.[status] ?? status);
-  // The medium whose tab is open on a page: its own on a medium view or a
-  // subject page, games everywhere else (the home page included).
-  eleventyConfig.addFilter("openMedium", (medium) =>
-    mediaOn.has(medium) ? medium : (MEDIA[0]?.id ?? DEFAULT_MEDIUM));
+  const tabsListed = (() => {
+    const t = listOf(siteData.tabs);
+    const m = listOf(siteData.media);
+    return (t.length ? t : m.length ? m : [DEFAULT_GROUP]).filter((x, i, a) => a.indexOf(x) === i);
+  })();
+  const viewUrls = (id) => ({
+    home: `/${id}/`,
+    essays: `/essays/${id}/`,
+    ...(id === DEFAULT_GROUP
+      ? { canon: "/canon/", shelf: "/shelf/", best: "/best/", log: "/log/" }
+      : { canon: `/canon/${id}/`, shelf: `/shelf/${id}/`, best: `/best/${id}/`, log: `/log/${id}/` }),
+  });
+  const NOW_MODES = new Set(["status", "recent"]);
+  // A plain object per group, safe to hand to templates (no Sets): the bands
+  // are booleans so a template can ask `group.hasShelf`.
+  const GROUPS = declaredGroups.map(([id, g]) => {
+    const bands = new Set(listOf(g.bands));
+    const tabbed = tabsListed.includes(id);
+    const nowPlaying = NOW_MODES.has(g.now_playing) ? g.now_playing : "off";
+    const iconFile = `${g.icon ?? id}.svg`;
+    return {
+      id,
+      label: String(g.label ?? id),
+      noun: String(g.noun ?? g.label ?? id),
+      description: typeof g.description === "string" ? g.description : null,
+      hasShelf: bands.has("shelf"),
+      hasCanon: bands.has("canon"),
+      hasCards: bands.has("cards"),
+      statuses: listOf(g.statuses),
+      statusWords: g.status_words && typeof g.status_words === "object" ? g.status_words : {},
+      covers: g.covers ?? null,
+      coverFit: g.cover_fit === true,
+      nowPlaying,
+      // An icon is required once a group is tabbed or in now playing (the
+      // compile refuses otherwise); any other group shows one if it has one.
+      hasIcon: fs.existsSync(path.join("src", "img", "icons", "media", iconFile)),
+      icon: `/img/icons/media/${iconFile}`,
+      color: typeof g.color === "string" ? g.color : null,
+      cardsFile: g.cards ? String(g.cards) : null,
+      tabbed,
+      count: groupCount.get(id) ?? 0,
+      urls: viewUrls(id),
+    };
+  });
+  const GROUP = new Map(GROUPS.map((g) => [g.id, g]));
+  // A group gets pages once it has a subject (hidden until content, the
+  // site-wide rule), tab or not.
+  const LIVE = GROUPS.filter((g) => g.count);
+  const TABS = tabsListed.map((t) => GROUP.get(t)).filter((g) => g?.count);
+  const ETC = LIVE.filter((g) => !g.tabbed);
+  const undeclaredGroups = [...groupCount.keys()].filter((g) => !GROUP.has(g));
+  const groupInfo = Object.fromEntries(GROUPS.map((g) => [g.id, g]));
+  eleventyConfig.addGlobalData("groupInfo", groupInfo);
+  eleventyConfig.addGlobalData("tabs", TABS);
+  // Each group's colour and icon as a class (.m-<id>): the colour in the
+  // icon wherever it appears (the nav, now playing, a mixed rung's members).
+  // In site.yaml since 2026-11-03, on the 10-31 pastel recipe (style.css
+  // has the why); etc and about, which aren't groups, keep theirs there.
+  eleventyConfig.addGlobalData("groupStyle", GROUPS
+    .filter((g) => g.color || g.hasIcon)
+    .map((g) => `.m-${g.id}{${g.color ? `--mc:${g.color};` : ""}${g.hasIcon ? `--mico:url("${g.icon}")` : ""}}`)
+    .join(""));
+  eleventyConfig.addFilter("groupNoun", (g) => GROUP.get(g)?.noun ?? g);
+  eleventyConfig.addFilter("statusWord", (status, g) =>
+    GROUP.get(g)?.statusWords?.[status] ?? status);
+  const hasShelf = (g) => GROUP.get(g)?.hasShelf === true;
+  const hasCanon = (g) => GROUP.get(g)?.hasCanon === true;
 
   // Tags are a curated VIEW over several subjects — /t/final-fantasy/ gathers
   // every fragment ever written about any Final Fantasy game onto one page.
@@ -1143,13 +1420,17 @@ export default function (eleventyConfig) {
     coverBoxes.clear();
   });
 
-  // Tabletop covers are box art, and boxes come square, landscape or small and
-  // tall, so they are never cropped to the games' 2:3 grid (2026-10-25). The
-  // box ratio (width / height, held to 2:3..3:2 so a long box doesn't become a
-  // sliver) rides along as `coverBox`; templates fit the box inside its slot,
-  // bottom-aligned like a box on a shelf, and the post column sizes the cover
-  // to it. Games keep coverBox null and the crop they always had.
-  const coverBoxes = new Map(); // slug -> clamped ratio, or null
+  // Some covers are never cropped to the games' 2:3 grid (2026-10-25,
+  // tabletop's boxes, which come square, landscape or small and tall; since
+  // 2026-11-03 any group's, by `cover_fit:` — sports' logos too, since a
+  // round mark cropped to 2:3 loses its sides). The ratio (width / height,
+  // held to 2:3..3:2 so a long box doesn't become a sliver) rides along as
+  // `coverBox`; templates fit the cover inside its slot, bottom-aligned like
+  // a box on a shelf, and the post column sizes the cover to it. Per cover
+  // file, from the group's `cover_fit:`, which a subject's own `cover_fit:`
+  // (or a card's) overrides. Everything else keeps coverBox null and the
+  // crop it always had.
+  const coverBoxes = new Map(); // stem|fit -> clamped ratio, or null
   // Pixel size from the header alone: a PNG's IHDR, or a JPEG's first SOF.
   const imageSize = (file) => {
     const b = fs.readFileSync(file);
@@ -1167,17 +1448,22 @@ export default function (eleventyConfig) {
     }
     return null;
   };
-  const coverBox = (slug) => {
-    if (coverBoxes.has(slug)) return coverBoxes.get(slug);
+  const coverBoxOf = (stem, fit) => {
+    const key = `${stem}|${fit ? 1 : 0}`;
+    if (coverBoxes.has(key)) return coverBoxes.get(key);
     let box = null;
-    const url = coverUrls.get(slug);
-    if (url && mediumOf(subjects[slug]) === "tabletop") {
+    const url = coverUrls.get(stem);
+    if (url && fit) {
       const size = imageSize(path.join("src", url));
       if (size?.w && size?.h) box = +Math.min(1.5, Math.max(2 / 3, size.w / size.h)).toFixed(4);
     }
-    coverBoxes.set(slug, box);
+    coverBoxes.set(key, box);
     return box;
   };
+  const fitOf = (slug) => typeof subjects[slug]?.cover_fit === "boolean"
+    ? subjects[slug].cover_fit
+    : GROUP.get(groupOf(subjects[slug]))?.coverFit === true;
+  const coverBox = (slug) => coverBoxOf(slug, fitOf(slug));
 
   // A blurb is the third content type: an undated, revisable paragraph that
   // stands for a subject whose thoughts never took the form of a ## heading.
@@ -1219,7 +1505,9 @@ export default function (eleventyConfig) {
 
   const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
 
-  const skyTag = (slug, status) => {
+  // `cover` is the cover file to show, the subject's own unless a face
+  // names another (see faces below).
+  const skyTag = (slug, status, cover = slug) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
     // A covered subject shows its cover here instead of its sky. Status is
@@ -1228,16 +1516,17 @@ export default function (eleventyConfig) {
     // Background image, not <img>, for the same reason the sky is one: an img
     // carries intrinsic height and would drive the row instead of being driven
     // by it, which is what keeps the art tracking entry length.
-    const cover = coverUrls.get(slug);
-    if (cover) {
+    const coverUrl = coverUrls.get(cover) ?? (cover !== slug ? coverUrls.get(slug) : null);
+    if (coverUrl) {
       // A link, but deliberately not a second tab stop or a second thing to
       // announce: the heading beside it already links to the same page, so
       // this is the redundant-image-link case — hidden from assistive tech and
       // skipped by the keyboard, present for the mouse.
-      const box = coverBox(slug);
+      const stem = coverUrls.has(cover) ? cover : slug;
+      const box = coverBoxOf(stem, fitOf(slug));
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(slug) ? " sky-pixel" : ""}" href="/s/${slug}/" ` +
-        `style="background-image:url(${cover})" aria-hidden="true" tabindex="-1"></a>`
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}" href="/s/${slug}/" ` +
+        `style="background-image:url(${coverUrl})" aria-hidden="true" tabindex="-1"></a>`
       );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
@@ -1246,11 +1535,42 @@ export default function (eleventyConfig) {
 
   // normalised heading -> slug
   const aliasMap = new Map();
+  // Faces (2026-11-03): an alias that keeps its own display name and cover.
+  // `## Bears` files under NFL — same page, same frecency, same timeline —
+  // but its section is headed "Bears" and shows the bears cover, where a
+  // plain `## NFL` shows the shield. Declared in the blurb (`faces:`),
+  // compiled into subjects.yaml; the compile also lists each face key as an
+  // alias, so everything that only knows aliases files it right. A plain
+  // alias still renders as its subject's title and cover (`## dqxis` →
+  // "Dragon Quest XI S"). A later split moves the face to a subject of its
+  // own and old sections re-file themselves.
+  // normalised face key -> { slug, key, title, cover }
+  const faceMap = new Map();
   for (const [slug, meta] of Object.entries(subjects)) {
     aliasMap.set(normalise(meta.title ?? slug), slug);
     aliasMap.set(normalise(slug), slug);
     for (const alias of meta.aliases ?? []) aliasMap.set(normalise(alias), slug);
+    const faces = meta.faces && typeof meta.faces === "object" ? meta.faces : {};
+    for (const [key, face] of Object.entries(faces)) {
+      aliasMap.set(normalise(key), slug);
+      faceMap.set(normalise(key), {
+        slug,
+        key: normalise(key),
+        title: String(face?.title ?? key),
+        cover: face?.cover ? String(face.cover) : null,
+      });
+    }
   }
+  // A heading -> { slug, face } (face null for a plain heading or alias).
+  const resolveHeading = (heading) => {
+    const key = normalise(heading);
+    const slug = aliasMap.get(key) ?? null;
+    const face = slug ? faceMap.get(key) ?? null : null;
+    return { slug, face: face?.slug === slug ? face : null };
+  };
+  // What a section about a subject is headed: its face's name, else the
+  // subject's title.
+  const headingTitle = (slug, face) => face?.title ?? subjects[slug]?.title ?? slug;
 
   eleventyConfig.addFilter("resolveSubject", (heading) =>
     aliasMap.get(normalise(heading)) ?? null,
@@ -1377,7 +1697,9 @@ export default function (eleventyConfig) {
         return {
           slug: s,
           title: meta.title ?? s,
-          medium: mediumOf(meta),
+          group: groupOf(meta),
+          shelf: hasShelf(groupOf(meta)),
+          ratable: hasCanon(groupOf(meta)),
           status: meta.status ?? "active",
           canon: canonSlugsAll.has(s),
           rating: ratingOf(s, meta),
@@ -1433,9 +1755,9 @@ export default function (eleventyConfig) {
           ? e.data.description.trim()
           : null,
         citedSubjects,
-        // The medium whose essays view lists it: the first about: subject's.
+        // The group whose essays view lists it: the first about: subject's.
         // An essay citing only tags, or only the canon, files under games.
-        medium: citedSubjects.length ? mediumOf(subjects[citedSubjects[0]]) : DEFAULT_MEDIUM,
+        group: citedSubjects.length ? groupOf(subjects[citedSubjects[0]]) : DEFAULT_GROUP,
         chipUrl: citedSubjects.length
           ? `/img/sky/${citedSubjects[0]}-chip.png`
           : citedTagsDirect.length ? tagChip(citedTagsDirect[0])
@@ -1502,12 +1824,17 @@ export default function (eleventyConfig) {
       if (post.data.about != null) dailyAbout.push(post.inputPath);
 
       // Two headings resolving to the same subject in one post merge into a
-      // single dated fragment rather than appearing twice under one date.
-      const perPost = new Map();
+      // single dated fragment rather than appearing twice under one date —
+      // unless they wear different faces (`## Bears` and `## NFL` on one
+      // Sunday stay two sections, each under its own name and cover). The
+      // fragment links back to its first section's anchor in the day.
+      const perPost = new Map(); // slug|face -> { slug, face, anchor, text }
+      const sections = splitSections(post.rawInput);
+      const anchors = sectionAnchors(sections.map((x) => x.heading));
 
-      for (const { heading, body } of splitSections(post.rawInput)) {
+      for (const [i, { heading, body }] of sections.entries()) {
         if (!heading) continue; // empty "## " from the daily-note template
-        const slug = aliasMap.get(normalise(heading));
+        const { slug, face } = resolveHeading(heading);
         if (!slug) {
           const key = normalise(heading);
           if (!unmatched.has(key)) {
@@ -1517,14 +1844,25 @@ export default function (eleventyConfig) {
         }
         const text = body.join("\n").trim();
         if (!text) continue;
-        perPost.set(slug, perPost.has(slug) ? `${perPost.get(slug)}\n\n${text}` : text);
+        const key = `${slug}|${face?.key ?? ""}`;
+        const prev = perPost.get(key);
+        if (prev) prev.text += `\n\n${text}`;
+        else perPost.set(key, { slug, face, anchor: anchors[i], text });
       }
 
-      for (const [slug, text] of perPost) {
+      for (const { slug, face, anchor, text } of perPost.values()) {
         if (!collected.has(slug)) collected.set(slug, []);
         collected.get(slug).push({
           date: post.date,
           sourceUrl: post.url,
+          anchorUrl: anchor ? `${post.url}#${anchor}` : post.url,
+          // The face this section wore, with its cover's fit worked out, so
+          // a view's timeline can show it without knowing what a face is.
+          face: face && {
+            title: face.title,
+            cover: face.cover,
+            box: face.cover ? coverBoxOf(face.cover, fitOf(slug)) : coverBox(slug),
+          },
           html: revealSpoilers(md.render(text)),
           words: text.split(/\s+/).filter(Boolean).length,
         });
@@ -1556,8 +1894,11 @@ export default function (eleventyConfig) {
       return {
         slug,
         ...meta,
-        medium: mediumOf(meta),
+        group: groupOf(meta),
         status: meta?.status ?? "active",
+        // The etc tab's ranking (see frecency) and its "most written" axis.
+        score: frecency(fragments, essays),
+        written: fragments.length + essays.length,
         ...art,
         // Both of these exist for the shelf's sort axes. lastWrote is the same
         // date the recency tier is derived from, kept in its raw form because a
@@ -1614,16 +1955,21 @@ export default function (eleventyConfig) {
         .replace(/\[spoiler\]/g, " ")
         .replace(/<\/(p|li|blockquote|figcaption|td|th)>/gi, "$&\n"),
     );
-  // A daily minus its sections on page-only subjects: Aurora Watch is the
-  // site's build log, and its fonts and frames are not how Hat talks about
-  // games.
+  // A daily minus its sections on the site's own build log: Aurora Watch's
+  // fonts and frames are not how Hat talks. Keyed on the `site` group alone
+  // (2026-11-03; until then on "is it a medium", which under groups would
+  // silently drop every non-media thread — and "Caleb" and "cubbies" are how
+  // Hat talks). One line to drop if the site stops being one he writes
+  // around rather than about.
+  const CLOUD_SKIP_GROUP = "site";
+  const inCloud = (slug) => groupOf(subjects[slug]) !== CLOUD_SKIP_GROUP;
   const mediaProse = (raw) => {
     let keep = true;
     return String(raw).split("\n").filter((line) => {
       const m = /^##(?!#)\s*(.*)$/.exec(line);
       if (m) {
         const slug = aliasMap.get(normalise(m[1].trim()));
-        keep = !slug || mediumOf(subjects[slug]) in MEDIUM_NOUNS;
+        keep = !slug || inCloud(slug);
       }
       return keep;
     }).join("\n");
@@ -1636,7 +1982,7 @@ export default function (eleventyConfig) {
       })),
       ...buildEssayList(api)
         .filter((e) => !e.citedSubjects.length
-          || e.citedSubjects.some((s) => mediumOf(subjects[s]) in MEDIUM_NOUNS))
+          || e.citedSubjects.some(inCloud))
         .map((e) => ({ date: e.date, text: readerText(e.feedHtml), essay: e })),
     ];
     const year = cloudYear(docs);
@@ -1660,12 +2006,12 @@ export default function (eleventyConfig) {
     }));
 
     // Words written under each subject's ## headings, plus every essay about
-    // it in full. Media subjects only: Aurora Watch is the build log, not
+    // it in full. Not the site group's: Aurora Watch is the build log, not
     // something written about.
     const essayWords = new Map(docs.filter((d) => d.essay)
       .map((d) => [d.essay.slug, d.text.split(/\s+/).length]));
     const subjectCloud = (keep) => buildSubjectPages(api)
-      .filter((s) => s.medium in MEDIUM_NOUNS)
+      .filter((s) => inCloud(s.slug))
       .map((s) => ({
         label: s.title ?? s.slug,
         href: `/s/${s.slug}/`,
@@ -1715,8 +2061,9 @@ export default function (eleventyConfig) {
           entries.push({
             kind: "fragment",
             date: fragment.date,
-            url: fragment.sourceUrl,
+            url: fragment.anchorUrl,
             subject,
+            face: fragment.face,
             html: fragment.html,
           });
         }
@@ -1778,8 +2125,9 @@ export default function (eleventyConfig) {
           entries.push({
             kind: "fragment",
             date: fragment.date,
-            url: fragment.sourceUrl,
+            url: fragment.anchorUrl,
             subject,
+            face: fragment.face,
             html: fragment.html,
           });
         }
@@ -1792,8 +2140,8 @@ export default function (eleventyConfig) {
         rank: meta?.rank ?? null,
         description: meta?.description ?? null,
         members,
-        // Medium icons show on a rung's cards only when the rung spans media.
-        mixed: new Set(members.map((s) => s.medium)).size > 1,
+        // Group icons show on a rung's members only when the rung spans groups.
+        mixed: new Set(members.map((s) => s.group)).size > 1,
         entries,
         indexUrl: "/r/",
       };
@@ -1824,10 +2172,12 @@ export default function (eleventyConfig) {
   // Mirrors replay_canon_log() in the vault's chaosh_subjects.py, which
   // decides what gets logged — if one changes, change both. A line that
   // can't apply is reported and skipped, never fatal.
-  // One medium's entries only: a line without `medium:` is games, which is
-  // every line from before the multi-medium build.
-  const logMedium = (entry) => String(entry?.medium ?? DEFAULT_MEDIUM);
-  const replayCanonLog = (log, medium = DEFAULT_MEDIUM) => {
+  // One group's entries only: a line without `medium:` is games, which is
+  // every line from before the multi-medium build. The key stays `medium:`
+  // (the log is Hat's, and every non-games line already says it); its value
+  // is a group.
+  const logMedium = (entry) => String(entry?.medium ?? DEFAULT_GROUP);
+  const replayCanonLog = (log, medium = DEFAULT_GROUP) => {
     let roster = [];
     const joined = new Map();
     const problems = [];
@@ -1865,15 +2215,15 @@ export default function (eleventyConfig) {
     return { roster, joined, problems };
   };
 
-  // One canon per medium (2026-10-25), ten-ish rather than a strict ten.
-  // Called once per medium by the mediumPages collection.
+  // One canon per group with a canon band (per medium from 2026-10-25),
+  // ten-ish rather than a strict ten. Called once per group by groupPages.
   const canonFor = (api, medium) => {
     const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
     const essays = buildEssayList(api);
     const essayBySlug = new Map(essays.map((e) => [e.slug, e]));
     const { roster, joined, problems } = replayCanonLog(canonLog, medium);
-    canonProblems.push(...problems.map((p) => medium === DEFAULT_MEDIUM ? p : `${medium}: ${p}`));
-    const canonSlugs = new Set([...canonSlugsAll].filter((s) => mediumOf(subjects[s]) === medium));
+    canonProblems.push(...problems.map((p) => medium === DEFAULT_GROUP ? p : `${medium}: ${p}`));
+    const canonSlugs = new Set([...canonSlugsAll].filter((s) => groupOf(subjects[s]) === medium));
 
     // Slot order from the log. A canon game the log hasn't caught up with —
     // a swap made today, before the 2am run logs it, or any preview — goes
@@ -1921,10 +2271,10 @@ export default function (eleventyConfig) {
       changes,
       // `about: canon` is the games canon's: essays about the canon itself
       // predate the other media's, and no other medium has one yet.
-      essays: medium === DEFAULT_MEDIUM
+      essays: medium === DEFAULT_GROUP
         ? essays.filter((e) => e.aboutCanon).sort((a, b) => b.date - a.date)
         : [],
-      description: medium === DEFAULT_MEDIUM ? ratings[CANON]?.description ?? null : null,
+      description: medium === DEFAULT_GROUP ? ratings[CANON]?.description ?? null : null,
     };
   };
 
@@ -1932,19 +2282,39 @@ export default function (eleventyConfig) {
   // rewritten to the canonical title from subjects.yaml — so "## dqxis" can be
   // typed on a phone and still reads "Dragon Quest XI S" on the site. An
   // unrecognised heading is left exactly as written.
+  // A face keeps its own name ("## Bears" reads "Bears", filed under NFL).
   const linkSubjectsHtml = (html) =>
     String(html ?? "").replace(
       /<h2([^>]*)>([\s\S]*?)<\/h2>/gi,
       (whole, attrs, inner) => {
-        const slug = aliasMap.get(normalise(plainText(inner)));
+        const { slug, face } = resolveHeading(plainText(inner));
         if (!slug) return whole;
         // The canonical title is plain text from yaml going straight into html
         // that no template gets to escape, so escape it here. `inner` is the
         // fallback and is already rendered html — leave it alone.
-        const title = subjects[slug]?.title ? escapeHtml(subjects[slug].title) : inner;
+        const title = face || subjects[slug]?.title ? escapeHtml(headingTitle(slug, face)) : inner;
         return `<h2${attrs}><a href="/s/${slug}/">${title}</a></h2>`;
       },
     );
+
+  // Per-section anchors (2026-11-03): every ## section of a daily gets an id
+  // built from its heading AS TYPED, normalised — not from the subject it
+  // resolves to — so /daily/2026-11-02/#bears holds if Bears ever splits
+  // from NFL. A heading typed twice in a day takes -2, -3. Subject pages and
+  // the views link back to the section in its day. Only on the daily's own
+  // page: the home page shows several days, and two of them could both say
+  // "## Bears".
+  const anchorOf = (heading) => normalise(plainText(md.renderInline(String(heading ?? "")))).replace(/ /g, "-");
+  const sectionAnchors = (headings) => {
+    const seen = new Map();
+    return headings.map((h) => {
+      const a = anchorOf(h);
+      if (!a) return null;
+      const n = (seen.get(a) ?? 0) + 1;
+      seen.set(a, n);
+      return n === 1 ? a : `${a}-${n}`;
+    });
+  };
 
   // The feed keeps the plain form above — a reader has none of this stylesheet,
   // so the fragment scaffolding would arrive as dead markup. On the site each
@@ -1959,11 +2329,20 @@ export default function (eleventyConfig) {
   const wrapFragment = (sky, body, box = null) =>
     `<div class="frag"${box ? ` style="--box:${box}"` : ""}>${sky}<div class="frag-body">${body}</div></div>`;
 
-  const linkSubjectsFragments = (html) => {
+  const linkSubjectsFragments = (html, anchored = false) => {
     const src = String(html ?? "");
     if (!src.trim()) return src;
 
     const out = [];
+    const seen = new Map();
+    const idFor = (inner) => {
+      if (!anchored) return "";
+      const a = normalise(plainText(inner)).replace(/ /g, "-");
+      if (!a) return "";
+      const n = (seen.get(a) ?? 0) + 1;
+      seen.set(a, n);
+      return ` id="${n === 1 ? a : `${a}-${n}`}"`;
+    };
     for (const part of src.split(/(?=<h2[\s>])/i)) {
       if (!part.trim()) continue;
 
@@ -1974,27 +2353,30 @@ export default function (eleventyConfig) {
       }
 
       const [, attrs, inner, rest] = m;
-      const slug = aliasMap.get(normalise(plainText(inner)));
+      const id = idFor(inner);
+      const { slug, face } = resolveHeading(plainText(inner));
 
       // Unregistered headings stay exactly as written, but keep the column.
       if (!slug) {
-        out.push(wrapFragment(FRAG_LOOSE, `<h2${attrs}>${inner}</h2>${rest}`));
+        out.push(wrapFragment(FRAG_LOOSE, `<h2${attrs}${id}>${inner}</h2>${rest}`));
         continue;
       }
 
       const meta = subjects[slug] ?? {};
-      const title = meta.title ? escapeHtml(meta.title) : inner;
+      const title = face || meta.title ? escapeHtml(headingTitle(slug, face)) : inner;
       const status = meta.status ?? "active";
-      // No status chip on a non-media subject (see mediaKnown).
-      const badge = mediumOf(meta) in MEDIUM_NOUNS
+      // A status chip only where the group has a shelf: a bandless subject
+      // (Aurora Watch, a league) has no status to show.
+      const badge = hasShelf(groupOf(meta))
         ? `<span class="badge b-${status}">${status}</span>` : "";
       const head =
-        `<h2 class="frag-head"${attrs}>` +
+        `<h2 class="frag-head"${attrs}${id}>` +
         `<a class="frag-subject" href="/s/${slug}/">${title}</a>` +
         badge +
         `</h2>`;
 
-      out.push(wrapFragment(skyTag(slug, status), head + rest, coverBox(slug)));
+      const cover = face?.cover ?? slug;
+      out.push(wrapFragment(skyTag(slug, status, cover), head + rest, coverBoxOf(coverUrls.has(cover) ? cover : slug, fitOf(slug))));
     }
     return out.join("");
   };
@@ -2009,8 +2391,9 @@ export default function (eleventyConfig) {
   // template so a view's art and a daily's cannot drift: same cover link, same
   // generated-tile fallback, same completed crop. The --box ratio goes on the
   // .frag, as wrapFragment does — the template reads it off the subject.
-  eleventyConfig.addFilter("subjectSky", (slug) =>
-    skyTag(slug, subjects[slug]?.status ?? "active"),
+  // `face` is a fragment's face, when it wore one: its cover instead.
+  eleventyConfig.addFilter("subjectSky", (slug, face) =>
+    skyTag(slug, subjects[slug]?.status ?? "active", face?.cover ?? slug),
   );
 
   // The tag footer on a daily post: the union of the tags of every subject that
@@ -2134,6 +2517,19 @@ export default function (eleventyConfig) {
 
     return entries.sort((a, b) => b.date - a.date).slice(0, FEED_LIMIT);
   });
+
+  // The second feed (2026-11-03): essays only, at /essays/feed.xml. The one
+  // split that maps to a real difference in reader intent — volume, not
+  // topic. No per-group, per-subject or per-tag feeds (Hat: "is anyone
+  // unsubscribing from my entire blog because once a week I write a bit
+  // about the bears game? I doubt it"); a reader who wants one topic reads
+  // its page. Same entries, same ids, as in the full feed, so a reader
+  // subscribed to both sees one essay once.
+  eleventyConfig.addCollection("essayFeed", (api) =>
+    buildEssayList(api)
+      .map((e) => ({ url: e.url, date: e.date, title: e.title, html: e.feedHtml }))
+      .sort((a, b) => b.date - a.date)
+      .slice(0, FEED_LIMIT));
 
   // ------------------------------------------------------------- link cards
   //
@@ -2488,6 +2884,20 @@ export default function (eleventyConfig) {
         console.warn(`  · ${slug} → ${value}`);
       }
       console.warn(`  That game renders as pending. Fix the slug, or add the rung to ratings.yaml on purpose.\n`);
+    }
+
+    // The compile refuses both of these in the vault; this is the backstop
+    // for a repo copy that got here some other way.
+    if (undeclaredGroups.length > 0) {
+      console.warn(`\n[chaosh.at] ${undeclaredGroups.length} first categor(ies) name no group in site.yaml:`);
+      for (const g of undeclaredGroups) console.warn(`  · ${g}`);
+      console.warn(`  Those subjects have their pages but no group page, no etc entry and no views.\n`);
+    }
+
+    if (cardProblems.length > 0) {
+      console.warn(`\n[chaosh.at] ${cardProblems.length} card problem(s):`);
+      for (const p of cardProblems) console.warn(`  · ${p}`);
+      console.warn(`  The rest of the cards still show; fix the line in the vault.\n`);
     }
 
     if (unmatched.size > 0) {

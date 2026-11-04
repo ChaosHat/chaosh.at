@@ -13,6 +13,8 @@ Medium icons (2026-10-25), in media/, renamed by medium:
   media/shows.svg <- device-tv.svg
   media/books.svg <- book-open.svg
   media/about.svg <- user.svg
+The etc tab's icon (2026-11-03) is from pixelarticons 2.4.2 (not in 1.8.1):
+  media/etc.svg <- infinity.svg
 cursor.svg (the nav's menu cursor) is drawn for the site, not from the pack.
 
 MIT License
