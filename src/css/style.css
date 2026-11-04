@@ -538,11 +538,14 @@ figure,
    name at the left and the nav window at the right, ~45px off the header.
    A grid rather than the wrapping row the mock used: the views window sits
    in row 2 of the nav's column, so it offsets from the nav's own left edge,
-   and row 2 is the pop-out's room on EVERY page, open or not (36px: its
-   43px less the 7px overlap). Reserved, the panel under the header sits at
-   one height everywhere; sized to the pop-out, the page jumped down 36px
-   whenever you went into a group (Hat, 2026-11-04). The name spans both
-   rows and centres on the nav and its pop-out together. 52rem is where the row fits: the name
+   and row 1 is only as tall as the nav, so the name centres exactly on the
+   tab row: the landmarks (name, tabs) sit in one place on every page, and
+   only the content under them moves when a group adds its pop-out row —
+   ordinary sub-navigation. Tried and dropped the same day: reserving the
+   pop-out's row on every page (an empty slot reads as something missing,
+   and the name centred on nav + invisible pop-out aligned with nothing),
+   and the name at its old 28px beside a top-aligned nav (5px off the tabs'
+   centre: near-aligned reads as a mistake). 52rem is where the row fits: the name
    is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
    gap — 801px — with a little to spare. Narrower, the column above (nav
    under the name) until the phone layout takes over at 34rem: deliberate,
@@ -551,23 +554,14 @@ figure,
   .site-header {
     display: grid;
     grid-template-columns: auto max-content;
-    grid-template-rows: auto minmax(36px, auto);
     justify-content: space-between;
-    align-items: start;
+    align-items: center;
     padding-top: 16px;
   }
-  .site-title { grid-area: 1 / 1 / 3 / 2; align-self: center; }
+  .site-title { grid-area: 1 / 1; }
   /* .site-header for weight: .media-nav's own margin-top comes later. */
   .site-header .media-nav { grid-area: 1 / 2; margin-top: 0; }
   .views-pop { grid-area: 2 / 2; justify-self: start; }
-}
-
-/* The same reservation in the column (34-52rem): nothing to centre, so a
-   placeholder in the pop-out's place where there's no pop-out. Phones
-   don't reserve: there the pop-out wraps to two lines, and holding ~55px
-   for it on every page is the fold height 11-02 fought for. */
-@media (min-width: 34.0625rem) and (max-width: 51.99rem) {
-  .site-header:not(:has(.views-pop))::after { content: ""; height: 36px; }
 }
 
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
