@@ -975,14 +975,24 @@ export default function (eleventyConfig) {
   // views window under it holds. A group's views are its bands as words,
   // shown only inside the group — its landing page, its views, its subjects'
   // pages — for an etc group too since 2026-11-04 (movies: shelf · log),
-  // where the etc tab is the open one. /etc/ itself gets none: the page is
-  // the list. The site's own pages keep the about row. Everywhere else —
+  // where the etc tab is the open one. /etc/'s own are the etc groups,
+  // highest score first: the page is the list too, but a tab with no
+  // sub-menu read as broken next to every other tab that has one (Hat,
+  // 2026-11-04, reversing the handoff's "none"). The site's own pages keep
+  // the about row. Everywhere else —
   // home, dailies, the archive, essays, tags, ratings — no tab is open and
   // there is no views window.
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
     if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
-    if (url === "/etc/") return { tab: "etc", row: null };
-    const g = (groupPages ?? []).find((x) => x.id === groupId);
+    const pages = groupPages ?? [];
+    if (url === "/etc/") return {
+      tab: "etc",
+      row: "list",
+      items: pages.filter((x) => !x.tabbed)
+        .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
+        .map((x) => ({ label: x.label, url: x.homeUrl, current: false })),
+    };
+    const g = pages.find((x) => x.id === groupId);
     if (!g) return { tab: null, row: null };
     const at = (view) => navView === view;
     return {

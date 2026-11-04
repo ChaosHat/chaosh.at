@@ -2620,16 +2620,29 @@ main {
   /* About is its icon unless it's open (the old rule for every closed tab,
      kept for the last one): with every word the row ran ~36px over at
      390px, and the person icon at the row's end reads on its own. */
-  .med-about .med-label:not(.is-open) .med-word { display: none; }
+  /* Open too since 2026-11-04: its word wrapped the tab row to two lines
+     on the site's own pages. Open, the icon goes to ink and the pop-out
+     under it says where you are. */
+  .med-about .med-word { display: none; }
   .med-about { margin-left: auto; }
   /* Tight enough that all five views fit one line at 390px in Pixelify
      (2026-10-25, when log made it five). Pixel Operator is wider, 396px
      against ~324, so since 2026-10-26 they wrap to two rows — a menu
      window's grid, kept over shrinking the nav or scrolling it. */
-  .views { gap: 6px 6px; padding: 10px 8px 9px; }
   .views a { gap: 4px; }
-  /* Under the stretched nav, in less: the five words wrap to two lines
-     inside it, which is fine (the mock). */
+  /* A grid on a phone (2026-11-04): five words need ~396px on one line and
+     the window has ~322, and a free wrap read as two lines of text ("canon
+     essays") with ~20px-tall taps, under WCAG 2.2's 24px floor. Three
+     columns of whole cells read as a menu of items, the SNES item grid, and
+     each word's link is the cell's full 36px height. */
+  .views {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: 0 14px;
+    padding: 2px 10px;
+  }
+  .views a { padding: 10px 0; }
+  /* Under the stretched nav, in less. */
   .views-pop { max-width: calc(100% - 24px); margin: -10px 0 0 24px; }
 }
 /* ---------------------------------------------------------------- groups
