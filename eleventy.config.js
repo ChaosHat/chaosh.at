@@ -1,8 +1,9 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { pixelSubject, pixelBand, pixelLayers, pixelLightSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
+import { pixelSubject, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf } from "./aurora.js";
 import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -2744,30 +2745,86 @@ export default function (eleventyConfig) {
 
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. Two 20-frame sprite sheets — the back
-  // curtain 288×48 a frame, the front 192×48 — drawn as true pixel art and
+  // curtain 288×52 a frame, the front 192×52 — drawn as true pixel art and
   // stepped through together by CSS at ×5, so the pair repeats every 2880px.
-  const today = new Date().toISOString().slice(0, 10);
-  // The masthead's name is the comet mark (button.js): the button's wordmark
-  // at 2× with a comet falling through it, coloured from today's sky.
-  eleventyConfig.addGlobalData("wordmark", cometMarkSvg(today, 2));
-  const { front: sheet, back: sheetBack } = pixelLayers(today);
-  // Indexed: twenty mostly-repeating frames only compress once a frame fits
-  // in deflate's window (png.js).
-  skyFiles.set("img/aurora/sheet.png", encodePngIndexed(sheet.px, sheet.w, sheet.h));
-  skyFiles.set("img/aurora/sheet-back.png", encodePngIndexed(sheetBack.px, sheetBack.w, sheetBack.h));
-  // The light each curtain casts, baked from the same frames (aurora.js
+  // Plus the light each curtain casts, baked from the same frames (aurora.js
   // pixelLightSheet): body::after screens both over the header, at the same
-  // two periods as the sky.
-  const light = pixelLightSheet(sheet);
-  const lightBack = pixelLightSheet(sheetBack);
-  skyFiles.set("img/aurora/light.png", encodePng(light.px, light.w, light.h, 3));
-  skyFiles.set("img/aurora/light-back.png", encodePng(lightBack.px, lightBack.w, lightBack.h, 3));
+  // two periods as the sky. Four files, a set.
+  const today = new Date().toISOString().slice(0, 10);
+  const MASTHEAD_FILES = ["sheet.png", "sheet-back.png", "light.png", "light-back.png"];
+  const mastheadSet = (key, opts = {}) => {
+    const { front, back } = pixelLayers(key, opts);
+    const light = pixelLightSheet(front, { below: PIXEL_LIGHT_BELOW });
+    const lightBack = pixelLightSheet(back, { below: PIXEL_LIGHT_BELOW });
+    // Indexed: twenty mostly-repeating frames only compress once a frame fits
+    // in deflate's window (png.js).
+    return [
+      encodePngIndexed(front.px, front.w, front.h),
+      encodePngIndexed(back.px, back.w, back.h),
+      encodePng(light.px, light.w, light.h, 3),
+      encodePng(lightBack.px, lightBack.w, lightBack.h, 3),
+    ];
+  };
+  mastheadSet(today).forEach((png, i) => skyFiles.set(`img/aurora/${MASTHEAD_FILES[i]}`, png));
   // The page's star tile, reseeded with the masthead every build.
   const stars = starTile(today);
   skyFiles.set("img/aurora/stars.png", encodePng(stars.px, stars.w, stars.h, 4));
-  // The chrome frame wears the masthead's hue (aurora.js dayFrame), so it
-  // rolls with the same build date. base.njk sets it on <html>.
-  eleventyConfig.addGlobalData("frame", dayFrame(today));
+
+  // A post page's masthead is the post's own sky (2026-11-04): the night it
+  // was written, animated, in place of the band it wore until then. Drawn in
+  // the BAND's form (pixelBandForm), not the masthead's — the live masthead
+  // deliberately avoids its own day's band form (aurora.js pixelForm), and a
+  // post page wants the sky a reader knows from the band. Hue and geometry
+  // seeds come from the date on both paths (pixelSheet), so only the form
+  // needed saying. The frame colour and the wordmark follow the same date, or
+  // a post under its own sky would wear today's chrome.
+  //
+  // Built, never drawn in the browser, one set per post date at
+  // /img/aurora/<date>/ (~44KB; a reader loads only their page's). ~140ms a
+  // set, every post ever written, every build — so a set is cached on disk
+  // under a hash of the code that draws it (.cache/aurora/<hash>/<date>/),
+  // and CI keeps .cache/ between runs (deploy.yml). A renderer change is a
+  // new hash and redraws everything; older hash folders are swept here.
+  const MASTHEAD_CACHE_ROOT = path.join(".cache", "aurora");
+  const mastheadHash = crypto
+    .createHash("sha256")
+    .update(fs.readFileSync("aurora.js"))
+    .update(fs.readFileSync("png.js"))
+    .update(`below=${PIXEL_LIGHT_BELOW};form=band`)
+    .digest("hex")
+    .slice(0, 16);
+  const MASTHEAD_CACHE = path.join(MASTHEAD_CACHE_ROOT, mastheadHash);
+  if (fs.existsSync(MASTHEAD_CACHE_ROOT))
+    for (const name of fs.readdirSync(MASTHEAD_CACHE_ROOT))
+      if (name !== mastheadHash) fs.rmSync(path.join(MASTHEAD_CACHE_ROOT, name), { recursive: true, force: true });
+  const mastheads = new Map(); // date -> { vars, frame, wordmark }
+  const todayMasthead = { vars: "", frame: dayFrame(today), wordmark: cometMarkSvg(today, 2) };
+  // base.njk's one question per page: whose sky? A date (a daily's, an
+  // essay's) gets that date's set; nothing gets today's, at the stable root
+  // URLs style.css names as its defaults.
+  eleventyConfig.addFilter("masthead", (d) => {
+    if (!d) return todayMasthead;
+    const key = new Date(d).toISOString().slice(0, 10);
+    if (mastheads.has(key)) return mastheads.get(key);
+    const dir = path.join(MASTHEAD_CACHE, key);
+    const cached = MASTHEAD_FILES.map((f) => path.join(dir, f));
+    let pngs;
+    if (cached.every((f) => fs.existsSync(f))) pngs = cached.map((f) => fs.readFileSync(f));
+    else {
+      pngs = mastheadSet(key, { form: pixelBandForm(key) });
+      fs.mkdirSync(dir, { recursive: true });
+      pngs.forEach((png, i) => fs.writeFileSync(cached[i], png));
+    }
+    pngs.forEach((png, i) => skyFiles.set(`img/aurora/${key}/${MASTHEAD_FILES[i]}`, png));
+    const url = (i) => `url(/img/aurora/${key}/${MASTHEAD_FILES[i]})`;
+    const m = {
+      vars: `--sky-front:${url(0)};--sky-back:${url(1)};--light-front:${url(2)};--light-back:${url(3)};`,
+      frame: dayFrame(key),
+      wordmark: cometMarkSvg(key, 2),
+    };
+    mastheads.set(key, m);
+    return m;
+  });
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —

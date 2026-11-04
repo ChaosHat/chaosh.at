@@ -9,11 +9,9 @@ eleventyComputed:
   title: "{{ essay.title | safe }}"
 ---
 <article class="post essay-page"{% if essay.tint %} style="--tint:{{ essay.tint }}"{% endif %}>
-  {#- The essay's date seeds the same day-sky a daily gets, so the essay and
-      the daily it shipped alongside share a band. Before this the header kept
-      the daily's padding with nothing drawn in it — 3.3rem of air under the
-      date (2026-09-06). -#}
-  <header class="post-head" style="--day-sky:url({{ essay.date | daySky }})">
+  {#- No band since 2026-11-04: the masthead above is the essay's date's sky,
+      the one its daily shares (base.njk). -#}
+  <header class="post-head">
     <h1 class="post-title">{{ essay.title }}</h1>
     <p class="post-subdate">{{ essay.date | readableDate }}</p>
   </header>

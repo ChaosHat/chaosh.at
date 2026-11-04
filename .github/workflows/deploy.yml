@@ -27,6 +27,20 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
+      # The render cache (2026-11-04): post mastheads by date (.cache/aurora)
+      # and link cards (.cache/og). Without it every build redraws both from
+      # scratch — a masthead set per post ever written, ~140ms each. Caches
+      # are immutable once saved, so each run saves under its own key and
+      # restores the newest one drawn by the same code; a renderer change
+      # misses and starts clean. Both caches also key their own entries on
+      # the code (eleventy.config.js mastheadHash, og.js keyOf), so a stale
+      # restore could only waste space. Old runs' entries age out under
+      # GitHub's cache eviction.
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: render-${{ hashFiles('aurora.js', 'png.js', 'og.js', 'og-fonts/**') }}-${{ github.run_id }}
+          restore-keys: render-${{ hashFiles('aurora.js', 'png.js', 'og.js', 'og-fonts/**') }}-
       - run: npm ci
       - run: npm run build
         env:

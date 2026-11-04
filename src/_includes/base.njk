@@ -1,8 +1,13 @@
 <!doctype html>
-{#- The day's frame colour (aurora.js dayFrame): every panel, card and cover
-    border is drawn in the masthead's hue. style.css derives --dim and --fill
-    from it and keeps a lavender fallback for a build without one. -#}
-<html lang="en"{% if frame %} style="--frame:{{ frame }}"{% endif %}>
+{#- Whose sky (2026-11-04): a daily's or an essay's page wears the night it
+    was written — the masthead sheets, the frame colour and the wordmark, all
+    from that date (eleventy.config.js `masthead`). Every other page gets
+    today's, whose sheets are style.css's defaults, so `vars` is empty. -#}
+{%- set sky = (page.date if isDaily else (essay.date if essay else null)) | masthead -%}
+{#- The frame colour (aurora.js dayFrame): every panel, card and cover border
+    is drawn in the masthead's hue. style.css derives --dim and --fill from it
+    and keeps a lavender fallback for a build without one. -#}
+<html lang="en" style="--frame:{{ sky.frame }};{{ sky.vars }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,7 +71,7 @@
       {#- The name is the site button's wordmark (button.js), not set type:
           CHAOS·HAT with the dot at the word boundary. aria-label carries
           the domain for readers and crawlers. -#}
-      <a class="site-title" href="/">{{ wordmark | safe }}</a>
+      <a class="site-title" href="/">{{ sky.wordmark | safe }}</a>
       {#- The logo row is the wordmark alone since 2026-11-02. The site's
           own pages (about · links · guestbook) sat top right as three panes
           from 2026-10-25; they're the last word of the media row now, on

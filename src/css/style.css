@@ -254,24 +254,31 @@ body {
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
    Two 20-frame sprite sheets, one per curtain, stepped through together by
    background-position — sprite animation, one decode each, no flicker. The
-   sheets are pixel art at exactly ×5 with pixelated scaling, 48 rows a frame:
+   sheets are pixel art at exactly ×5 with pixelated scaling, 52 rows a frame:
    the FRONT curtain is 192 art px wide (a 960px tile), the BACK curtain 288
    (1440px), each with repeat-x, so pixel density never changes with the
    viewport and the pair only repeats every 2880px — one 960px tile showed two
    identical copies on a 1920 screen. The front is listed first, so it paints
    over the back wherever it is drawn (the sheet leaves the rest transparent);
    that is the back-to-front rule, in CSS. The height is px, not rem, because
-   the frame window must match the 240px frame exactly or neighbouring frames
-   bleed through. At 240px the band runs well into the top of the page; the
-   intro and the strips wear smoked boxes over it.
+   the frame window must match the 260px frame exactly or neighbouring frames
+   bleed through. The band runs well into the top of the page; the intro and
+   the strips wear smoked boxes over it. It has no bottom edge of its own
+   (2026-11-04): the frame runs on under the front curtain's lowest rim, so
+   the band ends on the rim's own ragged bottom with sky under it — not on a
+   line, and not on a fade.
 
-   192/288, 48, ×5, 20 frames and 0.3s a frame are pixelLayers' contract
-   (PIXEL_W, PIXEL_BACK_W, PIXEL_FH, PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL),
-   not free numbers — the values below are derived from them (240; 960 and
-   1440 wide, both 20*240 tall; steps(20); -4800px; 6s) and all of them move
-   together. One keyframe list moves both layers by the same -4800px, which
+   192/288, 48 + 4, ×5, 20 frames and 0.3s a frame are pixelLayers' contract
+   (PIXEL_W, PIXEL_BACK_W, PIXEL_FH + PIXEL_PAD, PIXEL_SCALE, PIXEL_FRAMES,
+   PIXEL_DWELL), not free numbers — the values below are derived from them
+   (260; 960 and 1440 wide, both 20*260 tall; steps(20); -5200px; 6s) and all
+   of them move together. One keyframe list moves both layers by the same -5200px, which
    is what keeps the two sheets in step. Nothing here moves sideways. The
-   reasoning is in aurora.js. */
+   reasoning is in aurora.js.
+
+   The sheets are today's unless the page says otherwise: a post page sets
+   --sky-front/--sky-back/--light-front/--light-back on <html> to its own
+   date's set (base.njk, 2026-11-04), and every number here holds for it. */
 body::before {
   content: "";
   position: absolute;
@@ -279,17 +286,17 @@ body::before {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 240px;
+  height: 260px;
   z-index: -1;
   pointer-events: none;
-  background: url("/img/aurora/sheet.png") repeat-x, url("/img/aurora/sheet-back.png") repeat-x;
-  background-size: 960px 4800px, 1440px 4800px;
+  background: var(--sky-front, url("/img/aurora/sheet.png")) repeat-x, var(--sky-back, url("/img/aurora/sheet-back.png")) repeat-x;
+  background-size: 960px 5200px, 1440px 5200px;
   image-rendering: pixelated;
   animation: aurora-roll 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll {
-  to { background-position: 0 -4800px, 0 -4800px; }
+  to { background-position: 0 -5200px, 0 -5200px; }
 }
 
 /* The light the aurora casts (2026-10-21, the Sea of Stars direction): two
@@ -301,10 +308,12 @@ body::before {
    and 1440 wide, steps(20), 6s — so each light layer has its curtain's period
    and the four sheets step together. NOT the same height: every light frame
    carries a guard row above and below (aurora.js pixelLightSheet), so the
-   smooth scale never blends one frame into the next. A light frame is 12 rows
-   + 2 guards at 20px a row = a 280px stride, the sheet is 20 x 280 = 5600px
+   smooth scale never blends one frame into the next. And it runs 80px past
+   the sky (PIXEL_LIGHT_BELOW), so the glow falls off below the rim instead
+   of stopping where the sky's frame does. A light frame is 17 rows + 2
+   guards at 20px a row = a 380px stride, the sheet is 20 x 380 = 7600px
    tall, and the window starts 20px down, past the top guard: 0 -20px to
-   -5620px. The 240px it shows is the sky's 240px.
+   -7620px. The 340px it shows starts where the sky's 260px does.
 
    z-index 1 puts it over the header and under everything lifted to 2 below:
    the intro, the furniture panel and the reading column sit in front of the
@@ -317,18 +326,18 @@ body::after {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 240px;
+  height: 340px;
   z-index: 1;
   pointer-events: none;
   mix-blend-mode: screen;
-  background: url("/img/aurora/light.png") 0 -20px repeat-x, url("/img/aurora/light-back.png") 0 -20px repeat-x;
-  background-size: 960px 5600px, 1440px 5600px;
+  background: var(--light-front, url("/img/aurora/light.png")) 0 -20px repeat-x, var(--light-back, url("/img/aurora/light-back.png")) 0 -20px repeat-x;
+  background-size: 960px 7600px, 1440px 7600px;
   image-rendering: auto;
   animation: aurora-roll-light 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll-light {
-  to { background-position: 0 -5620px, 0 -5620px; }
+  to { background-position: 0 -7620px, 0 -7620px; }
 }
 .furniture { position: relative; z-index: 2; }
 
@@ -458,7 +467,7 @@ h1,
 }
 
 /* The boxes that sit over the sky — the furniture strips, and the intro until
-   it moved to the footer (2026-11-02) — which the 240px masthead and the page
+   it moved to the footer (2026-11-02) — which the masthead and the page
    stars run behind, take smoked glass for a ground instead of the flat fill
    (2026-10-19). Asides keep --fill: they sit inside the reading column, which
    is already smoked. */
@@ -2024,7 +2033,9 @@ a.sky-cover:hover { border-color: var(--accent); }
 .entry-head, .post-head { position: relative; }
 .entry-head > *, .post-head > * { position: relative; }
 
-.entry-head::before, .post-head::before {
+/* Home only since 2026-11-04: a post's own page wears its sky as the
+   masthead (base.njk), so .post-head draws no band. */
+.entry-head::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -2050,7 +2061,7 @@ a.sky-cover:hover { border-color: var(--accent); }
 }
 
 @media (min-width: 48rem) {
-  .entry-head::before, .post-head::before { inset: 0 -3.5rem; }
+  .entry-head::before { inset: 0 -3.5rem; }
 }
 
 .post-head { margin-bottom: 2rem; padding: 18px 0 21px; }
@@ -2156,7 +2167,7 @@ main {
   /* The shell is the viewport from here down to 58rem, so the smoke and the
      day bands stop at the body padding instead of running off-screen. */
   main:has(> .post, > .post-list, > .tag, > .subject)::before { inset: -1.25rem; }
-  main:has(> .post, > .post-list) :is(.post-head, .entry-head)::before { inset: 0 -1.25rem; }
+  main:has(> .post-list) .entry-head::before { inset: 0 -1.25rem; }
   /* A stream essay is a lede, not a section: it lines up with the dailies'
      text column around it. */
   .stream-essay > :not(.entry-head) {
