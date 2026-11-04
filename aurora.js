@@ -906,6 +906,27 @@ export const PIXEL_W = 192;
 export const PIXEL_BACK_W = 288;
 export const PIXEL_FH = 48;
 export const PIXEL_SCALE = 5;
+// The masthead's frame runs PIXEL_PAD rows past PIXEL_FH (2026-11-04). At 48
+// the front curtain's lowest rim (base 0.86 plus sweep and wobble, then two
+// rows of glow under it) reached row 50, so the frame cut it: a quarter of
+// row 47 was lit, and the band ended on a ruled line. The posture is still
+// in fractions of 48 — the curtains did not move — the frame only goes on
+// under them, so the rim's own ragged bottom is the edge, with sky below.
+// Across 300 dates the deepest lit row is 50; 52 leaves a row of air and
+// keeps the frame a multiple of the light's `down`. The light runs another
+// PIXEL_LIGHT_BELOW rows past that (pixelLightSheet `below`), where the halo
+// has fallen to 1/255: it falls off instead of stopping at the band.
+// PIXEL_PAD_TOP rows go on top the same way (2026-11-04): the curtains'
+// tips run above the posture's row 0 — up to 9 rows on 400 sampled skies,
+// within 6 on 95% — and the frame cut them flat at the top of the page. 12
+// rows draws them and moves the whole sky 60px down the page, which is what
+// Hat asked for: the first post's title, which lost its band to the
+// masthead, now sits on the masthead's rim.
+// 12 + 48 + 4 = 64 rows at ×5 is 320px; the light 80 rows, 400px. CSS must
+// agree.
+export const PIXEL_PAD = 4;
+export const PIXEL_PAD_TOP = 12;
+export const PIXEL_LIGHT_BELOW = 16;
 const TAU = 2 * Math.PI;
 
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
@@ -1190,7 +1211,7 @@ const PX_STROKE = 3;
 // sheet is opaque only where the single-sheet painter's order would have let
 // it cover the back.
 // `starP` is the share of bare sky that gets a star.
-const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true, starP = 0.008, dither = true, emit = null }) => {
+const pxFrame = (px, { W, H, rows = H, top = 0, oy, k, N, form, cs, ramps, fade, seed, stars = true, starP = 0.008, dither = true, emit = null }) => {
   const th = (TAU * k) / N;
   const fn = PIXEL_FORMS[form];
   const [tooth, fan, lead] = PX_TEETH[form];
@@ -1207,7 +1228,11 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
     }),
   );
   const isFront = (i) => cs[i].front ?? i === cs.length - 1;
-  for (let y = 0; y < H; y += 1) {
+  // `rows` may run past H (pixelSheet's `pad`), and `top` rows sit above
+  // row 0 (`padTop`): the posture is still in fractions of H, the frame just
+  // keeps going over and under it. y is the posture's row; `top + y` is the
+  // frame's.
+  for (let y = -top; y < rows - top; y += 1) {
     // The wordmark and nav sit in the top half: light thins toward the top,
     // the pixel version of the old gradient mask. It scales intensity BEFORE
     // quantising, so the dimming lands as darker ramp steps, never as alpha.
@@ -1254,7 +1279,7 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
       // rays, at its rim phase, so the light swells as a pulse leaves the rim.
       const eg = cs[who].emit ?? (isFront(who) ? 1 : 0);
       if (emit && idx >= (cs[who].emitFrom ?? 6) && eg)
-        emit[(oy + y) * W + x] = eg * (idx === 7 ? 1 : 0.7) * (live ? 1 + 0.5 * cw.ray * Math.sin(cw.ph - th) : 1);
+        emit[(oy + top + y) * W + x] = eg * (idx === 7 ? 1 : 0.7) * (live ? 1 + 0.5 * cw.ray * Math.sin(cw.ph - th) : 1);
       // Stars: single pixels in bare sky, two brightnesses, a few blinking
       // out. They change state five times a loop, not every frame, so the
       // sky's own twinkle stays slower than the aurora.
@@ -1265,7 +1290,7 @@ const pxFrame = (px, { W, H, oy, k, N, form, cs, ramps, fade, seed, stars = true
         if (h > 1 - starP && ihash(x * 31 + y * 17 + kk * 7 + seed) > 0.15)
           rgb = h > 1 - starP * 0.375 ? star : mixRgb(hexRgb(NIGHT[0]), star, 0.55);
       } else if (idx >= 2) rgb = ramps[who][idx];
-      const o = ((oy + y) * W + x) * 4;
+      const o = ((oy + top + y) * W + x) * 4;
       if (rgb) {
         px[o] = rgb[0];
         px[o + 1] = rgb[1];
@@ -1325,6 +1350,8 @@ export const pixelSheet = (
     starP = 0.008,
     layer = null,
     backW = PIXEL_BACK_W,
+    pad = 0,
+    padTop = 0,
   } = {},
 ) => {
   const hue = (hashOf(dateStr) % 360000) / 1000;
@@ -1379,14 +1406,17 @@ export const pixelSheet = (
     curtains = [cs[1]];
     inks = [ramps[1]];
   }
-  const px = new Uint8Array(W * H * N * 4);
-  const emit = new Float32Array(W * H * N);
+  // `pad` rows of sky under the posture's H (see PIXEL_PAD); the frame is
+  // H + pad rows, the curtains are where they would be without it.
+  const FH = padTop + H + pad;
+  const px = new Uint8Array(W * FH * N * 4);
+  const emit = new Float32Array(W * FH * N);
   for (let k = 0; k < N; k += 1)
-    pxFrame(px, { W, H, oy: k * H, k, N, form: f, cs: curtains, ramps: inks, fade, seed, stars: stars && layer !== "front", starP, dither, emit });
+    pxFrame(px, { W, H, rows: FH, top: padTop, oy: k * FH, k, N, form: f, cs: curtains, ramps: inks, fade, seed, stars: stars && layer !== "front", starP, dither, emit });
   // `light` is the colour the emitters cast: the front curtain's body ink,
   // the most saturated step, so the light tints rather than whitens.
   const own = layer === "back" ? ramps[0] : ramps[1];
-  return { px, w: W, h: H * N, form: f, emit, frames: N, light: own[4], rim: own[6] };
+  return { px, w: W, h: FH * N, form: f, emit, frames: N, light: own[4], rim: own[6] };
 };
 
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
@@ -1405,6 +1435,7 @@ const PX_STARS = 0.0051;
 // front is 960px wide on screen and the back 1440px.
 export const pixelLayers = (dateStr, opts = {}) => {
   const form = opts.form ?? pixelForm(dateStr);
+  opts = { pad: PIXEL_PAD, padTop: PIXEL_PAD_TOP, ...opts };
   const back = pixelSheet(dateStr, {
     ...opts,
     form,
@@ -1434,7 +1465,9 @@ export const pixelLayers = (dateStr, opts = {}) => {
 // wide halo that reaches the wordmark. Sigmas are in ART pixels (×5 on
 // screen: 2.0 and 6.8 are the mock's 10px and 34px). Horizontal blur wraps,
 // so the light tiles as seamlessly as the sky; vertical blur stops at the
-// band's edges, where the band does.
+// band's top edge, and at the bottom runs on `below` rows past the band
+// (PIXEL_LIGHT_BELOW for the masthead), so the light falls off under the rim
+// rather than ending on the band's last row.
 //
 // One light sheet per sky sheet (pixelLayers): the front curtain's light has
 // the front's 960px period and the back curtain's the back's 1440, so the
@@ -1450,20 +1483,23 @@ export const pixelLayers = (dateStr, opts = {}) => {
 // (h + 2) rows, not h, which CSS must know.
 //
 // CSS MUST AGREE: the same frame count, the same width and the same steps() as
-// the sheet, but not the same height or offsets. A light frame is 12 rows plus
-// two guards, 14, and each row is 20px on screen (down × the art scale), so
-// the frame stride is 280px, the sheet 20 × 280 = 5600px tall, and the window
-// starts one row (20px) down, past the top guard: 0 -20px … -5620px. The
-// frame's visible 240px is the same 240px as the sky's.
+// the sheet, but not the same height or offsets. For the masthead a light
+// frame is (64 + 16) / 4 = 20 rows plus two guards, 22, and each row is 20px
+// on screen (down × the art scale), so the frame stride is 440px, the sheet
+// 20 × 440 = 8800px tall, and the window starts one row (20px) down, past the
+// top guard: 0 -20px … -8820px. The frame's visible 400px starts at the same
+// place as the sky's 320px.
 export const pixelLightSheet = (
   sheet,
-  { down = 4, spill = { sigma: 2.0, gain: 1.4 }, halo = { sigma: 6.8, gain: 1.3 } } = {},
+  { down = 4, spill = { sigma: 2.0, gain: 1.4 }, halo = { sigma: 6.8, gain: 1.3 }, below = 0 } = {},
 ) => {
   const N = sheet.frames;
   const W = sheet.w;
   const H = sheet.h / N;
   const w = W / down;
-  const h = H / down;
+  // `below` art rows of light past the sky's frame (a multiple of `down`):
+  // nothing emits there, the blur just has somewhere to go.
+  const h = (H + below) / down;
   const blur = (src, sigma) => {
     const s = sigma / down;
     const r = Math.ceil(3 * s);

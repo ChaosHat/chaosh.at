@@ -138,6 +138,11 @@
      alternative; it would read as canon here (--gold is canon on this site)
      and sits in the quarter the arc skips. One variable to swap. */
   --m-etc: #84ccd0;
+  /* Essays (2026-11-04, the header pass): the arc's widest clean gap, rose
+     at hue ≈354 between movies (329) and tabletop (19), on the 10-31 recipe
+     (L 0.80, C 0.072). Not gold: that's canon. A placeholder pick, like the
+     icon; one variable to swap. */
+  --m-essays: #e3abc3;
 
   /* Pixel corners (2026-10-25): stepped staircases in 2px cells. A window is
      two layers, an outer one in the frame colour and an inner fill inset
@@ -254,42 +259,61 @@ body {
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
    Two 20-frame sprite sheets, one per curtain, stepped through together by
    background-position — sprite animation, one decode each, no flicker. The
-   sheets are pixel art at exactly ×5 with pixelated scaling, 48 rows a frame:
+   sheets are pixel art at exactly ×5 with pixelated scaling, 64 rows a frame:
    the FRONT curtain is 192 art px wide (a 960px tile), the BACK curtain 288
    (1440px), each with repeat-x, so pixel density never changes with the
    viewport and the pair only repeats every 2880px — one 960px tile showed two
    identical copies on a 1920 screen. The front is listed first, so it paints
    over the back wherever it is drawn (the sheet leaves the rest transparent);
    that is the back-to-front rule, in CSS. The height is px, not rem, because
-   the frame window must match the 240px frame exactly or neighbouring frames
-   bleed through. At 240px the band runs well into the top of the page; the
-   intro and the strips wear smoked boxes over it.
+   the frame window must match the 320px frame exactly or neighbouring frames
+   bleed through. The band runs well into the top of the page; the intro and
+   the strips wear smoked boxes over it. It has no bottom edge of its own
+   (2026-11-04): the frame runs on under the front curtain's lowest rim, so
+   the band ends on the rim's own ragged bottom with sky under it — not on a
+   line, and not on a fade. It also runs on ABOVE the posture (12 rows): the
+   curtains' tips were cut flat at the top of the page, and drawing them
+   moves the sky 60px down, onto the first post's title.
 
-   192/288, 48, ×5, 20 frames and 0.3s a frame are pixelLayers' contract
-   (PIXEL_W, PIXEL_BACK_W, PIXEL_FH, PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL),
-   not free numbers — the values below are derived from them (240; 960 and
-   1440 wide, both 20*240 tall; steps(20); -4800px; 6s) and all of them move
-   together. One keyframe list moves both layers by the same -4800px, which
+   From 52rem the band starts 45px above the page (--sky-top, 9 art rows),
+   both layers, sky and light (2026-11-04, the header pass): layout C moved
+   home's first title ~67px up, into the curtain, and the rim has to meet
+   it. Phones keep 0: their header didn't shrink as much, and at 390 the
+   title already sat on the rim. The tips run off the top again there, as
+   the sky above a screen's edge does; drawing them still decides what the
+   upper rows hold. A page offset only: nothing in the sheets moves.
+
+   192/288, 12 + 48 + 4, ×5, 20 frames and 0.3s a frame are pixelLayers'
+   contract (PIXEL_W, PIXEL_BACK_W, PIXEL_PAD_TOP + PIXEL_FH + PIXEL_PAD,
+   PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL), not free numbers — the values
+   below are derived from them (320; 960 and 1440 wide, both 20*320 tall;
+   steps(20); -6400px; 6s) and all of them move together. One keyframe list moves both layers by the same -6400px, which
    is what keeps the two sheets in step. Nothing here moves sideways. The
-   reasoning is in aurora.js. */
+   reasoning is in aurora.js.
+
+   The sheets are today's unless the page says otherwise: a post page sets
+   --sky-front/--sky-back/--light-front/--light-back on <html> to its own
+   date's set (base.njk, 2026-11-04), and every number here holds for it. */
 body::before {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sky-top, 0px);
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 240px;
+  height: 320px;
   z-index: -1;
   pointer-events: none;
-  background: url("/img/aurora/sheet.png") repeat-x, url("/img/aurora/sheet-back.png") repeat-x;
-  background-size: 960px 4800px, 1440px 4800px;
+  background: var(--sky-front, url("/img/aurora/sheet.png")) repeat-x, var(--sky-back, url("/img/aurora/sheet-back.png")) repeat-x;
+  background-size: 960px 6400px, 1440px 6400px;
   image-rendering: pixelated;
   animation: aurora-roll 6s steps(20) infinite;
 }
 
+@media (min-width: 52rem) { :root { --sky-top: -45px; } }
+
 @keyframes aurora-roll {
-  to { background-position: 0 -4800px, 0 -4800px; }
+  to { background-position: 0 -6400px, 0 -6400px; }
 }
 
 /* The light the aurora casts (2026-10-21, the Sea of Stars direction): two
@@ -301,10 +325,12 @@ body::before {
    and 1440 wide, steps(20), 6s — so each light layer has its curtain's period
    and the four sheets step together. NOT the same height: every light frame
    carries a guard row above and below (aurora.js pixelLightSheet), so the
-   smooth scale never blends one frame into the next. A light frame is 12 rows
-   + 2 guards at 20px a row = a 280px stride, the sheet is 20 x 280 = 5600px
+   smooth scale never blends one frame into the next. And it runs 80px past
+   the sky (PIXEL_LIGHT_BELOW), so the glow falls off below the rim instead
+   of stopping where the sky's frame does. A light frame is 20 rows + 2
+   guards at 20px a row = a 440px stride, the sheet is 20 x 440 = 8800px
    tall, and the window starts 20px down, past the top guard: 0 -20px to
-   -5620px. The 240px it shows is the sky's 240px.
+   -8820px. The 400px it shows starts where the sky's 320px does.
 
    z-index 1 puts it over the header and under everything lifted to 2 below:
    the intro, the furniture panel and the reading column sit in front of the
@@ -313,22 +339,22 @@ body::before {
 body::after {
   content: "";
   position: absolute;
-  top: 0;
+  top: var(--sky-top, 0px);
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 240px;
+  height: 400px;
   z-index: 1;
   pointer-events: none;
   mix-blend-mode: screen;
-  background: url("/img/aurora/light.png") 0 -20px repeat-x, url("/img/aurora/light-back.png") 0 -20px repeat-x;
-  background-size: 960px 5600px, 1440px 5600px;
+  background: var(--light-front, url("/img/aurora/light.png")) 0 -20px repeat-x, var(--light-back, url("/img/aurora/light-back.png")) 0 -20px repeat-x;
+  background-size: 960px 8800px, 1440px 8800px;
   image-rendering: auto;
   animation: aurora-roll-light 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll-light {
-  to { background-position: 0 -5620px, 0 -5620px; }
+  to { background-position: 0 -8820px, 0 -8820px; }
 }
 .furniture { position: relative; z-index: 2; }
 
@@ -357,6 +383,13 @@ body:not(.wide) main::before {
   inset: -1rem -1.25rem;
   background: var(--smoke);
   pointer-events: none;
+  /* The glass comes up out of the sky rather than starting on a line
+     (2026-11-04). The masthead's light now runs ~80px past its sky
+     (PIXEL_LIGHT_BELOW) and the glass sits over it, so a square top cut the
+     glow on a ruled edge — the line the curtain fix had just removed. 6rem
+     is about where the light has gone. The masthead itself is not faded. */
+  -webkit-mask-image: linear-gradient(transparent, #000 6rem);
+  mask-image: linear-gradient(transparent, #000 6rem);
 }
 
 /* The wider reach waits until it fits: 47rem column + 2rem a side. At 48rem
@@ -458,7 +491,7 @@ h1,
 }
 
 /* The boxes that sit over the sky — the furniture strips, and the intro until
-   it moved to the footer (2026-11-02) — which the 240px masthead and the page
+   it moved to the footer (2026-11-02) — which the masthead and the page
    stars run behind, take smoked glass for a ground instead of the flat fill
    (2026-10-19). Asides keep --fill: they sit inside the reading column, which
    is already smoked. */
@@ -481,15 +514,16 @@ figure,
   flex-direction: column;
   align-items: flex-start;
   padding: 1.75rem 0 4px;
-  /* 8px between the nav window and the panel window (2026-10-25): one menu
-     screen of several windows, each with its own job, the way an SNES pause
-     menu sets a party window beside its command window. Closer read as one
-     docked window that should change with the tab; the old 20px read as two
-     unrelated boxes. */
-  margin-bottom: 4px;
+  /* The header holds every window since 2026-11-04 (layout C): the name,
+     now playing, the nav, the pop-out. Its margin is the gap to the first
+     post, which the panel's own margin used to be. One menu screen of
+     several windows, each with its own job, the way an SNES pause menu sets
+     a party window beside its command window (2026-10-25). */
+  margin-bottom: 32px;
   /* No rule under the header since 2026-10-19: with the band behind it the
      line cut the aurora in two, and the nav panes already mark the row. */
 }
+.site-header .furniture { margin: 1.75rem 0 0; align-self: stretch; min-width: 0; }
 
 .site-title {
   display: inline-flex;
@@ -514,6 +548,36 @@ figure,
   flex: none;
   max-width: none;
   margin: -12px -26px -28px -28px;
+}
+
+/* Layout C (the header pass, 2026-11-04): row 1 the name and now playing,
+   row 2 the nav on the column's left edge, row 3 the pop-out where there is
+   one, so the pop-out offsets from the nav's own left edge. The panel takes
+   whatever row 1 leaves (the ticker shrinks freely), so the name and the
+   window share a row from 52rem without crowding: the ticker keeps its
+   label and two or three titles. The same morning had the nav beside the
+   name (mock option 3) with the panel under the header and a reserved 36px
+   row so the panel never moved when the pop-out opened; with the panel
+   above the nav nothing under the pop-out but the post, so the row went.
+   First content at 1280: home 241 → 174px, a group page 241 → 210. Why,
+   the panel and the rejected layouts: chaosh.at Decisions, 2026-11-04
+   (later). Narrower, a column (name, panel, nav, pop-out) until the phone
+   layout takes over at 34rem. */
+@media (min-width: 52rem) {
+  .site-header {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    justify-content: stretch;
+    align-items: center;
+    column-gap: 32px;
+    padding-top: 16px;
+  }
+  .site-title { grid-area: 1 / 1; }
+  .site-header .furniture { grid-area: 1 / 2; margin: 0; }
+  /* .site-header for weight: .media-nav's own margin-top comes later. */
+  .site-header .media-nav { grid-area: 2 / 1 / 3 / 3; justify-self: start; }
+  .views-pop { grid-area: 3 / 1 / 4 / 3; justify-self: start; }
 }
 
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
@@ -550,28 +614,17 @@ figure,
 .site-intro span { display: block; max-width: var(--read); }
 .site-intro span + span:last-child { margin-top: 0.5em; }
 
-/* ------------------------------------------- now playing / latest essays */
+/* ----------------------------------------------------------- now playing */
 
-/* The furniture panel holds both rows (2026-10-19; until then each row was
-   its own framed strip, 10px apart). The rows split on a --dim rule, the
-   frame's own inset colour, so the divider reads as part of the frame.
-   Each row is one line with its label inline at the left since 2026-11-02
-   (the labels were a row of their own above the items): the panel went from
-   ~200px to ~105px and the day's first words moved up by that much. The
-   labels share a min-width so the two item columns start on one edge, the
-   way a menu's values line up past its keys. */
-.furniture { margin-bottom: 2.5rem; }
+/* The furniture panel: now playing, one line, label inline at the left
+   (2026-11-02). It held a second row, latest essays, from 2026-10-19 to
+   2026-11-04, when essays became a tab and the panel moved into the header
+   (layout C, above). */
 .furniture > .win-in { padding: 9px 14px 10px; }
 .now { display: flex; align-items: center; gap: 1rem; }
-.now + .now {
-  margin-top: 8px;
-  padding-top: 9px;
-  border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
-}
 
 .now-label {
   flex: none;
-  min-width: 108px;
   font: 16px/1 var(--pixel);
   color: var(--mc);
 }
@@ -587,8 +640,14 @@ figure,
   overflow-x: auto;
   scrollbar-width: none;
   gap: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+}
+/* The fade, both ends, a fixed 28px on every width (2026-11-04): 3% was
+   ~25px at 1280 and nothing much on a phone, which faded the right end
+   only; three panel reviewers read the hard-clipped left edge as a bug. */
+.now-items.tick,
+.now-items {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
 }
 .now-items.tick::-webkit-scrollbar { display: none; }
 .tick .track { display: flex; flex: none; gap: 1rem; padding-right: 1rem; }
@@ -608,54 +667,23 @@ figure,
 
 .now-item:hover { color: var(--accent); }
 
-/* 32px, not smaller. Below this a chip's curtain renders under 2px per column
-   and reads as coloured lines, not sky — and this strip is where a stranger
-   meets the art first, so it has to survive the encounter. */
-/* Both rows of the panel at one height (2026-10-25): now playing's medium
-   icons at 24px (a clean 2x of their 12-cell grid) and the essay chips
-   cropped to a 24px square from the top of their scene, where the curtain
-   is. Until then the chips were 32px wide at 3:4 (~43px tall) beside 12px
-   icons, and the essays row sat visibly heavier than now playing. */
-.now-item .sky { width: 24px; aspect-ratio: 1; }
+/* The medium icons at 24px, a clean 2x of their 12-cell grid (2026-10-25). */
 .now-item .mico { flex: none; width: 24px; height: 24px; }
 
-.essay-when { color: var(--muted); font: 700 16px/1 var(--pixel-fine); white-space: nowrap; }
-
-.essays-all {
-  margin-left: auto;
-  flex: none;
-  font: 16px/1 var(--pixel);
-  text-decoration: none;
-}
-
-/* On a phone each strip is one row that scrolls sideways (2026-10-19): wrapped,
-   the furniture ran ~850px and the first post started below the screen. The
-   right edge fades so the row reads as continuing; an essay title may still
-   wrap, inside a 70vw item, so a long one doesn't become a long scroll.
-   The inline labels give up their shared width (2026-11-02): at 350px the
-   row is label, then whatever fits, and "all →" goes — the nav's essays
-   word is the same door. */
+/* On a phone the row scrolls sideways (2026-10-19): wrapped, the panel ran
+   ~850px and the first post started below the screen. */
 @media (max-width: 34rem) {
-  .furniture { margin-bottom: 1.75rem; }
+  .site-header { margin-bottom: 1.75rem; }
+  .site-header .furniture { margin-top: 2.75rem; }
   .now { gap: 0.75rem; }
-  .now-label { min-width: 0; }
-  .essays-all { display: none; }
   .now-items {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
-    mask-image: linear-gradient(to right, #000 85%, transparent);
   }
   .now-items::-webkit-scrollbar { display: none; }
   .now-item { flex: none; }
   .now-item:last-child { padding-right: 2rem; }
-  /* One line, cut with an ellipsis (2026-10-25): a wrapped title made the
-     essays row taller than now playing's. It was a 70vw item that wrapped
-     until then, so a long title wouldn't become a long scroll; it still
-     can't, at 70vw. */
-  .essays .now-item { max-width: 70vw; min-width: 0; }
-  .essays .essay-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 /* ------------------------------------------------------- badges and tags */
@@ -2024,7 +2052,9 @@ a.sky-cover:hover { border-color: var(--accent); }
 .entry-head, .post-head { position: relative; }
 .entry-head > *, .post-head > * { position: relative; }
 
-.entry-head::before, .post-head::before {
+/* Home only since 2026-11-04: a post's own page wears its sky as the
+   masthead (base.njk), so .post-head draws no band. */
+.entry-head::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -2050,7 +2080,7 @@ a.sky-cover:hover { border-color: var(--accent); }
 }
 
 @media (min-width: 48rem) {
-  .entry-head::before, .post-head::before { inset: 0 -3.5rem; }
+  .entry-head::before { inset: 0 -3.5rem; }
 }
 
 .post-head { margin-bottom: 2rem; padding: 18px 0 21px; }
@@ -2156,7 +2186,7 @@ main {
   /* The shell is the viewport from here down to 58rem, so the smoke and the
      day bands stop at the body padding instead of running off-screen. */
   main:has(> .post, > .post-list, > .tag, > .subject)::before { inset: -1.25rem; }
-  main:has(> .post, > .post-list) :is(.post-head, .entry-head)::before { inset: 0 -1.25rem; }
+  main:has(> .post-list) .entry-head::before { inset: 0 -1.25rem; }
   /* A stream essay is a lede, not a section: it lines up with the dailies'
      text column around it. */
   .stream-essay > :not(.entry-head) {
@@ -2395,6 +2425,7 @@ main {
    page's <head> from site.yaml (groupStyle, eleventy.config.js). */
 .m-about { --mc: var(--m-about); --mico: url("/img/icons/media/about.svg"); }
 .m-etc { --mc: var(--m-etc); --mico: url("/img/icons/media/etc.svg"); }
+.m-essays { --mc: var(--m-essays); --mico: url("/img/icons/media/essays.svg"); }
 /* Now playing's window: no medium of its own. */
 .m-neutral { --mc: var(--muted); }
 /* A medium icon: pixelarticons on the 12-cell lattice, so 12px is 1:1 like
@@ -2439,7 +2470,7 @@ main {
   --win-frame-a: 1;
   width: max-content;
   max-width: 100%;
-  margin-top: 1.75rem; /* the old 1.25rem plus the header's dropped 0.5rem row gap */
+  margin-top: 24px; /* under the panel (layout C, 2026-11-04) */
   filter: var(--px-keyline);
 }
 .media,
@@ -2475,12 +2506,27 @@ main {
   mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   animation: cursor-bob 0.8s steps(1) infinite;
 }
-/* The views row, rendered only where there's one to show (navState). The
-   rule above it is the panel's divider, the frame's own colour at 30%. */
+/* The views window, rendered only where there's one to show (navState):
+   its own window since 2026-11-04, popped out of the nav rather than a
+   second row inside its frame. It overlaps the nav's bottom edge, offset
+   down and in, the way a new window cascades open over the one that opened
+   it in an FF menu — later in the DOM, so it paints over the nav with no
+   z-index. 7px of overlap: Hat had the mock's 12px go "sliiiiightly lower".
+   The day's frame and an opaque fill, like the nav: the same kind of
+   window, one level down. */
+.views-pop {
+  --mc: var(--frame);
+  --win-fill-a: 1;
+  --win-frame-a: 1;
+  align-self: flex-start;
+  width: max-content;
+  max-width: calc(100% - 44px);
+  margin: -7px 0 0 44px;
+  filter: var(--px-keyline);
+}
 .views {
   gap: 6px 30px;
   padding: 11px 20px 12px 17px;
-  border-top: 2px solid color-mix(in oklab, var(--mc) 30%, var(--night));
 }
 /* Every word is ink and the cursor alone marks your place, as in an SNES
    menu (2026-10-31). --muted is the label colour, and in the panel right
@@ -2526,30 +2572,49 @@ main {
   .views a::before { position: absolute; right: calc(100% + 3px); }
 }
 @media (max-width: 34rem) {
-  /* Below the band, the same 2.75rem the dropped nav row used (2026-10-25);
-     the window runs the column, about at its right end. Every tab keeps its
-     word since 2026-11-03 (only the open one did): with movies in etc the
-     row is games · tabletop · etc · about, which fits a 390px phone. A
-     longer row wraps. */
-  .media-nav { width: auto; align-self: stretch; margin-top: 2.75rem; }
-  .media { gap: 6px 7px; padding: 10px 6px 9px; }
-  .med-label { gap: 4px; }
-  /* No cursor slot in the tab row on a phone (2026-11-03): four slots
-     were the 40px that pushed about onto a second row, and even the open
-     tab's one slot did. The open tab is still bold and in ink; the views
-     row under it keeps its cursor. */
+  /* 16px under the panel; the window runs the column. */
+  .media-nav { width: auto; align-self: stretch; margin-top: 16px; }
+  /* A tab bar of equal cells, icon over an 8px word (2026-11-04, the header
+     pass): five words on one line didn't fit 390px once essays joined, and
+     about had already lost its word to make four fit. One cell per tab, as
+     many columns as tabs. Measured at 360px: the words are 17-44px against
+     a 293px row, so six cells (~49px) fit — the six-tab cap. Every tab
+     keeps its word; no icon-only tabs. The open cell is tinted in the
+     frame's colour as well as bold and in ink. */
+  .media {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0;
+    padding: 4px;
+  }
+  .med-label { flex-direction: column; justify-content: center; gap: 6px; padding: 7px 0 6px; }
+  .med-word { font: 8px/8px var(--pixel); }
+  .med-label.is-open { background: color-mix(in oklab, var(--frame) 20%, transparent); }
+  /* No cursor slot in the tab row on a phone (2026-11-03): the tint and the
+     bold mark the open cell; the views under it keep their cursor. */
   .med-label::before { display: none; }
-  /* About is its icon unless it's open (the old rule for every closed tab,
-     kept for the last one): with every word the row ran ~36px over at
-     390px, and the person icon at the row's end reads on its own. */
-  .med-about .med-label:not(.is-open) .med-word { display: none; }
-  .med-about { margin-left: auto; }
   /* Tight enough that all five views fit one line at 390px in Pixelify
      (2026-10-25, when log made it five). Pixel Operator is wider, 396px
      against ~324, so since 2026-10-26 they wrap to two rows — a menu
      window's grid, kept over shrinking the nav or scrolling it. */
-  .views { gap: 6px 6px; padding: 10px 8px 9px; }
   .views a { gap: 4px; }
+  /* A grid on a phone (2026-11-04): five words need ~396px on one line and
+     the window has ~322, and a free wrap read as two lines of text ("canon
+     essays") with ~20px-tall taps, under WCAG 2.2's 24px floor. Three
+     columns of whole cells read as a menu of items, the SNES item grid, and
+     each word's link is the cell's full 36px height. */
+  .views {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: 0 14px;
+    padding: 2px 10px;
+  }
+  .views a { padding: 10px 0; }
+  /* Four views make a 2x2, not three and a stray (2026-11-04). */
+  .views:has(> li:nth-child(4):last-child) { grid-template-columns: repeat(2, max-content); column-gap: 32px; }
+  /* Under the stretched nav, in less. */
+  .views-pop { max-width: calc(100% - 24px); margin: -10px 0 0 24px; }
 }
 /* ---------------------------------------------------------------- groups
    A group's landing page, the band at its head, the cards, and the small
@@ -2573,10 +2638,10 @@ main {
 .group-head h1 { display: flex; align-items: center; gap: 12px; }
 .group-head h1 .mico { width: 24px; height: 24px; vertical-align: 0; }
 
-/* The band: one strip of the shelf's cards under a heading line that names
-   it and links the fuller views. One row at every width — the shelf grid's
-   own column count (2 to 5, see .shelf-grid) — so it reads as a taste, not
-   a second shelf; the eleventy side caps it at five. */
+/* The band: one strip of a group's cards (sports' teams) under its name.
+   One row at every width — the shelf grid's own column count (2 to 5, see
+   .shelf-grid) — so it reads as a taste, not a second shelf. The canon and
+   shelf strips and their view links went on 2026-11-04 (the views window). */
 .group-band { margin: 0 0 2.5rem; }
 .band-head {
   display: flex;
@@ -2586,9 +2651,6 @@ main {
   margin: 0 0 14px;
   font: 400 16px/1 var(--pixel);
 }
-.band-link { font: 8px/16px var(--pixel); color: var(--muted); text-decoration: none; }
-.band-link:hover,
-.band-link:focus-visible { color: var(--ink); }
 .band-strip > :nth-child(n + 3) { display: none; }
 @media (min-width: 34rem) { .band-strip > :nth-child(3) { display: block; } }
 @media (min-width: 44rem) { .band-strip > :nth-child(4) { display: block; } }

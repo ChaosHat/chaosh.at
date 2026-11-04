@@ -1,8 +1,9 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { pixelSubject, pixelBand, pixelLayers, pixelLightSheet, starTile, dayFrame, palette, hashOf } from "./aurora.js";
+import { pixelSubject, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf } from "./aurora.js";
 import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -851,20 +852,12 @@ export default function (eleventyConfig) {
     return fragments.reduce((n, f) => n + w(f.date), 0)
       + FRECENCY_ESSAY * essays.reduce((n, e) => n + w(e.date), 0);
   };
-  // The etc views row: the top ETC_ROW etc groups, then "all →" whenever
-  // there are more (Hat: "groups to start, this seems like something free to
-  // change later" — etcRow is the one place that picks what the row lists).
-  const ETC_ROW = 5;
-
-  // The card band on a group's landing page: one strip, the group's "here's
-  // my taste". Canon covers where the group has a canon with members; failing
-  // that, the shelf minus what's unplayed or stopped, rated first then
-  // alphabetical (2026-11-03 — "most recently written about" would be two
-  // covers for movies, and raw shelf order would lead with an unwatched film
-  // the day one is added); a cards band's cards, in Hat's order. Capped at
-  // BAND_MAX, and the CSS shows only the row that fits, so it stays a strip.
-  const BAND_MAX = 5;
-  const BAND_SKIP = new Set(["backlog", "shelved", "incomplete"]);
+  // The card band on a group's landing page: a cards band's cards, in Hat's
+  // order (sports' teams), and the CSS shows only the row that fits, so it
+  // stays a strip. The canon strip and the shelf fallback that stood in for
+  // it went on 2026-11-04 (from 11-03), with the "full canon → · full shelf
+  // → · best of →" line over them: the views window under the nav carries
+  // those views now, on every group's pages, etc's too.
 
   // Every group's pages in one place: its landing page, and a page per view
   // per band, each template paginating over this. Every group with a
@@ -904,17 +897,9 @@ export default function (eleventyConfig) {
         .sort((a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay"));
       const cards = loadCards(g);
       const featured = featuredFor(api, g.id);
-      const rankOf = (s) => s.canon ? 0 : s.rating?.rank ?? 99;
       const band = g.hasCards && cards.length
         ? { kind: "cards", title: g.cardsFile.replace(/^./, (c) => c.toUpperCase()), items: cards }
-        : canon.members.length
-          ? { kind: "canon", title: "Canon", items: canon.members.slice(0, BAND_MAX) }
-          : g.hasShelf
-            ? { kind: "shelf", title: "From the shelf", items: subjectsHere
-              .filter((s) => !BAND_SKIP.has(s.status))
-              .sort((a, b) => rankOf(a) - rankOf(b) || String(a.title).localeCompare(String(b.title)))
-              .slice(0, BAND_MAX) }
-            : null;
+        : null;
       const score = subjectsHere.reduce((n, s) => n + s.score, 0);
       const lastWrote = subjectsHere.map((s) => s.lastWrote).filter(Boolean).sort((a, b) => b - a)[0] ?? null;
       const byScore = subjectsHere.slice()
@@ -929,13 +914,7 @@ export default function (eleventyConfig) {
         log,
         stream,
         cards,
-        band: band?.items.length ? band : null,
-        // The fuller views the band points at, on its heading line.
-        bandLinks: [
-          canon.members.length && { label: "full canon", url: g.urls.canon },
-          g.hasShelf && subjectsHere.length && { label: "full shelf", url: g.urls.shelf },
-          featured.length && { label: "best of", url: g.urls.best },
-        ].filter(Boolean),
+        band,
         // Several subjects and no shelf to browse them on: they go as a word
         // row under the band (nfl · mlb · nba · nhl).
         subjectRow: !g.hasShelf && subjectsHere.length > 1 ? byScore : [],
@@ -993,36 +972,57 @@ export default function (eleventyConfig) {
     buildGroupPages(api).some((g) => !g.tabbed) ? [{ url: "/etc/" }] : []);
 
   // base.njk's one question about the nav: which tab is open, and what the
-  // views row under it holds. A group's views row is its bands as words,
+  // views window under it holds. A group's views are its bands as words,
   // shown only inside the group — its landing page, its views, its subjects'
-  // pages. Inside etc (/etc/, an etc group's pages, their subjects) the row
-  // is the busiest etc groups instead, then "all →". The site's own pages
-  // keep the about row. Everywhere else — home, dailies, the archive,
-  // essays, tags, ratings — no tab is open and there is no second row.
+  // pages — for an etc group too since 2026-11-04 (movies: shelf · log),
+  // where the etc tab is the open one. /etc/'s own are the etc groups,
+  // highest score first: the page is the list too, but a tab with no
+  // sub-menu read as broken next to every other tab that has one (Hat,
+  // 2026-11-04, reversing the handoff's "none"). Essays is a tab since the
+  // 11-04 header pass: /essays/ and each group's slice (/essays/<group>/)
+  // open it, its items all · and each group with an essay, and a group's
+  // own views no longer list essays. The rule: links may repeat, the ▶ may
+  // not, and a sub-menu item never moves you out of its tab — so a page
+  // lives under what it is a list of (/essays/games/ is a list of essays),
+  // and an essay's own page under its group (base.njk passes essay.group,
+  // like a subject's). The site's own pages keep the about row. Everywhere
+  // else — home, dailies, the archive, tags, ratings — no tab is open and
+  // there is no views window.
+  // /etc/'s pop-out holds the six highest-scoring etc groups, the tab cap's
+  // number (2026-11-04): it reorders itself every build as the writing
+  // moves, and the rest are on the page under it. No "all →", because that
+  // would be a link to the page you're on.
+  const ETC_POP = 6;
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
-    const pages = groupPages ?? [];
     if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
-    const etcGroups = pages.filter((g) => !g.tabbed).sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
-    const etcRow = () => {
-      const items = etcGroups.slice(0, ETC_ROW).map((g) => ({
-        label: g.label, url: g.homeUrl, current: g.id === groupId,
-      }));
-      if (etcGroups.length > ETC_ROW) items.push({ label: "all →", url: "/etc/", current: url === "/etc/" });
-      return items;
+    const pages = groupPages ?? [];
+    if (url === "/etc/") return {
+      tab: "etc",
+      row: "list",
+      items: pages.filter((x) => !x.tabbed)
+        .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label))
+        .slice(0, ETC_POP)
+        .map((x) => ({ label: x.label, url: x.homeUrl, current: false })),
     };
-    if (url === "/etc/") return { tab: "etc", row: "list", items: etcRow() };
+    if (url === "/essays/" || pages.some((x) => x.essays.length && x.urls.essays === url)) return {
+      tab: "essays",
+      row: "list",
+      items: [
+        { label: "all", url: "/essays/", current: url === "/essays/" },
+        ...pages.filter((x) => x.essays.length)
+          .map((x) => ({ label: x.label, url: x.urls.essays, current: url === x.urls.essays })),
+      ],
+    };
     const g = pages.find((x) => x.id === groupId);
     if (!g) return { tab: null, row: null };
-    if (!g.tabbed) return { tab: "etc", row: "list", items: etcRow() };
     const at = (view) => navView === view;
     return {
-      tab: g.id,
+      tab: g.tabbed ? g.id : "etc",
       row: "list",
       items: [
         g.canon.members.length && { label: "canon", url: g.urls.canon, current: at("canon") },
         g.hasShelf && { label: "shelf", url: g.urls.shelf, current: at("shelf") },
         g.featured.length && { label: "best of", url: g.urls.best, current: at("best") },
-        g.essays.length && { label: "essays", url: g.urls.essays, current: at("essays") },
         g.log.length && { label: "log", url: g.urls.log, current: at("log") },
       ].filter(Boolean),
     };
@@ -2744,30 +2744,86 @@ export default function (eleventyConfig) {
 
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. Two 20-frame sprite sheets — the back
-  // curtain 288×48 a frame, the front 192×48 — drawn as true pixel art and
+  // curtain 288×64 a frame, the front 192×64 — drawn as true pixel art and
   // stepped through together by CSS at ×5, so the pair repeats every 2880px.
-  const today = new Date().toISOString().slice(0, 10);
-  // The masthead's name is the comet mark (button.js): the button's wordmark
-  // at 2× with a comet falling through it, coloured from today's sky.
-  eleventyConfig.addGlobalData("wordmark", cometMarkSvg(today, 2));
-  const { front: sheet, back: sheetBack } = pixelLayers(today);
-  // Indexed: twenty mostly-repeating frames only compress once a frame fits
-  // in deflate's window (png.js).
-  skyFiles.set("img/aurora/sheet.png", encodePngIndexed(sheet.px, sheet.w, sheet.h));
-  skyFiles.set("img/aurora/sheet-back.png", encodePngIndexed(sheetBack.px, sheetBack.w, sheetBack.h));
-  // The light each curtain casts, baked from the same frames (aurora.js
+  // Plus the light each curtain casts, baked from the same frames (aurora.js
   // pixelLightSheet): body::after screens both over the header, at the same
-  // two periods as the sky.
-  const light = pixelLightSheet(sheet);
-  const lightBack = pixelLightSheet(sheetBack);
-  skyFiles.set("img/aurora/light.png", encodePng(light.px, light.w, light.h, 3));
-  skyFiles.set("img/aurora/light-back.png", encodePng(lightBack.px, lightBack.w, lightBack.h, 3));
+  // two periods as the sky. Four files, a set.
+  const today = new Date().toISOString().slice(0, 10);
+  const MASTHEAD_FILES = ["sheet.png", "sheet-back.png", "light.png", "light-back.png"];
+  const mastheadSet = (key, opts = {}) => {
+    const { front, back } = pixelLayers(key, opts);
+    const light = pixelLightSheet(front, { below: PIXEL_LIGHT_BELOW });
+    const lightBack = pixelLightSheet(back, { below: PIXEL_LIGHT_BELOW });
+    // Indexed: twenty mostly-repeating frames only compress once a frame fits
+    // in deflate's window (png.js).
+    return [
+      encodePngIndexed(front.px, front.w, front.h),
+      encodePngIndexed(back.px, back.w, back.h),
+      encodePng(light.px, light.w, light.h, 3),
+      encodePng(lightBack.px, lightBack.w, lightBack.h, 3),
+    ];
+  };
+  mastheadSet(today).forEach((png, i) => skyFiles.set(`img/aurora/${MASTHEAD_FILES[i]}`, png));
   // The page's star tile, reseeded with the masthead every build.
   const stars = starTile(today);
   skyFiles.set("img/aurora/stars.png", encodePng(stars.px, stars.w, stars.h, 4));
-  // The chrome frame wears the masthead's hue (aurora.js dayFrame), so it
-  // rolls with the same build date. base.njk sets it on <html>.
-  eleventyConfig.addGlobalData("frame", dayFrame(today));
+
+  // A post page's masthead is the post's own sky (2026-11-04): the night it
+  // was written, animated, in place of the band it wore until then. Drawn in
+  // the BAND's form (pixelBandForm), not the masthead's — the live masthead
+  // deliberately avoids its own day's band form (aurora.js pixelForm), and a
+  // post page wants the sky a reader knows from the band. Hue and geometry
+  // seeds come from the date on both paths (pixelSheet), so only the form
+  // needed saying. The frame colour and the wordmark follow the same date, or
+  // a post under its own sky would wear today's chrome.
+  //
+  // Built, never drawn in the browser, one set per post date at
+  // /img/aurora/<date>/ (~44KB; a reader loads only their page's). ~140ms a
+  // set, every post ever written, every build — so a set is cached on disk
+  // under a hash of the code that draws it (.cache/aurora/<hash>/<date>/),
+  // and CI keeps .cache/ between runs (deploy.yml). A renderer change is a
+  // new hash and redraws everything; older hash folders are swept here.
+  const MASTHEAD_CACHE_ROOT = path.join(".cache", "aurora");
+  const mastheadHash = crypto
+    .createHash("sha256")
+    .update(fs.readFileSync("aurora.js"))
+    .update(fs.readFileSync("png.js"))
+    .update(`below=${PIXEL_LIGHT_BELOW};form=band`)
+    .digest("hex")
+    .slice(0, 16);
+  const MASTHEAD_CACHE = path.join(MASTHEAD_CACHE_ROOT, mastheadHash);
+  if (fs.existsSync(MASTHEAD_CACHE_ROOT))
+    for (const name of fs.readdirSync(MASTHEAD_CACHE_ROOT))
+      if (name !== mastheadHash) fs.rmSync(path.join(MASTHEAD_CACHE_ROOT, name), { recursive: true, force: true });
+  const mastheads = new Map(); // date -> { vars, frame, wordmark }
+  const todayMasthead = { vars: "", frame: dayFrame(today), wordmark: cometMarkSvg(today, 2) };
+  // base.njk's one question per page: whose sky? A date (a daily's, an
+  // essay's) gets that date's set; nothing gets today's, at the stable root
+  // URLs style.css names as its defaults.
+  eleventyConfig.addFilter("masthead", (d) => {
+    if (!d) return todayMasthead;
+    const key = new Date(d).toISOString().slice(0, 10);
+    if (mastheads.has(key)) return mastheads.get(key);
+    const dir = path.join(MASTHEAD_CACHE, key);
+    const cached = MASTHEAD_FILES.map((f) => path.join(dir, f));
+    let pngs;
+    if (cached.every((f) => fs.existsSync(f))) pngs = cached.map((f) => fs.readFileSync(f));
+    else {
+      pngs = mastheadSet(key, { form: pixelBandForm(key) });
+      fs.mkdirSync(dir, { recursive: true });
+      pngs.forEach((png, i) => fs.writeFileSync(cached[i], png));
+    }
+    pngs.forEach((png, i) => skyFiles.set(`img/aurora/${key}/${MASTHEAD_FILES[i]}`, png));
+    const url = (i) => `url(/img/aurora/${key}/${MASTHEAD_FILES[i]})`;
+    const m = {
+      vars: `--sky-front:${url(0)};--sky-back:${url(1)};--light-front:${url(2)};--light-back:${url(3)};`,
+      frame: dayFrame(key),
+      wordmark: cometMarkSvg(key, 2),
+    };
+    mastheads.set(key, m);
+    return m;
+  });
 
   // The 88×31 site button, at stable root URLs so it can be hotlinked. Still
   // and animated; the friend picks. Same date-driven hue as the masthead —
