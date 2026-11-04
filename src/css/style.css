@@ -539,13 +539,14 @@ figure,
    A grid rather than the wrapping row the mock used: the views window sits
    in row 2 of the nav's column, so it offsets from the nav's own left edge,
    and row 1 is only as tall as the nav, so the name centres exactly on the
-   tab row: the landmarks (name, tabs) sit in one place on every page, and
-   only the content under them moves when a group adds its pop-out row —
-   ordinary sub-navigation. Tried and dropped the same day: reserving the
-   pop-out's row on every page (an empty slot reads as something missing,
-   and the name centred on nav + invisible pop-out aligned with nothing),
-   and the name at its old 28px beside a top-aligned nav (5px off the tabs'
-   centre: near-aligned reads as a mistake). 52rem is where the row fits: the name
+   tab row. Row 2 is the pop-out's room on every page (36px: its 43px less
+   the 7px overlap), so the panel under the header never moves: its items
+   are links into groups, and a click on one that opened the pop-out used
+   to shove the panel down under the cursor (Hat, 2026-11-04). With nothing
+   in it the row is the gap between two groups — navigation above, the
+   signposts below — not a slot. The first try at this the same day also
+   centred the name on nav + pop-out, which aligned it with nothing and made
+   the gap read as missing; the name stays on the tab row. 52rem is where the row fits: the name
    is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
    gap — 801px — with a little to spare. Narrower, the column above (nav
    under the name) until the phone layout takes over at 34rem: deliberate,
@@ -554,6 +555,7 @@ figure,
   .site-header {
     display: grid;
     grid-template-columns: auto max-content;
+    grid-template-rows: auto minmax(36px, auto);
     justify-content: space-between;
     align-items: center;
     padding-top: 16px;
@@ -562,6 +564,13 @@ figure,
   /* .site-header for weight: .media-nav's own margin-top comes later. */
   .site-header .media-nav { grid-area: 1 / 2; margin-top: 0; }
   .views-pop { grid-area: 2 / 2; justify-self: start; }
+}
+
+/* The same room in the column (34-52rem), as a placeholder where there's
+   no pop-out. Phones don't hold it: there the pop-out wraps to two lines,
+   and ~55px on every page is the fold height 11-02 fought for. */
+@media (min-width: 34.0625rem) and (max-width: 51.99rem) {
+  .site-header:not(:has(.views-pop))::after { content: ""; height: 36px; }
 }
 
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
