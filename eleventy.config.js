@@ -2714,7 +2714,7 @@ export default function (eleventyConfig) {
 
   // The masthead's sky rolls its hue at each build — a different aurora every
   // day, held all day, zero JavaScript. Two 20-frame sprite sheets — the back
-  // curtain 288×52 a frame, the front 192×52 — drawn as true pixel art and
+  // curtain 288×64 a frame, the front 192×64 — drawn as true pixel art and
   // stepped through together by CSS at ×5, so the pair repeats every 2880px.
   // Plus the light each curtain casts, baked from the same frames (aurora.js
   // pixelLightSheet): body::after screens both over the header, at the same

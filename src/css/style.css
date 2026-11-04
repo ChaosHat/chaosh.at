@@ -254,25 +254,27 @@ body {
 /* The masthead aurora, edge to edge across the viewport, in the day's hue.
    Two 20-frame sprite sheets, one per curtain, stepped through together by
    background-position — sprite animation, one decode each, no flicker. The
-   sheets are pixel art at exactly ×5 with pixelated scaling, 52 rows a frame:
+   sheets are pixel art at exactly ×5 with pixelated scaling, 64 rows a frame:
    the FRONT curtain is 192 art px wide (a 960px tile), the BACK curtain 288
    (1440px), each with repeat-x, so pixel density never changes with the
    viewport and the pair only repeats every 2880px — one 960px tile showed two
    identical copies on a 1920 screen. The front is listed first, so it paints
    over the back wherever it is drawn (the sheet leaves the rest transparent);
    that is the back-to-front rule, in CSS. The height is px, not rem, because
-   the frame window must match the 260px frame exactly or neighbouring frames
+   the frame window must match the 320px frame exactly or neighbouring frames
    bleed through. The band runs well into the top of the page; the intro and
    the strips wear smoked boxes over it. It has no bottom edge of its own
    (2026-11-04): the frame runs on under the front curtain's lowest rim, so
    the band ends on the rim's own ragged bottom with sky under it — not on a
-   line, and not on a fade.
+   line, and not on a fade. It also runs on ABOVE the posture (12 rows): the
+   curtains' tips were cut flat at the top of the page, and drawing them
+   moves the sky 60px down, onto the first post's title.
 
-   192/288, 48 + 4, ×5, 20 frames and 0.3s a frame are pixelLayers' contract
-   (PIXEL_W, PIXEL_BACK_W, PIXEL_FH + PIXEL_PAD, PIXEL_SCALE, PIXEL_FRAMES,
-   PIXEL_DWELL), not free numbers — the values below are derived from them
-   (260; 960 and 1440 wide, both 20*260 tall; steps(20); -5200px; 6s) and all
-   of them move together. One keyframe list moves both layers by the same -5200px, which
+   192/288, 12 + 48 + 4, ×5, 20 frames and 0.3s a frame are pixelLayers'
+   contract (PIXEL_W, PIXEL_BACK_W, PIXEL_PAD_TOP + PIXEL_FH + PIXEL_PAD,
+   PIXEL_SCALE, PIXEL_FRAMES, PIXEL_DWELL), not free numbers — the values
+   below are derived from them (320; 960 and 1440 wide, both 20*320 tall;
+   steps(20); -6400px; 6s) and all of them move together. One keyframe list moves both layers by the same -6400px, which
    is what keeps the two sheets in step. Nothing here moves sideways. The
    reasoning is in aurora.js.
 
@@ -286,17 +288,17 @@ body::before {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 260px;
+  height: 320px;
   z-index: -1;
   pointer-events: none;
   background: var(--sky-front, url("/img/aurora/sheet.png")) repeat-x, var(--sky-back, url("/img/aurora/sheet-back.png")) repeat-x;
-  background-size: 960px 5200px, 1440px 5200px;
+  background-size: 960px 6400px, 1440px 6400px;
   image-rendering: pixelated;
   animation: aurora-roll 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll {
-  to { background-position: 0 -5200px, 0 -5200px; }
+  to { background-position: 0 -6400px, 0 -6400px; }
 }
 
 /* The light the aurora casts (2026-10-21, the Sea of Stars direction): two
@@ -310,10 +312,10 @@ body::before {
    carries a guard row above and below (aurora.js pixelLightSheet), so the
    smooth scale never blends one frame into the next. And it runs 80px past
    the sky (PIXEL_LIGHT_BELOW), so the glow falls off below the rim instead
-   of stopping where the sky's frame does. A light frame is 17 rows + 2
-   guards at 20px a row = a 380px stride, the sheet is 20 x 380 = 7600px
+   of stopping where the sky's frame does. A light frame is 20 rows + 2
+   guards at 20px a row = a 440px stride, the sheet is 20 x 440 = 8800px
    tall, and the window starts 20px down, past the top guard: 0 -20px to
-   -7620px. The 340px it shows starts where the sky's 260px does.
+   -8820px. The 400px it shows starts where the sky's 320px does.
 
    z-index 1 puts it over the header and under everything lifted to 2 below:
    the intro, the furniture panel and the reading column sit in front of the
@@ -326,18 +328,18 @@ body::after {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  height: 340px;
+  height: 400px;
   z-index: 1;
   pointer-events: none;
   mix-blend-mode: screen;
   background: var(--light-front, url("/img/aurora/light.png")) 0 -20px repeat-x, var(--light-back, url("/img/aurora/light-back.png")) 0 -20px repeat-x;
-  background-size: 960px 7600px, 1440px 7600px;
+  background-size: 960px 8800px, 1440px 8800px;
   image-rendering: auto;
   animation: aurora-roll-light 6s steps(20) infinite;
 }
 
 @keyframes aurora-roll-light {
-  to { background-position: 0 -7620px, 0 -7620px; }
+  to { background-position: 0 -8820px, 0 -8820px; }
 }
 .furniture { position: relative; z-index: 2; }
 
@@ -536,11 +538,11 @@ figure,
    name at the left and the nav window at the right, ~45px off the header.
    A grid rather than the wrapping row the mock used: the views window sits
    in row 2 of the nav's column, so it offsets from the nav's own left edge,
-   and row 1 is only as tall as the nav, so the pop-out costs only its own
-   height. The nav sits at the top (16px) and the name stays where it always
-   was (28px), not centred on the tabs: centred, the row started 30px lower
-   and with the pop-out open the gap down to now playing read as goofy (Hat,
-   2026-11-04). The comet's fireball still clears the panel on home. 52rem is where the row fits: the name
+   and row 2 is the pop-out's room on EVERY page, open or not (36px: its
+   43px less the 7px overlap). Reserved, the panel under the header sits at
+   one height everywhere; sized to the pop-out, the page jumped down 36px
+   whenever you went into a group (Hat, 2026-11-04). The name spans both
+   rows and centres on the nav and its pop-out together. 52rem is where the row fits: the name
    is 144px, the nav ~585px with a tab open, the gutters 40px, and a 2rem
    gap — 801px — with a little to spare. Narrower, the column above (nav
    under the name) until the phone layout takes over at 34rem: deliberate,
@@ -549,14 +551,23 @@ figure,
   .site-header {
     display: grid;
     grid-template-columns: auto max-content;
+    grid-template-rows: auto minmax(36px, auto);
     justify-content: space-between;
     align-items: start;
     padding-top: 16px;
   }
-  .site-title { grid-area: 1 / 1; margin-top: 12px; }
+  .site-title { grid-area: 1 / 1 / 3 / 2; align-self: center; }
   /* .site-header for weight: .media-nav's own margin-top comes later. */
   .site-header .media-nav { grid-area: 1 / 2; margin-top: 0; }
   .views-pop { grid-area: 2 / 2; justify-self: start; }
+}
+
+/* The same reservation in the column (34-52rem): nothing to centre, so a
+   placeholder in the pop-out's place where there's no pop-out. Phones
+   don't reserve: there the pop-out wraps to two lines, and holding ~55px
+   for it on every page is the fold height 11-02 fought for. */
+@media (min-width: 34.0625rem) and (max-width: 51.99rem) {
+  .site-header:not(:has(.views-pop))::after { content: ""; height: 36px; }
 }
 
 /* The site's own pages sat on this row, top right, from 2026-09-03 to
