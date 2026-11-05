@@ -10,7 +10,7 @@ eleventyExcludeFromCollections: true
     base.njk always advertises /feed.xml first, so a subscribe button that
     takes the first alternate gets the full one. -#}
 {%- set entries = collections.essayFeed -%}
-{%- set newest = entries[0].date if entries | length -%}
+{%- set newest = entries[0].shipped if entries | length -%}
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{{ site.title }} · essays</title>
@@ -27,8 +27,8 @@ eleventyExcludeFromCollections: true
     <link href="{{ site.url }}{{ entry.url }}" rel="alternate" type="text/html"/>
     {#- The same permanent id the full feed gives this essay. -#}
     <id>tag:chaosh.at,{{ entry.date | dateSlug }}:{{ entry.url }}</id>
-    <published>{{ entry.date | atomDate }}</published>
-    <updated>{{ entry.date | atomDate }}</updated>
+    <published>{{ entry.shipped | atomDate }}</published>
+    <updated>{{ entry.shipped | atomDate }}</updated>
     <content type="html">{{ entry.html | absoluteUrls(site.url) | escape }}</content>
   </entry>
   {%- endfor %}

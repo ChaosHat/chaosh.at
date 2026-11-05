@@ -1746,6 +1746,7 @@ export default function (eleventyConfig) {
         url: `/e/${slug}/`,
         title: e.data.title || e.fileSlug,
         date: e.date,
+        inputPath: e.inputPath, // the feed's shipped.json key
         featured: e.data.featured === true,
         html,
         feedHtml: stripSpoilers(raw),
@@ -2503,19 +2504,42 @@ export default function (eleventyConfig) {
   // reader who wants to go further back has the archive; the feed is for what
   // is new. Dropping off the end is harmless — readers keep what they fetched.
   const FEED_LIMIT = 30;
+
+  // When each post actually went out (2026-11-04), for <published>/<updated>.
+  // The post's own date is midnight UTC — 7pm Eastern the evening BEFORE — so
+  // a daily reached readers ~31 hours "old" and landed deep in anything sorted
+  // by date (Bubbles' New, for one). publish.py stamps the run's time into
+  // src/_data/shipped.json the first time it writes a post, keyed by its path
+  // under src/, and never again: pinned exactly like the date it stands in
+  // for, so an edit still cannot re-notify. Posts shipped before the sidecar
+  // existed have no stamp and keep their date. The entry id stays on the date.
+  const shippedFile = path.join("src", "_data", "shipped.json");
+  const readShipped = () => {
+    const stamps = fs.existsSync(shippedFile)
+      ? JSON.parse(fs.readFileSync(shippedFile, "utf8"))
+      : {};
+    return (inputPath, date) => {
+      const t = stamps[path.relative("src", inputPath).split(path.sep).join("/")];
+      return t ? new Date(t) : date;
+    };
+  };
+
   eleventyConfig.addCollection("feed", (api) => {
+    const shippedAt = readShipped();
     const entries = publishable(api.getFilteredByTag("dailies")).map((p) => ({
       url: p.url,
       date: p.date,
+      shipped: shippedAt(p.inputPath, p.date),
       title: p.data.title || dateFormat.format(p.date),
       html: stripSpoilers(linkSubjectsHtml(md.render(p.rawInput))),
     }));
 
     for (const e of buildEssayList(api)) {
-      entries.push({ url: e.url, date: e.date, title: e.title, html: e.feedHtml });
+      entries.push({ url: e.url, date: e.date, shipped: shippedAt(e.inputPath, e.date),
+        title: e.title, html: e.feedHtml });
     }
 
-    return entries.sort((a, b) => b.date - a.date).slice(0, FEED_LIMIT);
+    return entries.sort((a, b) => b.shipped - a.shipped).slice(0, FEED_LIMIT);
   });
 
   // The second feed (2026-11-03): essays only, at /essays/feed.xml. The one
@@ -2525,11 +2549,14 @@ export default function (eleventyConfig) {
   // about the bears game? I doubt it"); a reader who wants one topic reads
   // its page. Same entries, same ids, as in the full feed, so a reader
   // subscribed to both sees one essay once.
-  eleventyConfig.addCollection("essayFeed", (api) =>
-    buildEssayList(api)
-      .map((e) => ({ url: e.url, date: e.date, title: e.title, html: e.feedHtml }))
-      .sort((a, b) => b.date - a.date)
-      .slice(0, FEED_LIMIT));
+  eleventyConfig.addCollection("essayFeed", (api) => {
+    const shippedAt = readShipped();
+    return buildEssayList(api)
+      .map((e) => ({ url: e.url, date: e.date, shipped: shippedAt(e.inputPath, e.date),
+        title: e.title, html: e.feedHtml }))
+      .sort((a, b) => b.shipped - a.shipped)
+      .slice(0, FEED_LIMIT);
+  });
 
   // ------------------------------------------------------------- link cards
   //

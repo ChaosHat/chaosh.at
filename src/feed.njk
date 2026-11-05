@@ -5,7 +5,7 @@ eleventyExcludeFromCollections: true
 {%- set entries = collections.feed -%}
 {#- The epoch fallback only fires on a site with zero entries; anything
     date-shaped keeps the build alive there (site.built never existed). -#}
-{%- set newest = entries[0].date if entries | length -%}
+{%- set newest = entries[0].shipped if entries | length -%}
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{{ site.title }}</title>
@@ -25,10 +25,11 @@ eleventyExcludeFromCollections: true
         change once published — not if the title changes, not if the post is
         edited. Built from the date and path, both of which are fixed. -#}
     <id>tag:chaosh.at,{{ entry.date | dateSlug }}:{{ entry.url }}</id>
-    {#- Both pinned to the post's own date. NEVER the edit or build time —
-        advancing these is exactly what re-surfaces a post in every reader. -#}
-    <published>{{ entry.date | atomDate }}</published>
-    <updated>{{ entry.date | atomDate }}</updated>
+    {#- Both pinned to when the post first shipped (its date, for posts older
+        than shipped.json). NEVER the edit or build time — advancing these is
+        exactly what re-surfaces a post in every reader. -#}
+    <published>{{ entry.shipped | atomDate }}</published>
+    <updated>{{ entry.shipped | atomDate }}</updated>
     <content type="html">{{ entry.html | absoluteUrls(site.url) | escape }}</content>
   </entry>
   {%- endfor %}
