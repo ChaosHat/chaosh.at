@@ -163,6 +163,7 @@
       <nav class="views-pop win" aria-label="About"><div class="win-in">
         <ul class="views">
           {% if collections.pages | length %}<li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>me</a></li>{% endif %}
+          {% if collections.colophon | length %}<li><a href="/colophon/"{% if page.url == "/colophon/" %} aria-current="page"{% endif %}>colophon</a></li>{% endif %}
           <li><a href="/links/"{% if page.url == "/links/" %} aria-current="page"{% endif %}>links</a></li>
           <li><a href="/guestbook/"{% if page.url == "/guestbook/" %} aria-current="page"{% endif %}>guestbook</a></li>
           <li><a href="/feed.xml">feed</a></li>

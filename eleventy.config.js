@@ -994,7 +994,7 @@ export default function (eleventyConfig) {
   // would be a link to the page you're on.
   const ETC_POP = 6;
   eleventyConfig.addFilter("navState", (groupPages, groupId, url, navView) => {
-    if (["/about/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
+    if (["/about/", "/colophon/", "/links/", "/guestbook/"].includes(url)) return { tab: "about", row: "about" };
     const pages = groupPages ?? [];
     if (url === "/etc/") return {
       tab: "etc",
