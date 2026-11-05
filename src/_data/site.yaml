@@ -2,14 +2,6 @@ title: chaosh.at
 url: https://chaosh.at
 author: Hat
 description: Games, books, shows, and whatever else.
-# The media the site shows, in tab order: the off switch. A medium also needs at
-# least one subject (its first category) before its tab appears. Dropping one
-# hides its tab, its canon/shelf/best-of pages and its now-playing entries;
-# its subject pages and posts stay up. Manual.md → Media.
-media:
-  - games
-  - tabletop
-  - movies
 # Groups (2026-11-03): everything a subject can belong to. A subject's first
 # category names its group. `bands` says what a group has beyond its log and
 # essays: shelf (subjects carry status), canon (subjects may carry rating),
@@ -18,7 +10,8 @@ media:
 # (/<slug>/), guarded like a subject slug: removing or renaming one needs
 # `compile_subjects.py --forget-group <slug>` plus a redirects.yaml entry.
 # Icon + color are required once a group is tabbed or now_playing isn't off.
-# Manual.md → Groups. `media:` above stays until the groups branch merges.
+# Manual.md → Groups. (Until 2026-11-04 a `media:` list was the tabs and an
+# off switch for a medium's views; groups and tabs replaced it.)
 groups:
   games:
     noun: game
