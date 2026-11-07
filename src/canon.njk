@@ -10,7 +10,7 @@ navView: canon
 permalink: "{{ group.urls.canon }}"
 eleventyComputed:
   title: "{% if group.id == 'games' %}The Hat Canon{% else %}The Hat Canon: {{ group.label }}{% endif %}"
-  description: "{% if group.id == 'games' %}Ten games that say what I like in games, and a dated record of every time the list has changed.{% else %}The {{ group.label }} that say what I like, and a dated record of every time the list has changed.{% endif %}"
+  description: "{% if group.id == 'games' %}Ten games that say what I like in games, and a dated record of every time the list has changed.{% else %}The {{ group.id | groupNouns }} that say what I like, and a dated record of every time the list has changed.{% endif %}"
 ---
 {#- The canon's own page (2026-10-22): the ten, the record of how the list
     got that way, and the essays about the canon itself. Three sources, all

@@ -27,7 +27,7 @@ description: What the words under the covers mean, in order.
       {% if rung.slug == "canon" %}<a class="badge badge-g b-canon" href="/canon/">canon</a>
       {% else %}<a class="rating r-{{ rung.slug }}" href="/r/{{ rung.slug }}/">{{ rung.title }}</a>{% endif %}
       {% if rung.description %}<p class="rung-desc">{{ rung.description }}</p>{% endif %}
-      <p class="rung-count">{{ rung.members | length }} game{% if rung.members | length != 1 %}s{% endif %}</p>
+      <p class="rung-count">{{ rung.members | groupCounts }}</p>
     </li>
     {%- endfor %}
     <li class="rung rung-pending">

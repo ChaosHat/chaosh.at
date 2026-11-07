@@ -1184,6 +1184,18 @@ export default function (eleventyConfig) {
     .map((g) => `.m-${g.id}{${g.color ? `--mc:${g.color};` : ""}${g.hasIcon ? `--mico:url("${g.icon}")` : ""}}`)
     .join(""));
   eleventyConfig.addFilter("groupNoun", (g) => GROUP.get(g)?.noun ?? g);
+  eleventyConfig.addFilter("groupNouns", (g) => `${GROUP.get(g)?.noun ?? g}s`);
+  // A subject list counted by group, in site.yaml order: "12 games · 9
+  // tabletop games". A rung spans groups since tabletop got ratings; "games"
+  // for everything was wrong from then (2026-11-07).
+  eleventyConfig.addFilter("groupCounts", (members) => {
+    const n = new Map();
+    for (const s of members ?? []) n.set(s.group, (n.get(s.group) ?? 0) + 1);
+    if (!n.size) return "none yet";
+    return GROUPS.filter((g) => n.has(g.id))
+      .map((g) => `${n.get(g.id)} ${g.noun}${n.get(g.id) === 1 ? "" : "s"}`)
+      .join(" · ");
+  });
   eleventyConfig.addFilter("statusWord", (status, g) =>
     GROUP.get(g)?.statusWords?.[status] ?? status);
   const hasShelf = (g) => GROUP.get(g)?.hasShelf === true;
@@ -1673,7 +1685,9 @@ export default function (eleventyConfig) {
       // The blurb is the essay's own opening paragraph — the author writes the
       // lede, nothing paraphrases it. Off the REDACTED render: a blurb is
       // plain text in a stream, with no span to blur and nothing to click.
-      const firstPara = stripSpoilers(raw).match(/<p>([\s\S]*?)<\/p>/i);
+      // The feed summary's skips apply: an epigraph or an aside up top isn't
+      // the lede (DQXIS opened with Weezer until 2026-11-07).
+      const firstPara = stripSpoilers(raw).replace(SUMMARY_SKIP, "").match(/<p>([\s\S]*?)<\/p>/i);
       const blurb = firstPara ? plainText(firstPara[1]) : null;
 
       const { citedSubjects, citedTagsDirect, aboutCanon } = resolveAbout(e.inputPath, e.data.about);
@@ -2637,10 +2651,11 @@ export default function (eleventyConfig) {
   // card is as public as the feed — so the feed's rule: cut, not blurred.
   const cardText = (s) => String(s ?? "").replace(/\|\|[\s\S]+?\|\|/g, "[spoiler]").trim();
 
-  // First paragraph of the REDACTED render. Headings are <h2>, images are
-  // <figure>, so the first <p> is already the first prose.
+  // First paragraph of the REDACTED render. Headings are <h2>; figures,
+  // asides, quotes and lists are skipped (the feed summary's rule), so the
+  // first <p> left is the first prose.
   const firstPara = (html) => {
-    const m = stripSpoilers(html).match(/<p>([\s\S]*?)<\/p>/i);
+    const m = stripSpoilers(html).replace(SUMMARY_SKIP, "").match(/<p>([\s\S]*?)<\/p>/i);
     return m ? plainText(m[1]) : "";
   };
 
