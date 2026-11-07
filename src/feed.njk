@@ -30,6 +30,10 @@ eleventyExcludeFromCollections: true
         exactly what re-surfaces a post in every reader. -#}
     <published>{{ entry.shipped | atomDate }}</published>
     <updated>{{ entry.shipped | atomDate }}</updated>
+    {#- Per entry as well as on the feed: an aggregator that re-serves the
+        entry drops the feed-level author. -#}
+    <author><name>{{ site.author }}</name></author>
+    <summary type="html">{{ entry.html | feedSummary | absoluteUrls(site.url) | escape }}</summary>
     <content type="html">{{ entry.html | absoluteUrls(site.url) | escape }}</content>
   </entry>
   {%- endfor %}

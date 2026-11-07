@@ -2489,6 +2489,25 @@ export default function (eleventyConfig) {
     ),
   );
 
+  // A feed entry's <summary> (2026-11-06): the opening prose, nothing else.
+  // Aggregators that show a teaser (Kagi Small Web) build one themselves when
+  // there isn't one — tags stripped, so the subject heading, an image caption
+  // and the first paragraph ran together and cut off mid-sentence. Given a
+  // short summary they pass it through as-is. Figures, asides, quotes and lists
+  // are skipped; headings fall away because only <p> is taken. Fed the feed's
+  // html, so spoilers are already cut out. The first paragraph, plus the
+  // second when the first is a one-liner.
+  const SUMMARY_SKIP = /<(figure|aside|blockquote|ul|ol|pre|table)\b[\s\S]*?<\/\1>/gi;
+  const SUMMARY_MIN = 200;
+  eleventyConfig.addFilter("feedSummary", (html) => {
+    const paras = (String(html ?? "").replace(SUMMARY_SKIP, "").match(/<p>[\s\S]*?<\/p>/g) || [])
+      .filter((p) => p.replace(/<[^>]+>/g, "").trim());
+    const kept = paras.slice(0, 1);
+    const text = (p) => p.replace(/<[^>]+>/g, "").trim().length;
+    if (paras[1] && text(paras[0]) < SUMMARY_MIN) kept.push(paras[1]);
+    return kept.join("\n");
+  });
+
   // ------------------------------------------------------------------- feed
   //
   // Dated posts plus standing essays. A bare fragment-collector subject page

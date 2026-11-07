@@ -29,6 +29,8 @@ eleventyExcludeFromCollections: true
     <id>tag:chaosh.at,{{ entry.date | dateSlug }}:{{ entry.url }}</id>
     <published>{{ entry.shipped | atomDate }}</published>
     <updated>{{ entry.shipped | atomDate }}</updated>
+    <author><name>{{ site.author }}</name></author>
+    <summary type="html">{{ entry.html | feedSummary | absoluteUrls(site.url) | escape }}</summary>
     <content type="html">{{ entry.html | absoluteUrls(site.url) | escape }}</content>
   </entry>
   {%- endfor %}
