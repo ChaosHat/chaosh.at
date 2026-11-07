@@ -309,7 +309,8 @@ final-fantasy-resonance:
   title: Final Fantasy Resonance
   category:
     - games
-  status: active
+  status: completed
+  rating: loved
   aliases:
     - ffr
     - ffresonance

@@ -1,0 +1,1 @@
+I really enjoyed my time with Final Fantasy Resonance. It looks great, the music is fantastic, and it's not too long. The complexity here is just right, it has depth if you want it, it's fine if you don't, and it's more interesting than a Dragon Quest. It's a nice, chill time that's a love letter to the franchise and is extremely well executed. 
