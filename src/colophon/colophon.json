@@ -2,5 +2,6 @@
   "layout": "page.njk",
   "permalink": "/colophon/",
   "tags": "colophon",
-  "title": "Colophon"
+  "title": "Colophon",
+  "templateEngineOverride": "md"
 }
