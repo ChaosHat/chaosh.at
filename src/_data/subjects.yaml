@@ -70,7 +70,7 @@ burnout-3-takedown:
   title: 'Burnout 3: Takedown'
   category:
     - games
-  status: active
+  status: completed
   rating: loved
   aliases:
     - burnout 3
@@ -337,7 +337,7 @@ final-fantasy-vii-rebirth:
   title: Final Fantasy VII Rebirth
   category:
     - games
-  status: backlog
+  status: active
   aliases:
     - ff7 rebirth
     - ffvii rebirth
@@ -699,6 +699,7 @@ nintendo-switch-sports-resort:
   category:
     - games
   status: active
+  rating: liked
   aliases:
     - switch sports resort
     - nssr
@@ -874,7 +875,7 @@ sovereign-tower:
   title: Sovereign Tower
   category:
     - games
-  status: shelved
+  status: active
   aliases:
     - sovereign
 split-fiction:
