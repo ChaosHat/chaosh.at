@@ -514,6 +514,12 @@ export const foldStrip = (entries, { tail = false, through = lastShippable() } =
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
+  // src/fonts/SUBSET.md (how the woff2s were cut) is a note, not a page: as a
+  // template it published at /fonts/SUBSET/ and ran through Nunjucks, where
+  // a `{{` in a shell snippet would have stopped the build (2026-11-11). Out
+  // of template processing; the passthrough above still copies it verbatim
+  // to /fonts/SUBSET.md beside the fonts and licences it documents.
+  eleventyConfig.ignores.add("src/fonts/**");
   // Cloudflare Pages control files, and the fediverse host-meta (see
   // src/_redirects for why it's a static file and not a redirect).
   eleventyConfig.addPassthroughCopy({ "src/_redirects": "_redirects" });
