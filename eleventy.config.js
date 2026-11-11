@@ -17,7 +17,8 @@ const md = new MarkdownIt({ html: true, linkify: true });
 
 // Obsidian image embeds: ![[foo.png]], ![[foo.png|alt text]], ![[foo.png|640]]
 // (digits = width, like Obsidian). publish.py copies the referenced file to
-// src/img/posts/<safe name> and REFUSES any post whose image it can't find, so
+// src/img/posts/<safe name> (<safe name>.webp for a PNG since 2026-11-11 —
+// see publishedNames) and REFUSES any post whose image it can't find, so
 // a rendered embed never 404s. The safe-name transform and extension list
 // mirror image_safe_name()/IMAGE_EXTS in chaosh_subjects.py — if one changes,
 // change both. Non-image embeds (![[Some Note]] transclusion) are left as
@@ -32,6 +33,13 @@ export const imageSafeName = (name) => name.replace(/[^A-Za-z0-9._-]+/g, "-");
 // alternation). Never alt text. Same words Minimal/ITS use for image floats.
 // (2026-10-23, after the 10-22 daily's second shot was stranded.)
 const PLACE_HINT = /^(left|right|full)$/i;
+// The file an embed is published as (2026-11-11): a PNG publish.py has
+// processed since this date is <safe name>.webp, recorded as the "name" of
+// its src/img/manifest.json entry; every other image is its safe name, as
+// before. Filled from the manifest in eleventy.before (below), so the page,
+// its figures, the lightbox's data-full and both feeds all take the src
+// this rule writes. The embed's own name stays the key everywhere else.
+const publishedNames = new Map(); // safe name -> published file, only where they differ
 
 md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
   const m = IMAGE_EMBED.exec(state.src.slice(state.pos));
@@ -45,7 +53,8 @@ md.inline.ruler.before("image", "obsidian_image", (state, silent) => {
     const alt = parts.slice(1).find((p) => p && !/^\d+(x\d+)?$/.test(p) && !PLACE_HINT.test(p)) ?? "";
     const token = state.push("image", "img", 0);
     if (place) token.meta = { place };
-    token.attrs = [["src", `/img/posts/${imageSafeName(name)}`], ["alt", alt]];
+    const safe = imageSafeName(name);
+    token.attrs = [["src", `/img/posts/${publishedNames.get(safe) ?? safe}`], ["alt", alt]];
     if (width) token.attrs.push(["width", width[1]]);
     token.children = [];
     if (alt) {
@@ -572,10 +581,13 @@ export default function (eleventyConfig) {
   // set only the reserved box's shape, and the tiles' aspect-ratio wins.
   const IMG_MANIFEST = path.join("src", "img", "manifest.json");
   const THUMB_DIR = path.join("src", "img", "posts", "thumb");
-  const postImages = new Map(); // safe name -> { w, h, thumb: { w, h } | null }
+  // Keyed by the PUBLISHED file's name since 2026-11-11 (that is what the
+  // image rule puts in src); `safe` is the embed's, which names the thumbnail.
+  const postImages = new Map(); // published name -> { w, h, thumb: { w, h } | null, safe }
   const isDim = (n) => Number.isInteger(n) && n > 0;
   eleventyConfig.on("eleventy.before", () => {
     postImages.clear();
+    publishedNames.clear();
     let manifest = {};
     try {
       if (fs.existsSync(IMG_MANIFEST)) manifest = JSON.parse(fs.readFileSync(IMG_MANIFEST, "utf8"));
@@ -584,11 +596,17 @@ export default function (eleventyConfig) {
     }
     if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) return;
     for (const [name, rec] of Object.entries(manifest)) {
-      if (!rec || typeof rec !== "object" || !isDim(rec.w) || !isDim(rec.h)) continue;
+      if (!rec || typeof rec !== "object") continue;
+      // Only ever <name>.webp, and only once it's on disk; anything else
+      // keeps the same-name file (publish.py's pub_name() reads it alike).
+      const file = rec.name === `${name}.webp` &&
+        fs.existsSync(path.join("src", "img", "posts", rec.name)) ? rec.name : name;
+      if (file !== name) publishedNames.set(name, file);
+      if (!isDim(rec.w) || !isDim(rec.h)) continue;
       const t = rec.thumb;
       const thumb = t && isDim(t.w) && isDim(t.h) &&
         fs.existsSync(path.join(THUMB_DIR, `${name}.webp`)) ? { w: t.w, h: t.h } : null;
-      postImages.set(name, { w: rec.w, h: rec.h, thumb });
+      postImages.set(file, { w: rec.w, h: rec.h, thumb, safe: name });
     }
   });
   // What obsidian_figure emits, and nothing else: a figure open tag straight
@@ -616,7 +634,7 @@ export default function (eleventyConfig) {
       if (kind === "fig-full")
         return `${open}<img src="/img/posts/${name}" alt="${alt}" width="${rec.w}" height="${rec.h}"${hints}>`;
       if (!rec.thumb) return whole;
-      return `${open}<img src="/img/posts/thumb/${name}.webp" alt="${alt}" width="${rec.thumb.w}" height="${rec.thumb.h}"${hints}` +
+      return `${open}<img src="/img/posts/thumb/${rec.safe}.webp" alt="${alt}" width="${rec.thumb.w}" height="${rec.thumb.h}"${hints}` +
         ` data-full="/img/posts/${name}" data-full-width="${rec.w}" data-full-height="${rec.h}">`;
     });
   });
