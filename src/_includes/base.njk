@@ -303,7 +303,15 @@
       })();
     </script>
     {#- Lightbox: click a post image to see it full size. Without it the
-        images are just images. -#}
+        images are just images.
+        2026-11-11: a column image is its 640px thumbnail (eleventy.config.js,
+        "post images"); data-full is the published file, and that is what the
+        box shows. Until it arrives the box shows the thumbnail, already
+        loaded, stretched to the full file's final size so nothing jumps; the
+        size lock goes once the full file is in. The src is cleared first so
+        the last image opened never shows under this one's caption. A figure
+        without data-full (|full, or no thumbnail) opens its own src as
+        before. -#}
     <script>
       document.querySelector("main figure img") && (() => {
         const box = document.createElement("dialog");
@@ -315,6 +323,9 @@
         box.append(big, cap);
         document.body.append(box);
         box.addEventListener("click", () => box.close());
+        big.addEventListener("load", () => {
+          if (big.naturalWidth === +big.dataset.fw) big.style.width = big.style.height = "";
+        });
         /* 2026-11-11: keyboard path. Each figure image becomes a button
            (Tab, Enter or Space to open), Esc closes the dialog natively, and
            focus goes back to the image that opened it. */
@@ -334,7 +345,19 @@
           if (!img) return;
           trigger = img;
           box.setAttribute("aria-label", img.alt ? "Image: " + img.alt : "Image viewer");
-          big.src = img.currentSrc || img.src;
+          /* 2026-11-11: the full file, the thumbnail standing in meanwhile */
+          const full = img.dataset.full;
+          const fw = +img.dataset.fullWidth, fh = +img.dataset.fullHeight;
+          big.removeAttribute("src");
+          big.style.width = big.style.height = "";
+          big.dataset.fw = full ? fw : "";
+          if (full && fw && fh) {
+            const s = Math.min(1, innerWidth * 0.94 / fw, innerHeight * 0.84 / fh);
+            big.style.width = Math.floor(fw * s) + "px";
+            big.style.height = Math.floor(fh * s) + "px";
+            big.src = img.currentSrc || img.src;
+          }
+          big.src = full || img.currentSrc || img.src;
           big.alt = img.alt;
           const fc = img.closest("figure").querySelector("figcaption");
           cap.innerHTML = fc ? fc.innerHTML : "";
