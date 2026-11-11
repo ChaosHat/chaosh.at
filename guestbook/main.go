@@ -484,7 +484,7 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	thanks := a.siteURL + "/guestbook/thanks/"
 	// Honeypot: a hidden field nobody real fills in. Bots that fill it get
 	// the same thank-you page and nothing stored, so they learn nothing.
-	if r.PostFormValue("email") != "" {
+	if trapped(r.PostForm) {
 		log.Printf("honeypot from %s", clientIP(r))
 		http.Redirect(w, r, thanks, http.StatusSeeOther)
 		return
@@ -526,6 +526,24 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	log.Printf("pending #%d from %s (%q)", e.ID, ip, name)
 	a.background(func() { a.notifyNew(e) })
 	http.Redirect(w, r, thanks, http.StatusSeeOther)
+}
+
+// honeypot is the form's hidden field. Until 2026-11-11 it was "email", which
+// browser and password-manager autofill fill in, so a real visitor's
+// signature got the thank-you page and vanished. The new name is one no
+// autofill has a reason to touch.
+const honeypot = "fav_color"
+
+// trapped reports whether a post filled the honeypot. The current form
+// always sends the field (empty). A post without it is the old form, from a
+// cached page or a bot that learned it, whose trap was "email", so "email"
+// is the trap only then; on the new form an autofilled email is ignored.
+// Neither field is ever stored.
+func trapped(form url.Values) bool {
+	if _, ok := form[honeypot]; ok {
+		return form.Get(honeypot) != ""
+	}
+	return form.Get("email") != ""
 }
 
 func (a *app) moderate(w http.ResponseWriter, r *http.Request) {

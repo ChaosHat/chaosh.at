@@ -25,9 +25,13 @@ permalink: /guestbook/
   <label>message
     <textarea name="message" maxlength="500" rows="4" required></textarea>
   </label>
-  {#- Honeypot. Hidden from people, filled by bots; the service drops it. -#}
+  {#- Honeypot. Hidden from people, filled by bots; the service drops it.
+      Named so no autofill has a reason to touch it (2026-11-11: it was
+      `email`, and an autofilled address silently dropped a real signature);
+      the data- attributes ask 1Password, LastPass and Bitwarden to skip it.
+      The service's `honeypot` constant must match the name. -#}
   <div class="gb-trap" aria-hidden="true">
-    <label>email <input name="email" tabindex="-1" autocomplete="off"></label>
+    <label>leave this empty <input name="fav_color" type="text" tabindex="-1" autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore></label>
   </div>
   <button type="submit">sign</button>
 </form>
