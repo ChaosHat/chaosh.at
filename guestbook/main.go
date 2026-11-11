@@ -49,6 +49,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -112,6 +113,12 @@ type store struct {
 	write   func(path string, b []byte) error
 	Entries []Entry `json:"entries"`
 	NextID  int64   `json:"next_id"`
+	// PublicChanged is when the approved set last changed (RFC 3339, UTC,
+	// nanoseconds), saved with the change itself. Compared at startup with
+	// the last successful dispatch, so a restart inside the coalescing window
+	// doesn't lose the rebuild (2026-11-11). Absent in files written before
+	// then, which load unchanged.
+	PublicChanged string `json:"public_changed,omitempty"`
 }
 
 var (
@@ -238,15 +245,25 @@ func (s *store) moderate(id int64, token, status string) (Entry, bool, string, e
 		if e.Status == status {
 			return *e, false, e.Status, nil
 		}
-		was := e.Status
+		was, prev := e.Status, s.PublicChanged
 		e.Status = status
+		if status == "approved" || was == "approved" {
+			s.PublicChanged = time.Now().UTC().Format(time.RFC3339Nano)
+		}
 		if err := s.save(); err != nil {
-			e.Status = was
+			e.Status, s.PublicChanged = was, prev
 			return *e, false, was, err
 		}
 		return *e, true, was, nil
 	}
 	return Entry{}, false, "", errNotFound
+}
+
+func (s *store) publicChanged() time.Time {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	t, _ := time.Parse(time.RFC3339Nano, s.PublicChanged)
+	return t
 }
 
 func (s *store) approved() []publicEntry {
@@ -311,21 +328,28 @@ func rateKey(ip string) string {
 }
 
 type app struct {
-	st       *store
-	listen   string
-	siteURL  string
-	ntfyURL  string
-	ntfyTop  string
-	ntfyTok  string
-	ghToken  string
-	ghRepo   string
-	ghFlow   string
-	selfURL  string
-	ghAPI    string
-	client   *http.Client
-	buildMu  sync.Mutex
-	buildDue *time.Timer
-	bg       sync.WaitGroup
+	st      *store
+	listen  string
+	siteURL string
+	ntfyURL string
+	ntfyTop string
+	ntfyTok string
+	ghToken string
+	ghRepo  string
+	ghFlow  string
+	selfURL string
+	ghAPI   string
+	client  *http.Client
+	// The rebuild debounce. afterFunc is time.AfterFunc outside tests, which
+	// fire the timers by hand; marker is the file holding the start time of
+	// the last successful dispatch.
+	coalesce  time.Duration
+	afterFunc func(time.Duration, func()) stopper
+	buildMu   sync.Mutex
+	buildDue  stopper
+	markerMu  sync.Mutex
+	marker    string
+	bg        sync.WaitGroup
 }
 
 // background runs f off the request path. Tests wait on a.bg.
@@ -358,6 +382,9 @@ func newApp(getenv func(string) string) (*app, error) {
 		ghAPI:   strings.TrimRight(env("GITHUB_API", "https://api.github.com"), "/"),
 		selfURL: strings.TrimRight(env("SELF_URL", "https://sign.chaosh.at"), "/"),
 		client:  &http.Client{Timeout: 15 * time.Second},
+
+		coalesce:  dispatchCoalesce,
+		afterFunc: func(d time.Duration, f func()) stopper { return time.AfterFunc(d, f) },
 	}
 	var bad []string
 	if a.ntfyURL == "" {
@@ -385,6 +412,7 @@ func newApp(getenv func(string) string) (*app, error) {
 		return nil, err
 	}
 	a.st = st
+	a.marker = filepath.Join(filepath.Dir(st.path), "dispatched")
 	return a, nil
 }
 
@@ -399,6 +427,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("guestbook listening on %s, %d entries, notifying %s", a.listen, len(a.st.Entries), a.ntfyURL)
+	a.resumeBuild()
 	srv := &http.Server{Addr: a.listen, Handler: a.handler(), ReadHeaderTimeout: 10 * time.Second}
 	log.Fatal(srv.ListenAndServe())
 }
@@ -586,30 +615,93 @@ func (a *app) moderate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s #%d %s\n", status, e.ID, e.Name)
 }
 
+// stopper is the part of *time.Timer requestBuild needs.
+type stopper interface{ Stop() bool }
+
 // requestBuild asks GitHub to rebuild, coalescing a burst of approvals into
 // one run. The nightly 07:30 UTC build is the fallback if this ever fails.
+//
+// Each request stops the pending timer and starts a new one (2026-11-11).
+// The old code Reset a single timer, and a Reset landing after the timer had
+// fired but before its callback took the lock re-armed it, so one burst
+// could dispatch twice. Now a callback that finds it is no longer buildDue
+// has been superseded and does nothing; the newer timer covers its
+// approvals. An approval while a dispatch is already in flight still gets a
+// run of its own.
 func (a *app) requestBuild() {
 	a.buildMu.Lock()
 	defer a.buildMu.Unlock()
 	if a.buildDue != nil {
-		a.buildDue.Reset(dispatchCoalesce)
-		return
+		a.buildDue.Stop()
 	}
-	a.buildDue = time.AfterFunc(dispatchCoalesce, func() {
+	var t stopper
+	t = a.afterFunc(a.coalesce, func() {
 		a.buildMu.Lock()
-		a.buildDue = nil
-		a.buildMu.Unlock()
-		if err := a.dispatch(); err != nil {
-			log.Printf("dispatch: %v", err)
-			a.ntfy(map[string]any{
-				"title":    "guestbook: rebuild failed",
-				"message":  err.Error() + "\nApproved entries appear on the next nightly build.",
-				"priority": 4, "tags": []string{"warning"},
-			})
+		if a.buildDue != t {
+			a.buildMu.Unlock()
 			return
 		}
-		log.Print("dispatched site rebuild")
+		a.buildDue = nil
+		a.buildMu.Unlock()
+		a.runBuild()
 	})
+	a.buildDue = t
+}
+
+func (a *app) runBuild() {
+	start := time.Now().UTC()
+	if err := a.dispatch(); err != nil {
+		log.Printf("dispatch: %v", err)
+		if err := a.ntfy(map[string]any{
+			"title":    "guestbook: rebuild failed",
+			"message":  err.Error() + "\nApproved entries appear on the next nightly build.",
+			"priority": 4, "tags": []string{"warning"},
+		}); err != nil {
+			log.Printf("ntfy: %v", err)
+		}
+		return
+	}
+	log.Print("dispatched site rebuild")
+	a.markDispatched(start)
+}
+
+// markDispatched records that a build requested at start covers every
+// approval before it. Two dispatches can overlap; the later start wins.
+func (a *app) markDispatched(start time.Time) {
+	a.markerMu.Lock()
+	defer a.markerMu.Unlock()
+	if last, ok := a.lastDispatch(); ok && !start.After(last) {
+		return
+	}
+	if err := writeDurable(a.marker, []byte(start.Format(time.RFC3339Nano)+"\n")); err != nil {
+		// Costs at most one extra rebuild after the next restart.
+		log.Printf("dispatch marker: %v", err)
+	}
+}
+
+func (a *app) lastDispatch() (time.Time, bool) {
+	b, err := os.ReadFile(a.marker)
+	if err != nil {
+		return time.Time{}, false
+	}
+	t, err := time.Parse(time.RFC3339Nano, strings.TrimSpace(string(b)))
+	return t, err == nil
+}
+
+// resumeBuild runs at startup: if the approved set changed after the last
+// successful dispatch began, a restart (or a failed dispatch) lost that
+// rebuild, so ask again. A missing marker with no recorded change, as on the
+// first start after this shipped, asks for nothing.
+func (a *app) resumeBuild() {
+	changed := a.st.publicChanged()
+	if changed.IsZero() {
+		return
+	}
+	if last, ok := a.lastDispatch(); ok && !changed.After(last) {
+		return
+	}
+	log.Printf("approved set changed %s, after the last dispatched rebuild; requesting one", changed.Format(time.RFC3339))
+	a.requestBuild()
 }
 
 func (a *app) dispatch() error {
@@ -627,8 +719,10 @@ func (a *app) dispatch() error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNoContent {
+		// GitHub's error body, never the request: the token stays out of
+		// the log and the ntfy warning.
 		var b bytes.Buffer
-		b.ReadFrom(resp.Body)
+		b.ReadFrom(io.LimitReader(resp.Body, 300))
 		return fmt.Errorf("github %s: %s", resp.Status, strings.TrimSpace(b.String()))
 	}
 	return nil
