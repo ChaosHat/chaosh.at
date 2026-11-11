@@ -9,15 +9,19 @@ pagination:
 navView: shelf
 permalink: "{{ group.urls.shelf }}"
 eleventyComputed:
-  title: "{{ group.label | capitalize }}"
+  title: "Shelf: {{ group.label }}"
 ---
+{#- The <title> says "Shelf: games" (2026-11-11), the way the log says "Log:
+    games": as plain "Games" it was the group page's title too, so two tabs
+    and a bookmark couldn't tell /shelf/ from /games/. The heading stays the
+    group's name. -#}
 {#- One shelf per medium (2026-10-25): /shelf/ is games, /shelf/<medium>/
     every other. From 2026-09-11 until then it was one shelf for everything
     with a category filter chip beside the sort; the media tabs replaced the
     filter. -#}
 {% set items = group.subjects | shelveSort | shelfRanks %}
 
-<h1>{{ title }}</h1>
+<h1>{{ group.label | capitalize }}</h1>
 
 {#- Sort, in CSS. The radios carry no script: each tile ships a precomputed rank
     per axis (see shelfRanks) and the checked radio decides which one `order`

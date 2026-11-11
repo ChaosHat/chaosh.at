@@ -1,12 +1,14 @@
 ---
 layout: base.njk
-title: Archive
 pagination:
   data: collections.stream
   size: 20
   alias: posts
 permalink: "{% if pagination.pageNumber == 0 %}/archive/{% else %}/archive/page-{{ pagination.pageNumber + 1 }}/{% endif %}"
+eleventyComputed:
+  title: "Archive{% if pagination.pageNumber > 0 %}, page {{ pagination.pageNumber + 1 }}{% endif %}"
 ---
+{#- Each page its own <title> (2026-11-11); all six were "Archive". -#}
 <h1>Archive</h1>
 
 <ul class="archive-list">
