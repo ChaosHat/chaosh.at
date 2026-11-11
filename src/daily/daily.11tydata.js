@@ -4,6 +4,8 @@
 // post would silently re-date itself each build and resurface in the feed
 // forever, so it is excluded from the site and reported instead.
 
+import { titleText } from "../../eleventy.config.js";
+
 const DATE_FILENAME = /^\d{4}-\d{2}-\d{2}$/;
 
 const isDated = (data) =>
@@ -20,6 +22,8 @@ export default {
   tags: "dailies",
   isDaily: true,
   eleventyComputed: {
+    // A plain string or nothing, whatever YAML made of it (titleText).
+    title: (data) => titleText(data.title),
     datedProperly: (data) => isDated(data),
     permalink: (data) =>
       isDated(data)

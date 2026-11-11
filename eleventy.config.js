@@ -344,6 +344,19 @@ md.core.ruler.push("obsidian_float_sides", (state) => {
   }
 });
 
+// `title:` as typed is YAML, so `title: 1984` arrives as a number and
+// `title: 2026-01-01` as a Date, and consumers assumed a string: the forum
+// sig died on `title.trim` and skipped all three /sig/ images (2026-11-11).
+// Coerced once, where a title enters — a daily's computed data
+// (daily.11tydata.js) and an essay's entry (buildEssayList) — so nothing
+// downstream has to. A date reads back as the YYYY-MM-DD that was typed
+// (YAML dates are UTC midnight); blank or missing stays blank, "untitled".
+export const titleText = (t) => {
+  if (t == null) return "";
+  if (t instanceof Date) return Number.isNaN(t.getTime()) ? "" : t.toISOString().slice(0, 10);
+  return String(t).trim();
+};
+
 // Headings are matched loosely so "DQXIS", "dqxi s" and "Dragon Quest XI S"
 // all land on the same subject.
 export const normalise = (s) =>
@@ -1832,7 +1845,7 @@ export default function (eleventyConfig) {
       return {
         slug,
         url: `/e/${slug}/`,
-        title: e.data.title || e.fileSlug,
+        title: titleText(e.data.title) || e.fileSlug,
         date: e.date,
         inputPath: e.inputPath, // the feed's shipped.json key
         featured: e.data.featured === true,
