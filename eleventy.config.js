@@ -91,7 +91,50 @@ const isCaptionParagraph = (t, i) => {
   return c.length >= 3 && c[0].type === "em_open" && c[c.length - 1].type === "em_close" &&
     c.slice(1, -1).every((x) => x.level > 0);
 };
+// An image whose next line is more text, with no blank line between, used to
+// share one paragraph with it and render as an inline <img> beside a line of
+// prose: no figure, no column, no lightbox, while Obsidian shows the two
+// forms the same (the 2026-10-11 and 10-18 dailies). So a paragraph that
+// OPENS with an image line is cut after it, as if the blank line were there:
+// the image becomes its own paragraph (a figure, below) and the rest a
+// paragraph of its own — a caption if it's wholly italic, prose otherwise.
+// Repeats, so image lines stacked one under another each become a figure.
+// Prose first and an image on the next line is left alone: the Manual calls
+// that inline. Tight-list paragraphs (hidden) are left alone too. (2026-11-11.)
+const splitImageLines = (state) => {
+  const t = state.tokens;
+  const out = [];
+  for (let i = 0; i < t.length; i++) {
+    const kids = t[i + 1]?.children;
+    if (t[i].type !== "paragraph_open" || t[i].hidden || t[i + 1]?.type !== "inline" ||
+        t[i + 2]?.type !== "paragraph_close" || kids.length < 3 || kids[0].type !== "image" ||
+        (kids[1].type !== "softbreak" && kids[1].type !== "hardbreak")) {
+      out.push(t[i]);
+      continue;
+    }
+    const [open, inline, close] = t.slice(i, i + 3);
+    const lead = new state.Token("inline", "", 0);
+    lead.children = [kids[0]];
+    lead.content = inline.content.split("\n")[0];
+    lead.map = open.map && [open.map[0], open.map[0] + 1];
+    const leadOpen = new state.Token("paragraph_open", "p", 1);
+    const leadClose = new state.Token("paragraph_close", "p", -1);
+    leadOpen.block = leadClose.block = true;
+    leadOpen.level = leadClose.level = open.level;
+    lead.level = inline.level;
+    leadOpen.map = lead.map;
+    out.push(leadOpen, lead, leadClose);
+    // The rest goes back round: it may open with another image line.
+    inline.children = kids.slice(2);
+    inline.content = inline.content.slice(inline.content.indexOf("\n") + 1);
+    if (open.map) open.map = [open.map[0] + 1, open.map[1]];
+    i--;
+  }
+  state.tokens = out;
+};
+
 md.core.ruler.push("obsidian_figure", (state) => {
+  splitImageLines(state);
   const t = state.tokens;
   const out = [];
   for (let i = 0; i < t.length; i++) {
