@@ -8,7 +8,8 @@ eleventyExcludeFromCollections: true
     the redirect stubs, /sig/, the 404, the two feeds and the guestbook thanks
     page. lastmod only where the build has a date it can trust: a post's own.
     A listing page's newest post would be a guess at when its text last
-    changed, so listings carry none. -#}
+    changed, so listings carry none. A paginated view (2026-11-11) lists
+    every page, from the same *Paged collections its template builds. -#}
 {%- macro loc(url, date) -%}
   <url><loc>{{ site.url }}{{ url }}</loc>{% if date %}<lastmod>{{ date | dateSlug }}</lastmod>{% endif %}</url>
 {%- endmacro -%}
@@ -27,8 +28,8 @@ eleventyExcludeFromCollections: true
 {%- if collections.essayPages | length %}
 {{ loc("/essays/") -}}
 {%- endif %}
-{%- for g in collections.groupPages %}
-{{ loc(g.urls.home) -}}
+{%- for g in collections.groupPagesPaged %}
+{{ loc(g.pager.url) -}}
 {%- endfor %}
 {%- for g in collections.groupCanonPages %}
 {{ loc(g.urls.canon) -}}
@@ -42,8 +43,8 @@ eleventyExcludeFromCollections: true
 {%- for g in collections.groupEssayPages %}
 {{ loc(g.urls.essays) -}}
 {%- endfor %}
-{%- for g in collections.groupLogPages %}
-{{ loc(g.urls.log) -}}
+{%- for g in collections.groupLogPagesPaged %}
+{{ loc(g.pager.url) -}}
 {%- endfor %}
 {%- for x in collections.etcPage %}
 {{ loc(x.url) -}}
@@ -51,12 +52,12 @@ eleventyExcludeFromCollections: true
 {%- for s in collections.subjectPages %}
 {{ loc("/s/" + s.slug + "/") -}}
 {%- endfor %}
-{%- for t in collections.tagPages %}
-{{ loc("/t/" + t.slug + "/") -}}
+{%- for t in collections.tagPagesPaged %}
+{{ loc(t.pager.url) -}}
 {%- endfor %}
 {{ loc("/r/") }}
-{%- for r in collections.ratingPages %}
-{{ loc("/r/" + r.slug + "/") -}}
+{%- for r in collections.ratingPagesPaged %}
+{{ loc(r.pager.url) -}}
 {%- endfor %}
 {%- if collections.pages | length %}
 {{ loc("/about/") -}}
