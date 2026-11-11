@@ -1355,16 +1355,63 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   .essay-list a { flex: 1 1 0; min-width: 0; }
 }
 
+/* The pager (2026-11-11), the archive's and every paginated view's: the
+   day row's type (16px pixel, muted words, accent links), the current page
+   in ink and bold like the open tab. Three columns so the numbers stay put
+   whether or not an arrow is there; every arrow and number a 40px target.
+   It was 8px "N / total" between two words, too small to be the only way
+   on from a long page. On a view it sits under the text column from 58rem,
+   as the day row does. */
 .pagination {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   margin-top: 2rem;
-  font: 8px/1 var(--pixel);
+  font: 16px/24px var(--pixel);
 }
-
 .pagination a { text-decoration: none; }
-.pagination span { margin-left: auto; color: var(--muted); }
+.pagination > a,
+.pagination > span > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-width: 40px;
+  min-height: 40px;
+}
+.pagination > span { grid-column: 2; display: flex; }
+.pagination > [rel="prev"] { grid-column: 1; justify-self: end; padding-right: 8px; color: var(--muted); }
+.pagination > [rel="next"] { grid-column: 3; justify-self: start; padding-left: 8px; color: var(--muted); }
+.pagination > a:hover,
+.pagination > a:focus-visible { color: var(--accent); }
+.pagination [aria-current] { color: var(--ink); font-weight: 700; }
+/* The "…": no target, as narrow as its glyph. */
+.pagination > span > span:not([aria-current]) { min-width: 0; color: var(--muted); }
+/* A phone keeps the arrows; the words stay for screen readers (.sr-only).
+   The row takes the body's gutters too: past 99 pages a middle page reads
+   ← 1 … 99 100 101 … 211 →, 314px at 40px a target, and a 320px screen
+   has 280 between the gutters. */
+@media (max-width: 34rem) {
+  .pagination { margin-inline: -1.25rem; }
+  .pagination > [rel="prev"],
+  .pagination > [rel="next"] { padding: 0; }
+  .pagination > a > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+/* Seven pages, a middle one, is nine targets: 360px at 40. Under 360 the
+   numbers narrow to 34 (still 40 tall); the arrows keep 40. */
+@media (max-width: 22.49rem) {
+  .pagination > span > * { min-width: 34px; }
+}
+@media (min-width: 58rem) {
+  .tag > .pagination { margin-left: calc(var(--lcol) + var(--lgap)); margin-right: calc(var(--mcol) + var(--mgap)); }
+}
 
 /* ----------------------------------------------------------- shelf page */
 

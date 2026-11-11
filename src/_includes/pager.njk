@@ -1,11 +1,20 @@
-{#- The pager under a paginated view's timeline (2026-11-11): archive.njk's
-    markup and class, with rel on the links. Callers set `pager` (from the
-    *Paged collections in eleventy.config.js, view pages). A one-page view
-    has none. -#}
+{#- The pager (2026-11-11): one for every paginated view and the archive.
+    `← newer  1 2 … 7  older →`, page 1 the newest; the current page is
+    marked, not linked; past seven pages the numbers truncate (pagerNumbers
+    in eleventy.config.js). On a phone the words go and the arrows stay.
+    Callers set `pager`: number, total, first (page 1's URL, which page-N/
+    hangs off), previous, next. A one-page view has none. -#}
 {%- if pager.total > 1 %}
-  <nav class="pagination">
-    {% if pager.previous %}<a href="{{ pager.previous }}" rel="prev">← {{ pager.previousWord }}</a>{% endif %}
-    <span>{{ pager.number }} / {{ pager.total }}</span>
-    {% if pager.next %}<a href="{{ pager.next }}" rel="next">{{ pager.nextWord }} →</a>{% endif %}
+  <nav class="pagination" aria-label="Pages">
+    {% if pager.previous %}<a href="{{ pager.previous }}" rel="prev">← <span>newer</span></a>{% endif %}
+    <span>
+      {%- for n in pager | pagerNumbers %}
+      {%- if not n %}<span>…</span>
+      {%- elif n == pager.number %}<span aria-current="page">{{ n }}</span>
+      {%- else %}<a href="{{ pager.first if n == 1 else pager.first + 'page-' + n + '/' }}">{{ n }}</a>
+      {%- endif %}
+      {%- endfor -%}
+    </span>
+    {% if pager.next %}<a href="{{ pager.next }}" rel="next"><span>older</span> →</a>{% endif %}
   </nav>
 {%- endif -%}

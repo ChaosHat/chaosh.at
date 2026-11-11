@@ -2423,8 +2423,6 @@ export default function (eleventyConfig) {
           first: base,
           previous: number > 1 ? pageUrl(base, number - 1) : null,
           next: number < slices.length ? pageUrl(base, number + 1) : null,
-          previousWord: "newer",
-          nextWord: "older",
         },
       };
     });
@@ -2466,6 +2464,22 @@ export default function (eleventyConfig) {
     pagedViews(buildTagPages(api), "entries", (t) => `/t/${t.slug}/`));
   eleventyConfig.addCollection("ratingPagesPaged", (api) =>
     pagedViews(buildRatingPages(api), "entries", (r) => `/r/${r.slug}/`));
+
+  // The pager's numbers (pager.njk, every paginated view and the archive):
+  // every page up to seven, past that the first, the last, the current and
+  // one either side, with null for each gap. A gap of exactly one page shows
+  // that page instead, since "…" there would hide nothing but a number.
+  const PAGER_ALL = 7;
+  const pagerNumbers = (current, total) => {
+    if (total <= PAGER_ALL) return Array.from({ length: total }, (_, i) => i + 1);
+    const keep = [...new Set([1, current - 1, current, current + 1, total])]
+      .filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+    return keep.flatMap((n, i) => {
+      const gap = i ? n - keep[i - 1] : 1;
+      return gap === 1 ? [n] : gap === 2 ? [n - 1, n] : [null, n];
+    });
+  };
+  eleventyConfig.addFilter("pagerNumbers", (pager) => pagerNumbers(pager.number, pager.total));
 
   // ----------------------------------------------------------------- canon
   //

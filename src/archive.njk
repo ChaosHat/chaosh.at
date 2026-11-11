@@ -29,10 +29,12 @@ eleventyComputed:
   {% endfor %}
 </ul>
 
-{% if pagination.href.previous or pagination.href.next %}
-<nav class="pagination">
-  {% if pagination.href.previous %}<a href="{{ pagination.href.previous }}">← newer</a>{% endif %}
-  <span>{{ pagination.pageNumber + 1 }} / {{ pagination.pages | length }}</span>
-  {% if pagination.href.next %}<a href="{{ pagination.href.next }}">older →</a>{% endif %}
-</nav>
-{% endif %}
+{#- The views' pager since 2026-11-11 (pager.njk), so there is one. -#}
+{%- set pager = {
+  number: pagination.pageNumber + 1,
+  total: pagination.pages | length,
+  first: "/archive/",
+  previous: pagination.href.previous,
+  next: pagination.href.next
+} %}
+{% include "pager.njk" %}
