@@ -1,0 +1,11 @@
+{#- The pager under a paginated view's timeline (2026-11-11): archive.njk's
+    markup and class, with rel on the links. Callers set `pager` (from the
+    *Paged collections in eleventy.config.js, view pages). A one-page view
+    has none. -#}
+{%- if pager.total > 1 %}
+  <nav class="pagination">
+    {% if pager.previous %}<a href="{{ pager.previous }}" rel="prev">← {{ pager.previousWord }}</a>{% endif %}
+    <span>{{ pager.number }} / {{ pager.total }}</span>
+    {% if pager.next %}<a href="{{ pager.next }}" rel="next">{{ pager.nextWord }} →</a>{% endif %}
+  </nav>
+{%- endif -%}

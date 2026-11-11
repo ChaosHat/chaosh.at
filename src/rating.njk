@@ -1,12 +1,12 @@
 ---
 layout: base.njk
 pagination:
-  data: collections.ratingPages
+  data: collections.ratingPagesPaged
   size: 1
   alias: rating
-permalink: "/r/{{ rating.slug }}/"
+permalink: "{{ rating.pager.url }}"
 eleventyComputed:
-  title: "{{ rating.title | safe }}"
+  title: "{{ rating.title | safe }}{% if rating.pager.number > 1 %}, page {{ rating.pager.number }}{% endif %}"
   description: "{{ rating.description | safe }}"
 ---
 {#- One rung of the rating ladder: every game rated this, and everything

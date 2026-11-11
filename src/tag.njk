@@ -1,12 +1,12 @@
 ---
 layout: base.njk
 pagination:
-  data: collections.tagPages
+  data: collections.tagPagesPaged
   size: 1
   alias: tag
-permalink: "/t/{{ tag.slug }}/"
+permalink: "{{ tag.pager.url }}"
 eleventyComputed:
-  title: "{{ tag.title | safe }}"
+  title: "{{ tag.title | safe }}{% if tag.pager.number > 1 %}, page {{ tag.pager.number }}{% endif %}"
   description: "{{ tag.description | safe }}"
 ---
 {%- set view = tag %}

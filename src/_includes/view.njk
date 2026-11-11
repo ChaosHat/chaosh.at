@@ -9,8 +9,18 @@
     Callers set `view` (slug, title, glyph, description, members, entries,
     optional indexUrl) and `emptyLabel`. The `.tag-*` classes are structural
     and read as "view page" here, tagview or rung alike — see the tag-page
-    block in style.css. -#}
+    block in style.css.
+
+    `view.pager` (2026-11-11): past page 1 the header is the title, linked
+    back to page 1, and the page number; the definition, the members and
+    their blurbs are page 1's. -#}
 <article class="tag">
+  {%- if view.pager.number > 1 %}
+  <header class="tag-head">
+    <h1>{% if view.glyph %}<span class="view-glyph" aria-hidden="true">{{ view.glyph }}</span> {% endif %}<a href="{{ view.pager.first }}">{{ view.title }}</a></h1>
+    <p class="post-subdate">page {{ view.pager.number }}</p>
+  </header>
+  {%- else %}
   <header class="tag-head">
     <h1>{% if view.glyph %}<span class="view-glyph" aria-hidden="true">{{ view.glyph }}</span> {% endif %}{{ view.title }}</h1>
     {% if view.description %}<p class="tag-desc">{{ view.description }}</p>{% endif %}
@@ -59,12 +69,15 @@
     {% endfor %}
   </section>
   {% endif %}
+  {%- endif %}
 
   {% if view.entries | length %}
   <section class="timeline">
     {%- set entries = view.entries %}
     {% include "timeline.njk" %}
   </section>
+  {%- set pager = view.pager %}
+  {%- include "pager.njk" %}
   {% elif not (blurbed | length) %}
     {% if view.members | length %}
   <p class="empty">Nothing written about these yet.</p>

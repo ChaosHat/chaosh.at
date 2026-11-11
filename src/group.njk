@@ -1,14 +1,14 @@
 ---
 layout: base.njk
 pagination:
-  data: collections.groupPages
+  data: collections.groupPagesPaged
   size: 1
   alias: group
   addAllPagesToCollections: false
 navView: home
-permalink: "{{ group.urls.home }}"
+permalink: "{{ group.pager.url }}"
 eleventyComputed:
-  title: "{{ group.label | capitalize }}"
+  title: "{{ group.label | capitalize }}{% if group.pager.number > 1 %}, page {{ group.pager.number }}{% endif %}"
   description: "{{ group.description | safe if group.description else '' }}"
 ---
 {#- A group's landing page (2026-11-03), one per group with a subject, tab
@@ -19,6 +19,14 @@ eleventyComputed:
     about it, newest first. Every band hides until it has something in it. -#}
 {%- from "cards.njk" import tile %}
 <article class="tag group-page">
+  {#- Past page 1 (2026-11-11) the header is the name, linked back to page
+      1, and the page number; the cards and the subject row are page 1's. -#}
+  {%- if group.pager.number > 1 %}
+  <header class="tag-head group-head">
+    <h1>{% if group.hasIcon %}<span class="mico m-{{ group.id }}" aria-hidden="true"></span>{% endif %}<a href="{{ group.pager.first }}">{{ group.label }}</a></h1>
+    <p class="post-subdate">page {{ group.pager.number }}</p>
+  </header>
+  {%- else %}
   <header class="tag-head group-head">
     <h1>{% if group.hasIcon %}<span class="mico m-{{ group.id }}" aria-hidden="true"></span>{% endif %}{{ group.label }}</h1>
     {% if group.description %}<p class="tag-desc">{{ group.description }}</p>{% endif %}
@@ -44,6 +52,7 @@ eleventyComputed:
   {% if group.subjectRow | length %}
   <p class="group-subjects">{% for s in group.subjectRow %}<a href="/s/{{ s.slug }}/">{{ s.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
   {% endif %}
+  {%- endif %}
 
   {#- The log: every ## section about the group's subjects, newest first,
       each with its subject's cover in the art column; essays at their date,
@@ -53,6 +62,8 @@ eleventyComputed:
     {%- set entries = group.stream %}
     {% include "timeline.njk" %}
   </section>
+  {%- set pager = group.pager %}
+  {%- include "pager.njk" %}
   {% else %}
   <p class="empty">Nothing written yet.</p>
   {% endif %}
