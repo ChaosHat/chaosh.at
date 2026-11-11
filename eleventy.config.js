@@ -182,6 +182,33 @@ md.core.ruler.push("obsidian_figure", (state) => {
 // `[!aside|left]` / `[!aside|right]` (Obsidian's callout-metadata slot) pins
 // the side, like an image's placement hint.
 const ASIDE_MARK = /^\[!aside(?:\|(left|right))?\][+-]?[ \t]*/i;
+// Any other callout type (`> [!note] Title`) stays a plain blockquote, but
+// without its marker: until 2026-11-11 the page printed "[!note] Title" as
+// typed. The marker goes, and the title, when there is one, becomes the
+// quote's first line as a paragraph of its own; a bare `[!note]` leaves the
+// body alone. No box, no icon, no fold — only aside is claimed.
+const CALLOUT_MARK = /^\[![a-z][\w-]*(?:\|[^\]]*)?\][+-]?[ \t]*/i;
+const plainCallout = (state, t, i, inline, first, m) => {
+  first.content = first.content.slice(m[0].length);
+  const kids = inline.children;
+  const br = kids.findIndex((c) => c.type === "softbreak" || c.type === "hardbreak");
+  const title = br < 0 ? kids : kids.slice(0, br);
+  const body = br < 0 ? [] : kids.slice(br + 1);
+  const hasTitle = title.some((c) => c.type !== "text" || c.content.trim());
+  if (!hasTitle && !body.length) t.splice(i + 1, 3);
+  else if (!hasTitle) inline.children = body;
+  else if (body.length) {
+    inline.children = title;
+    const open = new state.Token("paragraph_open", "p", 1);
+    const close = new state.Token("paragraph_close", "p", -1);
+    const rest = new state.Token("inline", "", 0);
+    open.block = close.block = true;
+    open.level = close.level = t[i + 1].level;
+    rest.children = body;
+    rest.content = "";
+    t.splice(i + 4, 0, open, rest, close);
+  }
+};
 md.core.ruler.push("obsidian_aside", (state) => {
   const t = state.tokens;
   for (let i = 0; i < t.length; i++) {
@@ -189,7 +216,11 @@ md.core.ruler.push("obsidian_aside", (state) => {
     const inline = t[i + 2];
     const first = inline?.children?.[0];
     const m = first?.type === "text" && ASIDE_MARK.exec(first.content);
-    if (!m) continue;
+    if (!m) {
+      const c = first?.type === "text" && CALLOUT_MARK.exec(first.content);
+      if (c) plainCallout(state, t, i, inline, first, c);
+      continue;
+    }
     let depth = 0;
     let j = i;
     for (; j < t.length; j++) {
