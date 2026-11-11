@@ -244,8 +244,11 @@
         const copy = document.createElement("div");
         copy.className = "track";
         copy.setAttribute("aria-hidden", "true");
-        let on = false, idle = 0, last = 0, lastAuto = 0, pos = 0;
+        let on = false, idle = 0, last = 0, lastAuto = 0, pos = 0, armedW = -1;
         const arm = () => {
+          /* 2026-11-11: rebuilding moves every item, which resets the scroll
+             and drops focus; keep both across it. */
+          const sl = row.scrollLeft, focused = items.find((a) => a === document.activeElement);
           row.classList.add("tick");
           track.replaceChildren(...items);
           row.replaceChildren(track);
@@ -253,12 +256,16 @@
             row.classList.remove("tick");
             row.replaceChildren(...items);
             on = false;
-            return;
+          } else {
+            /* tabindex -1: the aria-hidden copy is for the loop's look only; keyboard users get the row once. */
+            copy.replaceChildren(...items.map((a) => { const c = a.cloneNode(true); c.tabIndex = -1; return c; }));
+            row.append(copy);
+            row.scrollLeft = sl % track.offsetWidth;
+            pos = row.scrollLeft;
+            on = true;
           }
-          copy.replaceChildren(...items.map((a) => a.cloneNode(true)));
-          row.append(copy);
-          pos = row.scrollLeft;
-          on = true;
+          armedW = row.clientWidth;
+          if (focused) focused.focus({ preventScroll: true });
         };
         const hold = (ms) => { idle = performance.now() + ms; };
         for (const e of ["pointerenter", "pointerdown", "wheel", "touchstart", "focusin"]) row.addEventListener(e, () => hold(3000), { passive: true });
@@ -291,7 +298,7 @@
           requestAnimationFrame(step);
         };
         arm();
-        addEventListener("resize", arm);
+        addEventListener("resize", () => { if (row.clientWidth !== armedW) arm(); }); /* 2026-11-11: height-only resizes (a phone's URL bar) rebuilt the row and jumped it back */
         requestAnimationFrame(step);
       })();
     </script>
