@@ -1,0 +1,69 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+{#- The sitemap (2026-11-11): every real page once, from the same collections
+    the pages themselves paginate over, so a page that exists is listed and a
+    page that doesn't (a view with nothing in it) isn't. Left out on purpose:
+    the redirect stubs, /sig/, the 404, the two feeds and the guestbook thanks
+    page. lastmod only where the build has a date it can trust: a post's own.
+    A listing page's newest post would be a guess at when its text last
+    changed, so listings carry none. -#}
+{%- macro loc(url, date) -%}
+  <url><loc>{{ site.url }}{{ url }}</loc>{% if date %}<lastmod>{{ date | dateSlug }}</lastmod>{% endif %}</url>
+{%- endmacro -%}
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{{ loc("/") }}
+{%- for n in range(1, (((collections.stream | length) / 20) | round(0, "ceil")) + 1) %}
+{{ loc("/archive/" if n == 1 else "/archive/page-" + n + "/") -}}
+{%- endfor %}
+{%- for p in collections.dailies %}
+{{ loc(p.url, p.date) -}}
+{%- endfor %}
+{%- for e in collections.essayPages %}
+{{ loc(e.url, e.date) -}}
+{%- endfor %}
+{%- if collections.essayPages | length %}
+{{ loc("/essays/") -}}
+{%- endif %}
+{%- for g in collections.groupPages %}
+{{ loc(g.urls.home) -}}
+{%- endfor %}
+{%- for g in collections.groupCanonPages %}
+{{ loc(g.urls.canon) -}}
+{%- endfor %}
+{%- for g in collections.groupShelfPages %}
+{{ loc(g.urls.shelf) -}}
+{%- endfor %}
+{%- for g in collections.groupBestPages %}
+{{ loc(g.urls.best) -}}
+{%- endfor %}
+{%- for g in collections.groupEssayPages %}
+{{ loc(g.urls.essays) -}}
+{%- endfor %}
+{%- for g in collections.groupLogPages %}
+{{ loc(g.urls.log) -}}
+{%- endfor %}
+{%- for x in collections.etcPage %}
+{{ loc(x.url) -}}
+{%- endfor %}
+{%- for s in collections.subjectPages %}
+{{ loc("/s/" + s.slug + "/") -}}
+{%- endfor %}
+{%- for t in collections.tagPages %}
+{{ loc("/t/" + t.slug + "/") -}}
+{%- endfor %}
+{{ loc("/r/") }}
+{%- for r in collections.ratingPages %}
+{{ loc("/r/" + r.slug + "/") -}}
+{%- endfor %}
+{%- if collections.pages | length %}
+{{ loc("/about/") -}}
+{%- endif %}
+{%- if collections.colophon | length %}
+{{ loc("/colophon/") -}}
+{%- endif %}
+{{ loc("/links/") }}
+{{ loc("/guestbook/") }}
+</urlset>
