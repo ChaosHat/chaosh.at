@@ -14,8 +14,11 @@ on:
 permissions:
   contents: read
 
+# Production (main, and the scheduled runs, which always run on main) queues in
+# one group so deploys never overlap. A hand-run preview from another branch
+# gets a group of its own, so it can't cancel a pending production deploy.
 concurrency:
-  group: pages
+  group: ${{ github.ref == 'refs/heads/main' && 'pages' || format('pages-preview-{0}', github.ref_name) }}
   cancel-in-progress: false
 
 jobs:
