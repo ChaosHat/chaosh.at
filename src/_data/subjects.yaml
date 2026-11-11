@@ -875,7 +875,8 @@ sovereign-tower:
   title: Sovereign Tower
   category:
     - games
-  status: active
+  status: completed
+  rating: liked
   aliases:
     - sovereign
 split-fiction:
@@ -1726,6 +1727,20 @@ sausage:
     - the sausage
     - chaosh.at
     - the site
+ai:
+  title: AI
+  category:
+    - tech
+  aliases:
+    - llm
+    - llms
+emulation:
+  title: Emulation
+  category:
+    - tech
+  aliases:
+    - retro handhelds
+    - emulators
 mlb:
   title: MLB
   category:

@@ -53,6 +53,9 @@ groups:
   site:
     label: site
     description: Everything about tinkering with and building the site you see here.
+  tech:
+    label: tech
+    description: Thoughts about devices, gizmos, gadgets, and software.
   # Sports (2026-11-03): subjects are leagues (NFL, NBA, MLB, NHL), Bears is
   # a face of NFL, and the teams are cards in teams.yaml. No canon, shelf or
   # ratings. Starts in etc; promote by frequency.

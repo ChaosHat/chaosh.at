@@ -2,6 +2,7 @@
  "slots": 384,
  "assigned": {
   "against-the-storm": 126,
+  "ai": 3,
   "alien": 28,
   "aliens": 176,
   "android-netrunner": 30,
@@ -41,6 +42,7 @@
   "dune-part-two": 52,
   "dungeons-and-dragons-2024": 340,
   "elden-ring": 222,
+  "emulation": 5,
   "esoteric-ebb": 156,
   "everything-everywhere-all-at-once": 120,
   "fallout-1": 128,

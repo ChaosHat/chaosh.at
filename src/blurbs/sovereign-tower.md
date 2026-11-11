@@ -1,0 +1,1 @@
+A charming and fun game. It's funny, well written, and has a fun concept. There are so many different paths you could take with so many different characters. It just feels a bit too simple and samey to compel me to see all the different routes. 
