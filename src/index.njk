@@ -4,6 +4,9 @@ layout: base.njk
 {#- The newest entry wears no band (2026-11-04): the masthead stands in for
     it, daily or essay. It stays tonight's sky, not that post's — nothing
     here claims they're the same. Every entry after keeps its band. -#}
+{#- The page's one h1 (2026-11-11): the site name is a wordmark image link in
+    the header, so a heading for it is read aloud only. -#}
+<h1 class="sr-only">{{ site.title }}</h1>
 <ul class="post-list">
   {% for entry in collections.stream | limit(5) %}
   {% if entry.kind == "essay" %}
