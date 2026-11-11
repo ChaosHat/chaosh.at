@@ -1165,6 +1165,42 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   border-top: 1px solid var(--edge);
 }
 
+/* Previous/next day (2026-11-11): the archive row's type (16px pixel, accent
+   title, muted date) in a two-sided row; a lone link keeps its own side. On
+   a wide screen it lines up with the prose, between the art and image columns. */
+.day-nav {
+  display: flex;
+  gap: 0 1rem;
+  margin-top: 1rem;
+}
+.day-nav a {
+  flex: 0 1 calc(50% - 0.5rem);
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.5rem 0;
+  font: 16px/24px var(--pixel);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.day-nav a:only-child { flex: 0 1 auto; max-width: 100%; }
+.day-next { margin-left: auto; text-align: right; }
+.day-nav-date, .day-nav-title { display: block; }
+/* A phone shows the dates alone, side by side, in the short form the shelf
+   uses: a title cost two or three lines a side there, and the long date
+   wrapped in half a phone's width. The row is a way out, not a headline. */
+.day-nav-short { display: none; }
+@media (max-width: 34rem) {
+  .day-nav-title, .day-nav-long { display: none; }
+  .day-nav-short { display: inline; }
+  .day-nav-date { white-space: nowrap; }
+}
+.day-nav-date { color: var(--muted); }
+.day-nav a:hover .day-nav-date,
+.day-nav a:focus-visible .day-nav-date { color: var(--accent); }
+@media (min-width: 58rem) {
+  .day-nav { margin-left: calc(var(--lcol) + var(--lgap)); margin-right: calc(var(--mcol) + var(--mgap)); }
+}
+
 /* The essay's shelf card, floated as the opening paragraph's indent. Shelf
    tile width, so the cover lands at the size it was fetched to be read at;
    the cells hang under it exactly as on the shelf. The float releases on a

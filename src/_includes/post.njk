@@ -28,4 +28,15 @@ layout: base.njk
     {% for tag in dayTags %}<a class="tag-link" href="/t/{{ tag.slug }}/">#{{ tag.slug }}</a>{% endfor %}
   </p>
   {% endif %}
+  {#- Other days (2026-11-11): the neighbours in the published dailies
+      collection, which is newest first, so Eleventy's "next" item is the
+      OLDER day. A held or future day is not in it, so never linked. -#}
+  {% set olderDay = collections.dailies | getNextCollectionItem(page) %}
+  {% set newerDay = collections.dailies | getPreviousCollectionItem(page) %}
+  {% if olderDay or newerDay %}
+  <nav class="day-nav" aria-label="Other days">
+    {% if olderDay %}<a class="day-prev" rel="prev" href="{{ olderDay.url }}"><span class="day-nav-date">← <span class="day-nav-long">{{ olderDay.date | readableDate }}</span><span class="day-nav-short">{{ olderDay.date | shortDate }}</span></span>{% if olderDay.data.title %}<span class="day-nav-title">{{ olderDay.data.title }}</span>{% endif %}</a>{% endif %}
+    {% if newerDay %}<a class="day-next" rel="next" href="{{ newerDay.url }}"><span class="day-nav-date"><span class="day-nav-long">{{ newerDay.date | readableDate }}</span><span class="day-nav-short">{{ newerDay.date | shortDate }}</span> →</span>{% if newerDay.data.title %}<span class="day-nav-title">{{ newerDay.data.title }}</span>{% endif %}</a>{% endif %}
+  </nav>
+  {% endif %}
 </article>
