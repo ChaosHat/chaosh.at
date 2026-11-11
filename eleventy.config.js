@@ -531,7 +531,9 @@ export default function (eleventyConfig) {
     eleventyConfig.addPassthroughCopy({ [`src/favicon/${f}`]: f });
   eleventyConfig.addPassthroughCopy({ "src/.well-known/host-meta": ".well-known/host-meta" });
   // Post images only — src/img/manifest.json is publish.py book-keeping and
-  // deliberately not copied.
+  // deliberately not copied. (Read below since 2026-11-11, never served.)
+  // src/img/posts/thumb/ rides along: the thumbnails are served beside the
+  // full files, at /img/posts/thumb/<name>.webp.
   eleventyConfig.addPassthroughCopy({ "src/img/posts": "img/posts" });
   eleventyConfig.addPassthroughCopy({ "src/img/covers": "img/covers" });
   // Friends' 88×31s for /links/, hosted here rather than hotlinked: a copy
@@ -540,6 +542,78 @@ export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/img/buttons": "img/buttons" });
   // Badge icons: pixelarticons (MIT) plus the drawn canon star.
   eleventyConfig.addPassthroughCopy({ "src/img/icons": "img/icons" });
+
+  // ------------------------------------------------------------ post images
+  // Thumbnails, dimensions and lazy loading (2026-11-11, code check finding
+  // 1). Every post image was its full 1600px file (~2 MB a PNG screenshot)
+  // with no size and no loading hint, even as a 256px column figure or a
+  // 52px phone tile: /games/ and /log/ pulled ~95 MB, home 15.5 MB.
+  // publish.py now writes a ~640px WebP beside each one
+  // (src/img/posts/thumb/<name>.webp) and records both files' pixel sizes
+  // in src/img/manifest.json. A column figure (fig-float: the image column,
+  // the tile rail, a figure in an aside) shows the thumbnail, sized, lazy,
+  // with the full file in data-full for the lightbox (base.njk); a |full
+  // figure keeps the full file and gains its size and the hints. The page's
+  // first figure is never lazy — it is often in the first screen.
+  // Done as a transform on finished HTML pages rather than in the markdown
+  // rule, on purpose: the same md instance renders the feeds (which keep
+  // their absolute full-file <img> exactly as before, being .xml), and only
+  // the whole page knows which figure comes first.
+  // Missing anything — no manifest, a bare-sha entry from before, no dims,
+  // no thumbnail on disk — and that image keeps exactly the old markup, so
+  // either half of this can ship first. The CSS needs nothing: `img
+  // { height: auto }` and `figure > img { width: 100% }` let the attributes
+  // set only the reserved box's shape, and the tiles' aspect-ratio wins.
+  const IMG_MANIFEST = path.join("src", "img", "manifest.json");
+  const THUMB_DIR = path.join("src", "img", "posts", "thumb");
+  const postImages = new Map(); // safe name -> { w, h, thumb: { w, h } | null }
+  const isDim = (n) => Number.isInteger(n) && n > 0;
+  eleventyConfig.on("eleventy.before", () => {
+    postImages.clear();
+    let manifest = {};
+    try {
+      if (fs.existsSync(IMG_MANIFEST)) manifest = JSON.parse(fs.readFileSync(IMG_MANIFEST, "utf8"));
+    } catch (e) {
+      console.warn(`[images] ${IMG_MANIFEST} unreadable (${e.message}) — every image keeps its full file`);
+    }
+    if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) return;
+    for (const [name, rec] of Object.entries(manifest)) {
+      if (!rec || typeof rec !== "object" || !isDim(rec.w) || !isDim(rec.h)) continue;
+      const t = rec.thumb;
+      const thumb = t && isDim(t.w) && isDim(t.h) &&
+        fs.existsSync(path.join(THUMB_DIR, `${name}.webp`)) ? { w: t.w, h: t.h } : null;
+      postImages.set(name, { w: rec.w, h: rec.h, thumb });
+    }
+  });
+  // What obsidian_figure emits, and nothing else: a figure open tag straight
+  // followed by the image rule's <img src alt [width]>. Anything with other
+  // attributes is left as it is.
+  const FIGURE_IMG = /(<figure class="(fig-float|fig-full)(?: [^"]*)?">)<img ([^>]*)>/g;
+  const IMG_ATTR = /([a-z][a-z0-9-]*)="([^"]*)"/g;
+  const POST_IMG = /^\/img\/posts\/([A-Za-z0-9._-]+)$/;
+  eleventyConfig.addTransform("post-images", function (content) {
+    const out = this.page?.outputPath;
+    if (typeof out !== "string" || !out.endsWith(".html") || !postImages.size) return content;
+    const at = content.indexOf("<main");
+    if (at < 0) return content;
+    let first = true;
+    return content.slice(0, at) + content.slice(at).replace(FIGURE_IMG, (whole, open, kind, attrs) => {
+      const eager = first;
+      first = false;
+      const a = Object.fromEntries([...attrs.matchAll(IMG_ATTR)].map((m) => [m[1], m[2]]));
+      if (Object.keys(a).some((k) => !["src", "alt", "width"].includes(k))) return whole;
+      const name = POST_IMG.exec(a.src ?? "")?.[1];
+      const rec = name && postImages.get(name);
+      if (!rec) return whole;
+      const hints = `${eager ? "" : ' loading="lazy"'} decoding="async"`;
+      const alt = a.alt ?? "";
+      if (kind === "fig-full")
+        return `${open}<img src="/img/posts/${name}" alt="${alt}" width="${rec.w}" height="${rec.h}"${hints}>`;
+      if (!rec.thumb) return whole;
+      return `${open}<img src="/img/posts/thumb/${name}.webp" alt="${alt}" width="${rec.thumb.w}" height="${rec.thumb.h}"${hints}` +
+        ` data-full="/img/posts/${name}" data-full-width="${rec.w}" data-full-height="${rec.h}">`;
+    });
+  });
 
   eleventyConfig.addDataExtension("yaml", (contents) => parseYaml(contents));
   eleventyConfig.setLibrary("md", md);

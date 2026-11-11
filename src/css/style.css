@@ -980,7 +980,9 @@ figcaption {
 /* Lightbox (2026-10-19): a post image opens at full size over the page.
    A native <dialog> built by the script at the end of base.njk, so Esc,
    focus and the top layer come free; any click closes it. The image is the
-   published 1600px copy, shown at its own size, capped to the viewport. */
+   published 1600px copy, shown at its own size, capped to the viewport.
+   (2026-11-11: column images show a 640px thumbnail; the box still opens
+   the full file, from the image's data-full — see base.njk.) */
 main figure img { cursor: zoom-in; }
 .lightbox {
   max-width: none;
