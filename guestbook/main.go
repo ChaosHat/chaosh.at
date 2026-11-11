@@ -11,8 +11,11 @@
 //
 // Nothing here touches git. One writer to the repo (publish.py), by design.
 //
-// Storage is one JSON file, rewritten atomically. A guestbook is not a
-// database; the whole thing fits in memory forever.
+// Storage is one JSON file, rewritten atomically and durably (temp, fsync,
+// rename, fsync the directory). A guestbook is not a database; the whole
+// thing fits in memory forever. Memory follows the disk: a change whose save
+// fails is undone and the caller gets a 500 (2026-11-11), so /entries.json
+// never serves something the file doesn't hold.
 //
 // Env (see /etc/guestbook/env):
 //
@@ -30,6 +33,7 @@ package main
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -42,6 +46,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -84,11 +89,16 @@ type publicEntry struct {
 }
 
 type store struct {
-	mu      sync.Mutex
-	path    string
+	mu   sync.Mutex
+	path string
+	// write puts the marshalled file on disk; nil means writeDurable. Tests
+	// swap in a failing one to prove the rollback.
+	write   func(path string, b []byte) error
 	Entries []Entry `json:"entries"`
 	NextID  int64   `json:"next_id"`
 }
+
+var errNotFound = errors.New("no such entry")
 
 func loadStore(dir string) (*store, error) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
@@ -122,7 +132,7 @@ func (s *store) forgetOldIPs() {
 	}
 }
 
-// save writes the whole file via temp+rename. Caller holds mu.
+// save writes the whole file. Caller holds mu.
 func (s *store) save() error {
 	// Every write is an expiry point, so retention needs no timer of its own.
 	s.forgetOldIPs()
@@ -130,32 +140,75 @@ func (s *store) save() error {
 	if err != nil {
 		return err
 	}
-	tmp := s.path + ".tmp"
-	if err := os.WriteFile(tmp, append(b, '\n'), 0o640); err != nil {
-		return err
+	write := s.write
+	if write == nil {
+		write = writeDurable
 	}
-	return os.Rename(tmp, s.path)
+	return write(s.path, append(b, '\n'))
 }
 
+// writeDurable is temp+rename with the fsyncs that make it survive a power
+// cut: the data before the rename, the directory after it (2026-11-11; the
+// plain rename could leave an empty file after a crash on some filesystems).
+func writeDurable(path string, b []byte) error {
+	tmp := path + ".tmp"
+	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o640)
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(b)
+	if err == nil {
+		err = f.Sync()
+	}
+	if cerr := f.Close(); err == nil {
+		err = cerr
+	}
+	if err == nil {
+		err = os.Rename(tmp, path)
+	}
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	d, err := os.Open(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	return d.Sync()
+}
+
+// add stores a new entry, or on a failed save leaves the store exactly as it
+// was and returns the error.
 func (s *store) add(e Entry) (Entry, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	e.ID = s.NextID
 	s.NextID++
 	s.Entries = append(s.Entries, e)
-	return e, s.save()
+	if err := s.save(); err != nil {
+		s.Entries = s.Entries[:len(s.Entries)-1]
+		s.NextID--
+		return Entry{}, err
+	}
+	return e, nil
 }
 
 // moderate flips a pending entry. Returns the entry, whether it changed, and
 // the status it held before — the caller needs the old one to know whether the
 // PUBLIC page changed, which is true when an entry leaves "approved" just as
 // much as when it arrives there.
+//
+// errNotFound means no entry has that id and token. Any other error is a
+// failed save, and the entry keeps its old status (2026-11-11: it used to
+// stay flipped in memory, so /entries.json served an approval the file
+// didn't hold and no rebuild was asked for).
 func (s *store) moderate(id int64, token, status string) (Entry, bool, string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for i := range s.Entries {
 		e := &s.Entries[i]
-		if e.ID != id || e.Token != token {
+		if e.ID != id || e.Token == "" || subtle.ConstantTimeCompare([]byte(e.Token), []byte(token)) != 1 {
 			continue
 		}
 		if e.Status == status {
@@ -163,9 +216,13 @@ func (s *store) moderate(id int64, token, status string) (Entry, bool, string, e
 		}
 		was := e.Status
 		e.Status = status
-		return *e, true, was, s.save()
+		if err := s.save(); err != nil {
+			e.Status = was
+			return *e, false, was, err
+		}
+		return *e, true, was, nil
 	}
-	return Entry{}, false, "", errors.New("no such entry")
+	return Entry{}, false, "", errNotFound
 }
 
 func (s *store) approved() []publicEntry {
@@ -309,7 +366,7 @@ func normalizeWebsite(s string) (string, bool) {
 func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
 	if err := r.ParseForm(); err != nil {
-		a.fail(w, "That was too much. Keep it under 500 characters.")
+		a.fail(w, http.StatusBadRequest, "That was too much. Keep it under 500 characters.")
 		return
 	}
 	thanks := a.siteURL + "/guestbook/thanks/"
@@ -323,7 +380,7 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	ip := clientIP(r)
 	if a.st.recent(ip, time.Hour) >= perHour || a.st.recent(ip, 24*time.Hour) >= perDay {
 		log.Printf("rate limited %s", ip)
-		a.fail(w, "You've signed a few times already. Come back tomorrow.")
+		a.fail(w, http.StatusTooManyRequests, "You've signed a few times already. Come back tomorrow.")
 		return
 	}
 	name := clean(r.PostFormValue("name"), maxName, false)
@@ -331,18 +388,18 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	site, ok := normalizeWebsite(r.PostFormValue("website"))
 	switch {
 	case name == "":
-		a.fail(w, "A name, please. Any name.")
+		a.fail(w, http.StatusBadRequest, "A name, please. Any name.")
 		return
 	case msg == "":
-		a.fail(w, "The message was empty.")
+		a.fail(w, http.StatusBadRequest, "The message was empty.")
 		return
 	case !ok:
-		a.fail(w, "That website address didn't parse. Leave it blank if you don't have one.")
+		a.fail(w, http.StatusBadRequest, "That website address didn't parse. Leave it blank if you don't have one.")
 		return
 	}
 	tok := make([]byte, 16)
 	if _, err := rand.Read(tok); err != nil {
-		a.fail(w, "Something broke on my end. Try again in a minute.")
+		a.fail(w, http.StatusInternalServerError, "Something broke on my end. Try again in a minute.")
 		return
 	}
 	e, err := a.st.add(Entry{
@@ -352,7 +409,7 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("store: %v", err)
-		a.fail(w, "Something broke on my end. Try again in a minute.")
+		a.fail(w, http.StatusInternalServerError, "Something broke on my end. Try again in a minute.")
 		return
 	}
 	log.Printf("pending #%d from %s (%q)", e.ID, ip, name)
@@ -372,14 +429,19 @@ func (a *app) moderate(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	var id int64
-	if _, err := fmt.Sscan(r.PathValue("id"), &id); err != nil {
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 	e, changed, was, err := a.st.moderate(id, r.PathValue("token"), status)
-	if err != nil {
+	if errors.Is(err, errNotFound) {
 		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		log.Printf("store: %s #%d: %v", action, id, err)
+		http.Error(w, fmt.Sprintf("%s #%d failed: the guestbook file couldn't be saved, so nothing changed. Try again.", action, id), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("%s #%d (%q) changed=%v was=%s", status, e.ID, e.Name, changed, was)
@@ -390,6 +452,8 @@ func (a *app) moderate(w http.ResponseWriter, r *http.Request) {
 	if changed && (status == "approved" || was == "approved") {
 		a.requestBuild()
 	}
+	// The name is a visitor's text; never let it be sniffed as HTML.
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	fmt.Fprintf(w, "%s #%d %s\n", status, e.ID, e.Name)
 }
 
@@ -485,9 +549,9 @@ func (a *app) ntfy(msg map[string]any) error {
 // fail is the one page this service renders: a plain refusal with a way
 // back. The site has no JS to show inline errors, and the form's own
 // required/maxlength attributes catch the ordinary cases before this.
-func (a *app) fail(w http.ResponseWriter, why string) {
+func (a *app) fail(w http.ResponseWriter, code int, why string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(code)
 	fmt.Fprintf(w, `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>guestbook</title>
 <style>body{background:#0a0c18;color:#eceafa;font:18px/1.5 system-ui,sans-serif;max-width:32rem;margin:4rem auto;padding:0 1rem}a{color:#8ce8cc}</style>
