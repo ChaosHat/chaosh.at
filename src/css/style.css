@@ -2830,3 +2830,27 @@ main {
   .cloud .c3 { font-size: 24px; }
   .cloud .c2 { font-size: 16px; }
 }
+
+/* Skip link: clipped like .sr-only until it has focus, then drawn in the
+   corner over the header. Out of flow both ways, so it shifts nothing. The
+   target <main> takes focus from it (tabindex -1) without drawing a ring. */
+.skip-link:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.skip-link:focus {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 4px 12px;
+  background: var(--night);
+  color: var(--ink);
+  border: 2px solid var(--accent);
+  font: 16px/24px var(--pixel);
+}
+main:focus { outline: none; }

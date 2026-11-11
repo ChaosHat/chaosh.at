@@ -76,6 +76,9 @@
       The header and the furniture strips are outside main either way, so they
       never change width as you navigate between the two kinds of page. -#}
   <body{% if wide %} class="wide"{% endif %}>
+    {#- Skip link (2026-11-11): the first Tab stop, drawn only while focused.
+        Absolutely positioned either way, so showing it moves nothing. -#}
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       {#- The name is the site button's wordmark (button.js), not set type:
           CHAOS·HAT with the dot at the word boundary. aria-label carries
@@ -182,7 +185,7 @@
     </header>
 
 
-    <main>
+    <main id="main" tabindex="-1">
       {{ content | safe }}
     </main>
     {#- The handle is the domain, so the link doubles as identity: rel="me"
