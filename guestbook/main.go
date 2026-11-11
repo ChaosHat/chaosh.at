@@ -52,6 +52,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -67,8 +68,13 @@ const (
 	maxName    = 60
 	maxWebsite = 200
 	maxMessage = 500
-	// Per-IP caps. The gate against spam is moderation, not this; this only
-	// keeps one bad night from being fifty pings.
+	// Per-IP caps (an IPv6 address counts as its /64, the block one machine
+	// is usually handed). The gate against spam is moderation, not this; this
+	// only keeps one bad night from being fifty pings.
+	//
+	// There is deliberately no global cap on signings or pending entries
+	// (decided 2026-09-18, reaffirmed 2026-11-11): moderation is the gate,
+	// and a cap turns away real visitors on the one day traffic spikes.
 	perHour = 3
 	perDay  = 6
 	// Approvals within this window share one rebuild.
@@ -108,7 +114,10 @@ type store struct {
 	NextID  int64   `json:"next_id"`
 }
 
-var errNotFound = errors.New("no such entry")
+var (
+	errNotFound = errors.New("no such entry")
+	errTooMany  = errors.New("per-IP limit")
+)
 
 func loadStore(dir string) (*store, error) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
@@ -188,11 +197,16 @@ func writeDurable(path string, b []byte) error {
 	return d.Sync()
 }
 
-// add stores a new entry, or on a failed save leaves the store exactly as it
-// was and returns the error.
-func (s *store) add(e Entry) (Entry, error) {
+// add stores a new entry signed at now, if admit lets it in. On a failed save
+// the store is left exactly as it was. The per-IP caps are checked under the
+// same lock as the append, so a burst of parallel posts can't all slip in.
+func (s *store) add(e Entry, now time.Time) (Entry, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if err := s.admit(e.IP, now); err != nil {
+		return Entry{}, err
+	}
+	e.Date = now.UTC().Format(time.RFC3339)
 	e.ID = s.NextID
 	s.NextID++
 	s.Entries = append(s.Entries, e)
@@ -248,19 +262,52 @@ func (s *store) approved() []publicEntry {
 	return out
 }
 
-// recent counts signing attempts from ip in the window, pending or not.
-// Rejected entries count too — a rejected spammer does not get a fresh quota.
-func (s *store) recent(ip string, window time.Duration) int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cut := time.Now().UTC().Add(-window).Format(time.RFC3339)
-	n := 0
+// admit applies the per-IP caps to a signing from ip at now. Every stored
+// signing counts, rejected ones too — a rejected spammer does not get a
+// fresh quota. Caller holds mu.
+//
+// An entry whose IP was blanked after ipRetention matches no one; it is far
+// outside the 24h window anyway.
+func (s *store) admit(ip string, now time.Time) error {
+	key := rateKey(ip)
+	if key == "" {
+		return nil
+	}
+	hour := now.UTC().Add(-time.Hour).Format(time.RFC3339)
+	day := now.UTC().Add(-24 * time.Hour).Format(time.RFC3339)
+	var ipHour, ipDay int
 	for _, e := range s.Entries {
-		if e.IP == ip && e.Date >= cut {
-			n++
+		if e.IP == "" || e.Date < day || rateKey(e.IP) != key {
+			continue
+		}
+		ipDay++
+		if e.Date >= hour {
+			ipHour++
 		}
 	}
-	return n
+	if ipHour >= perHour || ipDay >= perDay {
+		return errTooMany
+	}
+	return nil
+}
+
+// rateKey is what the per-IP caps count by: an IPv4 address as is, an IPv6
+// one as its /64 (2026-11-11; exact addresses let one host rotate through its
+// block for unlimited signings). Anything unparseable counts as itself.
+func rateKey(ip string) string {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ip
+	}
+	addr = addr.Unmap().WithZone("")
+	if addr.Is4() {
+		return addr.String()
+	}
+	p, err := addr.Prefix(64)
+	if err != nil {
+		return ip
+	}
+	return p.String()
 }
 
 type app struct {
@@ -278,6 +325,16 @@ type app struct {
 	client   *http.Client
 	buildMu  sync.Mutex
 	buildDue *time.Timer
+	bg       sync.WaitGroup
+}
+
+// background runs f off the request path. Tests wait on a.bg.
+func (a *app) background(f func()) {
+	a.bg.Add(1)
+	go func() {
+		defer a.bg.Done()
+		f()
+	}()
 }
 
 // newApp reads the config through getenv (os.Getenv outside tests) and
@@ -366,6 +423,9 @@ func (a *app) entries(w http.ResponseWriter, r *http.Request) {
 
 // clientIP is the last X-Forwarded-For hop, which is the one Caddy appended.
 // Anything earlier in the list was sent by the client and can't be trusted.
+// The header itself is trusted whoever sends it, which holds only while the
+// service listens on loopback behind Caddy (LISTEN's default): exposed
+// directly, a client could name any IP and dodge the per-IP caps.
 func clientIP(r *http.Request) string {
 	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
 		parts := strings.Split(xff, ",")
@@ -430,11 +490,6 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ip := clientIP(r)
-	if a.st.recent(ip, time.Hour) >= perHour || a.st.recent(ip, 24*time.Hour) >= perDay {
-		log.Printf("rate limited %s", ip)
-		a.fail(w, http.StatusTooManyRequests, "You've signed a few times already. Come back tomorrow.")
-		return
-	}
 	name := clean(r.PostFormValue("name"), maxName, false)
 	msg := clean(r.PostFormValue("message"), maxMessage, true)
 	site, ok := normalizeWebsite(r.PostFormValue("website"))
@@ -455,17 +510,21 @@ func (a *app) sign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	e, err := a.st.add(Entry{
-		Name: name, Website: site, Message: msg,
-		Date: time.Now().UTC().Format(time.RFC3339), Status: "pending",
+		Name: name, Website: site, Message: msg, Status: "pending",
 		Token: hex.EncodeToString(tok), IP: ip,
-	})
+	}, time.Now())
+	if errors.Is(err, errTooMany) {
+		log.Printf("rate limited %s", ip)
+		a.fail(w, http.StatusTooManyRequests, "You've signed a few times already. Come back tomorrow.")
+		return
+	}
 	if err != nil {
 		log.Printf("store: %v", err)
 		a.fail(w, http.StatusInternalServerError, "Something broke on my end. Try again in a minute.")
 		return
 	}
 	log.Printf("pending #%d from %s (%q)", e.ID, ip, name)
-	go a.notifyNew(e)
+	a.background(func() { a.notifyNew(e) })
 	http.Redirect(w, r, thanks, http.StatusSeeOther)
 }
 

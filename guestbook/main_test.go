@@ -66,15 +66,22 @@ func TestIPsBlankedAfter30Days(t *testing.T) {
 func TestRecentStillCountsAfterBlanking(t *testing.T) {
 	s := &store{path: t.TempDir() + "/g.json", NextID: 1}
 	s.Entries = []Entry{
-		{ID: 1, IP: "9.9.9.9", Date: ago(time.Hour)},
+		{ID: 1, IP: "9.9.9.9", Date: ago(time.Hour - time.Minute)},
 		{ID: 2, IP: "9.9.9.9", Date: ago(2 * time.Hour)},
-		{ID: 3, IP: "9.9.9.9", Date: ago(40 * 24 * time.Hour)},
+		{ID: 3, IP: "9.9.9.9", Date: ago(3 * time.Hour)},
+		{ID: 4, IP: "9.9.9.9", Date: ago(4 * time.Hour)},
+		{ID: 5, IP: "9.9.9.9", Date: ago(5 * time.Hour)},
+		{ID: 6, IP: "9.9.9.9", Date: ago(40 * 24 * time.Hour)},
 	}
 	_ = s.save()
-	if n := s.recent("9.9.9.9", 24*time.Hour); n != 2 {
-		t.Errorf("recent = %d, want 2", n)
+	if err := s.admit("9.9.9.9", time.Now()); err != nil {
+		t.Errorf("5 in the day refused: %v", err)
 	}
-	if n := s.recent("", 24*time.Hour); n != 0 {
-		t.Errorf("blank IP matched %d entries, want 0", n)
+	s.Entries = append(s.Entries, Entry{ID: 7, IP: "9.9.9.9", Date: ago(6 * time.Hour)})
+	if err := s.admit("9.9.9.9", time.Now()); err != errTooMany {
+		t.Errorf("6 in the day: %v, want errTooMany", err)
+	}
+	if err := s.admit("", time.Now()); err != nil {
+		t.Errorf("blank IP matched: %v", err)
 	}
 }
