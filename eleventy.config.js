@@ -513,6 +513,12 @@ export const foldStrip = (entries, { tail = false, through = lastShippable() } =
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
+  // The stylesheet is cached for hours while pages revalidate, so a deploy
+  // could pair new markup with old CSS. base.njk links it as
+  // /css/style.css?v=<this>: the first 10 hex of the file's sha256, read at
+  // build time, so the URL changes exactly when the contents do.
+  eleventyConfig.addGlobalData("cssVersion", () =>
+    crypto.createHash("sha256").update(fs.readFileSync(path.join("src", "css", "style.css"))).digest("hex").slice(0, 10));
   eleventyConfig.addPassthroughCopy({ "src/fonts": "fonts" });
   // src/fonts/SUBSET.md (how the woff2s were cut) is a note, not a page: as a
   // template it published at /fonts/SUBSET/ and ran through Nunjucks, where
