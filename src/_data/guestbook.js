@@ -20,8 +20,15 @@ export default async function () {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const live = await r.json();
       if (!Array.isArray(live)) throw new Error("not an array");
-      entries = live;
-      source = "live";
+      // An empty answer while the snapshot has entries is a broken or
+      // freshly wiped service, not a book everyone was removed from: taking
+      // it would erase the page (2026-11-11). Keep the snapshot and say so.
+      if (live.length === 0 && snapshot.length > 0) {
+        console.warn(`[guestbook] live endpoint returned no entries but the snapshot has ${snapshot.length}; using the snapshot`);
+      } else {
+        entries = live;
+        source = "live";
+      }
     } catch (e) {
       console.warn(`[guestbook] live fetch failed (${e.message}); using snapshot (${snapshot.length})`);
     }
