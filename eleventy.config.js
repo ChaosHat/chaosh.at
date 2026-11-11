@@ -2543,10 +2543,27 @@ export default function (eleventyConfig) {
   const SPOILER =
     /\|\|((?:(?!<\/(?:p|li|h[1-6]|blockquote|ul|ol|pre|td|th|table)>)[\s\S])+?)\|\|/g;
 
+  // Code blocks (<pre>) are cut out whole, as before. Inline <code> is masked
+  // instead of cut: split out, it broke a spoiler that contained code into two
+  // halves, so ||a `code` spoiler|| … ||ok|| showed both spoilers and blurred
+  // the innocent text between them, and the feed and meta description got
+  // the words (2026-11-11). Masked, a span of code is one opaque character
+  // pair that a spoiler can contain and whose own `||` can't pair with
+  // anything; it's put back after `fn`, so code is still never touched —
+  // inside a kept spoiler it rides along, inside a cut one it goes with it.
+  // NUL never survives markdown-it (it becomes U+FFFD), so the mask can't
+  // collide with text.
+  const PRE_REGION = /(<pre[\s\S]*?<\/pre>)/gi;
+  const INLINE_CODE = /<code[\s\S]*?<\/code>/gi;
   const outsideCode = (html, fn) =>
     String(html ?? "")
-      .split(CODE_REGION)
-      .map((part, i) => (i % 2 ? part : fn(part)))
+      .split(PRE_REGION)
+      .map((part, i) => {
+        if (i % 2) return part;
+        const codes = [];
+        const masked = part.replace(INLINE_CODE, (c) => `\u0000${codes.push(c) - 1}\u0000`);
+        return fn(masked).replace(/\u0000(\d+)\u0000/g, (_m, n) => codes[n]);
+      })
       .join("");
 
   // tabindex is what makes the span focusable, and focus is what reveals it —
