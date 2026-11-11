@@ -2633,6 +2633,16 @@ main {
   .views a { padding: 10px 0; }
   /* Four views make a 2x2, not three and a stray (2026-11-04). */
   .views:has(> li:nth-child(4):last-child) { grid-template-columns: repeat(2, max-content); column-gap: 32px; }
+  /* 2026-11-11: the about window's five (colophon joined) need 326px as three
+     columns, which fits the window only from ~414px; the third column ("links")
+     hung outside it, 62px past a 320 screen. Two columns (244px) below 25.8rem (414px still fits three),
+     one below 21rem. Scoped to that window; the other lists are shorter words. */
+  @media (max-width: 25.8rem) {
+    .views-pop[aria-label="About"] .views:has(> li:nth-child(5):last-child) { grid-template-columns: repeat(2, max-content); }
+  }
+  @media (max-width: 20.99rem) {
+    .views-pop[aria-label="About"] .views:has(> li:nth-child(5):last-child) { grid-template-columns: max-content; }
+  }
   /* Under the stretched nav, in less. */
   .views-pop { max-width: calc(100% - 24px); margin: -10px 0 0 24px; }
 }
