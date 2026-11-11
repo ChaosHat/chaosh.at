@@ -2260,8 +2260,9 @@ export default function (eleventyConfig) {
   eleventyConfig.addShortcode("wordcloud", () => clouds);
 
   // A tag page is the subject fan-out widened: every member's fragments on one
-  // timeline, oldest-first to match a subject page, each entry labelled with
-  // the game it came from because unlike a subject page this one is mixed.
+  // timeline, newest first, each entry labelled with the game it came from
+  // because unlike a subject page this one is mixed. (Oldest first, to match
+  // a subject page, until 2026-11-11: see newestFirst below.)
   //
   // A standing essay appears as its blurb plus a link rather than in full. The
   // tag page is a way in, not a second home for the writing — inlining four
@@ -2269,6 +2270,14 @@ export default function (eleventyConfig) {
   //
   // A tag with no members still builds. That is the same courtesy subjects get:
   // register it now, add games as you write them, and the page fills in.
+  // Tags and rungs run newest first since 2026-11-11, as group pages and the
+  // log always have (they were oldest first, like a subject page). Hat: two
+  // directions across the paginated views were confusing, and a view that
+  // interleaves several games isn't one story to read forward. A subject
+  // page is one story and stays oldest first. A same-day tie puts the
+  // daily's section before the essay, the group page's rule (buildGroupPages,
+  // the home stream); sections of one day keep their member order.
+  const newestFirst = (a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay");
   const buildTagPages = (api) => {
     const allFanOut = buildSubjectPages(api);
     const bySlug = new Map(allFanOut.map((s) => [s.slug, s]));
@@ -2307,7 +2316,7 @@ export default function (eleventyConfig) {
         });
       }
 
-      entries.sort((a, b) => a.date - b.date);
+      entries.sort(newestFirst);
 
       return {
         slug,
@@ -2356,7 +2365,7 @@ export default function (eleventyConfig) {
           });
         }
       }
-      entries.sort((a, b) => a.date - b.date);
+      entries.sort(newestFirst);
 
       return {
         slug,
@@ -2399,10 +2408,7 @@ export default function (eleventyConfig) {
       [i * PAGE_SIZE, i === pages - 1 ? n : (i + 1) * PAGE_SIZE]);
   };
   const pageUrl = (base, n) => (n === 1 ? base : `${base}page-${n}/`);
-  // `newestFirst` names the pager's words: the log and group pages run
-  // newest first like the archive (← newer · older →); tags and rungs run
-  // oldest first, as they always have, so their words swap.
-  const pagedViews = (views, key, baseOf, newestFirst) => views.flatMap((v) => {
+  const pagedViews = (views, key, baseOf) => views.flatMap((v) => {
     const base = baseOf(v);
     const slices = pageSlices(v[key].length);
     return slices.map(([from, to], i) => {
@@ -2417,8 +2423,8 @@ export default function (eleventyConfig) {
           first: base,
           previous: number > 1 ? pageUrl(base, number - 1) : null,
           next: number < slices.length ? pageUrl(base, number + 1) : null,
-          previousWord: newestFirst ? "newer" : "older",
-          nextWord: newestFirst ? "older" : "newer",
+          previousWord: "newer",
+          nextWord: "older",
         },
       };
     });
@@ -2452,14 +2458,14 @@ export default function (eleventyConfig) {
   };
   eleventyConfig.addCollection("groupPagesPaged", (api) => {
     pageClashes(api);
-    return pagedViews(buildGroupPages(api), "stream", (g) => g.urls.home, true);
+    return pagedViews(buildGroupPages(api), "stream", (g) => g.urls.home);
   });
   eleventyConfig.addCollection("groupLogPagesPaged", (api) =>
-    pagedViews(buildGroupPages(api).filter((g) => g.log.length), "log", (g) => g.urls.log, true));
+    pagedViews(buildGroupPages(api).filter((g) => g.log.length), "log", (g) => g.urls.log));
   eleventyConfig.addCollection("tagPagesPaged", (api) =>
-    pagedViews(buildTagPages(api), "entries", (t) => `/t/${t.slug}/`, false));
+    pagedViews(buildTagPages(api), "entries", (t) => `/t/${t.slug}/`));
   eleventyConfig.addCollection("ratingPagesPaged", (api) =>
-    pagedViews(buildRatingPages(api), "entries", (r) => `/r/${r.slug}/`, false));
+    pagedViews(buildRatingPages(api), "entries", (r) => `/r/${r.slug}/`));
 
   // ----------------------------------------------------------------- canon
   //
