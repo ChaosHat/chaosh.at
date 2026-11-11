@@ -1475,11 +1475,15 @@ export default function (eleventyConfig) {
     // ×5 / ×2, shown at natural size and cropped, never stretched.
     const big = pixelSubject(slug, hue, status, tier, opts);
     const chip = pixelSubject(slug, hue, status, tier, { ...opts, chip: true });
+    // Chips live in a folder of their own (2026-11-11): as `<slug>-chip.png`
+    // beside the big tiles, subjects `foo` and `foo-chip` both wrote
+    // img/sky/foo-chip.png and one silently replaced the other. A slug never
+    // holds a "/", so the folders can't collide; tag chips get one too.
     skyFiles.set(`img/sky/${slug}.png`, encodePng(big.px, big.w, big.h, 4));
-    skyFiles.set(`img/sky/${slug}-chip.png`, encodePng(chip.px, chip.w, chip.h, 4));
+    skyFiles.set(`img/sky/chip/${slug}.png`, encodePng(chip.px, chip.w, chip.h, 4));
     return {
       skyUrl: `/img/sky/${slug}.png`,
-      chipUrl: `/img/sky/${slug}-chip.png`,
+      chipUrl: `/img/sky/chip/${slug}.png`,
     };
   };
 
@@ -1490,7 +1494,7 @@ export default function (eleventyConfig) {
   // as an active subject would be (bands, no moon): a tag is never finished.
   // List chip only; the essay page gets no card for a tag (Hat, 2026-10-14).
   const tagChip = (slug) => {
-    const file = `img/sky/tag-${slug}-chip.png`;
+    const file = `img/sky/tag/${slug}.png`; // its own folder, see registerSky
     if (!skyFiles.has(file)) {
       const c = pixelSubject(`tag:${slug}`, hashOf(`tag:${slug}`) % 360, "active", 1, { chip: true });
       skyFiles.set(file, encodePng(c.px, c.w, c.h, 4));
@@ -1881,7 +1885,7 @@ export default function (eleventyConfig) {
         // An essay citing only tags, or only the canon, files under games.
         group: citedSubjects.length ? groupOf(subjects[citedSubjects[0]]) : DEFAULT_GROUP,
         chipUrl: citedSubjects.length
-          ? `/img/sky/${citedSubjects[0]}-chip.png`
+          ? `/img/sky/chip/${citedSubjects[0]}.png`
           : citedTagsDirect.length ? tagChip(citedTagsDirect[0])
           : aboutCanon ? tagChip(CANON) : null,
         aboutCanon,
