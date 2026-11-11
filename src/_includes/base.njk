@@ -35,6 +35,13 @@
     {%- if card.published %}
     <meta property="article:published_time" content="{{ card.published }}">
     {%- endif %}
+    {#- Credits the post to the author's fediverse account when a Mastodon-style
+        server unfurls it. The handle is site.yaml's fediverse profile
+        (https://social.chaosh.at/@hat) on the account domain, which is the
+        site's own: @hat@chaosh.at (webfinger.js). Not @posts, the bridged blog. -#}
+    {%- if (isDaily or essay) and site.fediverse %}
+    <meta name="fediverse:creator" content="@{{ site.fediverse.split('/@')[1] }}@{{ site.url | replace('https://', '') }}">
+    {%- endif %}
     {%- if card.image %}
     <meta property="og:image" content="{{ site.url }}{{ card.image }}">
     <meta property="og:image:width" content="1200">
