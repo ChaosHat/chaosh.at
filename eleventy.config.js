@@ -1755,7 +1755,6 @@ export default function (eleventyConfig) {
   // lede + link. Full text in one place; everywhere else points (decided
   // 2026-08-12, superseding the pinned-essay-atop-a-subject-page model).
   let essayList = null;
-  const essayCollisions = [];
   const homelessEssays = [];
   const buildEssayList = (api) => {
     if (essayList) return essayList;
@@ -1768,8 +1767,18 @@ export default function (eleventyConfig) {
       // side (2026-11-11).
       const stem = path.basename(e.inputPath, path.extname(e.inputPath));
       const slug = essaySlug(stem);
+      // Two filenames, one URL: a build failure that names both, by design
+      // (2026-11-11). This used to queue an after-build warning that one page
+      // overwrote the other, but Eleventy never gets that far — the two
+      // pages die as a bare DuplicatePermalinkOutputError naming essay.njk.
+      // Failing is right (silently shipping one of two essays isn't); not
+      // saying which files is what this fixes. publish.py refuses the second
+      // file before it reaches the repo, so this is the backstop.
       if (bySlug.has(slug)) {
-        essayCollisions.push(`${bySlug.get(slug)} and ${e.inputPath} → /e/${slug}/`);
+        throw new Error(
+          `[chaosh.at] essay slug collision: ${bySlug.get(slug)} and ${e.inputPath} both publish at /e/${slug}/. ` +
+            `Rename one file; the slugified names must differ.`,
+        );
       }
       bySlug.set(slug, e.inputPath);
 
@@ -1904,7 +1913,6 @@ export default function (eleventyConfig) {
     aboutIssues.length = 0;
     dailyAbout.length = 0;
     badRatings.clear();
-    essayCollisions.length = 0;
     homelessEssays.length = 0;
   });
 
@@ -3167,14 +3175,6 @@ export default function (eleventyConfig) {
       );
       for (const file of dailyAbout) console.warn(`  · ${file}`);
       console.warn(`  Dailies file by ## heading; about: is essay-only.\n`);
-    }
-
-    if (essayCollisions.length > 0) {
-      console.warn(
-        `\n[chaosh.at] ${essayCollisions.length} essay filename collision(s) — one page overwrote the other:`,
-      );
-      for (const c of essayCollisions) console.warn(`  · ${c}`);
-      console.warn(`  Rename one file; the slugified names must differ.\n`);
     }
 
     if (homelessEssays.length > 0) {
