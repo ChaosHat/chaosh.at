@@ -1,3 +1,23 @@
 /.well-known/host-meta
   Content-Type: application/xrd+xml; charset=utf-8
   Access-Control-Allow-Origin: *
+
+# Every path. HSTS without includeSubDomains or preload (sign.chaosh.at sends
+# its own). frame-ancestors is the whole CSP: the site uses inline scripts and
+# styles, so nothing else can be locked down yet.
+/*
+  Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: frame-ancestors 'self'
+
+# The two Atom feeds, served as the type feed readers expect.
+/feed.xml
+  Content-Type: application/atom+xml; charset=utf-8
+/essays/feed.xml
+  Content-Type: application/atom+xml; charset=utf-8
+
+# The *.pages.dev production and branch-preview hosts serve a full duplicate of
+# the site; keep them out of search. Host-scoped rules, per Cloudflare's docs.
+https://chaosh-at.pages.dev/*
+  X-Robots-Tag: noindex
+https://:branch.chaosh-at.pages.dev/*
+  X-Robots-Tag: noindex
