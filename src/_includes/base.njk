@@ -308,15 +308,32 @@
       document.querySelector("main figure img") && (() => {
         const box = document.createElement("dialog");
         box.className = "lightbox";
+        box.setAttribute("aria-label", "Image viewer");
         const big = document.createElement("img");
         const cap = document.createElement("p");
         cap.className = "lightbox-cap";
         box.append(big, cap);
         document.body.append(box);
         box.addEventListener("click", () => box.close());
-        document.querySelector("main").addEventListener("click", (e) => {
+        /* 2026-11-11: keyboard path. Each figure image becomes a button
+           (Tab, Enter or Space to open), Esc closes the dialog natively, and
+           focus goes back to the image that opened it. */
+        let trigger = null;
+        for (const im of document.querySelectorAll("main figure img")) {
+          im.tabIndex = 0;
+          im.setAttribute("role", "button");
+          im.setAttribute("aria-label", im.alt ? "Enlarge image: " + im.alt : "Enlarge image");
+        }
+        box.addEventListener("close", () => { if (trigger) trigger.focus(); trigger = null; });
+        const main = document.querySelector("main");
+        main.addEventListener("keydown", (e) => {
+          if ((e.key === "Enter" || e.key === " ") && e.target.matches("figure img")) { e.preventDefault(); e.target.click(); }
+        });
+        main.addEventListener("click", (e) => {
           const img = e.target.closest("figure img");
           if (!img) return;
+          trigger = img;
+          box.setAttribute("aria-label", img.alt ? "Image: " + img.alt : "Image viewer");
           big.src = img.currentSrc || img.src;
           big.alt = img.alt;
           const fc = img.closest("figure").querySelector("figcaption");
