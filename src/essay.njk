@@ -8,12 +8,15 @@ permalink: "/e/{{ essay.slug }}/"
 eleventyComputed:
   title: "{{ essay.title | safe }}"
 ---
-<article class="post essay-page"{% if essay.tint %} style="--tint:{{ essay.tint }}"{% endif %}>
+<article class="post essay-page h-entry"{% if essay.tint %} style="--tint:{{ essay.tint }}"{% endif %}>
   {#- No band since 2026-11-04: the masthead above is the essay's date's sky,
       the one its daily shares (base.njk). -#}
   <header class="post-head">
-    <h1 class="post-title">{{ essay.title }}</h1>
-    <p class="post-subdate">{{ essay.date | readableDate }}</p>
+    <h1 class="post-title p-name">{{ essay.title }}</h1>
+    <p class="post-subdate"><time class="dt-published" datetime="{{ essay.date | dateSlug }}">{{ essay.date | readableDate }}</time></p>
+    {#- See post.njk: the entry's url and author as hidden data. -#}
+    <data class="u-url" value="{{ site.url }}{{ page.url }}"></data>
+    <data class="u-author" value="{{ site.url }}/"></data>
   </header>
   {#- One shelf card per cited subject. SPANs inside, same reason as the
       shelf: the card is one anchor. A card whose subject a ## heading names

@@ -1,15 +1,20 @@
 ---
 layout: base.njk
 ---
-<article class="post">
+<article class="post h-entry">
   {#- No band since 2026-11-04: the masthead above is this post's sky. -#}
   <header class="post-head">
     {% if title %}
-    <h1 class="post-title">{{ title }}</h1>
-    <p class="post-subdate">{{ page.date | readableDate }}</p>
+    <h1 class="post-title p-name">{{ title }}</h1>
+    <p class="post-subdate"><time class="dt-published" datetime="{{ page.date | dateSlug }}">{{ page.date | readableDate }}</time></p>
     {% else %}
-    <h1 class="post-date">{{ page.date | readableDate }}</h1>
+    <h1 class="post-date p-name"><time class="dt-published" datetime="{{ page.date | dateSlug }}">{{ page.date | readableDate }}</time></h1>
     {% endif %}
+    {#- h-entry's url and author, as hidden data like the footer's h-card:
+        there is no permalink link on the page to annotate, and the author is
+        the h-card in base.njk's footer (its u-url is the home page). -#}
+    <data class="u-url" value="{{ site.url }}{{ page.url }}"></data>
+    <data class="u-author" value="{{ site.url }}/"></data>
   </header>
   {#- linkSubjects(true): each section gets its anchor (eleventy.config.js,
       sectionAnchors), on this page only. -#}
