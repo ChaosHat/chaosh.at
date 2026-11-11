@@ -295,9 +295,12 @@ const keyOf = (tree) => {
 
 // JPEG, not PNG: a cover and a blurred sky are photographic, and PNG came out
 // at ~450KB a card. q80 lands 45–130KB. jpeg-js is pure JS, so no sharp.
-export const renderCard = async (spec, { cacheDir = null } = {}) => {
+// `used`, a Set, collects the cache file names this render needed, so the
+// caller can sweep the rest (2026-11-11: nothing ever left the cache).
+export const renderCard = async (spec, { cacheDir = null, used = null } = {}) => {
   const tree = await cardTree(spec);
   const cached = cacheDir && path.join(cacheDir, `${keyOf(tree)}.jpg`);
+  if (cached) used?.add(path.basename(cached));
   if (cached && fs.existsSync(cached)) return fs.readFileSync(cached);
 
   const svg = await satori(tree, { width: OG_W, height: OG_H, fonts: loadFonts() });

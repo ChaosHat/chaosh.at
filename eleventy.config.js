@@ -2739,6 +2739,7 @@ export default function (eleventyConfig) {
   const ogMeta = new Map(); // page url -> { image, alt, description, type, published }
   const cardFiles = new Map(); // output path -> jpeg Buffer, written in eleventy.after
   const cardFailures = []; // "<url>: <error>"
+  const cardsUsed = new Set(); // .cache/og file names this build rendered from or into
   let ogSiteImage = null;
 
   // Chip colours are the status tokens in style.css, read rather than copied
@@ -2808,6 +2809,7 @@ export default function (eleventyConfig) {
     ogMeta.clear();
     cardFiles.clear();
     cardFailures.length = 0;
+    cardsUsed.clear();
     ogSiteImage = null;
   });
 
@@ -2897,7 +2899,7 @@ export default function (eleventyConfig) {
 
     const render = async (url, rel, spec) => {
       try {
-        cardFiles.set(rel, await og.renderCard(spec, { cacheDir: OG_CACHE }));
+        cardFiles.set(rel, await og.renderCard(spec, { cacheDir: OG_CACHE, used: cardsUsed }));
         return `/${rel}`;
       } catch (err) {
         cardFailures.push(`${url}: ${err?.message ?? err}`);
@@ -2913,6 +2915,20 @@ export default function (eleventyConfig) {
     for (const { url, rel, spec } of jobs) {
       const image = (await render(url, rel, spec)) ?? ogSiteImage;
       ogMeta.get(url).image = image;
+    }
+
+    // Sweep the cards this build didn't need (2026-11-11). Every edit to a
+    // title, a cover or a sky is a new cache key, and the old card stayed:
+    // 484 on disk for 120 in use, and CI saves the lot as a new cache entry
+    // every run. Only here, after every card was asked for — a run that
+    // died earlier, or a renderer that never loaded, sweeps nothing. The
+    // masthead cache is swept the same way, by its code hash, below.
+    try {
+      for (const name of fs.existsSync(OG_CACHE) ? fs.readdirSync(OG_CACHE) : []) {
+        if (name.endsWith(".jpg") && !cardsUsed.has(name)) fs.rmSync(path.join(OG_CACHE, name), { force: true });
+      }
+    } catch (err) {
+      console.warn(`[chaosh.at] link card cache not swept (the site is fine): ${err?.message ?? err}`);
     }
 
     return [...ogMeta.keys()];
