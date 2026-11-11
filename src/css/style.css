@@ -211,6 +211,8 @@
 
 html {
   position: relative;
+  /* 2026-11-11: makes 100cqw below the page width WITHOUT the classic scrollbar (100vw includes it). */
+  container-type: inline-size;
   background: var(--night) linear-gradient(var(--header), transparent) no-repeat;
   background-size: 100% 26rem;
 }
@@ -301,6 +303,7 @@ body::before {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
+  width: 100cqw; /* 2026-11-11: 100vw includes a classic scrollbar and scrolled every page sideways 7-8px */
   height: 320px;
   z-index: -1;
   pointer-events: none;
@@ -343,6 +346,7 @@ body::after {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
+  width: 100cqw; /* 2026-11-11: as body::before */
   height: 400px;
   z-index: 1;
   pointer-events: none;
@@ -355,6 +359,16 @@ body::after {
 
 @keyframes aurora-roll-light {
   to { background-position: 0 -8820px, 0 -8820px; }
+}
+/* 2026-11-11: with the body's whole-pixel left margin (above) the viewport's
+   centre is no longer the body's centre on an odd-width viewport, so the
+   centred sky left a half-pixel dark strip at the right edge. Pin both to the
+   viewport's left edge instead: minus the body's margin, one cqw of width. */
+@supports (margin-left: round(down, 1px, 1px)) {
+  body::before, body::after {
+    left: calc(-1 * max(0px, round(down, (100cqw - var(--wide)) / 2, 1px)));
+    transform: none;
+  }
 }
 .furniture { position: relative; z-index: 2; }
 
@@ -395,7 +409,9 @@ body:not(.wide) main::before {
 /* The wider reach waits until it fits: 47rem column + 2rem a side. At 48rem
    the gutter was still the body's 1.25rem and the smoke ran 12px off-screen,
    a sideways scroll on every page without a post band from 768 to 815px. */
-@media (min-width: 51rem) {
+/* 2026-11-11: a container query on html, not a media query: the viewport
+   includes a classic scrollbar, so at 816-830px the smoke ran 6px off-screen. */
+@container (min-width: 51rem) {
   body:not(.wide) main::before { inset: -1.25rem -2rem; }
 }
 
