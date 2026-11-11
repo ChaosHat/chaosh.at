@@ -16,9 +16,25 @@ StateDirectoryMode=0750
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=true
+# strict makes the whole filesystem read-only except StateDirectory, so
+# /var/lib/guestbook is the one writable path and needs no ReadWritePaths.
+# EnvironmentFile is read by systemd before the sandbox applies.
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
+# 2026-11-11: the rest of the usual set. An unprivileged listener on a high
+# port that makes outbound HTTPS needs no capabilities, devices or kernel
+# knobs. `systemd-analyze security guestbook` scores it.
+CapabilityBoundingSet=
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target
