@@ -1976,7 +1976,9 @@ a.badge { text-decoration: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shelf-art, .spoiler { transition: none; }
+  /* 2026-11-11: was .shelf-art, which never transitioned; the lift is on .shelf-card and the border warm on a.sky-cover. */
+  html a.sky-cover { transition: none; }  /* html: a.sky-cover's own rule is further down and ties otherwise */
+  .shelf-card, .spoiler { transition: none; }
   body::before, body::after { animation: none; }
   .lit-days span.on::before { animation: none; opacity: 0.8; }
 }
