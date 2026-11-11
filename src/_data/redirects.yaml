@@ -1,5 +1,6 @@
-# URLs that were live and moved. GitHub Pages serves static files and has no
-# server-side redirect, so each of these becomes a meta-refresh stub with a
+# URLs that were live and moved. The site is on Cloudflare Pages, which would
+# serve real 301s from src/_redirects, but that file is hand-kept; these
+# entries are data, so each one becomes a meta-refresh stub with a
 # rel=canonical pointing at the real page — which is what a crawler needs and
 # what a bookmark or an inbound link survives on.
 #
