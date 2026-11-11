@@ -17,17 +17,27 @@
 // fails is undone and the caller gets a 500 (2026-11-11), so /entries.json
 // never serves something the file doesn't hold.
 //
-// Env (see /etc/guestbook/env):
+// Env (see /etc/guestbook/env), with defaults:
 //
 //	LISTEN          127.0.0.1:8477
 //	DATA_DIR        /var/lib/guestbook
 //	SITE_URL        https://chaosh.at
-//	NTFY_URL        https://ntfy.hatnas.com
-//	NTFY_TOPIC      guestbook
-//	NTFY_TOKEN      write-only token for the topic
+//	SELF_URL        https://sign.chaosh.at
+//	NTFY_URL        required, the server root (the topic goes in the body)
+//	NTFY_TOPIC      required, no default
+//	NTFY_TOKEN      write-only token for the topic (warned about if unset)
 //	GITHUB_TOKEN    fine-grained PAT, Actions read/write on one repo
 //	GITHUB_REPO     ChaosHat/chaosh.at
 //	GITHUB_WORKFLOW deploy.yml
+//	GITHUB_API      https://api.github.com (only ever changed for a local test)
+//
+// The ntfy message carries each entry's Approve / Reject links, token and
+// all, so anyone who can read the topic can moderate the book. The topic must
+// be unguessable, or the ntfy server must deny anonymous read on it (an
+// explicit ACL; read-only default access is not enough). There is no default
+// topic, and the service refuses to start without NTFY_URL and NTFY_TOPIC
+// (2026-11-11; the old defaults were a public server and the topic
+// "guestbook").
 package main
 
 import (
@@ -255,6 +265,7 @@ func (s *store) recent(ip string, window time.Duration) int {
 
 type app struct {
 	st       *store
+	listen   string
 	siteURL  string
 	ntfyURL  string
 	ntfyTop  string
@@ -263,35 +274,79 @@ type app struct {
 	ghRepo   string
 	ghFlow   string
 	selfURL  string
+	ghAPI    string
 	client   *http.Client
 	buildMu  sync.Mutex
 	buildDue *time.Timer
 }
 
-func env(k, def string) string {
-	if v := os.Getenv(k); v != "" {
-		return v
-	}
-	return def
-}
-
-func main() {
-	st, err := loadStore(env("DATA_DIR", "/var/lib/guestbook"))
-	if err != nil {
-		log.Fatal(err)
+// newApp reads the config through getenv (os.Getenv outside tests) and
+// loads the store. A config error names every variable at fault.
+func newApp(getenv func(string) string) (*app, error) {
+	env := func(k, def string) string {
+		if v := getenv(k); v != "" {
+			return v
+		}
+		return def
 	}
 	a := &app{
-		st:      st,
+		listen:  env("LISTEN", "127.0.0.1:8477"),
 		siteURL: strings.TrimRight(env("SITE_URL", "https://chaosh.at"), "/"),
-		ntfyURL: strings.TrimRight(env("NTFY_URL", "https://ntfy.hatnas.com"), "/"),
-		ntfyTop: env("NTFY_TOPIC", "guestbook"),
-		ntfyTok: os.Getenv("NTFY_TOKEN"),
-		ghToken: os.Getenv("GITHUB_TOKEN"),
+		ntfyURL: strings.TrimRight(getenv("NTFY_URL"), "/"),
+		ntfyTop: getenv("NTFY_TOPIC"),
+		ntfyTok: getenv("NTFY_TOKEN"),
+		ghToken: getenv("GITHUB_TOKEN"),
 		ghRepo:  env("GITHUB_REPO", "ChaosHat/chaosh.at"),
 		ghFlow:  env("GITHUB_WORKFLOW", "deploy.yml"),
+		ghAPI:   strings.TrimRight(env("GITHUB_API", "https://api.github.com"), "/"),
 		selfURL: strings.TrimRight(env("SELF_URL", "https://sign.chaosh.at"), "/"),
 		client:  &http.Client{Timeout: 15 * time.Second},
 	}
+	var bad []string
+	if a.ntfyURL == "" {
+		bad = append(bad, "NTFY_URL is unset")
+	} else if !isHTTPURL(a.ntfyURL) {
+		bad = append(bad, fmt.Sprintf("NTFY_URL %q is not an http(s) URL", a.ntfyURL))
+	}
+	if a.ntfyTop == "" {
+		bad = append(bad, "NTFY_TOPIC is unset (there is no default: the moderation links travel in the message, so the topic must be unguessable or read-protected)")
+	}
+	if !isHTTPURL(a.siteURL) {
+		bad = append(bad, fmt.Sprintf("SITE_URL %q is not an http(s) URL", a.siteURL))
+	}
+	if len(bad) > 0 {
+		return nil, errors.New("config: " + strings.Join(bad, "; "))
+	}
+	if a.ntfyTok == "" {
+		log.Print("warning: NTFY_TOKEN unset, publishing to ntfy anonymously")
+	}
+	if a.ghToken == "" {
+		log.Print("warning: GITHUB_TOKEN unset, approvals wait for the nightly build")
+	}
+	st, err := loadStore(env("DATA_DIR", "/var/lib/guestbook"))
+	if err != nil {
+		return nil, err
+	}
+	a.st = st
+	return a, nil
+}
+
+func isHTTPURL(s string) bool {
+	u, err := url.Parse(s)
+	return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
+}
+
+func main() {
+	a, err := newApp(os.Getenv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("guestbook listening on %s, %d entries, notifying %s", a.listen, len(a.st.Entries), a.ntfyURL)
+	srv := &http.Server{Addr: a.listen, Handler: a.handler(), ReadHeaderTimeout: 10 * time.Second}
+	log.Fatal(srv.ListenAndServe())
+}
+
+func (a *app) handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, a.siteURL+"/guestbook/", http.StatusFound)
@@ -300,10 +355,7 @@ func main() {
 	mux.HandleFunc("POST /sign", a.sign)
 	mux.HandleFunc("POST /mod/{action}/{id}/{token}", a.moderate)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte("ok\n")) })
-	addr := env("LISTEN", "127.0.0.1:8477")
-	log.Printf("guestbook listening on %s, %d entries", addr, len(st.Entries))
-	srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second}
-	log.Fatal(srv.ListenAndServe())
+	return mux
 }
 
 func (a *app) entries(w http.ResponseWriter, r *http.Request) {
@@ -487,7 +539,7 @@ func (a *app) dispatch() error {
 	if a.ghToken == "" {
 		return errors.New("GITHUB_TOKEN unset")
 	}
-	u := fmt.Sprintf("https://api.github.com/repos/%s/actions/workflows/%s/dispatches", a.ghRepo, a.ghFlow)
+	u := fmt.Sprintf("%s/repos/%s/actions/workflows/%s/dispatches", a.ghAPI, a.ghRepo, a.ghFlow)
 	req, _ := http.NewRequest("POST", u, strings.NewReader(`{"ref":"main"}`))
 	req.Header.Set("Authorization", "Bearer "+a.ghToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
