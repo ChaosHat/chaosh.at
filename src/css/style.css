@@ -2095,7 +2095,8 @@ a.sky-cover:hover { border-color: var(--accent); }
   mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
 }
 
-@media (min-width: 48rem) {
+/* 2026-11-11: from 54rem (container query, so a classic scrollbar counts), not 48rem: main only leaves 3.5rem of slack a side once the page is 47rem + 2 x 3.5rem wide, and from 48rem the band ran 36px off-screen at 768. */
+@container (min-width: 54rem) {
   .entry-head::before { inset: 0 -3.5rem; }
 }
 
