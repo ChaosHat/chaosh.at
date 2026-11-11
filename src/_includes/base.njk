@@ -11,6 +11,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {#- 2026-11-11: the site is dark-only; without this classic scrollbars and form chrome render light. -#}
+    <meta name="color-scheme" content="dark">
     <title>{% if title %}{{ title }} — {{ site.title }}{% elif isDaily %}{{ page.date | readableDate }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
     {#- Link cards (2026-09-23): what a link unfurls into on Bluesky, Discord
         and the rest. linkCard hands back this page's description, its card
