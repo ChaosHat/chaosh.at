@@ -1762,7 +1762,12 @@ export default function (eleventyConfig) {
     const bySlug = new Map(); // collision check: two stems, one slug
 
     essayList = publishedEssays(api).map((e) => {
-      const slug = essaySlug(e.fileSlug);
+      // The whole filename stem, as publish.py's essay_slug(stem) takes it.
+      // Eleventy's fileSlug drops a leading date, so `2026-01-01-foo.md` went
+      // to /e/foo/ here and /e/2026-01-01-foo/ in every check on the vault
+      // side (2026-11-11).
+      const stem = path.basename(e.inputPath, path.extname(e.inputPath));
+      const slug = essaySlug(stem);
       if (bySlug.has(slug)) {
         essayCollisions.push(`${bySlug.get(slug)} and ${e.inputPath} → /e/${slug}/`);
       }
@@ -1845,7 +1850,7 @@ export default function (eleventyConfig) {
       return {
         slug,
         url: `/e/${slug}/`,
-        title: titleText(e.data.title) || e.fileSlug,
+        title: titleText(e.data.title) || stem,
         date: e.date,
         inputPath: e.inputPath, // the feed's shipped.json key
         featured: e.data.featured === true,
