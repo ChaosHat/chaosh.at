@@ -78,6 +78,8 @@ const (
 	// and a cap turns away real visitors on the one day traffic spikes.
 	perHour = 3
 	perDay  = 6
+	// The largest request body taken anywhere; a full form is under 3 KB.
+	maxBody = 16 << 10
 	// Approvals within this window share one rebuild.
 	dispatchCoalesce = 45 * time.Second
 	// How long a signer's IP stays readable. It feeds nothing but the 24h rate
@@ -340,6 +342,9 @@ type app struct {
 	selfURL string
 	ghAPI   string
 	client  *http.Client
+	// scheme://host of siteURL and selfURL, for the Origin check.
+	siteOrigin string
+	selfOrigin string
 	// The rebuild debounce. afterFunc is time.AfterFunc outside tests, which
 	// fire the timers by hand; marker is the file holding the start time of
 	// the last successful dispatch.
@@ -398,9 +403,13 @@ func newApp(getenv func(string) string) (*app, error) {
 	if !isHTTPURL(a.siteURL) {
 		bad = append(bad, fmt.Sprintf("SITE_URL %q is not an http(s) URL", a.siteURL))
 	}
+	if !isHTTPURL(a.selfURL) {
+		bad = append(bad, fmt.Sprintf("SELF_URL %q is not an http(s) URL", a.selfURL))
+	}
 	if len(bad) > 0 {
 		return nil, errors.New("config: " + strings.Join(bad, "; "))
 	}
+	a.siteOrigin, a.selfOrigin = origin(a.siteURL), origin(a.selfURL)
 	if a.ntfyTok == "" {
 		log.Print("warning: NTFY_TOKEN unset, publishing to ntfy anonymously")
 	}
@@ -416,6 +425,11 @@ func newApp(getenv func(string) string) (*app, error) {
 	return a, nil
 }
 
+func origin(s string) string {
+	u, _ := url.Parse(s)
+	return u.Scheme + "://" + u.Host
+}
+
 func isHTTPURL(s string) bool {
 	u, err := url.Parse(s)
 	return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
@@ -428,7 +442,17 @@ func main() {
 	}
 	log.Printf("guestbook listening on %s, %d entries, notifying %s", a.listen, len(a.st.Entries), a.ntfyURL)
 	a.resumeBuild()
-	srv := &http.Server{Addr: a.listen, Handler: a.handler(), ReadHeaderTimeout: 10 * time.Second}
+	// Read/write/idle timeouts and a header cap (2026-11-11; only the header
+	// timeout was set), so a slow client can't hold connections open.
+	srv := &http.Server{
+		Addr:              a.listen,
+		Handler:           a.handler(),
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       20 * time.Second,
+		WriteTimeout:      20 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    16 << 10,
+	}
 	log.Fatal(srv.ListenAndServe())
 }
 
@@ -441,7 +465,7 @@ func (a *app) handler() http.Handler {
 	mux.HandleFunc("POST /sign", a.sign)
 	mux.HandleFunc("POST /mod/{action}/{id}/{token}", a.moderate)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte("ok\n")) })
-	return mux
+	return http.MaxBytesHandler(mux, maxBody)
 }
 
 func (a *app) entries(w http.ResponseWriter, r *http.Request) {
@@ -504,8 +528,34 @@ func normalizeWebsite(s string) (string, bool) {
 	return u.String(), true
 }
 
+// fromSite is the Origin check on /sign (2026-11-11): a post naming another
+// site, by Origin or failing that by Referer, is refused, so no other page
+// can host a copy of the form. A post naming neither is let through, as is
+// Origin "null" (sent instead of the origin under a no-referrer policy, from
+// privacy tools, from some redirects): plain form posts don't always carry
+// them, and a real visitor must never be locked out. The service's own
+// origin passes too, for privacy tools that rewrite the Referer to the
+// target's.
+func (a *app) fromSite(r *http.Request) bool {
+	ok := func(origin string) bool {
+		return strings.EqualFold(origin, a.siteOrigin) || strings.EqualFold(origin, a.selfOrigin)
+	}
+	if o := r.Header.Get("Origin"); o != "" && o != "null" {
+		return ok(o)
+	}
+	if ref := r.Header.Get("Referer"); ref != "" {
+		u, err := url.Parse(ref)
+		return err == nil && ok(u.Scheme+"://"+u.Host)
+	}
+	return true
+}
+
 func (a *app) sign(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
+	if !a.fromSite(r) {
+		log.Printf("foreign origin from %s: Origin %q Referer %q", clientIP(r), r.Header.Get("Origin"), r.Header.Get("Referer"))
+		a.fail(w, http.StatusForbidden, "This form only takes signatures from the guestbook page itself.")
+		return
+	}
 	if err := r.ParseForm(); err != nil {
 		a.fail(w, http.StatusBadRequest, "That was too much. Keep it under 500 characters.")
 		return
