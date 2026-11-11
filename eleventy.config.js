@@ -2269,7 +2269,7 @@ export default function (eleventyConfig) {
   //
   // A tag with no members still builds. That is the same courtesy subjects get:
   // register it now, add games as you write them, and the page fills in.
-  eleventyConfig.addCollection("tagPages", (api) => {
+  const buildTagPages = (api) => {
     const allFanOut = buildSubjectPages(api);
     const bySlug = new Map(allFanOut.map((s) => [s.slug, s]));
 
@@ -2317,7 +2317,8 @@ export default function (eleventyConfig) {
         entries,
       };
     });
-  });
+  };
+  eleventyConfig.addCollection("tagPages", buildTagPages);
 
   // A rating view is a tag page with a derived membership. Everything else
   // about it — the definition at the top, the members line, the mixed timeline
@@ -2330,7 +2331,7 @@ export default function (eleventyConfig) {
   // from the /r/ index, and "every game I loved" is the calibration surface the
   // scale exists for. All four build even at zero members, the same courtesy
   // an empty tag gets. Ordered by rank so the index can loop them as-is.
-  eleventyConfig.addCollection("ratingPages", (api) => {
+  const buildRatingPages = (api) => {
     const bySlug = new Map(buildSubjectPages(api).map((s) => [s.slug, s]));
 
     return ratingOrder.map((slug) => {
@@ -2369,7 +2370,96 @@ export default function (eleventyConfig) {
         indexUrl: "/r/",
       };
     });
+  };
+  eleventyConfig.addCollection("ratingPages", buildRatingPages);
+
+  // ------------------------------------------------------------ view pages
+  //
+  // The long timelines paginate (2026-11-11): /games/ held 211 entries in
+  // 300 KB on one page and gains ~60 a month. A group's page, its log, a tag
+  // and a rung split by count, PAGE_SIZE entries a page; an entry is one row
+  // of timeline.njk (a day's ## section about a subject, same-subject
+  // headings in a post already merged, or an essay). A view of
+  // PAGE_SINGLE_MAX or fewer stays one page, and a last page shorter than
+  // PAGE_MIN_TAIL folds into the one before it. Page 1 keeps the view's URL,
+  // the rest are <url>page-N/, the archive's scheme. Subject pages stay
+  // whole. Each item below is one page: the view, its slice of entries, and
+  // a `pager`; the templates paginate over these with size 1, and the
+  // collections they came from (groupPages, tagPages, …) stay one per view
+  // for the nav, the cards and /r/. Slices of already-rendered entries, so
+  // a page costs no re-render.
+  const PAGE_SIZE = 30;
+  const PAGE_SINGLE_MAX = 40;
+  const PAGE_MIN_TAIL = 10;
+  const pageSlices = (n) => {
+    if (n <= PAGE_SINGLE_MAX) return [[0, n]];
+    let pages = Math.ceil(n / PAGE_SIZE);
+    if (n - PAGE_SIZE * (pages - 1) < PAGE_MIN_TAIL) pages -= 1;
+    return Array.from({ length: pages }, (_, i) =>
+      [i * PAGE_SIZE, i === pages - 1 ? n : (i + 1) * PAGE_SIZE]);
+  };
+  const pageUrl = (base, n) => (n === 1 ? base : `${base}page-${n}/`);
+  // `newestFirst` names the pager's words: the log and group pages run
+  // newest first like the archive (← newer · older →); tags and rungs run
+  // oldest first, as they always have, so their words swap.
+  const pagedViews = (views, key, baseOf, newestFirst) => views.flatMap((v) => {
+    const base = baseOf(v);
+    const slices = pageSlices(v[key].length);
+    return slices.map(([from, to], i) => {
+      const number = i + 1;
+      return {
+        ...v,
+        [key]: v[key].slice(from, to),
+        pager: {
+          number,
+          total: slices.length,
+          url: pageUrl(base, number),
+          first: base,
+          previous: number > 1 ? pageUrl(base, number - 1) : null,
+          next: number < slices.length ? pageUrl(base, number + 1) : null,
+          previousWord: newestFirst ? "newer" : "older",
+          nextWord: newestFirst ? "older" : "newer",
+        },
+      };
+    });
   });
+  // No page-N URL may belong to anything else. Every view can paginate one
+  // day, so the check is against every view's base, not today's long ones:
+  // a group slugged `page-2` would sit at /log/page-2/, and a redirect from
+  // a <view>/page-N/ would shadow a real page. Fatal, like a clash in the
+  // compile; Eleventy's own duplicate-output error only fires once both
+  // pages exist.
+  const pageClashes = (api) => {
+    const bases = new Set([
+      ...LIVE.flatMap((g) => [g.urls.home, g.urls.log]),
+      ...buildTagPages(api).map((t) => `/t/${t.slug}/`),
+      ...buildRatingPages(api).map((r) => `/r/${r.slug}/`),
+    ]);
+    const redirectsFile = path.join("src", "_data", "redirects.yaml");
+    const redirects = fs.existsSync(redirectsFile)
+      ? parseYaml(fs.readFileSync(redirectsFile, "utf8")) || []
+      : [];
+    const claimed = [
+      ...GROUPS.flatMap((g) => Object.values(g.urls)),
+      ...bases,
+      ...[].concat(redirects).map((r) => String(r?.from ?? "")),
+    ];
+    const clash = claimed.filter((u) => {
+      const m = /^(.*\/)page-\d+\/$/.exec(u);
+      return m && bases.has(m[1]);
+    });
+    if (clash.length) throw new Error(`[chaosh.at] ${clash.join(", ")}: taken by a view's page-N URL (view pages, eleventy.config.js)`);
+  };
+  eleventyConfig.addCollection("groupPagesPaged", (api) => {
+    pageClashes(api);
+    return pagedViews(buildGroupPages(api), "stream", (g) => g.urls.home, true);
+  });
+  eleventyConfig.addCollection("groupLogPagesPaged", (api) =>
+    pagedViews(buildGroupPages(api).filter((g) => g.log.length), "log", (g) => g.urls.log, true));
+  eleventyConfig.addCollection("tagPagesPaged", (api) =>
+    pagedViews(buildTagPages(api), "entries", (t) => `/t/${t.slug}/`, false));
+  eleventyConfig.addCollection("ratingPagesPaged", (api) =>
+    pagedViews(buildRatingPages(api), "entries", (r) => `/r/${r.slug}/`, false));
 
   // ----------------------------------------------------------------- canon
   //
