@@ -366,7 +366,7 @@ fire-emblem-binding-blade:
   title: 'Fire Emblem: Binding Blade'
   category:
     - games
-  status: active
+  status: shelved
   aliases:
     - binding blade
     - bindingblade
@@ -1137,7 +1137,7 @@ zelda-ocarina-of-time:
   title: 'The Legend of Zelda: Ocarina of Time'
   category:
     - games
-  status: completed
+  status: active
   rating: loved
   aliases:
     - ocarina of time
@@ -1717,6 +1717,17 @@ you-can-see-everything:
   status: completed
   aliases:
     - ycse
+the-legend-of-korra:
+  title: The Legend of Korra
+  category:
+    - shows
+  status: active
+  aliases:
+    - the legend of korra
+    - legend of korra
+    - korra
+    - lok
+    - atlok
 sausage:
   title: Aurora Watch
   category:
