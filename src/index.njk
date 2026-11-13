@@ -25,9 +25,9 @@ layout: base.njk
   </li>
   {% else %}
   {% set post = entry.post %}
-  {#- Spoilers resolve BEFORE the cut: truncating first could strip a closing
-      "||" and leave the opening one unpaired, which renders the words plainly. -#}
-  {% set body = post.content | spoilers | homeBody %}
+  {#- Whole days since 2026-11-13: homeBody's 1500-character cut and its
+      "read the rest" link are gone (why: eleventy.config.js, above the
+      limit filter). -#}
   <li>
     <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ post.date | daySky }})"{% endif %}>
       {% if post.data.title %}
@@ -37,10 +37,7 @@ layout: base.njk
       <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
       {% endif %}
     </div>
-    <div class="post-body">{{ body.html | linkSubjects | safe }}</div>
-    {% if body.truncated %}
-    <a class="more" href="{{ post.url }}">read the rest → <span class="more-cut">{{ body.cut | join(", ") }}</span></a>
-    {% endif %}
+    <div class="post-body">{{ post.content | spoilers | linkSubjects | safe }}</div>
   </li>
   {% endif %}
   {% else %}

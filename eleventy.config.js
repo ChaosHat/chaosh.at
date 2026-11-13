@@ -698,12 +698,6 @@ export default function (eleventyConfig) {
   // stay a hand list in the CSS.
   eleventyConfig.addFilter("pxOdd", (s) => (String(s).match(/[ft ]/g) || []).length % 2 === 1);
 
-  // Dailies render in full on the home page — an excerpt hides the fact that a
-  // post covers several subjects. Long days are cut at an H2 boundary so a
-  // subject is never shown half-finished; "read more" appears only if cut.
-  const HOME_LIMIT = 1500; // visible characters
-  const visibleLength = (s) => s.replace(/<[^>]+>/g, "").trim().length;
-
   // Text cut out of RENDERED html is still html-encoded: markdown-it turned the
   // author's `"` into `&quot;` and `&` into `&amp;`. Handing that to a template
   // escapes it a second time (`&amp;quot;`), and handing it to `normalise` as a
@@ -729,56 +723,12 @@ export default function (eleventyConfig) {
   const escapeHtml = (s) =>
     String(s).replace(/[&<>"']/g, (c) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot", "'": "#39" }[c]};`);
 
-  const isSubject = (s) => /^<h2[\s>]/i.test(s.trim());
-
-  eleventyConfig.addFilter("homeBody", (html) => {
-    if (!html) return { html: "", truncated: false };
-    if (visibleLength(html) <= HOME_LIMIT) return { html, truncated: false };
-
-    const sections = html.split(/(?=<h2[\s>])/i).filter((s) => s.trim());
-    let kept = "";
-    let i = 0;
-
-    // A day may open with prose belonging to no subject. That preamble rides
-    // along with the first subject instead of competing with it for the
-    // budget. Guaranteeing "the first section" instead spends the guarantee on
-    // throat-clearing: a 267-char intro ahead of a 1489-char subject blew the
-    // limit on the pair, so the home page showed the intro alone and hid every
-    // subject on the day — the exact thing this filter exists to prevent.
-    if (sections.length && !isSubject(sections[0])) {
-      kept = sections[0];
-      i = 1;
-    }
-
-    // Always keep one subject whole, even if it alone exceeds the limit —
-    // better a long home page than a subject shown half-finished.
-    if (i < sections.length) {
-      kept += sections[i];
-      i += 1;
-    }
-
-    for (; i < sections.length; i += 1) {
-      if (visibleLength(kept + sections[i]) > HOME_LIMIT) break;
-      kept += sections[i];
-    }
-
-    // The cut sections' names ride along so "read the rest" can say what it
-    // is the rest OF. Canonical titles, not tags: every cut section is a
-    // subject, so the preview is never empty when content is hidden —
-    // tagviews are curated and sparse, and would advertise nothing at all
-    // for an untagged subject.
-    const cut = sections.slice(i).map((section) => {
-      const m = /^<h2[^>]*>([\s\S]*?)<\/h2>/i.exec(section.trim());
-      const heading = m ? plainText(m[1]) : "";
-      const { slug, face } = resolveHeading(heading);
-      return slug ? headingTitle(slug, face) : heading;
-    });
-
-    // Counted, not measured by string length: `sections` drops whitespace-only
-    // splits, so a kept-everything body can be shorter than the input and
-    // would otherwise offer "read the rest" of nothing.
-    return { html: kept, truncated: i < sections.length, cut };
-  });
+  // Dailies render whole on the home page (2026-11-13). A 1500-character cut
+  // at an H2 boundary (homeBody, 2026-08-11) hid about half of all dailies
+  // behind an 8px "read the rest" link nobody saw — the limit sat right under
+  // the median day (~1620). The home page shows five entries, so a whole day
+  // costs little; essays keep their lede-and-link. If a day ever runs past
+  // ~8000 characters, a per-day valve is the fix, not a site-wide limit.
 
   eleventyConfig.addFilter("limit", (arr, n) => arr.slice(0, n));
 
@@ -2701,9 +2651,6 @@ export default function (eleventyConfig) {
   // The feed keeps the plain form above — a reader has none of this stylesheet,
   // so the fragment scaffolding would arrive as dead markup. On the site each
   // section is wrapped instead, so a heading brings its sky with it.
-  //
-  // Safe to split on homeBody's lookahead because homeBody runs BEFORE this
-  // filter: truncation still sees flat sections and still cuts on an H2.
   const FRAG_LOOSE = '<span class="sky sky-blank" aria-hidden="true"></span>';
 
   // A box cover's ratio goes on the fragment, not the cover: the fragment's

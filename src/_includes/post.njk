@@ -20,8 +20,9 @@ layout: base.njk
       sectionAnchors), on this page only. -#}
   {{ content | linkSubjects(true) | spoilers | safe }}
   {#- Day-scoped: the union of the tags of every subject this post files to.
-      Only on the full post — the home page shows truncated bodies, where a
-      footer covering sections that were cut would be a lie. -#}
+      Only on the full post. It began there because the home page cut long
+      days, and a footer covering cut sections would have lied; the home page
+      shows whole days since 2026-11-13, so the footer could follow it there. -#}
   {#- Reply by email (2026-11-13), before the tags: "Re: <title>", or the
       date on a day without one. Hidden when site.yaml has no reply_email. -#}
   {% set reply = (title or (page.date | readableDate)) | replyHref %}
