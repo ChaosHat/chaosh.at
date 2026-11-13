@@ -38,6 +38,12 @@
     {% endif %}
   </header>
 
+  {#- The tag's note (2026-11-13): blurbs/tags/<slug>.md, its own prose and
+      its own `### Elsewhere` links. A rung has none. -#}
+  {% if view.introHtml %}
+  <section class="note-intro">{{ view.introHtml | safe }}</section>
+  {% endif %}
+
   {#- Members' standing blurbs, above the timeline: undated, so they can't
       slot into the stream — they sit where the view's definition does. Each
       row carries the member's art and links home, same grammar as a
@@ -53,7 +59,9 @@
       width, so the 24px chip that led each meta line went. `subjectSky` is
       skyTag, the daily's own art: the cover, or the generated tile. Any change
       to the daily's shell has to be checked here too. -#}
-  {% set blurbed = view.members | selectattr("blurbHtml") | list %}
+  {#- Prose only (2026-11-13): a member's `### Elsewhere` links stay on its
+      own page — links are never inherited. -#}
+  {% set blurbed = view.members | selectattr("blurbProseHtml") | list %}
   {% if blurbed | length %}
   <section class="blurbs">
     {% for member in blurbed %}
@@ -63,7 +71,7 @@
         <p class="fragment-meta">
           <a class="fragment-subject" href="/s/{{ member.slug }}/">{{ member.title }}</a>
         </p>
-        {{ member.blurbHtml | safe }}
+        {{ member.blurbProseHtml | safe }}
       </div>
     </div>
     {% endfor %}

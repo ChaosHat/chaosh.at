@@ -32,6 +32,12 @@ eleventyComputed:
     {% if group.description %}<p class="tag-desc">{{ group.description }}</p>{% endif %}
   </header>
 
+  {#- The group's note (2026-11-13): blurbs/groups/<id>.md, Hat on what the
+      thing is to him, ahead of everything else on page 1. -#}
+  {% if group.introHtml %}
+  <section class="note-intro">{{ group.introHtml | safe }}</section>
+  {% endif %}
+
   {#- The card band: sports' teams, one strip (the CSS keeps it to the row
       that fits). The canon strip, movies' shelf strip and the heading line
       of view links went on 2026-11-04: the views window under the nav
@@ -55,13 +61,31 @@ eleventyComputed:
   {%- endif %}
 
   {#- The log: every ## section about the group's subjects, newest first,
-      each with its subject's cover in the art column; essays at their date,
-      lede and link. The view pages' timeline, verbatim. -#}
+      one line each since 2026-11-13: the date, the subject, the section's
+      first sentence, linking to the day; an essay is its title. The group
+      page is the index, the subject page keeps the full replay (until then
+      this was the view pages' timeline, every section in full — /sports/
+      ran to 21 KB of posts under the cards). -#}
   {% if group.stream | length %}
-  <section class="timeline">
-    {%- set entries = group.stream %}
-    {% include "timeline.njk" %}
-  </section>
+  <ul class="essay-list line-log">
+    {% for entry in group.stream %}
+    {% if entry.kind == "essay" %}
+    <li>
+      <a class="line-date" href="{{ entry.url }}">{{ entry.date | lineDate }}</a>
+      <span class="sky sky-blank" aria-hidden="true"></span>
+      <a class="line-essay" href="{{ entry.url }}">{{ entry.title }}</a>
+      <span class="archive-kind">deep thoughts</span>
+    </li>
+    {% else %}
+    <li>
+      <a class="line-date" href="{{ entry.url }}">{{ entry.date | lineDate }}</a>
+      <span class="sky" style="background-image:url({{ entry.subject.chipUrl }})" aria-hidden="true"></span>
+      <a class="line-subject" href="/s/{{ entry.subject.slug }}/">{{ entry.face.title if entry.face else entry.subject.title }}</a>
+      {% if entry.lede %}<a class="line-lede" href="{{ entry.url }}">{{ entry.lede }}</a>{% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+  </ul>
   {%- set pager = group.pager %}
   {%- include "pager.njk" %}
   {% else %}

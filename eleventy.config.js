@@ -1082,7 +1082,7 @@ export default function (eleventyConfig) {
       // date (lede + link, as on the home page). A same-day tie puts the
       // daily first, as the home stream does.
       const essayIds = new Set();
-      const stream = [...log, ...essaysHere
+      const stream = [...log.map((f) => ({ ...f, lede: ledeOf(f.html) })), ...essaysHere
         .filter((e) => !essayIds.has(e.slug) && essayIds.add(e.slug))
         .map((e) => ({ kind: "essay", date: e.date, url: e.url, title: e.title, blurb: e.blurb }))]
         .sort((a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay"));
@@ -1097,6 +1097,8 @@ export default function (eleventyConfig) {
         .sort((a, b) => b.score - a.score || String(a.title).localeCompare(String(b.title)));
       return {
         ...g,
+        // The group's note (2026-11-13): blurbs/groups/<id>.md, above the cards.
+        introHtml: noteIntroHtml(`groups/${g.id}`),
         subjects: subjectsHere,
         byScore,
         canon,
@@ -1684,18 +1686,43 @@ export default function (eleventyConfig) {
   // Rescanned per build for the same reason covers are.
   const BLURB_DIR = path.join("src", "blurbs");
   const blurbTexts = new Map(); // slug -> markdown source
-  eleventyConfig.on("eleventy.before", () => {
-    blurbTexts.clear();
-    if (!fs.existsSync(BLURB_DIR)) return;
-    for (const name of fs.readdirSync(BLURB_DIR)) {
+  // Note blurbs (2026-11-13): a group's or a tag's intro, the same file kind
+  // one folder down — src/blurbs/groups/<group>.md, src/blurbs/tags/<tag>.md.
+  // Keyed "groups/sports", "tags/jrpg". Hat: a note is a blurb, wherever it
+  // is attached, so moving one between levels is a file move.
+  const noteBlurbTexts = new Map();
+  const readBlurbDir = (dir, into, prefix = "") => {
+    if (!fs.existsSync(dir)) return;
+    for (const name of fs.readdirSync(dir)) {
       if (!name.endsWith(".md")) continue;
       const text = fs
-        .readFileSync(path.join(BLURB_DIR, name), "utf8")
+        .readFileSync(path.join(dir, name), "utf8")
         .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "") // tolerate stray frontmatter
         .trim();
-      if (text) blurbTexts.set(name.slice(0, -3), text);
+      if (text) into.set(prefix + name.slice(0, -3), text);
+    }
+  };
+  eleventyConfig.on("eleventy.before", () => {
+    blurbTexts.clear();
+    noteBlurbTexts.clear();
+    readBlurbDir(BLURB_DIR, blurbTexts);
+    for (const kind of ["groups", "tags"]) {
+      readBlurbDir(path.join(BLURB_DIR, kind), noteBlurbTexts, `${kind}/`);
     }
   });
+
+  // `### Elsewhere` (2026-11-13) starts a blurb's outbound links: articles
+  // Hat thinks are good, one per line, `[Title](url), Author`, an optional
+  // why after. They belong to the page the blurb is about and are never
+  // inherited: a subject's page shows them, the views that gather the
+  // subject (/t/, /r/) show its prose only. -> [prose, whole] markdown.
+  const ELSEWHERE_RE = /^###[ \t]+Elsewhere[ \t]*$/im;
+  const blurbProse = (text) => {
+    const at = String(text ?? "").search(ELSEWHERE_RE);
+    return at === -1 ? text : text.slice(0, at).trim();
+  };
+  const renderBlurb = (text) => (text ? revealSpoilers(md.render(text)) : null);
+  const noteIntroHtml = (key) => renderBlurb(noteBlurbTexts.get(key));
 
   // One static band per post date — the sky the night it was written —
   // generated on demand from the filter and written out with the rest of the
@@ -2148,6 +2175,8 @@ export default function (eleventyConfig) {
         blurbHtml: blurbTexts.has(slug)
           ? revealSpoilers(md.render(blurbTexts.get(slug)))
           : null,
+        // The same minus its `### Elsewhere` links: what /t/ and /r/ show.
+        blurbProseHtml: renderBlurb(blurbProse(blurbTexts.get(slug))) || null,
         tags: tagLinks(tagsOfSubject.get(slug)),
         fragments,
         essays,
@@ -2322,6 +2351,8 @@ export default function (eleventyConfig) {
         slug,
         title: meta?.title ?? slug,
         description: meta?.description ?? null,
+        // The tag's note (2026-11-13): blurbs/tags/<slug>.md, under the head.
+        introHtml: noteIntroHtml(`tags/${slug}`),
         members,
         entries,
       };
@@ -2986,6 +3017,23 @@ export default function (eleventyConfig) {
   // A title is typed text, but it can still carry ||spoiler|| markup, and a
   // card is as public as the feed — so the feed's rule: cut, not blurred.
   const cardText = (s) => String(s ?? "").replace(/\|\|[\s\S]+?\|\|/g, "[spoiler]").trim();
+
+  // A group page's one-line entry (2026-11-13): the section's first
+  // sentence, redacted, clipped. Sections have no titles, so the opening
+  // stands in for one. A section that opens on an image or a list falls
+  // back to its first text of any kind.
+  const LEDE_MAX = 140;
+  const ledeOf = (html) => {
+    const text = firstPara(html)
+      || plainText(stripSpoilers(html).replace(/<(figure|aside)\b[\s\S]*?<\/\1>/gi, " "));
+    const flat = String(text).replace(/\s+/g, " ").trim();
+    const sentence = flat.match(/^.+?[.!?…](?=\s|$)/);
+    return clipText(sentence ? sentence[0] : flat, LEDE_MAX);
+  };
+  // "8 nov 2026": the one-line entry's date. Short like the strips, but
+  // with the year, since a group's log runs back years.
+  eleventyConfig.addFilter("lineDate", (d) =>
+    `${shortDateFormat.format(d).toLowerCase()} ${d.getUTCFullYear()}`);
 
   // First paragraph of the REDACTED render. Headings are <h2>; figures,
   // asides, quotes and lists are skipped (the feed summary's rule), so the

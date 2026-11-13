@@ -2790,6 +2790,48 @@ main {
 .group-subjects { margin: 0 0 2.5rem; font: 16px/24px var(--pixel); color: var(--muted); }
 .group-subjects a { text-decoration: none; }
 
+/* Notes (2026-11-13): a group's or tag's intro (blurbs/groups/, blurbs/tags/)
+   under its head, ahead of the cards, in the blurb's own type. `### Elsewhere`
+   heads the outbound links, here and in a subject's blurb: the day row's
+   pixel type, muted, so it reads as a label and not a section. */
+.note-intro { margin: 0 0 2.5rem; }
+.note-intro p { margin: 0 0 0.6em; }
+.note-intro > :last-child { margin-bottom: 0; }
+:is(.note-intro, .subject-blurb) h3 {
+  margin: 1.25rem 0 0.4rem;
+  font: 400 16px/24px var(--pixel);
+  color: var(--muted);
+}
+:is(.note-intro, .subject-blurb) h3 + ul { margin: 0; padding-left: 1.25rem; }
+:is(.note-intro, .subject-blurb) h3 + ul > li { margin: 0 0 0.3em; }
+
+/* A group page's log, one entry per row (2026-11-13): date, chip, subject on
+   the first line, the section's first sentence under it. Hat: "have the
+   intro stuff lead and then maybe just have the links to the post just be
+   dates or titles or one line". The essays list's row, with the date first
+   so a run of one team's games reads down a column. */
+.line-log { margin: 0 0 1.5rem; }
+.line-log > li { flex-wrap: wrap; row-gap: 2px; }
+.line-log .line-date {
+  flex: 0 0 8rem;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.line-log .line-lede {
+  flex-basis: 100%;
+  padding-left: calc(8rem + 24px + 1.5rem);
+  font: inherit;
+  color: var(--ink);
+}
+.line-log .line-lede:hover { text-decoration: underline; }
+@media (max-width: 34rem) {
+  .line-log .line-date { flex-basis: auto; }
+  .line-log .line-lede { padding-left: 0; }
+}
+@media (min-width: 58rem) {
+  :is(.note-intro, .line-log) { margin-right: calc(var(--mcol) + var(--mgap)); }
+}
+
 /* A card's two lines where a subject card has its cells: the vibe in plain
    ink, two lines at most and left-set (a centred wrapped line can't be kept
    on whole pixels), then the date Hat typed it, muted. */
