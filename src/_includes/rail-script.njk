@@ -1,0 +1,37 @@
+{#- The rail's place-keeper (2026-11-13, after maggieappleton.com's TOC): the
+    last target whose top has passed 20% down the viewport is "here" — its
+    link and its day light up. Targets are whatever the rail links to, in
+    document order, which is the rail's order. Does nothing while the rail is
+    hidden (narrow screens), so the chips' pages pay for one style read. -#}
+<script>
+(() => {
+  // Deferred: the rail comes before the posts it points into, so at parse
+  // time none of its targets exist yet.
+  const init = () => {
+  const rail = document.querySelector(".rail");
+  if (!rail) return;
+  const links = [...rail.querySelectorAll('a[href^="#"]')];
+  const items = links
+    .map((a) => ({ a, el: document.getElementById(decodeURIComponent(a.hash.slice(1))) }))
+    .filter((x) => x.el);
+  const days = [...rail.querySelectorAll(".rail-day")];
+  let queued = false;
+  const update = () => {
+    queued = false;
+    if (getComputedStyle(rail).display === "none") return;
+    const line = innerHeight * 0.2;
+    let here = null;
+    for (const it of items) if (it.el.getBoundingClientRect().top <= line) here = it;
+    for (const a of links) a.classList.toggle("is-active", here?.a === a);
+    const day = here?.a.closest(".rail-day");
+    for (const d of days) d.classList.toggle("is-active", d === day);
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener("scroll", queue, { passive: true });
+  addEventListener("resize", queue);
+  update();
+  };
+  if (document.readyState === "loading") addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>

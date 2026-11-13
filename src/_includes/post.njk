@@ -1,6 +1,20 @@
 ---
 layout: base.njk
 ---
+{#- The day's sections as the rail in the left gutter, wide screens only, on
+    a day with three or more (one or two repeat the headings right below).
+    Narrower screens get the .day-toc bar under the date instead; both
+    replaced "in this post" chips (2026-11-13). -#}
+{% set contents = content | dayContents %}
+{% if contents | length >= 3 %}
+<nav class="rail" aria-label="In this post"><div class="rail-inner">
+  <div class="rail-day">
+    <a class="rail-row rail-row-day" href="#main"><span class="rail-label">{{ page.date | shortDate }}</span><span class="rail-tick"></span></a>
+    {% for s in contents %}<a class="rail-row" href="#{{ s.id }}"><span class="rail-label">{{ s.title }}</span><span class="rail-tick"></span></a>{% endfor %}
+  </div>
+</div></nav>
+{% include "rail-script.njk" %}
+{% endif %}
 <article class="post h-entry">
   {#- No band since 2026-11-04: the masthead above is this post's sky. -#}
   <header class="post-head">
@@ -15,6 +29,16 @@ layout: base.njk
         the h-card in base.njk's footer (its u-url is the home page). -#}
     <data class="u-url" value="{{ site.url }}{{ page.url }}"></data>
     <data class="u-author" value="{{ site.url }}/"></data>
+    {#- The rail's narrow-screen half (2026-11-13, after maggieappleton.com's
+        mobile TOC): one collapsed bar under the date that opens into the
+        day's sections. Native <details>, so no script; hidden wherever the
+        rail shows. -#}
+    {% if contents | length >= 3 %}
+    <details class="day-toc">
+      <summary><span class="day-toc-label">in this post</span><span class="day-toc-count">{{ contents | length }}</span></summary>
+      <ul>{% for s in contents %}<li><a href="#{{ s.id }}">{{ s.title }}</a></li>{% endfor %}</ul>
+    </details>
+    {% endif %}
   </header>
   {#- linkSubjects(true): each section gets its anchor (eleventy.config.js,
       sectionAnchors), on this page only. -#}

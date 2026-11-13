@@ -7,6 +7,34 @@ layout: base.njk
 {#- The page's one h1 (2026-11-11): the site name is a wordmark image link in
     the header, so a heading for it is read aloud only. -#}
 <h1 class="sr-only">{{ site.title }}</h1>
+{#- The rail (2026-11-13, after maggieappleton.com's TOC): the stream's
+    entries down the left gutter, each day's date big and its subjects under
+    it, sticky, the one you're in lit. Wide screens only (CSS, "the rail");
+    the ids it links to are the li's and linkSubjects' date-prefixed ones. -#}
+<nav class="rail" aria-label="On this page"><div class="rail-inner">
+  {#- A row is a label and a tick. At rest only the ticks show, a thin strip
+      against the shell's left edge; hover or focus opens the labels (CSS,
+      "the rail"). Rows group by day: an essay on a day that also has a daily
+      joins that day's group, so a group opens on a new date only. -#}
+  {% set five = collections.stream | limit(5) %}
+  {% for entry in five %}
+  {% set item = entry.essay or entry.post %}
+  {% set d = item.date | dateSlug %}
+  {% set prev = five[loop.index0 - 1] if not loop.first %}
+  {% set newDay = loop.first or ((prev.essay or prev.post).date | dateSlug) != d %}
+  {% if newDay %}{% if not loop.first %}</div>{% endif %}
+  <div class="rail-day">
+    <a class="rail-row rail-row-day" href="#{{ ('essay-' + d) if entry.kind == "essay" else d }}"><span class="rail-label">{{ item.date | shortDate }}</span><span class="rail-tick"></span></a>
+  {% endif %}
+  {% if entry.kind == "essay" %}
+    <a class="rail-row rail-row-essay" href="#essay-{{ d }}"><span class="rail-label"><span class="rail-kind">deep thoughts</span>{{ item.title }}</span><span class="rail-tick"></span></a>
+  {% else %}
+    {% for s in item.content | dayContents(d + "-") %}<a class="rail-row" href="#{{ s.id }}"><span class="rail-label">{{ s.title }}</span><span class="rail-tick"></span></a>{% endfor %}
+  {% endif %}
+  {% if loop.last %}</div>{% endif %}
+  {% endfor %}
+</div></nav>
+{% include "rail-script.njk" %}
 <ul class="post-list">
   {% for entry in collections.stream | limit(5) %}
   {% if entry.kind == "essay" %}
@@ -14,7 +42,7 @@ layout: base.njk
       full piece has one home. The kicker marks it as the other kind of post,
       since a titled daily wears the same head. -#}
   {% set e = entry.essay %}
-  <li class="stream-essay">
+  <li class="stream-essay" id="essay-{{ e.date | dateSlug }}">
     <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ e.date | daySky }})"{% endif %}>
       <span class="entry-kind">deep thoughts</span>
       <a class="post-list-title" href="{{ e.url }}">{{ e.title }}</a>
@@ -28,7 +56,8 @@ layout: base.njk
   {#- Whole days since 2026-11-13: homeBody's 1500-character cut and its
       "read the rest" link are gone (why: eleventy.config.js, above the
       limit filter). -#}
-  <li>
+  {% set d = post.date | dateSlug %}
+  <li id="{{ d }}">
     <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ post.date | daySky }})"{% endif %}>
       {% if post.data.title %}
       <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
@@ -37,7 +66,7 @@ layout: base.njk
       <a class="post-list-date" href="{{ post.url }}">{{ post.date | readableDate }}</a>
       {% endif %}
     </div>
-    <div class="post-body">{{ post.content | spoilers | linkSubjects | safe }}</div>
+    <div class="post-body">{{ post.content | spoilers | linkSubjects(true, d + "-") | safe }}</div>
   </li>
   {% endif %}
   {% else %}

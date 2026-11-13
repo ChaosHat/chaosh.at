@@ -1168,6 +1168,110 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .reply-line a:hover, .reply-line a:focus-visible { color: var(--accent, inherit); text-decoration: underline; }
 :is(.post, .essay-page) > .reply-line + .post-tags { margin-top: 1rem; }
 
+.post .frag-head[id], .post h2[id], .post-list .frag-head[id], .post-list > li[id] { scroll-margin-top: 1.5rem; }
+
+/* The rail (2026-11-13, after maggieappleton.com's TOC): the page's days and
+   their subjects down the left gutter, sticky, the one you're reading lit
+   (rail-script.njk). At rest it is ticks only — one per subject, a longer,
+   brighter one per day — a ~30px strip against the shell's left edge, so it
+   reads as the layout's edge and not a third column (a full text rail was
+   tried the same day and tipped the page left, with nothing to answer it
+   on the right). Hover or focus opens it leftward into the gutter: rows
+   grow, labels fade in, top to bottom, over a smoked panel. Only where the
+   gutter holds the open panel; narrower, a daily has the .day-toc bar
+   instead and the home page goes without (badge-style "in this post"
+   chips under the date were tried first; the rail and bar replaced them). Absolute against <main>, spanning its height, so
+   the inner list can stick the whole page. */
+/* The rail's narrow-screen half: a collapsed "in this post" bar under a
+   daily's date (post.njk). Ruled top and bottom like hers, the label in the
+   pixel face, a chevron that turns; open, the sections list in the prose
+   face. Chrome animates the open (::details-content + interpolate-size);
+   elsewhere it snaps. */
+.day-toc { margin: 1rem 0 0; border-block: 1px solid var(--edge); interpolate-size: allow-keywords; }
+.day-toc summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 2px; list-style: none; cursor: pointer;
+  font: 16px/20px var(--pixel); color: var(--muted);
+}
+.day-toc summary::-webkit-details-marker { display: none; }
+.day-toc summary::after {
+  content: ""; margin-left: auto; width: 7px; height: 7px;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg); transition: transform 0.2s;
+}
+.day-toc[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+.day-toc summary:hover, .day-toc summary:focus-visible { color: var(--accent); }
+.day-toc-count {
+  padding: 4px 6px; font: 8px/1 var(--pixel); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.day-toc::details-content { block-size: 0; overflow: hidden; transition: block-size 0.25s ease-out, content-visibility 0.25s allow-discrete; }
+.day-toc[open]::details-content { block-size: auto; }
+.day-toc ul { list-style: none; margin: 0; padding: 2px 0 12px 12px; }
+.day-toc li { margin: 0; }
+.day-toc li a { display: block; padding: 6px 0; font: 17px/22px var(--prose); color: var(--accent); text-decoration: none; }
+.day-toc li a:hover, .day-toc li a:focus-visible { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+  .day-toc::details-content, .day-toc summary::after { transition: none; }
+}
+
+.rail { display: none; }
+@media (min-width: 85rem) {
+  main:has(> .rail) { position: relative; }
+  .day-toc { display: none; }
+  .rail {
+    display: flex; justify-content: flex-end;
+    position: absolute; top: 0; bottom: 0; right: calc(100% + 0.5rem);
+    width: 12rem; pointer-events: none;
+    interpolate-size: allow-keywords;
+  }
+  .rail-inner {
+    position: sticky; top: 1.5rem; align-self: flex-start;
+    max-height: calc(100vh - 3rem); overflow-y: auto; scrollbar-width: none;
+    padding: 8px 6px 8px 10px; pointer-events: auto;
+    border: 1px solid transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+}
+.rail-day { padding: 5px 0; }
+.rail-row {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  height: 7px; overflow: hidden; text-decoration: none;
+  transition: height 0.25s ease-out;
+}
+.rail-row-day { height: 9px; }
+.rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); transition: background-color 0.15s, width 0.15s; }
+.rail-row-day .rail-tick { width: 18px; background: var(--muted); }
+.rail-row-essay .rail-tick { background: color-mix(in srgb, var(--m-essays) 55%, transparent); }
+.rail-label {
+  max-width: 0; opacity: 0;
+  text-align: right; color: var(--muted);
+  font: 15px/18px var(--prose);
+  transition: opacity 0.2s, max-width 0s 0.25s;
+}
+.rail-row-day .rail-label { font: 16px/20px var(--pixel); color: var(--ink); }
+.rail-kind { display: block; font: 8px/12px var(--pixel); color: var(--m-essays); }
+
+/* Open. Labels stagger in by row, like the original. */
+.rail-inner:is(:hover, :focus-within) {
+  background: color-mix(in srgb, var(--night) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-color: var(--edge);
+}
+.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; }
+.rail-inner:is(:hover, :focus-within) .rail-row-day { min-height: 26px; margin-top: 4px; }
+.rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; opacity: 1; transition: opacity 0.2s 0.05s, max-width 0s; }
+
+/* Here. */
+.rail-row:hover .rail-label, .rail-row:focus-visible .rail-label { color: var(--accent); }
+.rail-row.is-active .rail-tick { width: 16px; background: var(--accent); }
+.rail-row-day.is-active .rail-tick, .rail-day.is-active .rail-row-day .rail-tick { width: 22px; background: var(--accent); }
+.rail-row.is-active .rail-label, .rail-day.is-active .rail-row-day .rail-label { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .rail-row, .rail-label, .rail-tick, .rail-inner { transition: none; }
+}
+
 /* `.post >` outranks `.post > p`, which would otherwise zero the margin. */
 .post > .post-tags {
   margin-top: 2.5rem;

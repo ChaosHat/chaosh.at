@@ -2658,7 +2658,11 @@ export default function (eleventyConfig) {
   const wrapFragment = (sky, body, box = null) =>
     `<div class="frag"${box ? ` style="--box:${box}"` : ""}>${sky}<div class="frag-body">${body}</div></div>`;
 
-  const linkSubjectsFragments = (html, anchored = false) => {
+  // `prefix` (2026-11-13) namespaces the ids where several days share a page:
+  // the home page passes "<date>-" so two days' "## Bears" stay distinct, and
+  // the rail beside the stream links to them. The daily's own page passes
+  // none, so /daily/…/#bears still holds.
+  const linkSubjectsFragments = (html, anchored = false, prefix = "") => {
     const src = String(html ?? "");
     if (!src.trim()) return src;
 
@@ -2670,7 +2674,7 @@ export default function (eleventyConfig) {
       if (!a) return "";
       const n = (seen.get(a) ?? 0) + 1;
       seen.set(a, n);
-      return ` id="${n === 1 ? a : `${a}-${n}`}"`;
+      return ` id="${prefix}${n === 1 ? a : `${a}-${n}`}"`;
     };
     for (const part of src.split(/(?=<h2[\s>])/i)) {
       if (!part.trim()) continue;
@@ -2711,6 +2715,25 @@ export default function (eleventyConfig) {
   };
 
   eleventyConfig.addFilter("linkSubjects", linkSubjectsFragments);
+
+  // "In this post" (2026-11-13): the day's ## sections as jump links, on the
+  // daily's own page. Ids are minted exactly as linkSubjectsFragments' idFor
+  // mints them off the same rendered html, so every link lands. Titles are
+  // the resolved names the headings render with (alias → title, faces kept).
+  eleventyConfig.addFilter("dayContents", (html, prefix = "") => {
+    const seen = new Map();
+    const out = [];
+    for (const m of String(html ?? "").matchAll(/<h2[^>]*>([\s\S]*?)<\/h2>/gi)) {
+      const text = plainText(m[1]);
+      const a = normalise(text).replace(/ /g, "-");
+      if (!a) continue;
+      const n = (seen.get(a) ?? 0) + 1;
+      seen.set(a, n);
+      const { slug, face } = resolveHeading(text);
+      out.push({ id: prefix + (n === 1 ? a : `${a}-${n}`), title: slug ? headingTitle(slug, face) : text });
+    }
+    return out;
+  });
 
   // The same art, for a template that builds its own .frag: the view pages'
   // timelines (/log/, /t/, /r/) since 2026-11-03, when they took the daily's
