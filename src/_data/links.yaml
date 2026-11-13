@@ -1,3 +1,7 @@
 - name: Adri's Headspace
   url: https://adriannatchalla.gay/
   button: /img/buttons/adris-headspace.gif
+- name: What the Fran
+  url: https://francescrossley.com/
+  note: Frances Rossley, daily on books, TTRPG homebrew and the old web
+  blogroll: true
