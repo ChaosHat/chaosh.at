@@ -66,7 +66,30 @@ eleventyComputed:
       page is the index, the subject page keeps the full replay (until then
       this was the view pages' timeline, every section in full — /sports/
       ran to 21 KB of posts under the cards). -#}
-  {% if group.stream | length %}
+  {#- Marginalia (2026-11-13, after inktoblog.com/margin): each entry is the
+      thing and Hat's note on it, in full, newest first. "Thoughts on:" and
+      the link, the date (to the section in its daily), then the note. A
+      section that didn't open on a link is the date and the note. -#}
+  {% if group.layout == "marginalia" and group.stream | length %}
+  <div class="margin-list">
+    {% for entry in group.stream %}
+    {% if entry.kind == "essay" %}
+    <article class="margin-note">
+      <p class="margin-source"><a href="{{ entry.url }}">{{ entry.title }}</a> <span class="archive-kind">deep thoughts</span></p>
+      <p class="margin-meta"><a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a></p>
+    </article>
+    {% else %}
+    <article class="margin-note">
+      {% if entry.source %}<p class="margin-source">Thoughts on: <a href="{{ entry.source.url }}">{{ entry.source.titleHtml | safe }}</a> <span aria-hidden="true">↗</span></p>{% endif %}
+      <p class="margin-meta"><a class="fragment-date" href="{{ entry.url }}">{{ entry.date | readableDate }}</a></p>
+      <div class="margin-body">{{ entry.noteHtml | safe }}</div>
+    </article>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {%- set pager = group.pager %}
+  {%- include "pager.njk" %}
+  {% elif group.stream | length %}
   <ul class="essay-list line-log">
     {% for entry in group.stream %}
     {% if entry.kind == "essay" %}

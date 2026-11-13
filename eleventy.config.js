@@ -1082,7 +1082,8 @@ export default function (eleventyConfig) {
       // date (lede + link, as on the home page). A same-day tie puts the
       // daily first, as the home stream does.
       const essayIds = new Set();
-      const stream = [...log.map((f) => ({ ...f, lede: ledeOf(f.html) })), ...essaysHere
+      const stream = [...log.map((f) => (g.layout === "marginalia"
+        ? { ...f, ...marginOf(f.html) } : { ...f, lede: ledeOf(f.html) })), ...essaysHere
         .filter((e) => !essayIds.has(e.slug) && essayIds.add(e.slug))
         .map((e) => ({ kind: "essay", date: e.date, url: e.url, title: e.title, blurb: e.blurb }))]
         .sort((a, b) => b.date - a.date || (a.kind === "essay") - (b.kind === "essay"));
@@ -1113,7 +1114,8 @@ export default function (eleventyConfig) {
         subjectRow: !g.hasShelf && subjectsHere.length > 1 ? byScore : [],
         // Where the group's name goes: a one-subject group's is its subject's
         // page (the group page would only repeat it), anything else its own.
-        homeUrl: subjectsHere.length === 1 ? `/s/${subjectsHere[0].slug}/` : g.urls.home,
+        homeUrl: subjectsHere.length === 1 && g.layout !== "marginalia"
+          ? `/s/${subjectsHere[0].slug}/` : g.urls.home,
         score,
         lastWrote,
         written: subjectsHere.reduce((n, s) => n + s.written, 0),
@@ -1353,12 +1355,22 @@ export default function (eleventyConfig) {
       icon: `/img/icons/media/${iconFile}`,
       color: typeof g.color === "string" ? g.color : null,
       cardsFile: g.cards ? String(g.cards) : null,
+      // `layout: marginalia` (2026-11-13): the page lists link-and-note
+      // entries, and stands in for its subjects' pages (subjectHref).
+      layout: typeof g.layout === "string" ? g.layout : null,
       tabbed,
       count: groupCount.get(id) ?? 0,
       urls: viewUrls(id),
     };
   });
   const GROUP = new Map(GROUPS.map((g) => [g.id, g]));
+  // Where a subject's name links. A marginalia group's subject has no page of
+  // its own (2026-11-13): `## margin` links to /margin/, and the template-built
+  // /s/margin/ links land on a redirects.yaml stub that forwards there.
+  const subjectHref = (slug) => {
+    const g = GROUP.get(groupOf(subjects[slug]));
+    return g?.layout === "marginalia" ? g.urls.home : `/s/${slug}/`;
+  };
   // A group gets pages once it has a subject (hidden until content, the
   // site-wide rule), tab or not.
   const LIVE = GROUPS.filter((g) => g.count);
@@ -1759,7 +1771,7 @@ export default function (eleventyConfig) {
       const stem = coverUrls.has(cover) ? cover : slug;
       const box = coverBoxOf(stem, fitOf(slug));
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}" href="/s/${slug}/" ` +
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}" href="${subjectHref(slug)}" ` +
         `style="background-image:url(${coverUrl})" aria-hidden="true" tabindex="-1"></a>`
       );
     }
@@ -2094,7 +2106,10 @@ export default function (eleventyConfig) {
         }
         const text = body.join("\n").trim();
         if (!text) continue;
-        const key = `${slug}|${face?.key ?? ""}`;
+        // A marginalia note never merges (2026-11-13): two `## margin` in a
+        // day are two links and two notes, each its own entry.
+        const key = GROUP.get(groupOf(subjects[slug]))?.layout === "marginalia"
+          ? `${slug}|#${i}` : `${slug}|${face?.key ?? ""}`;
         const prev = perPost.get(key);
         if (prev) prev.text += `\n\n${text}`;
         else perPost.set(key, { slug, face, anchor: anchors[i], text });
@@ -2186,6 +2201,9 @@ export default function (eleventyConfig) {
   };
 
   eleventyConfig.addCollection("subjectPages", buildSubjectPages);
+  // The subjects that get a /s/ page: all but a marginalia group's.
+  eleventyConfig.addCollection("subjectPagesOwn", (api) =>
+    buildSubjectPages(api).filter((s) => subjectHref(s.slug) === `/s/${s.slug}/`));
 
   // The about page's clouds — see wordcloud.js. Built as a collection because
   // that is where the posts are; the shortcode below only reads the result.
@@ -2266,7 +2284,7 @@ export default function (eleventyConfig) {
       .filter((s) => inCloud(s.slug))
       .map((s) => ({
         label: s.title ?? s.slug,
-        href: `/s/${s.slug}/`,
+        href: subjectHref(s.slug),
         color: palette(subjectHues.get(s.slug) ?? 0).glow,
         weight: s.fragments.filter(keep).reduce((n, f) => n + f.words, 0)
           + s.essays.filter(keep).reduce((n, e) => n + (essayWords.get(e.slug) ?? 0), 0),
@@ -2657,7 +2675,7 @@ export default function (eleventyConfig) {
         // that no template gets to escape, so escape it here. `inner` is the
         // fallback and is already rendered html — leave it alone.
         const title = face || subjects[slug]?.title ? escapeHtml(headingTitle(slug, face)) : inner;
-        return `<h2${attrs}><a href="/s/${slug}/">${title}</a></h2>`;
+        return `<h2${attrs}><a href="${subjectHref(slug)}">${title}</a></h2>`;
       },
     );
 
@@ -2735,7 +2753,7 @@ export default function (eleventyConfig) {
         ? `<span class="badge b-${status}">${status}</span>` : "";
       const head =
         `<h2 class="frag-head"${attrs}${id}>` +
-        `<a class="frag-subject" href="/s/${slug}/">${title}</a>` +
+        `<a class="frag-subject" href="${subjectHref(slug)}">${title}</a>` +
         badge +
         `</h2>`;
 
@@ -3017,6 +3035,23 @@ export default function (eleventyConfig) {
   // A title is typed text, but it can still carry ||spoiler|| markup, and a
   // card is as public as the feed — so the feed's rule: cut, not blurred.
   const cardText = (s) => String(s ?? "").replace(/\|\|[\s\S]+?\|\|/g, "[spoiler]").trim();
+
+  // A marginalia entry (2026-11-13): the section opens on a link, the thing
+  // it's about, then Hat's note. -> {source: {url, titleHtml} | null,
+  // noteHtml}. The link comes out of the note; a dash, colon or comma right
+  // after it goes too, so "[Title](url) — I think…" reads as just the note.
+  // A section that doesn't open on a link is a plain note (publish.py names
+  // it in the ntfy).
+  const MARGIN_SOURCE = /^\s*<p>\s*<a href="(https?:\/\/[^"]+)"[^>]*>([\s\S]*?)<\/a>([\s\S]*?)<\/p>/i;
+  const marginOf = (html) => {
+    const m = MARGIN_SOURCE.exec(String(html ?? ""));
+    if (!m) return { source: null, noteHtml: html };
+    const rest = m[3].replace(/^\s*(?:<br\s*\/?>)?\s*(?:[—–:,-]\s*)?/, "").trim();
+    return {
+      source: { url: m[1], titleHtml: m[2] },
+      noteHtml: (rest ? `<p>${rest}</p>` : "") + html.slice(m[0].length),
+    };
+  };
 
   // A group page's one-line entry (2026-11-13): the section's first
   // sentence, redacted, clipped. Sections have no titles, so the opening

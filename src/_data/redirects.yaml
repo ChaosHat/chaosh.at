@@ -28,3 +28,9 @@
   # Retargeted 2026-10-25: tabletop has its own shelf again, as a medium.
   # Merged 2026-09-11. One shelf, category as a filter chip beside the sort;
   # the second shelf had one tile and a nav link of its own.
+
+- from: /s/margin/
+  to: /margin/
+  # 2026-11-13: margin is a marginalia group's subject, which has no page of
+  # its own; the group page lists the notes. Links the site builds go to
+  # /margin/ directly (subjectHref); this catches the template-built ones.

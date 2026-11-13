@@ -2828,8 +2828,19 @@ main {
   .line-log .line-date { flex-basis: auto; }
   .line-log .line-lede { padding-left: 0; }
 }
+
+/* Marginalia (2026-11-13): the thing, then the note. The source line in the
+   day row's pixel type, the date muted under it, the note in body type. */
+.margin-note { padding: 0 0 1.25rem; margin: 0 0 1.25rem; border-bottom: 1px solid var(--edge); }
+.margin-source { margin: 0; font: 16px/24px var(--pixel); }
+.margin-source a { text-decoration: none; }
+.margin-source a:hover { text-decoration: underline; }
+.margin-meta { margin: 2px 0 0.6rem; font: 16px/24px var(--pixel); }
+.margin-meta .fragment-date { font: 16px/24px var(--pixel); color: var(--muted); text-decoration: none; }
+.margin-body p { margin: 0 0 0.6em; }
+.margin-body > :last-child { margin-bottom: 0; }
 @media (min-width: 58rem) {
-  :is(.note-intro, .line-log) { margin-right: calc(var(--mcol) + var(--mgap)); }
+  :is(.note-intro, .line-log, .margin-list) { margin-right: calc(var(--mcol) + var(--mgap)); }
 }
 
 /* A card's two lines where a subject card has its cells: the vibe in plain

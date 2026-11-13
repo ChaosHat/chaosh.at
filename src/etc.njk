@@ -49,6 +49,9 @@ description: Everything else I write about, busiest first.
       <li class="etc-group" style="--o-score:{{ g.oScore }};--o-recent:{{ g.oRecent }};--o-written:{{ g.oWritten }}">
         <h2 class="etc-group-head"><a href="{{ g.homeUrl }}">{% if g.hasIcon %}<span class="mico m-{{ g.id }}" aria-hidden="true"></span>{% endif %}{{ g.label }}</a></h2>
         {% if g.description %}<p class="tag-desc">{{ g.description }}</p>{% endif %}
+        {#- A marginalia group's heading is its page; its one subject has no
+            page of its own to list (2026-11-13). -#}
+        {% if g.layout != "marginalia" %}
         <ul class="essay-list etc-subjects">
           {%- set listed = (g.subjects | selectattr("written") | list) if g.hasShelf else g.subjects %}
           {% for s in listed %}
@@ -63,6 +66,7 @@ description: Everything else I write about, busiest first.
           <li class="etc-more"><a href="{{ g.urls.shelf }}">{{ rest }} more on the shelf →</a></li>
           {% endif %}
         </ul>
+        {% endif %}
       </li>
       {% endfor %}
     </ol>

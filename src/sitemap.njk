@@ -49,7 +49,7 @@ eleventyExcludeFromCollections: true
 {%- for x in collections.etcPage %}
 {{ loc(x.url) -}}
 {%- endfor %}
-{%- for s in collections.subjectPages %}
+{%- for s in collections.subjectPagesOwn %}
 {{ loc("/s/" + s.slug + "/") -}}
 {%- endfor %}
 {%- for t in collections.tagPagesPaged %}
