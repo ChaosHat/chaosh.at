@@ -65,6 +65,8 @@ eleventyComputed:
   {{ s.body | safe }}
   {% endif %}
   {% endfor %}
+  {% set reply = essay.title | replyHref %}
+  {% if reply %}<p class="reply-line"><a href="{{ reply }}">reply by email</a></p>{% endif %}
   {#- The essay mirror of a daily's tag footer: the subjects it's about
       (about-list order), then the union of their tags plus any tag cited
       directly (tagviews order). Every view this essay appears in, linked. -#}

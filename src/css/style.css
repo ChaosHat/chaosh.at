@@ -1158,6 +1158,18 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .post-date { margin: 0; font: 400 16px/24px var(--pixel); }
 .post-subdate { margin: 0; font: 16px/24px var(--pixel); color: var(--muted); }
 
+/* Reply by email (2026-11-13): one quiet line in the pixel face, after the
+   writing and before the tags. Muted until hovered, so it reads as an
+   invitation, not a button. */
+:is(.post, .essay-page) > .reply-line { clear: both; margin: 2.5rem 0 0; padding-top: 0.5rem; font: 16px/24px var(--pixel); }
+/* In the prose column, between the art and image columns, as the day nav is. */
+@media (min-width: 58rem) {
+  .post:not(.essay-page) > .reply-line { margin-left: calc(var(--lcol) + var(--lgap)); }
+}
+.reply-line a { color: var(--muted); text-decoration: none; }
+.reply-line a:hover, .reply-line a:focus-visible { color: var(--accent, inherit); text-decoration: underline; }
+:is(.post, .essay-page) > .reply-line + .post-tags { margin-top: 1rem; }
+
 /* `.post >` outranks `.post > p`, which would otherwise zero the margin. */
 .post > .post-tags {
   margin-top: 2.5rem;

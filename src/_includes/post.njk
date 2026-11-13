@@ -22,6 +22,10 @@ layout: base.njk
   {#- Day-scoped: the union of the tags of every subject this post files to.
       Only on the full post — the home page shows truncated bodies, where a
       footer covering sections that were cut would be a lie. -#}
+  {#- Reply by email (2026-11-13), before the tags: "Re: <title>", or the
+      date on a day without one. Hidden when site.yaml has no reply_email. -#}
+  {% set reply = (title or (page.date | readableDate)) | replyHref %}
+  {% if reply %}<p class="reply-line"><a href="{{ reply }}">reply by email</a></p>{% endif %}
   {% set dayTags = content | postTags %}
   {% if dayTags | length %}
   <p class="tag-list post-tags">

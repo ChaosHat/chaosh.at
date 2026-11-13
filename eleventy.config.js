@@ -3053,6 +3053,21 @@ export default function (eleventyConfig) {
     };
   };
 
+  // Reply by email (2026-11-13): `reply_email:` in site.yaml, blank hides it.
+  // A mail draft to that address with the subject filled in, "Re: <title>",
+  // the date when a daily has none. Nothing comes back to the site.
+  const replyEmail = typeof siteData.reply_email === "string" ? siteData.reply_email.trim() : "";
+  const replyHref = (title) => replyEmail
+    ? `mailto:${replyEmail}?subject=${encodeURIComponent(`Re: ${cardText(title)}`)}`
+    : "";
+  eleventyConfig.addFilter("replyHref", replyHref);
+  // The feed's form: one line appended to the entry's content, since a feed
+  // reader is where most readers will meet it.
+  eleventyConfig.addFilter("replyHtml", (title) => {
+    const href = replyHref(title);
+    return href ? `<p><a href="${href.replace(/&/g, "&amp;")}">Reply by email</a></p>` : "";
+  });
+
   // A group page's one-line entry (2026-11-13): the section's first
   // sentence, redacted, clipped. Sections have no titles, so the opening
   // stands in for one. A section that opens on an image or a list falls
