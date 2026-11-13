@@ -3342,12 +3342,47 @@ export default function (eleventyConfig) {
 
   // Unmatched headings are a warning, never a build failure — publishing is
   // automated at 2am and a typo must not take the site down.
-  eleventyConfig.on("eleventy.after", () => {
+  eleventyConfig.on("eleventy.after", ({ results } = {}) => {
+    // Prune unreferenced art (2026-11-13). registerSky draws a sky and a chip
+    // for every subject, but a covered subject shows its cover, so ~340 of
+    // ~390 subject PNGs were written and never shown — dead weight against
+    // Cloudflare Pages' 20,000-file deploy cap. The trade: skip writing them,
+    // rather than inline every sky as a data: URI (no page-weight cost here,
+    // and it maintains itself: the referenced set is read from the build's own
+    // output, so a new template that shows a sky just works). Only img/sky/ and
+    // day bands are prunable — an explicit allowlist, never "anything
+    // unreferenced": the button, forum sigs and root mastheads are named from
+    // outside the site's pages. Any scan failure writes everything, as before.
+    const prunable = (rel) => rel.startsWith("img/sky/") || /^img\/aurora\/day-[^/]*\.png$/.test(rel);
+    let shown = null;
+    try {
+      if (!Array.isArray(results)) throw new Error("eleventy.after got no results");
+      const texts = results.map((r) => (typeof r.content === "string" ? r.content : ""));
+      // Passthrough CSS isn't in results; read it from source.
+      const cssDir = path.join("src", "css");
+      for (const f of fs.readdirSync(cssDir, { recursive: true })) {
+        if (String(f).endsWith(".css")) texts.push(fs.readFileSync(path.join(cssDir, String(f)), "utf8"));
+      }
+      shown = new Set();
+      const ref = /\/(img\/(?:sky\/[^"'()\s<>]+?\.png|aurora\/day-[^"'()\s<>/]+?\.png))/g;
+      for (const t of texts) for (const m of t.matchAll(ref)) shown.add(m[1]);
+    } catch (err) {
+      shown = null;
+      console.warn(`[chaosh.at] art prune skipped, writing all art: ${err?.message ?? err}`);
+    }
+    let wrote = 0;
+    let skipped = 0;
     for (const [rel, svg] of skyFiles) {
+      if (shown && prunable(rel) && !shown.has(rel)) {
+        skipped++;
+        continue;
+      }
       const dest = path.join("_site", rel);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.writeFileSync(dest, svg);
+      wrote++;
     }
+    console.log(`[chaosh.at] art: wrote ${wrote}, skipped ${skipped} unreferenced`);
 
     for (const [rel, jpg] of cardFiles) {
       const dest = path.join("_site", rel);
