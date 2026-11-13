@@ -65,6 +65,36 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy _site --project-name=chaosh-at --branch=${{ github.ref_name }}
 
+      # Headroom tripwire (2026-11-13). Cloudflare Pages' free plan refuses a
+      # deploy over 20,000 files (or any file over 25 MiB), and GitHub asks
+      # for repos under 1 GB. ~1,900 files and ~210 MB in Nov 2026, growing
+      # ~5,500 files and ~330 MB a year — this pings the publish run's ntfy
+      # topic, every deploy, once either crosses its line, so there are months
+      # to move post images to R2 (or trim the generated sky/aurora art) before
+      # a deploy actually fails. Never fails the job.
+      - name: Headroom check
+        if: success()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=$(find _site -type f | wc -l)
+          big=$(find _site -type f -size +20M | head -3 | tr '\n' ' ' || true)
+          repo_mb=$(( $(gh api "repos/$GITHUB_REPOSITORY" --jq .size 2>/dev/null || echo 0) / 1024 ))
+          echo "site files: $files / 20000 · repo: ${repo_mb} MB · files over 20 MB: ${big:-none}"
+          msg=""
+          [ "$files" -gt 15000 ] && msg+="Site is $files files; Cloudflare Pages refuses a deploy over 20,000. "
+          [ "$repo_mb" -gt 800 ] && msg+="Repo is ${repo_mb} MB; GitHub asks for under 1 GB. "
+          [ -n "$big" ] && msg+="Files near the 25 MiB per-file limit: $big"
+          if [ -z "$msg" ] || [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+          auth=()
+          [ -n "$NTFY_TOKEN" ] && auth=(-H "Authorization: Bearer $NTFY_TOKEN")
+          curl -sS --max-time 10 -H "Title: chaosh.at nearing a hosting limit" \
+            -H "Tags: chart_with_upwards_trend" "${auth[@]}" \
+            -d "${msg}Plan: vault Open Questions → Hosting headroom." \
+            "https://ntfy.hatnas.com/$NTFY_TOPIC" || true
+
       # The vault side is loud — every refusal reaches the phone at 2am — while
       # a build that dies up here reaches nobody, and the live site just quietly
       # stops moving. Same ntfy topic as the publish run, so there is one feed
