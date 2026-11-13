@@ -1982,7 +1982,10 @@ a.badge { text-decoration: none; }
   color: var(--muted);
 }
 
-.links-head { font: 8px/1 var(--pixel); color: var(--muted); margin: 0 0 1rem; }
+/* Section heads at the subject-head size (16px, like a group page's band
+   head); 8px read as a caption, not a heading (2026-11-12). */
+.links-head { font: 400 16px/1 var(--pixel); color: var(--ink); margin: 2.5rem 0 1rem; }
+.links-sub { margin: -0.25rem 0 1rem; color: var(--muted); }
 
 .links-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
 .links-list > li { display: flex; align-items: center; gap: 1rem; }
@@ -1991,6 +1994,7 @@ a.badge { text-decoration: none; }
 .links-body a { color: var(--ink); text-decoration: none; }
 .links-body a:hover { color: var(--accent); }
 .links-note { color: var(--muted); }
+.links-roll { gap: 0.5rem; }
 
 /* ----------------------------------------------------------------- guestbook
    The form is plain HTML posting to sign.chaosh.at; the entries are baked in

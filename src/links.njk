@@ -20,14 +20,29 @@ permalink: /links/
 
 <p class="links-lede">Passing through? <a href="/guestbook/">Sign the guestbook</a>.</p>
 
-{% if links and links.length %}
+{#- One list, two sections: an entry with `blogroll: true` is a blog Hat reads
+    and recommends (one-way, text only); everything else links back. -#}
+{%- set linkbacks = (links or []) | rejectattr("blogroll") | list %}
+{%- set blogroll = (links or []) | selectattr("blogroll") | list %}
+
+{% if linkbacks.length %}
 <h2 class="links-head">People who link back</h2>
 <ul class="links-list">
-  {% for l in links %}
+  {% for l in linkbacks %}
   <li>
     {% if l.button %}<a class="links-button" href="{{ l.url }}"><img src="{{ l.button }}" width="88" height="31" alt="{{ l.name }}" loading="lazy"></a>{% else %}<span class="links-button links-button-none" aria-hidden="true"></span>{% endif %}
     <span class="links-body"><a href="{{ l.url }}">{{ l.name }}</a>{% if l.note %} <span class="links-note">— {{ l.note }}</span>{% endif %}</span>
   </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if blogroll.length %}
+<h2 class="links-head">Blogroll</h2>
+<p class="links-lede links-sub">Blogs I read. They don't have to link back.</p>
+<ul class="links-list links-roll">
+  {% for l in blogroll %}
+  <li><span class="links-body"><a href="{{ l.url }}">{{ l.name }}</a>{% if l.note %} <span class="links-note">— {{ l.note }}</span>{% endif %}</span></li>
   {% endfor %}
 </ul>
 {% endif %}
