@@ -15,7 +15,7 @@ This game is only okay.
 
 And that's a weird stance to take for a game I have around 130 hours on. I think about those Steam reviews: "thumbs down, this game is bad, total waste of time. 90 hours played at time of review." But there's some nuance here. Fortune's Weave is so good that it's ultimately its own worst enemy. The highs make the valleys seem so deep, vast, and hard to ignore. It's a victim of its own ambition and hubris, it tells Icarus "hold my beer." But let's start with the highs before we dig into it because there are very high highs.
 
-![[Pasted image 20261014111252.png]]
+![[Pasted image 20261014111252.webp]]
 
 *The best.*
 
@@ -71,7 +71,7 @@ Compare this to say, weapon skill, where now you can train this in the arena (or
 
 Then in act 3 Eshmel comes in and takes the reins from the lords, which feels...really unearned. Eshmel pushes everyone to the side (now Theodora knows how it feels) and is this flat, uninteresting character when we just spent time bonding with everyone else. I cared more and was more attached to the other four Flame Lords who don't even get their own paths. I'd much rather get more time with Talimun or Anatolia than have Eshmel. 
 
-![[Pasted image 20261014112735.png]]
+![[Pasted image 20261014112735.webp]]
 
 *Leda's face is exactly how I feel about Perfect Bird Time.*
 

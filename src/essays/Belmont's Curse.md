@@ -12,7 +12,7 @@ featured:
 ---
 As I write this, currently, I don't know if Belmont's Curse is a canon game for me over Metroid Dread. I've struggled, I've gone back and forth, and there's a clear cleavage of why this is such a challenging choice for me. And why do these two clash instead of just having both? Having both on doesn't say anything new about me, they're redundant on the business card. They just say "Hat likes Metroidvanias." So what's the case for either? 
 
-![[4231820_20261020224452_1.png]]
+![[4231820_20261020224452_1.webp]]
 
 *Is Rose the chosen one?*
 
@@ -22,7 +22,7 @@ But Dread does a better job of storytelling through atmosphere. I went on about 
 
 At the same time, Castlevania feels like it's more opinionated and unique as a setting. Belmont's Curse just looks good and has such a unique style compared to Dread's sterility. Due to that lack of dialogue and exposition, Dread feels generically sci-fi. While maybe it benefits from Dracula being a cultural shorthand to understanding it, Castlevania has a lore to it, it feels more specific. 
 
-![[4231820_20261016223759_1.png]]
+![[4231820_20261016223759_1.webp]]
 
 *It just looks good.*
 
@@ -34,7 +34,7 @@ Whereas Dread had some challenges where I looked at it and said...no. Absolutely
 
 Further, combat is more varied and fun. So much combat in Dread is very samey, the fight locations are very similar and Samus isn't the most mobile character in a lot of ways. While Samus is quick and jumpy and her platforming feels good, Rose's movement is more dynamic, she gets to whip around the map, pull herself to enemies, and airdash from a very early point. She gets a variety of weapons to change up her playstyle, and the spells from her tarot cards. These are ways you can express yourself in the gameplay by having your own preferences. 
 
-![[4231820_20261017142559_1.png]]
+![[4231820_20261017142559_1.webp]]
 
 *I really appreciated how the library had a low fi beats soundtrack.*
 
@@ -42,7 +42,7 @@ The little challenges in Belmont's Curse are better too. I vastly prefer the Wor
 
 Dread's minimal storytelling actually does a better job of signposting, I rarely felt confused about where to go next. Belmont's Curse had long stretches of "well I have no idea what even to do." I know for many diehard fans this is the point, but I personally don't love the feeling of extended flailing on the critical path. Optional stuff? Go nuts. Dread is probably closer to the other extreme of too much handholding, but I would prefer that to the feeling of flailing about and eventually having to look it up online. 
 
-![[4231820_20261016223308_1.png]]
+![[4231820_20261016223308_1.webp]]
 
 *Me, backtracking aimlessly again.*
 
@@ -50,7 +50,7 @@ Ultimately, I have no idea right now. My gut might nod towards Belmont's Curse b
 
 But my concern became well, what if the canon and changelog are just a large subset of "the games I played," would that be good? And what if I have this discussion again in a few months when Metroid Ravenous comes out? That feels like too much. I thought about an annual cadence to review the entire canon and all the possible contenders but that felt too static and like I'd forget. It's too slow. 
 
-![[4231820_20261017141016_1.png]]
+![[4231820_20261017141016_1.webp]]
 
 *I just thought this moment was funny.*
 

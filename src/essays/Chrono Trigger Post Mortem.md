@@ -24,7 +24,7 @@ And some of this additional characterization exists already! I wish the party wa
 
 There are so many cool character moments in the story but you only get to see how the current party reacts and I wanted to see more of that. I was dying for a fourth party member here just to be able to fit all my favorites in. Poor Frog riding the bench while Ayla and Robo soak up all the screen time. 
 
-![[ct-canon-party.png|Crono, Ayla and Robo walking through the prehistoric jungle]]
+![[ct-canon-party.webp|Crono, Ayla and Robo walking through the prehistoric jungle]]
 
 *The Hat canonical party.*
 

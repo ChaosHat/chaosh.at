@@ -9,7 +9,7 @@ featured:
 ---
 Some of the games on my canon are quite old so I wanted to circle back and elaborate on why they're here and why others aren't and again, continue to peel back the decision space on how I consider the canon. I wanted to wait to write about Awakening until I had a good crack at Fortune's Weave and could really decide whether or not this article would have been "Why Fortune's Weave is on the Canon." It's not though. It won't be. I mean, maybe that DLC will be REAL good and they'll fix all my issues and I'll revisit. 
 
-![[Pasted image 20261022215838.png]]
+![[Pasted image 20261022215838.webp]]
 
 *The Shepherds*
 
@@ -21,7 +21,7 @@ The best of these games feel like plate spinning, you're trying to manage this t
 
 Fire Emblem has always felt like the best version of this. You not only have the tactics, but you gain a campaign but more than that, a story. And stories are where Fire Emblem, starting from Blazing Blade (the first one I played) has always succeeded.
 
-![[Pasted image 20261022221019.png]]
+![[Pasted image 20261022221019.webp]]
 
 *The titular Awakening.*
 
@@ -35,7 +35,7 @@ First, the pair up mechanic does this directly. It lets your characters fight si
 
 This leads directly to the kid mechanic. When your characters gain an S support with someone, they get married and have a kid who, due to the time travel conveniences of the plot, is instantly grown up and ready to fight! Your choice of who supports and fights with who directly leads to who falls in love and creates the next generation.
 
-![[Pasted image 20261022220840.png]]
+![[Pasted image 20261022220840.webp]]
 
 *This is what peak gameplay looks like.*
 
@@ -47,7 +47,7 @@ I mostly intended this to be a celebration of Awakening, but I think it's worth 
 
 Blazing Blade was another hot contender for the canon, but the older games struggle more to enable those support conversations, it's just harder to build them up. The only way you can do it is just by fighting, there's no additional way to build them up via gifts or meals. Additionally, while they do earn support by fighting side by side, it's a bit more literal than Awakening's Pair Up mechanic. They just stand there, we don't actually see them supporting each other in combat. I do love it though for the gorgeous sprite art and the simplicity. It just gets you in and out of battles so quickly. There aren't chores to it. 
 
-![[Pasted image 20261022220942.png]]
+![[Pasted image 20261022220942.webp]]
 
 *It pays to pair up.*
 
@@ -59,7 +59,7 @@ I'm not going to write about Fortune's Weave, I've done enough of that already, 
 
 So, to end this on a high note and get back to that celebration, here are some more things I like about Awakening.
 
-![[Pasted image 20261022221059.png]]
+![[Pasted image 20261022221059.webp]]
 
 *That's my Marth.*
 
@@ -71,7 +71,7 @@ So, to end this on a high note and get back to that celebration, here are some m
 - Who doesn't love a fun time travel story with heroes from the future returning to save the past?
 - I love how they still use pixel art sprites on the overworld. Fire Emblem has never looked better than when it had that gorgeous sprite art on the GBA and at least they give us this much. 
 
-![[Pasted image 20261022220633.png]]
+![[Pasted image 20261022220633.webp]]
 
 *Owain is too cool.*
 

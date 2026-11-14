@@ -1781,3 +1781,9 @@ nhl:
     - sports
   aliases:
     - hockey
+margin:
+  title: Marginalia
+  category:
+    - margin
+  aliases:
+    - marginalia

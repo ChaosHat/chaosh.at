@@ -12,7 +12,7 @@ A real theme I've been noting since I started reflecting on games more regularly
 
 I found Dawn of Sorrow pretty forgettable. It runs back a winning concept in Soma and the souls system but ultimately doesn't do much to add to that. The seals thing is so derided that there's a fan patch to remove it. The plot definitely cannot hold up to Aria of Sorrow, and that's saying something: these plots are pretty thin to start. Soma was a new and interesting character in Aria, the revelation that he was the new heir to Dracula's power was a twist. Aria also dropped some real lore on how all of this works, with Dracula's relationship to Chaos and why he keeps coming back.
 
-![[Soma Aria vs Dawn.png]]
+![[Soma Aria vs Dawn.webp]]
 
 *Dawn of Sorrow was not a glow up for Soma.*
 
@@ -26,7 +26,7 @@ This doesn't work out that way though. I nearly always doubled up because the dp
 
 Another control issue is that you can swap between three profiles pretty quickly but I kind of always forgot exactly what was on which. Three profiles wasn't enough to just set and forget them, I had to keep changing them up. I can imagine a world where this game has a radial menu on an analog stick where you can assign a helpful icon to each of six positions. You absolutely want to use the profiles since returning to the menu every time to swap out a piercing weapon for this given monster would be a pain, but as is it feels like half a quality of life improvement. 
 
-![[Pasted image 20261021155826.png]]
+![[Pasted image 20261021155826.webp]]
 
 *Shanoa is just cool.*
 

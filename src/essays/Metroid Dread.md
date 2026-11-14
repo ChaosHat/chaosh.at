@@ -24,7 +24,7 @@ Then you defeat it, cathartically blowing its head off and draining the Omega Ca
 
 At the same time, Samus feels the most powerful she ever has here, we're in full Aliens action movie mode. She controls like a dream, the analog aim stick here lets you pick things off with precision compared to the clunkier d-pad only games. The melee counters feel strong and impactful highlighting Samus's bravery and strength against the unknown. She moves so well, the platforming here is the best in the series, allowing you to navigate with precision. The controls work with you, like a well calibrated power loader. 
 
-![[ripley-power-loader.jpg|Ripley in the power loader]]
+![[ripley-power-loader.webp|Ripley in the power loader]]
 
 *The Varia suit is truly a triumph of miniaturization compared to the 1986 version.*
 

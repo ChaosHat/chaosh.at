@@ -7,7 +7,7 @@ about:
   - zelda-a-link-between-worlds
 featured:
 ---
-![[Pasted image 20261029163800.png]]
+![[Pasted image 20261029163800.webp]]
 
 I really enjoyed A Link Between Worlds. It's fun, it's not too long, and it has some moments of real genius. It offers two very unique primary mechanics to the game, one of which is very good and makes me wish the other was better. The two mechanics, for those who don't know, are Link's ability to merge with walls and Ravio's shop. 
 
@@ -45,7 +45,7 @@ There is a hero mode that makes the game harder, but that doesn't address my pro
 
 This is why the wall merge power stands out so strongly. It's available the entire game and that makes it something that offers a *second dimension* of problem solving: there's the traditional Zelda layer that's immediately apparent to you, and then there's the layer that you see when you start thinking about how to leverage that special power. It's reminiscent of the portal gun from Portal, a movement ability that encourages you to look at the world differently (now you're thinking with wall merges) and makes you feel brilliant (or maybe a little dumb) when you figure it out. Each item makes you feel like this at times, but mostly only in the one mandatory dungeon and then never again. 
 
-![[Pasted image 20261029164204.png]]
+![[Pasted image 20261029164204.webp]]
 
 *I think we're too quick to forgive Hilda for her crimes.*
 
