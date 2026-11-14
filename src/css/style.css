@@ -1179,7 +1179,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
    on the right). Hover or focus opens it leftward into the gutter: rows
    grow, labels fade in, top to bottom, over a smoked panel. Only where the
    gutter holds the open panel; narrower, a daily has the .day-toc bar
-   instead and the home page goes without (badge-style "in this post"
+   instead and the home page its .home-toc (2026-11-14) (badge-style "in this post"
    chips under the date were tried first; the rail and bar replaced them). Absolute against <main>, spanning its height, so
    the inner list can stick the whole page. */
 /* The rail's narrow-screen half: a collapsed "in this post" bar under a
@@ -1215,6 +1215,19 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   .day-toc::details-content, .day-toc summary::after { transition: none; }
 }
+/* The home page's bar (index.njk): a line per date, its subjects wrapping
+   after it with dot separators, the date in the pixel face. Capped at 70vh
+   with its own scroll so a heavy week can't run the list off the screen. */
+.home-toc { margin: 0 0 1.5rem; }
+.home-toc ul { max-height: 70vh; overflow-y: auto; padding-left: 2px; }
+.home-toc li { padding: 6px 0; font: 17px/24px var(--prose); }
+.home-toc li + li { border-top: 1px dashed color-mix(in srgb, var(--edge) 70%, transparent); }
+.home-toc li a { display: inline; padding: 0; }
+/* The dot hangs off the end of the subject before it, so a wrap leaves it at
+   a line's end rather than opening the next one. */
+.home-toc li a:not(.home-toc-date):not(:last-child)::after { content: "\00a0\00a0·"; margin-right: 0.5em; color: var(--muted); }
+.home-toc .home-toc-date { margin-right: 0.6em; font: 12px/24px var(--pixel); color: var(--muted); }
+.home-toc .home-toc-essay::before { content: "✦ "; color: var(--muted); }
 
 .rail { display: none; }
 @media (min-width: 85rem) {

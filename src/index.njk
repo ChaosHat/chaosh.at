@@ -35,6 +35,35 @@ layout: base.njk
   {% endfor %}
 </div></nav>
 {% include "rail-script.njk" %}
+{#- The rail's narrow-screen half on the home page (2026-11-14): one collapsed
+    bar above the stream, not one per day. Open, a line per date with its
+    subjects wrapping after it, so five days fit a phone screen; tapping a
+    subject jumps and closes it. Static, not sticky: a sticky bar costs a
+    strip of a small screen for good. Hidden wherever the rail shows (CSS,
+    .day-toc). -#}
+<details class="day-toc home-toc">
+  <summary><span class="day-toc-label">on this page</span></summary>
+  <ul>
+  {% for entry in five %}
+  {% set item = entry.essay or entry.post %}
+  {% set d = item.date | dateSlug %}
+  {% set prev = five[loop.index0 - 1] if not loop.first %}
+  {% set newDay = loop.first or ((prev.essay or prev.post).date | dateSlug) != d %}
+  {% if newDay %}{% if not loop.first %}</li>{% endif %}
+  <li><a class="home-toc-date" href="#{{ ('essay-' + d) if entry.kind == "essay" else d }}">{{ item.date | shortDate }}</a>
+  {%- endif %}
+  {% if entry.kind == "essay" %}<a class="home-toc-essay" href="#essay-{{ d }}">{{ item.title }}</a>
+  {% else %}{% for s in item.content | dayContents(d + "-") %}<a href="#{{ s.id }}">{{ s.title }}</a>{% endfor %}
+  {% endif %}
+  {% if loop.last %}</li>{% endif %}
+  {% endfor %}
+  </ul>
+</details>
+<script>
+  document.querySelector(".home-toc")?.addEventListener("click", (e) => {
+    if (e.target.closest("a")) e.currentTarget.open = false;
+  });
+</script>
 <ul class="post-list">
   {% for entry in collections.stream | limit(5) %}
   {% if entry.kind == "essay" %}
