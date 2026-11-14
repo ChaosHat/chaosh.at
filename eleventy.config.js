@@ -443,6 +443,46 @@ export const gapLabel = (days) =>
 export const rayHeight = (words) =>
   Math.round(Math.min(28, 6 + 5 * Math.log2(1 + words / 15)));
 
+// Per-subject stats (2026-11-14): the flip card's back, the cleared card,
+// and the year page. `fragments` are a subject's dated ## sections (dailies
+// only), `essays` the essays whose about: names it. `from`/`to` (Dates, `to`
+// exclusive) scope it: none for the whole run, a year for the year page.
+// days = days with a ## on the subject; words/pics summed over those
+// sections; first/last its entry dates; weeks the Mon–Sun weeks they span
+// (the weeks grid's columns). Essays count only toward `essays`: they are a
+// different kind of writing, and the lit days are the play record.
+const weekStart = (t) => t - ((new Date(t).getUTCDay() + 6) % 7) * DAY_MS;
+export const subjectStats = (fragments, essays = [], { from = null, to = null } = {}) => {
+  const within = (d) => (!from || d >= from) && (!to || d < to);
+  const frs = fragments.filter((f) => within(f.date));
+  const days = new Map();
+  for (const f of frs) {
+    const key = dayKey(f.date);
+    days.set(key, (days.get(key) ?? 0) + (f.words ?? 0));
+  }
+  const keys = [...days.keys()].sort();
+  const first = keys.length ? new Date(dayOf(keys[0])) : null;
+  const last = keys.length ? new Date(dayOf(keys.at(-1))) : null;
+  return {
+    days: keys.length,
+    words: frs.reduce((n, f) => n + (f.words ?? 0), 0),
+    pics: frs.reduce((n, f) => n + (f.pics ?? 0), 0),
+    essays: essays.filter((e) => within(e.date)).length,
+    first,
+    last,
+    weeks: first
+      ? Math.round((weekStart(last.getTime()) - weekStart(first.getTime())) / (7 * DAY_MS)) + 1
+      : 0,
+    // day key -> words, for the weeks grid.
+    wordsByDay: Object.fromEntries(keys.map((k) => [k, days.get(k)])),
+  };
+};
+
+// Images embedded in a section: Obsidian `![[x.png]]` (with or without a
+// `|full` hint) and markdown `![alt](x.png)`. Not other embeds.
+const PIC_RE = /!\[\[[^\]|]+\.(?:png|jpe?g|webp|gif|avif)(?:\|[^\]]*)?\]\]|!\[[^\]]*\]\([^)]+\)/gi;
+export const countPics = (text) => (String(text ?? "").match(PIC_RE) ?? []).length;
+
 // `entries`: [{ date, words }] — several on one day sum.
 export const foldStrip = (entries, { tail = false, through = lastShippable() } = {}) => {
   const words = new Map();
@@ -2079,7 +2119,9 @@ export default function (eleventyConfig) {
             box: face.cover ? coverBoxOf(face.cover, fitOf(slug)) : coverBox(slug),
           },
           html: revealSpoilers(md.render(text)),
-          words: text.split(/\s+/).filter(Boolean).length,
+          // An embedded image is not a word (2026-11-14, for the stats).
+          words: text.replace(PIC_RE, " ").split(/\s+/).filter(Boolean).length,
+          pics: countPics(text),
         });
       }
     }
@@ -2126,6 +2168,8 @@ export default function (eleventyConfig) {
           // An essay day is a big day: straight to the ray cap.
           ...essays.map((e) => ({ date: e.date, words: 1000 })),
         ], meta?.status ?? "active"),
+        // Whole-run stats (see subjectStats); the year page scopes its own.
+        stats: subjectStats(fragments, essays),
         canon: canonSlugsAll.has(slug),
         // Templates branch on canon first (the gold), then on this, then
         // render "pending". A canon subject's rating is the canon rung.
@@ -2484,19 +2528,52 @@ export default function (eleventyConfig) {
   //
   // /canon/ — the ten, the dated record of how they got that way, and the
   // essays about the canon itself (2026-10-22). Membership is `rating: canon`
-  // (canonSlugs); the HISTORY is canon_log.yaml, which publish.py appends to
-  // on any night the set changes, so a swap is still just two blurb edits and
-  // the changelog writes itself. Hand edits there are expected: a date fixed,
-  // a `why:` naming the essay that argued the change.
-  const canonLogFile = path.join("src", "_data", "canon_log.yaml");
-  const canonLog = fs.existsSync(canonLogFile)
-    ? parseYaml(fs.readFileSync(canonLogFile, "utf8")) || []
+  // (canonSlugs); the HISTORY is the canon in/out entries of status_log.yaml
+  // (canon_log.yaml until 2026-11-14, when the status log absorbed it), which
+  // publish.py appends to on any night a status or rating changes, so a swap
+  // is still just two blurb edits and the changelog writes itself. Hand edits
+  // there are expected: a date fixed, a `why:` naming the essay that argued
+  // the change.
+  const statusLogFile = path.join("src", "_data", "status_log.yaml");
+  const statusLog = fs.existsSync(statusLogFile)
+    ? parseYaml(fs.readFileSync(statusLogFile, "utf8")) || []
     : [];
   const canonProblems = []; // reported in eleventy.after
 
   const slugList = (v) =>
     (v == null ? [] : [].concat(v)).map((s) => String(s ?? "").trim()).filter(Boolean);
   const logDate = (d) => (d instanceof Date ? d : new Date(String(d)));
+
+  // The status log's canon in/out as the old canon_log.yaml entries
+  // ({date, medium, in, out, why}), one per night and group, in log order —
+  // what replayCanonLog replays and the changelog renders. A subject's group
+  // is today's; `why:` is the night's first. Mirrors canon_log_view() in the
+  // vault's chaosh_subjects.py — if one changes, change both.
+  const logPair = (v) => (Array.isArray(v) && v.length === 2
+    ? v.map((x) => (x == null || x === "" ? null : String(x))) : null);
+  const canonLogView = (log) => {
+    const view = [];
+    const at = new Map();
+    for (const e of Array.isArray(log) ? log : []) {
+      if (!e || typeof e !== "object" || !e.slug || !e.date) continue;
+      const pair = logPair(e.rating);
+      if (!pair || (pair[0] === CANON) === (pair[1] === CANON)) continue;
+      const slug = String(e.slug);
+      const medium = subjects[slug] ? groupOf(subjects[slug]) : DEFAULT_GROUP;
+      const day = e.date instanceof Date ? e.date.toISOString().slice(0, 10) : String(e.date);
+      const key = `${day}|${medium}`;
+      if (!at.has(key)) {
+        const entry = { date: e.date, medium, in: [], out: [] };
+        at.set(key, entry);
+        view.push(entry);
+      }
+      const v = at.get(key);
+      v[pair[1] === CANON ? "in" : "out"].push(slug);
+      if (e.why && !v.why) v.why = String(e.why);
+    }
+    return view;
+  };
+  const canonLog = canonLogView(statusLog);
 
   // Where the log leaves the canon, and when each of today's ten came on.
   // An entry's `out` frees its slots and its `in` fills them in order, extras
@@ -3442,9 +3519,9 @@ export default function (eleventyConfig) {
     // drops the game's row from its /r/ view, and both failures are invisible
     // on the page — the tile just looks like one left unrated on purpose.
     if (canonProblems.length > 0) {
-      console.warn(`\n[chaosh.at] ${canonProblems.length} canon_log.yaml problem(s):`);
+      console.warn(`\n[chaosh.at] ${canonProblems.length} canon history (status_log.yaml) problem(s):`);
       for (const problem of canonProblems) console.warn(`  · ${problem}`);
-      console.warn(`  /canon/ still builds; fix the line in the vault's canon_log.yaml.\n`);
+      console.warn(`  /canon/ still builds; fix the line in the vault's status_log.yaml.\n`);
     }
 
     if (badRatings.size > 0) {

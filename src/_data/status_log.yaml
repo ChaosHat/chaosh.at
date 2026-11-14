@@ -1,0 +1,228 @@
+# Every status and rating change, oldest first: one entry per subject per
+# night. publish.py appends the night's differences (tonight's subjects.yaml
+# against where this log, or failing that last night's copy, leaves each
+# subject), dated the day that ended. Hand edits are fine: fix a date (status
+# changes often lag the writing), or add `why: <essay filename>` to link the
+# essay that argued a change. Canon in/out are ordinary rating entries and
+# /canon/'s changelog is drawn from them; never edit this to make a swap.
+# Backfilled 2026-11-14 from the site repo's subjects.yaml history (statuses
+# from 2026-08-10, ratings from 2026-10-22) and the retired canon_log.yaml.
+- date: 2026-08-10
+  slug: final-fantasy-vi
+  status: [active, incomplete]
+- date: 2026-08-11
+  slug: metaphor-refantazio
+  status: [active, completed]
+- date: 2026-08-15
+  slug: castlevania-symphony-of-the-night
+  status: [active, completed]
+- date: 2026-08-15
+  slug: final-fantasy-vii-remake
+  status: [active, completed]
+- date: 2026-08-18
+  slug: super-metroid
+  status: [active, completed]
+- date: 2026-08-20
+  slug: metroid-zero-mission
+  status: [active, completed]
+- date: 2026-08-21
+  slug: star-wars-jedi-fallen-order
+  status: [active, shelved]
+- date: 2026-08-21
+  slug: world-of-warcraft-playerbots
+  status: [active, incomplete]
+- date: 2026-08-27
+  slug: metroid-samus-returns
+  status: [active, completed]
+- date: 2026-08-28
+  slug: dragon-quest-xi-s
+  status: [active, completed]
+- date: 2026-08-29
+  slug: mass-effect-legendary-edition
+  status: [active, completed]
+- date: 2026-09-02
+  slug: metroid-dread
+  status: [active, completed]
+- date: 2026-09-03
+  slug: chrono-trigger
+  status: [active, completed]
+- date: 2026-09-05
+  slug: castlevania-dawn-of-sorrow
+  status: [active, completed]
+- date: 2026-09-08
+  slug: final-fantasy-iv
+  status: [active, incomplete]
+- date: 2026-09-09
+  slug: baldurs-gate-3
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: cyberpunk-2077
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: fire-emblem-awakening
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: monster-hunter-rise
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: metroid-dread
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: final-fantasy-vii-remake
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: crusader-kings-3
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: paper-mario-the-thousand-year-door
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: pokopia
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-09
+  slug: marvels-spider-man-2
+  rating: [null, canon]
+  why: Canon Premiere
+- date: 2026-09-12
+  slug: star-wars-zero-company
+  status: [active, shelved]
+- date: 2026-09-13
+  slug: castlevania-order-of-ecclesia
+  status: [active, completed]
+- date: 2026-09-13
+  slug: dragon-quest-v
+  status: [active, completed]
+- date: 2026-09-16
+  slug: fire-emblem-fortunes-weave
+  status: [backlog, active]
+- date: 2026-09-18
+  slug: zelda-a-link-between-worlds
+  status: [active, completed]
+- date: 2026-10-13
+  slug: fire-emblem-fortunes-weave
+  status: [active, shelved]
+- date: 2026-10-13
+  slug: star-wars-jedi-fallen-order
+  status: [shelved, incomplete]
+- date: 2026-10-13
+  slug: super-mario-rpg
+  status: [active, incomplete]
+- date: 2026-10-16
+  slug: castlevania-belmonts-curse
+  status: [backlog, active]
+- date: 2026-10-16
+  slug: prince-of-persia-the-lost-crown
+  status: [active, shelved]
+- date: 2026-10-21
+  slug: castlevania-belmonts-curse
+  status: [active, completed]
+- date: 2026-10-22
+  slug: final-fantasy-resonance
+  status: [backlog, active]
+- date: 2026-10-28
+  slug: lufia-2
+  rating: [null, liked*]
+- date: 2026-10-28
+  slug: pokemon-lazarus
+  status: [active, incomplete]
+- date: 2026-10-28
+  slug: sovereign-tower
+  status: [active, shelved]
+- date: 2026-10-28
+  slug: azul
+  rating: [null, loved]
+- date: 2026-10-28
+  slug: dune-imperium-uprising
+  rating: [null, favorite]
+- date: 2026-10-28
+  slug: flamecraft-duals
+  rating: [null, liked]
+- date: 2026-10-28
+  slug: keyflower
+  rating: [null, loved]
+- date: 2026-10-28
+  slug: roll-for-the-galaxy
+  rating: [null, loved]
+- date: 2026-10-28
+  slug: the-white-castle
+  rating: [null, loved]
+- date: 2026-10-28
+  slug: ticket-to-ride
+  rating: [null, favorite]
+- date: 2026-10-28
+  slug: tzolkin
+  rating: [null, favorite]
+- date: 2026-10-28
+  slug: wingspan
+  rating: [null, loved]
+- date: 2026-10-28
+  slug: android-netrunner
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: arboretum
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: arkham-horror-lcg
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: concordia
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: daggerheart
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: forest-shuffle
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: fromage
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: heat-pedal-to-the-metal
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: hot-streak
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: river-valley-glassworks
+  rating: [null, canon]
+- date: 2026-10-28
+  slug: rokoko
+  rating: [null, canon]
+- date: 2026-10-29
+  slug: nintendo-switch-sports-resort
+  status: [backlog, active]
+- date: 2026-11-06
+  slug: final-fantasy-resonance
+  status: [active, completed]
+  rating: [null, loved]
+- date: 2026-11-07
+  slug: burnout-3-takedown
+  status: [active, completed]
+- date: 2026-11-07
+  slug: final-fantasy-vii-rebirth
+  status: [backlog, active]
+- date: 2026-11-07
+  slug: nintendo-switch-sports-resort
+  rating: [null, liked]
+- date: 2026-11-07
+  slug: sovereign-tower
+  status: [shelved, active]
+- date: 2026-11-10
+  slug: sovereign-tower
+  status: [active, completed]
+  rating: [null, liked]
+- date: 2026-11-11
+  slug: fire-emblem-binding-blade
+  status: [active, shelved]
+- date: 2026-11-11
+  slug: zelda-ocarina-of-time
+  status: [completed, active]
