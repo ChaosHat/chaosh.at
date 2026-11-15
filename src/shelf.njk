@@ -81,9 +81,14 @@ eleventyComputed:
     one falls back to its generated tile, stretched by CSS to the cover's 2:3,
     so the original guarantee holds (no shelf goes blank waiting on an image)
     and a half-covered shelf still lays out as one even grid. -#}
+{%- from "card-back.njk" import back %}
 <ul class="shelf-grid shelf-{{ group.id }}">
   {% for item in items %}
-  <li class="shelf-item st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
+  {#- A card with anything written about it flips (2026-11-14): hover on a
+      desktop, the `flip` tab on a phone (the script below; the tab stays
+      hidden without it). The back is the whole run's numbers. -#}
+  {%- set flips = item.stats and item.stats.days %}
+  <li class="shelf-item{% if flips %} has-back{% endif %} st-{{ item.status }}{% if item.canon %} is-canon{% elif item.rating and item.rating.slug == "favorite" %} is-favorite{% endif %}" style="--o-az:{{ item.oAz }};--o-recent:{{ item.oRecent }};--o-canon:{{ item.oCanon }};--o-rating:{{ item.oRating }}">
     <a href="/s/{{ item.slug }}/">
       <span class="shelf-card">
         <span class="shelf-art">
@@ -111,10 +116,27 @@ eleventyComputed:
         {% if item.canon %}<span class="cell rating badge-g b-canon">canon</span>
         {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
         {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
+        {% if flips %}{{ back(item.title, item.stats, item.grid, item.released) }}{% endif %}
       </span>
       <span class="shelf-caption">{{ item.title }}</span>
     </a>
+    {% if flips %}<button type="button" class="flip-tab" aria-pressed="false" hidden><span>flip</span><span class="sr-only"> {{ item.title }}'s stats</span></button>{% endif %}
   </li>
   {% endfor %}
 </ul>
 </div>
+{#- The flip tab (2026-11-14): on a phone, where there is no hover, a small
+    `flip` in the card's corner turns it; the rest of the card stays one link
+    to the game. Shown only once this has run. -#}
+<script>
+  (() => {
+    const grid = document.querySelector(".shelf-grid");
+    if (!grid) return;
+    for (const b of grid.querySelectorAll(".flip-tab")) b.hidden = false;
+    grid.addEventListener("click", (e) => {
+      const b = e.target.closest(".flip-tab");
+      if (!b) return;
+      b.setAttribute("aria-pressed", b.closest(".shelf-item").classList.toggle("flipped"));
+    });
+  })();
+</script>

@@ -1,0 +1,22 @@
+{#- The flip card's back (2026-11-14): the menu window behind a shelf card.
+    Title with the run under it, a 2×2 of 16px numbers (days, words, pics,
+    essays; – for none), the weeks grid, and the release year at the foot —
+    ✦ and the accent when it is the page's year (`year`: the year page's;
+    the main shelf has none). `stats`/`grid` are whole-run on the main shelf,
+    one year's on the year page. "pics", not "shots": Hat couldn't tell what
+    "shots" meant. Absolute inside the front's box, so a long title never
+    makes one card taller than its row. -#}
+{%- from "weeks.njk" import weeks %}
+{%- macro back(title, stats, grid, released, year) -%}
+<span class="shelf-back" aria-hidden="true">
+  <span class="bk-t">{{ title }}<span class="bk-run">{{ stats.first | runText(stats.last) }}</span></span>
+  <span class="bk-big">
+    <span><b>{{ stats.days or "–" }}</b>days</span>
+    <span><b>{{ (stats.words | num) if stats.words else "–" }}</b>words</span>
+    <span><b>{{ stats.pics or "–" }}</b>pics</span>
+    <span><b>{{ stats.essays or "–" }}</b>essays</span>
+  </span>
+  <span class="bk-weeks">{{ weeks(grid) }}</span>
+  {%- if released %}<span class="bk-rel">released <span{% if year and released == year %} class="this-year"{% endif %}>{{ released }}</span></span>{% endif %}
+</span>
+{%- endmacro -%}

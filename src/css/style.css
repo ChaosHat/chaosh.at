@@ -1580,6 +1580,9 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
    one object, and lifting the art alone would peel it off the label under it. */
 .shelf-card { display: block; background: var(--fill); transition: transform 0.1s steps(3); }
 .shelf-item a:hover .shelf-card { transform: translateY(-4px); }
+/* A flip card doesn't lift (2026-11-14): its hover is the flip, and without
+   the lift a sweep across a shelf of them is a calm swap. */
+.shelf-item.has-back a:hover .shelf-card { transform: none; }
 .shelf-art { display: block; }
 
 /* 2:3 is SteamGridDB's portrait grid size (600x900), so a fetched cover lands
@@ -3281,4 +3284,91 @@ main:focus { outline: none; }
 @media (max-width: 34rem) {
   .finish { flex-direction: column; }
   .finish-head { padding-bottom: 4px; }
+}
+
+/* --------------------------------------------- flip cards (2026-11-14) */
+/* The shelf card's back: a menu window the front's size (card-back.njk).
+   Absolute inside .shelf-card so a three-line title never makes one card
+   taller than its row. A stepped opacity swap, not a 3D turn. */
+.shelf-item { position: relative; }
+.shelf-card { position: relative; }
+.shelf-back {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 8px;
+  background: var(--fill);
+  outline: 2px solid var(--dim);
+  outline-offset: -6px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.12s steps(2), visibility 0s 0.12s;
+}
+.bk-t {
+  display: block;
+  margin-bottom: 6px;
+  padding: 4px 30px 8px 4px;
+  font: 8px/12px var(--pixel);
+  color: var(--ink);
+  border-bottom: 2px solid var(--dim);
+  text-wrap: balance;
+}
+.bk-run { display: block; margin-top: 4px; color: var(--muted); }
+.bk-big { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 6px; padding: 10px 4px 0; }
+.bk-big span { display: flex; flex-direction: column; gap: 5px; font: 8px/1 var(--pixel); color: var(--muted); }
+.bk-big b { font: 400 16px/1 var(--pixel); color: var(--ink); font-variant-numeric: tabular-nums; }
+.bk-weeks { display: block; margin: 14px 4px 0; }
+.bk-rel { margin: auto 4px 2px; padding-top: 8px; border-top: 2px solid var(--dim); font: 8px/1 var(--pixel); color: var(--muted); }
+.bk-rel span { color: var(--ink); }
+.bk-rel span.this-year { color: var(--accent); }
+.bk-rel span.this-year::after { content: " ✦"; }
+
+/* Flipped: on hover (no delay), keyboard focus, or the tab. */
+.shelf-item.flipped .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
+.shelf-item.flipped .shelf-card > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+@media (hover: hover) {
+  /* On the item, not the link: the tab sits outside the link, and pointing
+     at it must not turn the card back over. */
+  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
+  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-card > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+}
+
+/* The phone's tab: a 32×28 hit area in the card's top-right corner, the
+   label inside it small. Always shown where there is no hover; on a desktop
+   only while the card is hovered or the tab focused. */
+.flip-tab {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  min-width: 32px;
+  min-height: 28px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.flip-tab[hidden] { display: none; }
+.flip-tab > span:first-child {
+  padding: 3px 4px;
+  font: 8px/1 var(--pixel);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--night) 75%, transparent);
+  border: 1px solid var(--dim);
+  opacity: 0;
+  transition: opacity 0.1s steps(2);
+}
+.shelf-item:hover .flip-tab > span:first-child,
+.flip-tab:focus-visible > span:first-child,
+.shelf-item.flipped .flip-tab > span:first-child { opacity: 1; }
+.flip-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (hover: none) { .flip-tab > span:first-child { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .shelf-back, .shelf-card > *, .flip-tab > span { transition: none !important; }
 }

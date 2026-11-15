@@ -485,18 +485,23 @@ export const subjectStats = (fragments, essays = [], { from = null, to = null } 
 // Unwritten days are left nearly invisible on purpose. Past WEEKS_MAX weeks
 // the template fades the left edge (`clipped`). -> { cells, clipped } | null
 export const WEEKS_MAX = 19;
+// Only the last WEEKS_MAX + 2 weeks are drawn at all: a run that spans years
+// (a replay, a board game) would otherwise put a cell per day of it in every
+// card's HTML, and the fade hides the cut.
 export const weeksGrid = (stats) => {
   if (!stats?.first) return null;
-  const pad = (stats.first.getUTCDay() + 6) % 7;
+  const floor = weekStart(stats.last.getTime()) - (WEEKS_MAX + 1) * 7 * DAY_MS;
+  const start = Math.max(stats.first.getTime(), floor);
+  const pad = (new Date(start).getUTCDay() + 6) % 7;
   const cells = Array.from({ length: pad }, () => ({ pad: true }));
-  for (let t = stats.first.getTime(); t <= stats.last.getTime(); t += DAY_MS) {
+  for (let t = start; t <= stats.last.getTime(); t += DAY_MS) {
     const key = dayKey(new Date(t));
     const words = stats.wordsByDay[key];
     cells.push(words
       ? { on: true, w: (0.35 + (0.65 * (rayHeight(words) - 6)) / 22).toFixed(2), title: `${key} · ${words} words` }
       : { on: false });
   }
-  return { cells, clipped: Math.ceil(cells.length / 7) > WEEKS_MAX };
+  return { cells, clipped: start > stats.first.getTime() || Math.ceil(cells.length / 7) > WEEKS_MAX };
 };
 
 // "7–21 oct", "28 aug → 3 sep", "10 nov": a run's dates as the cards say them.
@@ -870,6 +875,7 @@ export default function (eleventyConfig) {
 
   // 5,159 — the cards' word counts.
   eleventyConfig.addFilter("num", (n) => Number(n).toLocaleString("en-US"));
+  eleventyConfig.addFilter("runText", (first, last) => runText(first, last));
 
   // RFC 3339, which Atom requires.
   eleventyConfig.addFilter("atomDate", (d) => d.toISOString());
@@ -2381,6 +2387,8 @@ export default function (eleventyConfig) {
         ], meta?.status ?? "active"),
         // Whole-run stats (see subjectStats); the year page scopes its own.
         stats: subjectStats(fragments, essays),
+        // The flip card's weeks grid, whole run.
+        grid: weeksGrid(subjectStats(fragments, essays)),
         stream,
         toc,
         canon: canonSlugsAll.has(slug),
