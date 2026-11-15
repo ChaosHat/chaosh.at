@@ -1,20 +1,20 @@
 canon:
   rank: 0
   title: canon
-  description: The canon is my gamer business card. It's an easy way for you to see what I like and read more about why I like it so you know where I'm coming from. This list is designed to change as I do and as new games come out that are better examples.
+  description: A curated, short list and tl;dr of my tastes and what I love. It's biased towards newer things, I believe this should be a living, changing thing instead of something static and old.
 favorite:
   rank: 1
   title: favorite
-  description: A game I'll keep coming back to. Former canon, or on the doorstep of it.
+  description: These are my favorites and things I'll always come back to and replay. They're comfort food picks and games that are not quite canon, or former canon.
 loved:
   rank: 2
   title: loved
-  description: A strong recommendation. No caveat to hand you first; I think you should play it.
+  description: These are great games with no caveats. I'd recommend them to most people.
 liked:
   rank: 3
   title: liked
-  description: A recommendation, with some caveats. Still a yes — there's just a thing or two you should know going in.
+  description: Good games with things I might warn someone about, quirks or irritations, or just better for a more specific taste or audience.
 disliked:
   rank: 4
   title: disliked
-  description: Didn't land for me. Not "bad" — plenty of good games sit here, and plenty of people will disagree with me about them. A taste statement.
+  description: "I didn't like these! I'm not saying they're bad games, they're just games that aren't for me, for whatever reason. "

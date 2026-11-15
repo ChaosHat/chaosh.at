@@ -351,6 +351,17 @@
    "sha": "ace647ca6dbf35ef"
   }
  },
+ "20261114165756-01M7E02FDBV73J8CZCF7D1R4FQ.webp": {
+  "sha": "b86cae97ba45ab15",
+  "file": "b86cae97ba45ab15",
+  "w": 1600,
+  "h": 900,
+  "thumb": {
+   "w": 640,
+   "h": 360,
+   "sha": "92d2f78de9b6d4ae"
+  }
+ },
  "2909400_20261106220001_1.webp": {
   "sha": "8c00c8dc815f313b",
   "file": "8c00c8dc815f313b",
@@ -1229,6 +1240,17 @@
    "w": 640,
    "h": 360,
    "sha": "a2c6b22bfd0579c8"
+  }
+ },
+ "Screenshot_20261114-090258.webp": {
+  "sha": "64e2d9cb1b58a98e",
+  "file": "64e2d9cb1b58a98e",
+  "w": 1600,
+  "h": 900,
+  "thumb": {
+   "w": 640,
+   "h": 360,
+   "sha": "ba9e0dd89ed09e8f"
   }
  },
  "Soma-Aria-vs-Dawn.webp": {
