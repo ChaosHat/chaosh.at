@@ -8,6 +8,20 @@ permalink: "/s/{{ subject.slug }}/"
 eleventyComputed:
   title: "{{ subject.title | safe }}"
 ---
+{#- The rail on a long subject page (2026-11-14): months as the big rows,
+    each entry's date under them, the finish cards too (subjectToc). Wide
+    screens only; narrower, the .day-toc bar under the header. -#}
+{% if subject.toc %}
+<nav class="rail" aria-label="On this page"><div class="rail-inner">
+  {% for m in subject.toc %}
+  <div class="rail-day">
+    <a class="rail-row rail-row-day" href="#{{ m.id }}"><span class="rail-label">{{ m.label }}</span><span class="rail-tick"></span></a>
+    {% for r in m.rows %}<a class="rail-row{% if r.finish %} rail-row-finish{% endif %}" href="#{{ r.id }}"><span class="rail-label">{{ r.label }}</span><span class="rail-tick"></span></a>{% endfor %}
+  </div>
+  {% endfor %}
+</div></nav>
+{% include "rail-script.njk" %}
+{% endif %}
 <article class="subject">
   <header class="subject-head{% if subject.essays | length %} no-rule{% endif %}">
     {#- The subject's sky at the one size where the full three-curtain scene
@@ -75,6 +89,23 @@ eleventyComputed:
       {% endif %}
     </div>
   </header>
+  {#- The rail's narrow-screen half: a line per month, its days wrapping
+      after it (the home page's bar, .home-toc). -#}
+  {% if subject.toc %}
+  <details class="day-toc home-toc subject-toc">
+    <summary><span class="day-toc-label">on this page</span></summary>
+    <ul>
+    {% for m in subject.toc %}
+    <li><a class="home-toc-date" href="#{{ m.id }}">{{ m.label }}</a>{% for r in m.rows %}<a{% if r.finish %} class="toc-finish"{% endif %} href="#{{ r.id }}">{{ r.finish or r.day }}</a>{% endfor %}</li>
+    {% endfor %}
+    </ul>
+  </details>
+  <script>
+    document.querySelector(".subject-toc")?.addEventListener("click", (e) => {
+      if (e.target.closest("a")) e.currentTarget.open = false;
+    });
+  </script>
+  {% endif %}
 
   {#- A cards group's cards head the page of the subject they belong to
       (2026-11-03: the Bears and their vibe line on NFL, the Cubs on MLB):
@@ -109,15 +140,43 @@ eleventyComputed:
   {% if subject.fragments | length %}
   <section class="timeline">
     {% if subject.essays | length %}<h2 class="section-head">Along the way</h2>{% endif %}
-    {% for fragment in subject.fragments %}
-    <div class="fragment">
+    {#- The fragments with a card at each status or rating change
+        (subjectStream; tl-card.njk). -#}
+    {% for item in subject.stream %}
+    {% if item.kind == "fragment" %}
+    {%- set fragment = item.fragment %}
+    <div class="fragment"{% if item.id %} id="{{ item.id }}"{% endif %}>
       {#- Back to the section in its day. A section that wore a face (`##
           Bears` on NFL's page) says so beside its date. -#}
       <a class="fragment-date" href="{{ fragment.anchorUrl }}">{{ fragment.date | readableDate }}</a>{% if fragment.face %} <span class="fragment-face">{{ fragment.face.title }}</span>{% endif %}
       {{ fragment.html | safe }}
     </div>
+    {% else %}
+    {%- set card = item %}
+    {% include "tl-card.njk" %}
+    {% endif %}
     {% endfor %}
   </section>
+  {#- A cleared card's fireworks wait for the reader: most finishes sit at
+      the foot of a long page, and played on load the show was long over by
+      the time anyone got there. Hold the coda until the card is mostly on
+      screen, then play (style.css .is-waiting). The site's only other JS is
+      the image rail; without this the fireworks just play on load. -#}
+  {% if subject.stream | selectattr("fireworks") | length %}
+  <script>
+    (() => {
+      const cards = document.querySelectorAll(".finish.has-fw");
+      if (!("IntersectionObserver" in window)) return;
+      const io = new IntersectionObserver((seen) => {
+        for (const e of seen) if (e.isIntersecting) {
+          e.target.classList.remove("is-waiting");
+          io.unobserve(e.target);
+        }
+      }, { threshold: 0.6 });
+      for (const c of cards) { c.classList.add("is-waiting"); io.observe(c); }
+    })();
+  </script>
+  {% endif %}
   {% elif not (subject.essays | length or subject.blurbHtml) %}
   <p class="empty">Nothing written about this yet.</p>
   {% endif %}

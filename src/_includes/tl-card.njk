@@ -1,0 +1,29 @@
+{#- A status or rating card on a subject page's timeline (subjectStream in
+    eleventy.config.js, 2026-11-14). Slim bars for the in-between changes —
+    shelved, back on, a new run, a rating that moved — in the status's own
+    badge colours (canon's gold for canon in or out), and the finish card at
+    a completed or incomplete: "cleared" over that night's fireworks, or
+    "set down" under plain stars. Subject pages only: views and feeds keep
+    their rows bare. -#}
+{%- from "weeks.njk" import weeks %}
+{%- if card.kind == "bar" %}
+<div class="tl-card"><p class="status-bar"><span class="badge b-{{ card.cls }}">{{ card.word }}</span><span class="sb-date">{{ card.date | shortDate }}</span>{% if card.note %}<span class="sb-note">{{ card.note }}</span>{% endif %}</p></div>
+{%- elif card.kind == "rating" %}
+<div class="tl-card"><p class="status-bar{% if card.canon %} is-canon{% endif %}">
+  {%- if card.canon %}<span class="rating badge-g b-canon">canon</span>{% else %}<span class="rating r-{{ card.to | replace('*', '') }}">{{ card.to }}</span>{% endif -%}
+  <span class="sb-date">{{ card.date | shortDate }}</span>
+  <span class="sb-note">{% if card.from %}<span class="sb-from">{{ card.from }}</span> {% endif %}→ <span class="sb-to">{{ card.to or "unrated" }}</span></span>
+  {%- if card.why %}<a class="sb-why" href="{{ card.why.url }}">{{ card.why.title }} →</a>{% endif -%}
+</p></div>
+{%- elif card.kind == "finish" %}
+<div class="tl-card"{% if card.id %} id="{{ card.id }}"{% endif %}><div class="finish f-{{ card.cls }}{% if card.fireworks %} has-fw{% endif %}"{% if card.fireworks %} style="--fw:url({{ card.fireworks }})"{% endif %}>
+  <p class="finish-head"><span class="finish-word">{{ card.word }}</span><span class="finish-run">{{ card.run }} · {{ card.stats.weeks }} week{% if card.stats.weeks != 1 %}s{% endif %}</span></p>
+  <div class="finish-body">
+    <p class="finish-big"><span><b>{{ card.stats.days or "–" }}</b>days</span><span><b>{{ (card.stats.words | num) if card.stats.words else "–" }}</b>words</span><span><b>{{ card.stats.pics or "–" }}</b>pics</span></p>
+    <p class="finish-foot">{{ weeks(card.grid) }}
+      {%- if card.rating and card.rating.slug == "canon" %}<span class="rating badge-g b-canon">canon</span>
+      {%- elif card.rating %}<span class="rating r-{{ card.rating.slug }}">{{ card.rating.title }}</span>
+      {%- else %}<span class="rating r-pending">pending</span>{% endif %}</p>
+  </div>
+</div></div>
+{%- endif %}

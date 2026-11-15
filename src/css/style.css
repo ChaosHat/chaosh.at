@@ -1228,6 +1228,14 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .home-toc li a:not(.home-toc-date):not(:last-child)::after { content: "\00a0\00a0·"; margin-right: 0.5em; color: var(--muted); }
 .home-toc .home-toc-date { margin-right: 0.6em; font: 12px/24px var(--pixel); color: var(--muted); }
 .home-toc .home-toc-essay::before { content: "✦ "; color: var(--muted); }
+/* A subject page's bar (2026-11-14): the days are bare numbers after their
+   month, so they get room to be tapped; a finish card is a word, in its
+   status colour. */
+.subject-toc { margin: 0 0 1.5rem; }
+.subject-toc li a:not(.home-toc-date) { display: inline-block; min-width: 1.6em; padding: 2px 0; }
+.subject-toc .toc-finish { color: var(--st-completed); }
+.subject .fragment[id], .subject .tl-card[id] { scroll-margin-top: 1.5rem; }
+.rail-row-finish .rail-label { color: var(--st-completed); }
 
 .rail { display: none; }
 @media (min-width: 85rem) {
@@ -3121,3 +3129,156 @@ main {
   font: 16px/24px var(--pixel);
 }
 main:focus { outline: none; }
+
+/* ------------------------------------------- timeline cards (2026-11-14) */
+/* Status and rating cards between a subject page's entries (tl-card.njk,
+   subjectStream). In the reading column, never the 6rem art column (tried
+   on the mockup: cramped). Slim bars in the panel language — --fill ground,
+   --frame border, --ring outside — with the status badge as their first
+   cell; canon's in gold. The finish card is the one loud thing: "cleared"
+   over that night's fireworks, which play three times and settle on an
+   ember (aurora.js fireworksSheet's coda frame). */
+.tl-card { padding-right: calc(var(--mcol) + var(--mgap)); }
+.fragment + .tl-card,
+.tl-card + .tl-card,
+.tl-card + .fragment { margin-top: 2rem; }
+.tl-card + .tl-card { margin-top: 1rem; }
+
+.status-bar {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 0 12px 0 0;
+  font: 8px/1 var(--pixel);
+  background: var(--fill);
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.status-bar > .badge,
+.status-bar > .rating {
+  align-self: stretch;
+  padding: 8px 10px;
+  border: 0;
+  border-right: 2px solid var(--dim);
+}
+.status-bar .sb-date { color: var(--ink); }
+.status-bar .sb-note { color: var(--muted); }
+.status-bar .sb-why { color: var(--accent); text-decoration: none; }
+.status-bar .sb-why:hover { text-decoration: underline; }
+.status-bar.is-canon { border-color: var(--gold); }
+.status-bar.is-canon > .rating { border-right-color: color-mix(in srgb, var(--gold) 35%, var(--night)); }
+.status-bar.is-canon .sb-to { color: var(--gold); }
+
+/* The weeks grid: 7 rows Mon–Sun, a 5px cell a day. Unwritten days nearly
+   invisible on purpose; a long run fades out on the left. */
+.weeks {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 5px);
+  grid-auto-columns: 5px;
+  gap: 1px;
+  justify-content: start;
+  max-width: calc(19 * 6px);
+  overflow: hidden;
+}
+.weeks.clipped { justify-content: end; mask-image: linear-gradient(to right, transparent, #000 2rem); }
+.weeks i { background: color-mix(in srgb, var(--deep) 70%, transparent); }
+.weeks i.pad { background: none; }
+.weeks i.on {
+  background: color-mix(in srgb, var(--accent) calc(var(--w) * 100%), var(--deep));
+  box-shadow: 0 0 3px -1px color-mix(in srgb, var(--accent) calc(var(--w) * 80%), transparent);
+}
+
+/* The finish card: ~350×120, fit to content. "cleared" big on the left with
+   the moon, the run under it; the numbers, the weeks and today's rating on
+   the right over a soft scrim — no divider, no panel between the halves. */
+.finish {
+  --c: var(--st-completed);
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  min-height: 120px;
+  overflow: hidden;
+  background: url("/img/aurora/stars.png") repeat, var(--night);
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.finish.f-incomplete { --c: var(--st-incomplete); }
+.finish > * { position: relative; z-index: 1; }
+/* The fireworks: 116×40 art px a frame at ×3, 48 frames over 3.84s, three
+   times, then `forwards` holds the keyframe's end — the sheet's 49th frame,
+   the coda. CSS MUST AGREE with fireworksSheet (aurora.js). */
+.finish.has-fw::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--fw) 0 0 / 348px 5880px repeat-x;
+  image-rendering: pixelated;
+  animation: fw-pop 3.84s steps(48) 3 forwards;
+  pointer-events: none;
+}
+@keyframes fw-pop { to { background-position: 0 -5760px; } }
+/* Not yet seen (subject.njk's script, 2026-11-14): hold the quiet coda until
+   the card is on screen, so the show isn't over before the reader scrolls
+   down to it. Removing the class starts the animation fresh. No JS, no
+   class: it plays on load, as before. */
+.finish.has-fw.is-waiting::before { animation: none; background-position: 0 -5760px; }
+@media (prefers-reduced-motion: reduce) {
+  .finish.has-fw::before { animation: none; background-position: 0 -5760px; }
+}
+.finish-head {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 4px 14px 16px;
+}
+.finish-word {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 24px/1 var(--pixel);
+  color: var(--ink);
+  text-shadow: 0 2px 0 var(--ring);
+}
+.finish-word::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--c);
+  -webkit-mask: url("/img/icons/completed.svg") center / 16px 16px no-repeat;
+  mask: url("/img/icons/completed.svg") center / 16px 16px no-repeat;
+}
+.f-incomplete .finish-word::before {
+  -webkit-mask-image: url("/img/icons/incomplete.svg");
+  mask-image: url("/img/icons/incomplete.svg");
+}
+.finish-run { font: 8px/1 var(--pixel); color: var(--ink); text-shadow: 0 1px 0 var(--ring); white-space: nowrap; }
+.finish-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px 14px 18px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--night) 70%, transparent), transparent);
+}
+.finish-big { display: flex; gap: 6px 22px; margin: 0; }
+.finish-big span { display: flex; flex-direction: column; gap: 5px; font: 8px/1 var(--pixel); color: var(--muted); }
+.finish-big b {
+  font: 400 16px/1 var(--pixel);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 var(--ring), 0 0 4px var(--night);
+}
+.finish-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0; }
+@media (max-width: 34rem) {
+  .finish { flex-direction: column; }
+  .finish-head { padding-bottom: 4px; }
+}

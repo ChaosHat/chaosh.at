@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { pixelSubject, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf } from "./aurora.js";
+import { pixelSubject, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf, fireworksSheet, fireworksPalette } from "./aurora.js";
 import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -470,12 +470,182 @@ export const subjectStats = (fragments, essays = [], { from = null, to = null } 
     essays: essays.filter((e) => within(e.date)).length,
     first,
     last,
-    weeks: first
-      ? Math.round((weekStart(last.getTime()) - weekStart(first.getTime())) / (7 * DAY_MS)) + 1
-      : 0,
+    // The run's length as a reader says it ("4 weeks"), never zero.
+    weeks: first ? Math.max(1, Math.round(((last - first) / DAY_MS + 1) / 7)) : 0,
     // day key -> words, for the weeks grid.
     wordsByDay: Object.fromEntries(keys.map((k) => [k, days.get(k)])),
   };
+};
+
+// The weeks grid (2026-11-14): seven rows Mon–Sun, one column per week of a
+// run, a cell per day. Lit days in the accent at a brightness from ONE
+// absolute word scale — the lit-days strip's rayHeight curve — so cards side
+// by side compare honestly (a per-card scale made a 60-word day look like a
+// 1,500-word one; same reason the Design System dropped recency brightness).
+// Unwritten days are left nearly invisible on purpose. Past WEEKS_MAX weeks
+// the template fades the left edge (`clipped`). -> { cells, clipped } | null
+export const WEEKS_MAX = 19;
+export const weeksGrid = (stats) => {
+  if (!stats?.first) return null;
+  const pad = (stats.first.getUTCDay() + 6) % 7;
+  const cells = Array.from({ length: pad }, () => ({ pad: true }));
+  for (let t = stats.first.getTime(); t <= stats.last.getTime(); t += DAY_MS) {
+    const key = dayKey(new Date(t));
+    const words = stats.wordsByDay[key];
+    cells.push(words
+      ? { on: true, w: (0.35 + (0.65 * (rayHeight(words) - 6)) / 22).toFixed(2), title: `${key} · ${words} words` }
+      : { on: false });
+  }
+  return { cells, clipped: Math.ceil(cells.length / 7) > WEEKS_MAX };
+};
+
+// "7–21 oct", "28 aug → 3 sep", "10 nov": a run's dates as the cards say them.
+const runFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short" });
+export const runText = (first, last) => {
+  if (!first) return "";
+  const a = runFormat.format(first).toLowerCase();
+  const b = runFormat.format(last).toLowerCase();
+  if (dayKey(first) === dayKey(last)) return a;
+  return first.getUTCMonth() === last.getUTCMonth() && first.getUTCFullYear() === last.getUTCFullYear()
+    ? `${first.getUTCDate()}–${b}` : `${a} → ${b}`;
+};
+
+// A long subject page's "on this page" (2026-11-14, Hat: Resonance's page
+// "could use our new nav thing too"): the rail on wide screens, the bar on
+// narrow ones, as on a daily and the home page. Months are the rail's big
+// rows, each entry's date under them, plus the finish cards — the one card
+// worth jumping to. Gives every fragment and finish in `stream` an `id`
+// (d-YYYY-MM-DD, -2 on a second section the same day) as a side effect.
+// Only from TOC_MIN days written: a short page is its own table of contents.
+// -> [{ label, id, rows: [{ label, day, id, finish }] }] | null
+export const TOC_MIN = 6;
+const tocMonth = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", month: "short", year: "numeric" });
+export const subjectToc = (stream) => {
+  const used = new Map();
+  const months = [];
+  for (const item of stream) {
+    const date = item.kind === "fragment" ? item.fragment.date : item.kind === "finish" ? item.date : null;
+    if (!date) continue;
+    const key = dayKey(date);
+    const base = item.kind === "fragment" ? `d-${key}` : `${item.word.replace(" ", "-")}-${key}`;
+    const n = (used.get(base) ?? 0) + 1;
+    used.set(base, n);
+    item.id = n === 1 ? base : `${base}-${n}`;
+    const label = tocMonth.format(date).toLowerCase();
+    if (months.at(-1)?.label !== label) months.push({ label, id: item.id, rows: [] });
+    const rows = months.at(-1).rows;
+    // One row per day: a second section the same day is the same jump.
+    if (item.kind === "fragment" && rows.some((r) => !r.finish && r.key === key)) continue;
+    rows.push({ key, id: item.id, day: date.getUTCDate(), finish: item.kind === "finish" ? item.word : null,
+      label: item.kind === "finish" ? item.word : runFormat.format(date).toLowerCase() });
+  }
+  const days = new Set(stream.filter((i) => i.kind === "fragment").map((i) => dayKey(i.fragment.date)));
+  return days.size >= TOC_MIN ? months : null;
+};
+
+// A subject page's timeline with its status and rating cards (2026-11-14):
+// the fragments, oldest first, with a card dropped in at each change the
+// status log records. -> [{ kind: "fragment", fragment } | card]
+//
+// Where a card sits: after the last entry on or before its date — except a
+// change TO active (back on, a new run), which goes before an entry on the
+// same day, since the day's writing is the playing it started.
+//
+// Which changes get one:
+//   → shelved                 slim bar, "after N days written" (this stretch)
+//   shelved/incomplete → active  slim bar "back on", "after N days away"
+//   → completed / incomplete  the finish card, "cleared" / "set down", with
+//                             the run's stats (from the last finish or replay
+//                             start) and today's rating
+//   a replays: date           slim bar "new run"
+//   rating, canon in or out   gold bar, always, with the log's `why:` essay
+//   rating, another rung      bar only after a first verdict, and not for a
+//                             `*` alone (first verdicts ride the finish card)
+// Starting (backlog → active) gets nothing: the first entry says it.
+export const subjectStream = (fragments, log = [], { replays = [], rating = null, whyOf = () => null } = {}) => {
+  const keyOf = (d) => (d instanceof Date ? dayKey(d) : String(d).slice(0, 10));
+  const dateOf = (k) => new Date(`${k}T00:00:00Z`);
+  const cards = [];
+  const fragDays = [...new Set(fragments.map((f) => dayKey(f.date)))].sort();
+  const daysWritten = (fromK, toK) => fragDays.filter((k) => k > fromK && k <= toK).length;
+  const lastBefore = (k) => fragDays.filter((d) => d < k).at(-1) ?? null;
+  const gapDays = (a, b) => Math.round((dayOf(b) - dayOf(a)) / DAY_MS);
+  const pair = (v) => (Array.isArray(v) && v.length === 2
+    ? v.map((x) => (x == null || x === "" ? null : String(x))) : null);
+  const rung = (r) => (r ? r.replace(/\*$/, "") : null);
+
+  // Replay starts given as dates; a bare year draws nothing on a timeline.
+  const runStarts = replays.map(String).filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(r));
+  const events = [
+    ...log.map((e, i) => ({ ...e, k: keyOf(e.date), i })),
+    ...runStarts.map((k, i) => ({ k, run: true, i: -1 - i })),
+  ].sort((a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : a.i - b.i));
+
+  let stretch = ""; // the last back on / new run / finish: "days written" counts from here
+  let runFrom = ""; // the last finish or replay start: a finish card's run starts after it
+  for (const e of events) {
+    const date = dateOf(e.k);
+    if (e.run) {
+      const prev = lastBefore(e.k);
+      cards.push({ kind: "bar", cls: "active", word: "new run", k: e.k, date, before: true,
+        note: prev ? `after ${gapDays(prev, e.k)} days away` : "" });
+      // A replay starting today owns today's writing: run from the day before.
+      stretch = runFrom = keyOf(new Date(date - DAY_MS));
+      continue;
+    }
+    const st = pair(e.status);
+    if (st) {
+      const [from, to] = st;
+      if (to === "shelved") {
+        const n = daysWritten(stretch, e.k);
+        cards.push({ kind: "bar", cls: "shelved", word: "shelved", k: e.k, date,
+          note: n ? `after ${n} day${n === 1 ? "" : "s"} written` : "" });
+      } else if (to === "active" && (from === "shelved" || from === "incomplete")) {
+        const prev = lastBefore(e.k);
+        cards.push({ kind: "bar", cls: "active", word: "back on", k: e.k, date, before: true,
+          note: prev ? `after ${gapDays(prev, e.k)} days away` : "" });
+        stretch = keyOf(new Date(date - DAY_MS));
+      } else if (to === "completed" || to === "incomplete") {
+        const stats = subjectStats(fragments, [], {
+          from: runFrom ? new Date(dayOf(runFrom) + DAY_MS) : null,
+          to: new Date(date.getTime() + DAY_MS),
+        });
+        cards.push({ kind: "finish", cls: to, word: to === "completed" ? "cleared" : "set down",
+          k: e.k, date, stats, run: runText(stats.first, stats.last), grid: weeksGrid(stats), rating });
+        stretch = runFrom = e.k;
+      }
+    }
+    const rt = pair(e.rating);
+    if (rt) {
+      const [from, to] = rt;
+      const canon = (from === "canon") !== (to === "canon");
+      if (canon || (from && to && rung(from) !== rung(to))) {
+        cards.push({ kind: "rating", canon, from, to, k: e.k, date,
+          why: e.why ? whyOf(String(e.why)) : null });
+      }
+    }
+  }
+
+  // Drop each card in after the last fragment on or before its day (before
+  // a same-day fragment for a `before` card). Stable: same-slot cards keep
+  // date-then-log order.
+  const slot = (c) => {
+    const i = fragments.findIndex((f) => (c.before ? dayKey(f.date) >= c.k : dayKey(f.date) > c.k));
+    return i === -1 ? fragments.length : i;
+  };
+  const bySlot = new Map();
+  for (const c of cards) {
+    const s = slot(c);
+    if (!bySlot.has(s)) bySlot.set(s, []);
+    bySlot.get(s).push(c);
+  }
+  const out = [];
+  fragments.forEach((fragment, i) => {
+    out.push(...(bySlot.get(i) ?? []));
+    out.push({ kind: "fragment", fragment });
+  });
+  out.push(...(bySlot.get(fragments.length) ?? []));
+  return out;
 };
 
 // Images embedded in a section: Obsidian `![[x.png]]` (with or without a
@@ -697,6 +867,9 @@ export default function (eleventyConfig) {
   const dateCache = new Map();
 
   eleventyConfig.addFilter("dateSlug", (d) => d.toISOString().slice(0, 10));
+
+  // 5,159 — the cards' word counts.
+  eleventyConfig.addFilter("num", (n) => Number(n).toLocaleString("en-US"));
 
   // RFC 3339, which Atom requires.
   eleventyConfig.addFilter("atomDate", (d) => d.toISOString());
@@ -2132,6 +2305,25 @@ export default function (eleventyConfig) {
     // replay's fragments (Hat's call, 2026-08-12) — then the fragment timeline
     // in chrono order. The pin is subject-page-only; tag views keep essays
     // inline in the stream.
+    // The status log, by subject, oldest first (status_log.yaml is already
+    // in date order; a hand-moved date is sorted back in). `why:` names an
+    // essay by filename, resolved the way the canon changelog does.
+    const logBySlug = new Map();
+    for (const e of Array.isArray(statusLog) ? statusLog : []) {
+      if (!e || typeof e !== "object" || !e.slug || !e.date) continue;
+      const s = String(e.slug);
+      if (!logBySlug.has(s)) logBySlug.set(s, []);
+      logBySlug.get(s).push(e);
+    }
+    const dayStr = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d));
+    for (const list of logBySlug.values())
+      list.sort((a, b) => (dayStr(a.date) < dayStr(b.date) ? -1 : dayStr(a.date) > dayStr(b.date) ? 1 : 0));
+    const essayByName = new Map(buildEssayList(api).map((e) => [e.slug, e]));
+    const whyOf = (name) => {
+      const e = essayByName.get(essaySlug(name));
+      return e ? { url: e.url, title: e.title } : null;
+    };
+
     fanOut = Object.entries(subjects).map(([slug, meta]) => {
       const fragments = collected.get(slug) ?? [];
       const essays = (essaysBySubject.get(slug) ?? [])
@@ -2147,6 +2339,25 @@ export default function (eleventyConfig) {
       const tier = tierOf(lastWrote ?? null);
       const art = registerSky(slug, meta, tier);
       skyUrls.set(slug, art);
+
+      // The timeline with its status and rating cards (subjectStream). A
+      // cleared card's fireworks are that night's: one sheet per finish
+      // date, shared by every game finished that night (aurora.js).
+      const stream = subjectStream(fragments, logBySlug.get(slug) ?? [], {
+        replays: meta?.replays ?? [],
+        rating: ratingOf(slug, meta),
+        whyOf,
+      });
+      const toc = subjectToc(stream);
+      for (const card of stream) {
+        if (card.kind !== "finish" || card.cls !== "completed") continue;
+        const rel = `img/fireworks/${card.k}.png`;
+        if (!skyFiles.has(rel)) {
+          const sheet = fireworksSheet(card.k, fireworksPalette(card.k));
+          skyFiles.set(rel, encodePngIndexed(sheet.px, sheet.w, sheet.h));
+        }
+        card.fireworks = `/${rel}`;
+      }
 
       return {
         slug,
@@ -2170,6 +2381,8 @@ export default function (eleventyConfig) {
         ], meta?.status ?? "active"),
         // Whole-run stats (see subjectStats); the year page scopes its own.
         stats: subjectStats(fragments, essays),
+        stream,
+        toc,
         canon: canonSlugsAll.has(slug),
         // Templates branch on canon first (the gold), then on this, then
         // render "pending". A canon subject's rating is the canon rung.

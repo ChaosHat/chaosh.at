@@ -1,0 +1,6 @@
+{#- The weeks grid (weeksGrid in eleventy.config.js): seven rows Mon–Sun, a
+    column per week, lit days in the accent on one absolute word scale.
+    Shared by the cleared card and (step 3) the flip card's back. -#}
+{%- macro weeks(grid) -%}
+{%- if grid %}<span class="weeks{% if grid.clipped %} clipped{% endif %}" aria-hidden="true">{% for c in grid.cells %}<i{% if c.pad %} class="pad"{% elif c.on %} class="on" style="--w:{{ c.w }}" title="{{ c.title }}"{% endif %}></i>{% endfor %}</span>{% endif -%}
+{%- endmacro -%}

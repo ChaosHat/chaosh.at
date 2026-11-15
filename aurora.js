@@ -1735,3 +1735,224 @@ export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chi
     }
   return { px: pxUpscale(px, W, H, scale), w: W * scale, h: H * scale };
 };
+
+// -------------------------------------------------------------- fireworks
+//
+// A pixel fireworks finale (2026-11-14): the backdrop of a game's cleared
+// card, and kept general because Hat expects it "for other things too"
+// (canon promotions, milestones). Ported from the prototype in the vault
+// (.claude/scripts/prototypes/chaosh_fireworks.py, tuned on the mockup with
+// Hat: 6 bursts was too quiet, 26 too much, 11 right at the card's size).
+//
+// A sheet of `frames` frames of w×h art px stacked vertically, RGBA, alpha 0
+// where nothing burns, so it lies over a starry night. Each burst rises as a
+// rocket for RISE frames, flashes white, then throws one of seven shapes —
+// peony (with a core in the second family), chrysanthemum, ring, willow,
+// star, crossette, glitter — whose particles stay bright for most of their
+// life (the `(t/life)^1.7` colour step) and fade down the family's ramp.
+// The schedule wraps, so the sheet loops seamlessly.
+//
+// The sheet holds frames + 1 frames: the loop, then a coda — the last loop
+// played on with no new launches until only an ember or two is left, the
+// frame a card holds when the show is over (and the one shown under reduced
+// motion), so it settles instead of going blank or freezing mid-burst.
+//
+// CSS MUST AGREE: background-size w×s by (frames+1)×h×s at scale s,
+// `steps(frames)`, the loop's keyframe to `0 -(frames×h×s)px` (which stops
+// short of the coda), and the hold at exactly that offset.
+//
+// `fams` is { a, b, pale }: three ramps, each seven RGB triples from white
+// down to dark. fireworksPalette(date) builds them from a night's aurora.
+const FW_RISE = 6;
+const FW_EMBERS = 6;
+export const FW_W = 116;
+export const FW_H = 40;
+export const FW_FRAMES = 48;
+
+const fwTraj = (cx, cy, vx, vy, drag = 4.5, g = 0.035) => (t) => {
+  const d = (1 - Math.exp(-t / drag)) * drag;
+  return [cx + vx * d, cy + vy * d + g * t * t];
+};
+
+const fwBurst = (kind, cx, cy, C, C2, pale, size, rand) => {
+  const P = []; // { pos, start, life, trail, cols, flicker }
+  const between = (lo, hi) => lo + rand() * (hi - lo);
+  const int = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
+  const add = (pos, start, life, trail, cols, flicker) => P.push({ pos, start, life, trail, cols, flicker });
+  if (kind === "peony") {
+    const n = int(26, 34);
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n + between(-0.1, 0.1);
+      const s = size * between(0.85, 1.1);
+      add(fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s * 0.9), 0, int(17, 21), 1, i % 3 ? C : C2, true);
+      if (i % 2) {
+        const s2 = s * 0.45;
+        add(fwTraj(cx, cy, Math.cos(a) * s2, Math.sin(a) * s2 * 0.9), 0, 14, 0, C2, true);
+      }
+    }
+  } else if (kind === "chrys") {
+    const n = int(22, 28);
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n + between(-0.08, 0.08);
+      const s = size * between(0.9, 1.05);
+      add(fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s * 0.9), 0, 22, 4, C, false);
+    }
+  } else if (kind === "ring") {
+    const n = 30;
+    const tilt = between(0.35, 0.9);
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n;
+      add(fwTraj(cx, cy, Math.cos(a) * size, Math.sin(a) * size * tilt, 4.5, 0.02), 0, 18, 1, C, true);
+    }
+  } else if (kind === "willow") {
+    const n = 22;
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n + between(-0.1, 0.1);
+      const s = size * between(0.7, 0.95);
+      add(fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s * 0.8, 3.5, 0.06), 0, 32, 6, pale, false);
+    }
+  } else if (kind === "star") {
+    const n = 40;
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n - Math.PI / 2;
+      const seg = TAU / 5;
+      const k = Math.abs((((a + Math.PI / 2) % seg + seg) % seg) / seg - 0.5) * 2; // 1 at the points
+      const s = size * (0.45 + 0.55 * k);
+      add(fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s, 4.5, 0.015), 0, 19, 1, C, true);
+    }
+  } else if (kind === "crossette") {
+    const n = 6;
+    const S = 7;
+    for (let i = 0; i < n; i += 1) {
+      const a = (TAU * i) / n + between(-0.1, 0.1);
+      const s = size * 0.7;
+      const par = fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s * 0.9);
+      add(par, 0, S, 2, C, false);
+      const [px, py] = par(S);
+      for (let j = 0; j < 4; j += 1) {
+        const b = a + Math.PI / 4 + (j * Math.PI) / 2;
+        add(fwTraj(px, py, Math.cos(b) * size * 0.45, Math.sin(b) * size * 0.45), S, 13, 1, C2, true);
+      }
+    }
+  } else {
+    // glitter
+    const n = 46;
+    for (let i = 0; i < n; i += 1) {
+      const a = between(0, TAU);
+      const s = size * Math.sqrt(rand());
+      add(fwTraj(cx, cy, Math.cos(a) * s, Math.sin(a) * s * 0.9, 4.5, 0.02), 0, 22, 0, pale, "strobe");
+    }
+  }
+  return { P, life: Math.max(...P.map((p) => p.start + p.life)) };
+};
+
+const FW_KINDS = ["peony", "chrys", "ring", "willow", "star", "crossette", "glitter"];
+
+export const fireworksSheet = (seed, fams, { w = FW_W, h = FW_H, frames: F = FW_FRAMES, count = 11 } = {}) => {
+  const rand = mulberry32(hashOf(`fireworks:${seed}`));
+  const between = (lo, hi) => lo + rand() * (hi - lo);
+  const fam = { a: fams.a, b: fams.b };
+  const sched = [];
+  for (let k = 0; k < count; k += 1) {
+    const kind = k < FW_KINDS.length ? FW_KINDS[k] : FW_KINDS[Math.floor(rand() * FW_KINDS.length)];
+    const t0 = ((Math.floor((k * F) / count + between(-1, 1)) % F) + F) % F;
+    const cx = between(8, w - 8);
+    const cy = between(7, h * 0.55);
+    const size = kind === "glitter" ? between(2.5, 3.2) : between(2.8, 3.8);
+    const which = rand() < 0.5 ? "a" : "b";
+    const C = fam[which];
+    const C2 = fam[which === "a" ? "b" : "a"];
+    const { P, life } = fwBurst(kind, cx, cy, C, C2, fams.pale, size, mulberry32(hashOf(`fireworks:${seed}:${k}`)));
+    if (FW_RISE + life >= F) throw new Error(`fireworks: a ${kind} outlives the loop`);
+    sched.push({ t0, cx, cy, C, P, rocket: kind !== "glitter" || rand() < 0.5 });
+  }
+  const px = new Uint8Array(w * h * (F + 1) * 4);
+  const lit = new Array(F + 1).fill(0);
+  const put = (x, y, f, c, a = 255) => {
+    x = Math.round(x);
+    y = Math.round(y);
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const o = ((f * h + y) * w + x) * 4;
+    if (px[o + 3] > a) return;
+    if (px[o + 3] === 0) lit[f] += 1;
+    px[o] = c[0];
+    px[o + 1] = c[1];
+    px[o + 2] = c[2];
+    px[o + 3] = a;
+  };
+  // Frame f of the sheet at loop time T: in the loop every burst relaunches
+  // each F frames (age wraps); in the coda (wrap false) a burst lives once
+  // from its last launch, so nothing new goes up.
+  const paint = (f, T, wrap) => {
+    for (const { t0, cx, cy, C, P, rocket } of sched) {
+      const age = wrap ? (((T - t0) % F) + F) % F : T - t0;
+      if (age < 0) continue;
+      if (age < FW_RISE) {
+        if (!wrap) continue;
+        if (rocket) {
+          const y = h - 1 - ((h - 1 - cy) * (age + 1)) / FW_RISE;
+          const wob = Math.sin(age * 2) * 0.6;
+          put(cx + wob, y, f, C[1]);
+          put(cx, y + 1, f, C[3], 190);
+          put(cx, y + 3, f, C[5], 120);
+        }
+        continue;
+      }
+      const a = age - FW_RISE;
+      if (a < 2) {
+        // the flash
+        for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0], [0, 2], [0, -2]])
+          put(cx + dx, cy + dy, f, Math.abs(dx) + Math.abs(dy) < 2 ? C[0] : C[2], a === 0 ? 255 : 170);
+      }
+      P.forEach(({ pos, start, life, trail, cols, flicker }, i) => {
+        const t = a - start;
+        if (t < 0 || t >= life) return;
+        let ci = Math.min(cols.length - 1, Math.floor((t / life) ** 1.7 * cols.length));
+        if (flicker === "strobe") {
+          if ((t + i) % 3) return;
+          ci = Math.min(ci, 2);
+        } else if (flicker && t > life - 6 && (t + i) % 2) return;
+        const [x, y] = pos(t);
+        put(x, y, f, cols[ci]);
+        for (let k = 1; k <= trail && t - k >= 0; k += 1) {
+          const [x2, y2] = pos(t - k);
+          put(x2, y2, f, cols[Math.min(cols.length - 1, ci + 1 + Math.floor(k / 2))], Math.max(60, 200 - k * 30));
+        }
+      });
+    }
+  };
+  for (let f = 0; f < F; f += 1) paint(f, f, true);
+  // The coda: play on from the loop's end until at most FW_EMBERS pixels
+  // still burn, and keep that frame (or the dimmest one, if none gets there).
+  const scratch = (T) => {
+    px.fill(0, w * h * F * 4);
+    lit[F] = 0;
+    paint(F, T, false);
+    return lit[F];
+  };
+  let best = F;
+  let bestLit = Infinity;
+  for (let T = F; T < 3 * F; T += 1) {
+    const n = scratch(T);
+    if (n > 0 && n < bestLit) [best, bestLit] = [T, n];
+    if (n > 0 && n <= FW_EMBERS) break;
+  }
+  scratch(best);
+  return { px, w, h: h * (F + 1), frames: F, frameH: h, quiet: F };
+};
+
+// A night's fireworks colours: the masthead's own two ramps for that date
+// (pixelSheet: the front curtain's at the day's hue, the back's 60° on),
+// each read from its hot step down to its dusk ink, under a white core —
+// so a finish on a violet-and-pink night bursts violet and pink. `pale` is
+// the willow's and the glitter's: starlight into the front ramp's body.
+export const fireworksPalette = (dateStr) => {
+  const hue = (hashOf(dateStr) % 360000) / 1000;
+  const spread = daySpread(dateStr);
+  const fam = (ramp) => [[255, 255, 255], ...ramp.slice(2).reverse()].slice(0, 7);
+  const a = fam(pxPalette(hue, { lMax: 0.85, spread }));
+  const b = fam(pxPalette((hue + 60) % 360, { lMin: 0.4, lMax: 0.8, spread }));
+  const star = hexRgb(STAR);
+  const pale = [[255, 255, 255], star, a[2], a[3], mixRgb(star, hexRgb(NIGHT[0]), 0.45), a[5], a[6]];
+  return { a, b, pale };
+};
