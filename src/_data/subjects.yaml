@@ -28,6 +28,7 @@ anno-117:
   status: incomplete
   rating: loved
   released: 2025
+  first_played: 2026
   aliases:
     - anno
     - anno 117
@@ -80,6 +81,7 @@ burnout-3-takedown:
   status: completed
   rating: loved
   released: 2004
+  first_played: 2026
   replays:
     - 2026
   aliases:
@@ -104,6 +106,7 @@ castlevania-belmonts-curse:
   status: completed
   rating: loved
   released: 2026
+  first_played: 2026
   aliases:
     - belmont's curse
     - belmonts curse
@@ -116,6 +119,7 @@ castlevania-dawn-of-sorrow:
   status: completed
   rating: liked
   released: 2005
+  first_played: 2026
   aliases:
     - dawn of sorrow
     - castlevania dawn of sorrow
@@ -128,6 +132,7 @@ castlevania-order-of-ecclesia:
   status: completed
   rating: liked
   released: 2008
+  first_played: 2026
   aliases:
     - order of ecclesia
     - castlevania order of ecclesia
@@ -140,6 +145,7 @@ castlevania-symphony-of-the-night:
   status: completed
   rating: disliked
   released: 1997
+  first_played: 2026
   aliases:
     - sotn
     - castlevania sotn
@@ -152,6 +158,7 @@ chrono-trigger:
   status: completed
   rating: loved
   released: 1995
+  first_played: 2026
   aliases:
     - chrono
     - ct
@@ -162,6 +169,7 @@ civilization-5:
   status: completed
   rating: loved
   released: 2010
+  first_played: 2010
   aliases:
     - civ5
     - civ v
@@ -185,6 +193,7 @@ cyberpunk-2077:
   status: completed
   rating: canon
   released: 2020
+  first_played: 2020
   aliases:
     - cp2077
     - '2077'
@@ -206,6 +215,7 @@ diablo-iv:
   status: completed
   rating: liked
   released: 2023
+  first_played: 2023
   aliases:
     - d4
     - diablo 4
@@ -216,6 +226,7 @@ donkey-kong-bananza:
   status: incomplete
   rating: loved
   released: 2025
+  first_played: 2025
   aliases:
     - bananza
     - dk bananza
@@ -237,6 +248,7 @@ dragon-quest-v:
   status: completed
   rating: liked
   released: 1992
+  first_played: 2026
   aliases:
     - dqv
     - dq5
@@ -249,6 +261,7 @@ dragon-quest-xi-s:
   status: completed
   rating: loved
   released: 2019
+  first_played: 2026
   aliases:
     - dqxis
     - dqxi s
@@ -282,6 +295,7 @@ esoteric-ebb:
   status: completed
   rating: favorite
   released: 2026
+  first_played: 2026
   aliases:
     - ebb
     - esoteric ebb
@@ -324,6 +338,7 @@ fields-of-mistria:
   status: shelved
   rating: favorite
   released: 2024
+  first_played: 2024
   aliases:
     - mistria
     - fom
@@ -388,6 +403,7 @@ final-fantasy-vii-remake:
   status: completed
   rating: canon
   released: 2020
+  first_played: 2020
   replays:
     - 2026
   aliases:
@@ -411,6 +427,7 @@ fire-emblem-binding-blade:
     - games
   status: shelved
   released: 2002
+  first_played: 2026
   aliases:
     - binding blade
     - bindingblade
@@ -435,6 +452,7 @@ fire-emblem-engage:
   status: incomplete
   rating: liked
   released: 2023
+  first_played: 2023
   aliases:
     - engage
     - fe engage
@@ -457,6 +475,7 @@ fire-emblem-fortunes-weave:
   status: shelved
   rating: liked
   released: 2026
+  first_played: 2026
   aliases:
     - fortunes weave
     - fortune's weave
@@ -491,6 +510,7 @@ fire-emblem-three-houses:
   status: completed
   rating: favorite
   released: 2019
+  first_played: 2019
   aliases:
     - three houses
     - fe3h
@@ -502,6 +522,7 @@ ghost-of-yotei:
   status: completed
   rating: favorite
   released: 2025
+  first_played: 2025
   aliases:
     - ghost of yotei
     - yotei
@@ -520,6 +541,7 @@ horizon-forbidden-west:
   status: completed
   rating: favorite
   released: 2022
+  first_played: 2022
   aliases:
     - forbidden west
     - hfw
@@ -530,6 +552,7 @@ horizon-zero-dawn:
   status: completed
   rating: loved
   released: 2017
+  first_played: 2017
   aliases:
     - hzd
     - zero dawn
@@ -540,6 +563,7 @@ indiana-jones-and-the-great-circle:
   status: incomplete
   rating: loved
   released: 2024
+  first_played: 2024
   aliases:
     - great circle
     - the great circle
@@ -549,6 +573,7 @@ kingdom-hearts:
     - games
   status: incomplete
   released: 2002
+  first_played: 2026
   aliases:
     - kh
     - kh1
@@ -607,6 +632,7 @@ marvel-snap:
   status: completed
   rating: liked
   released: 2022
+  first_played: 2022
   aliases:
     - snap
 marvels-spider-man-2:
@@ -616,6 +642,7 @@ marvels-spider-man-2:
   status: completed
   rating: canon
   released: 2023
+  first_played: 2023
   aliases:
     - spider-man 2
     - spiderman 2
@@ -698,6 +725,7 @@ metroid-samus-returns:
   status: completed
   rating: liked
   released: 2017
+  first_played: 2026
   aliases:
     - samus returns
     - msr
@@ -708,6 +736,7 @@ metroid-zero-mission:
   status: completed
   rating: loved
   released: 2004
+  first_played: 2026
   aliases:
     - zero mission
     - metroid zero mission
@@ -719,6 +748,7 @@ mina-the-hollower:
   status: incomplete
   rating: loved
   released: 2026
+  first_played: 2026
   aliases:
     - mina
 monster-hunter-rise:
@@ -728,6 +758,7 @@ monster-hunter-rise:
   status: completed
   rating: canon
   released: 2021
+  first_played: 2021
   aliases:
     - mh rise
     - mhr
@@ -749,6 +780,7 @@ monster-hunter-wilds:
   status: shelved
   rating: loved
   released: 2025
+  first_played: 2025
   aliases:
     - wilds
     - mh wilds
@@ -759,6 +791,7 @@ monster-hunter-world:
   status: completed
   rating: loved
   released: 2018
+  first_played: 2018
   aliases:
     - mh world
     - mhw
@@ -769,6 +802,7 @@ my-time-at-sandrock:
   status: incomplete
   rating: loved
   released: 2023
+  first_played: 2026
   aliases:
     - sandrock
     - mtas
@@ -776,7 +810,7 @@ nintendo-switch-sports-resort:
   title: Nintendo Switch Sports Resort
   category:
     - games
-  status: active
+  status: completed
   rating: liked
   released: 2026
   aliases:
@@ -799,6 +833,7 @@ ori-and-the-blind-forest:
   status: completed
   rating: loved
   released: 2015
+  first_played: 2026
   aliases:
     - blind forest
     - ori blind forest
@@ -809,6 +844,7 @@ ori-and-the-will-of-the-wisps:
   status: incomplete
   rating: loved
   released: 2020
+  first_played: 2026
   aliases:
     - will of the wisps
     - wotw
@@ -831,6 +867,7 @@ persona-5-royal:
   status: completed
   rating: loved
   released: 2019
+  first_played: 2026
   aliases:
     - p5r
     - persona 5 royal
@@ -841,6 +878,7 @@ pokemon-crystal-legacy:
   status: incomplete
   rating: liked
   released: 2024
+  first_played: 2026
   aliases:
     - pokemon crystal legacy
     - crystal legacy
@@ -866,6 +904,7 @@ pokemon-lazarus:
     - games
   status: incomplete
   released: 2025
+  first_played: 2026
   aliases:
     - pokemon lazarus
     - lazarus
@@ -876,6 +915,7 @@ pokemon-legends-arceus:
   status: incomplete
   rating: liked
   released: 2022
+  first_played: 2022
   aliases:
     - pokemon legends arceus
     - pla
@@ -887,6 +927,7 @@ pokemon-unbound:
   status: completed
   rating: loved
   released: 2021
+  first_played: 2026
   aliases:
     - pokemon unbound
     - unbound
@@ -897,6 +938,7 @@ pokopia:
   status: shelved
   rating: canon
   released: 2026
+  first_played: 2026
   aliases:
     - pokemon pokopia
 portal:
@@ -965,6 +1007,7 @@ slay-the-spire-2:
   status: incomplete
   rating: loved*
   released: 2026
+  first_played: 2026
   aliases:
     - sts2
     - slay the spire ii
@@ -975,6 +1018,7 @@ sovereign-tower:
   status: completed
   rating: liked
   released: 2026
+  first_played: 2026
   aliases:
     - sovereign
 split-fiction:
@@ -1011,6 +1055,7 @@ star-wars-zero-company:
   status: shelved
   rating: liked
   released: 2026
+  first_played: 2026
   aliases:
     - zero company
     - swzc
@@ -1071,6 +1116,7 @@ super-mario-rpg:
   status: incomplete
   rating: liked*
   released: 2023
+  first_played: 2026
   aliases:
     - smrpg
     - mario rpg
@@ -1111,6 +1157,7 @@ super-metroid:
   status: completed
   rating: liked
   released: 1994
+  first_played: 2026
   aliases:
     - super metroid
 tape-to-tape:
@@ -1243,6 +1290,7 @@ zelda-breath-of-the-wild:
   status: completed
   rating: favorite
   released: 2017
+  first_played: 2017
   aliases:
     - breath of the wild
     - botw
@@ -1278,6 +1326,7 @@ zelda-ocarina-of-time-remake:
     - games
   status: active
   released: 2026
+  first_played: 2026
   aliases:
     - ocarina remake
     - oot remake
@@ -1290,6 +1339,7 @@ zelda-tears-of-the-kingdom:
   status: incomplete
   rating: liked
   released: 2023
+  first_played: 2023
   aliases:
     - tears of the kingdom
     - totk

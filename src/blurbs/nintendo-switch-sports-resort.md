@@ -1,0 +1,1 @@
+A really fun casual game, some of the modes are really zen and relaxing, some a bit more competitive. A good time with basically everyone and a monument to design simplicity. 

@@ -10,6 +10,8 @@ groups:
       - canon
       - shelf
     covers: steamgriddb
+    status_words:
+      backlog: considering
     now_playing: status
     color: "#9bd8f3"
   tabletop:

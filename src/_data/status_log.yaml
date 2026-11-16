@@ -5,6 +5,9 @@
 # changes often lag the writing), or add `why: <essay filename>` to link the
 # essay that argued a change. Canon in/out are ordinary rating entries and
 # /canon/'s changelog is drawn from them; never edit this to make a swap.
+# `timeline: false` on a status entry keeps the active stretch that entry
+# opens or closes off the year page's timeline (a per-run opt-out; the game
+# stays on the year's shelves, and nothing else reads the key).
 # Backfilled 2026-11-14 from the site repo's subjects.yaml history (statuses
 # from 2026-08-10, ratings from 2026-10-22) and the retired canon_log.yaml.
 - date: 2026-08-10
@@ -28,6 +31,7 @@
 - date: 2026-08-21
   slug: star-wars-jedi-fallen-order
   status: [active, shelved]
+  timeline: false
 - date: 2026-08-21
   slug: world-of-warcraft-playerbots
   status: [active, incomplete]
@@ -95,6 +99,7 @@
 - date: 2026-09-12
   slug: star-wars-zero-company
   status: [active, shelved]
+  timeline: false
 - date: 2026-09-13
   slug: castlevania-order-of-ecclesia
   status: [active, completed]
@@ -197,9 +202,9 @@
 - date: 2026-10-28
   slug: rokoko
   rating: [null, canon]
-- date: 2026-10-29
+- date: 2026-11-02
   slug: nintendo-switch-sports-resort
-  status: [backlog, active]
+  status: [backlog, completed]
 - date: 2026-11-06
   slug: final-fantasy-resonance
   status: [active, completed]
@@ -207,6 +212,7 @@
 - date: 2026-11-07
   slug: burnout-3-takedown
   status: [active, completed]
+  timeline: false
 - date: 2026-11-07
   slug: final-fantasy-vii-rebirth
   status: [backlog, active]
