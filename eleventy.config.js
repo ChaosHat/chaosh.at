@@ -487,10 +487,11 @@ export const subjectStats = (fragments, essays = [], { from = null, to = null } 
 export const WEEKS_MAX = 19;
 // Only the last WEEKS_MAX + 2 weeks are drawn at all: a run that spans years
 // (a replay, a board game) would otherwise put a cell per day of it in every
-// card's HTML, and the fade hides the cut.
-export const weeksGrid = (stats) => {
+// card's HTML, and the fade hides the cut. `max` narrows the window for a
+// smaller card (a post's cover, POST_WEEKS).
+export const weeksGrid = (stats, max = WEEKS_MAX) => {
   if (!stats?.first) return null;
-  const floor = weekStart(stats.last.getTime()) - (WEEKS_MAX + 1) * 7 * DAY_MS;
+  const floor = weekStart(stats.last.getTime()) - (max + 1) * 7 * DAY_MS;
   const start = Math.max(stats.first.getTime(), floor);
   const pad = (new Date(start).getUTCDay() + 6) % 7;
   const cells = Array.from({ length: pad }, () => ({ pad: true }));
@@ -501,8 +502,44 @@ export const weeksGrid = (stats) => {
       ? { on: true, w: (0.35 + (0.65 * (rayHeight(words) - 6)) / 22).toFixed(2), title: `${key} · ${words} words` }
       : { on: false });
   }
-  return { cells, clipped: start > stats.first.getTime() || Math.ceil(cells.length / 7) > WEEKS_MAX };
+  return { cells, clipped: start > stats.first.getTime() || Math.ceil(cells.length / 7) > max };
 };
+
+// The weeks grid and the flip card's back as html (2026-11-16), one renderer
+// for every card that turns over: weeks.njk and card-back.njk call these, and
+// a post's cover (skyTag) builds its back here too, so the shelf's back and a
+// post's can't drift. `title: null` is the post cover's compact back: the
+// heading beside it already names the game, so the run stands alone on top.
+const esc = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot", "'": "#39" }[c]};`);
+const fmtNum = (n) => Number(n).toLocaleString("en-US");
+export const weeksHtml = (grid) => {
+  if (!grid) return "";
+  const cells = grid.cells.map((c) =>
+    c.pad ? '<i class="pad"></i>'
+      : c.on ? `<i class="on" style="--w:${c.w}" title="${esc(c.title)}"></i>`
+      : "<i></i>").join("");
+  return `<span class="weeks${grid.clipped ? " clipped" : ""}" aria-hidden="true">${cells}</span>`;
+};
+export const cardBackHtml = ({ title = null, stats, grid, released = null, year = null }) => {
+  const run = runText(stats.first, stats.last);
+  const head = title != null
+    ? `<span class="bk-t">${esc(title)}<span class="bk-run">${run}</span></span>`
+    : `<span class="bk-run">${run}</span>`;
+  const big = [
+    [stats.days, "days"],
+    [stats.words ? fmtNum(stats.words) : 0, "words"],
+    [stats.pics, "pics"],
+    [stats.essays, "essays"],
+  ].map(([v, label]) => `<span><b>${v || "–"}</b>${label}</span>`).join("");
+  const rel = released
+    ? `<span class="bk-rel">released <span${year && released == year ? ' class="this-year"' : ""}>${esc(released)}</span></span>`
+    : "";
+  return `<span class="shelf-back${title != null ? "" : " bk-compact"}" aria-hidden="true">${head}` +
+    `<span class="bk-big">${big}</span><span class="bk-weeks">${weeksHtml(grid)}</span>${rel}</span>`;
+};
+// A post cover's back is 6rem wide: 13 weeks of 6px fit inside its frame.
+export const POST_WEEKS = 13;
 
 // "7–21 oct", "28 aug → 3 sep", "10 nov": a run's dates as the cards say them.
 const runFormat = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short" });
@@ -876,6 +913,9 @@ export default function (eleventyConfig) {
   // 5,159 — the cards' word counts.
   eleventyConfig.addFilter("num", (n) => Number(n).toLocaleString("en-US"));
   eleventyConfig.addFilter("runText", (first, last) => runText(first, last));
+  eleventyConfig.addFilter("weeksHtml", (grid) => weeksHtml(grid));
+  eleventyConfig.addFilter("cardBack", (stats, title, grid, released, year) =>
+    cardBackHtml({ title: title ?? null, stats, grid, released, year }));
 
   // RFC 3339, which Atom requires.
   eleventyConfig.addFilter("atomDate", (d) => d.toISOString());
@@ -1919,6 +1959,17 @@ export default function (eleventyConfig) {
   });
 
   const skyUrls = new Map(); // slug -> {skyUrl, chipUrl}, for linkSubjects
+  // slug -> { title, stats, released }: whole-run stats for every subject with
+  // a day written, filled by the fan-out, read at render time by skyTag and
+  // subjectBack (2026-11-16). Live in the static sense: every nightly build
+  // recomputes them, so a cover on an old post shows today's totals.
+  const backs = new Map();
+  // A post cover's back (compact: no title), and a popover title for the
+  // phone, where the cover is too small to turn over (base.njk's script).
+  const coverBack = (slug) => {
+    const b = backs.get(slug);
+    return b ? cardBackHtml({ stats: b.stats, grid: weeksGrid(b.stats, POST_WEEKS), released: b.released }) : "";
+  };
 
   // `cover` is the cover file to show, the subject's own unless a face
   // names another (see faces below).
@@ -1939,9 +1990,14 @@ export default function (eleventyConfig) {
       // skipped by the keyboard, present for the mouse.
       const stem = coverUrls.has(cover) ? cover : slug;
       const box = coverBoxOf(stem, fitOf(slug));
+      // The flip card's back (2026-11-16, Hat: from any post you should see
+      // how much he's written about the game). A face shows its subject's
+      // numbers: the section files to that subject's page.
+      const back = coverBack(slug);
+      const title = back ? ` data-title="${escapeHtml(backs.get(slug).title)}"` : "";
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}" href="${subjectHref(slug)}" ` +
-        `style="background-image:url(${coverUrl})" aria-hidden="true" tabindex="-1"></a>`
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}" href="${subjectHref(slug)}" ` +
+        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${back}</a>`
       );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
@@ -2355,6 +2411,8 @@ export default function (eleventyConfig) {
         whyOf,
       });
       const toc = subjectToc(stream);
+      const stats = subjectStats(fragments, essays);
+      if (stats.days) backs.set(slug, { title: meta?.title ?? slug, stats, released: meta?.released ?? null });
       for (const card of stream) {
         if (card.kind !== "finish" || card.cls !== "completed") continue;
         const rel = `img/fireworks/${card.k}.png`;
@@ -2386,9 +2444,9 @@ export default function (eleventyConfig) {
           ...essays.map((e) => ({ date: e.date, words: 1000 })),
         ], meta?.status ?? "active"),
         // Whole-run stats (see subjectStats); the year page scopes its own.
-        stats: subjectStats(fragments, essays),
+        stats,
         // The flip card's weeks grid, whole run.
-        grid: weeksGrid(subjectStats(fragments, essays)),
+        grid: weeksGrid(stats),
         stream,
         toc,
         canon: canonSlugsAll.has(slug),
@@ -3042,6 +3100,14 @@ export default function (eleventyConfig) {
   // generated-tile fallback, same completed crop. The --box ratio goes on the
   // .frag, as wrapFragment does — the template reads it off the subject.
   // `face` is a fragment's face, when it wore one: its cover instead.
+  // An essay card's back (2026-11-16): the shelf's full back, title and all.
+  // A filter rather than a field on the card because essays build before the
+  // fan-out fills `backs`; templates render after both.
+  eleventyConfig.addFilter("subjectBack", (slug) => {
+    const b = backs.get(slug);
+    return b ? cardBackHtml({ title: b.title, stats: b.stats, grid: weeksGrid(b.stats), released: b.released }) : "";
+  });
+
   eleventyConfig.addFilter("subjectSky", (slug, face) =>
     skyTag(slug, subjects[slug]?.status ?? "active", face?.cover ?? slug),
   );

@@ -2217,7 +2217,7 @@ a.badge { text-decoration: none; }
    the shelf a missing cover was cosmetic — here it would break the reading
    column, so the two forms must agree. */
 .frag > .sky {
-  width: 6rem;
+  width: var(--lcol);
   /* aspect-ratio: auto is load-bearing. .sky sets 3/4, which was invisible at
      3rem wide (4rem tall, the same as min-height) but at 7rem forces a 149px
      box — so a short entry, and every loose-prose column, got a tall empty
@@ -2399,7 +2399,7 @@ a.sky-cover:hover { border-color: var(--accent); }
    cover in the art column now, a subject page its own cover as a lone card
    (below, after the essays). Any change to the daily's shell has to be
    checked on those pages too, or they drift apart again.
-   The right column narrows with the screen. From 58rem it is a 16rem figure
+   The right column narrows with the screen. From 58rem it is a 13.5rem figure
    column, captions and all. Below that it is a thumbnail rail (6rem; 3.5rem
    on a phone): the shot is cropped to a tile, the caption hides, and a tap
    opens the lightbox with both. Asides can't be thumbnails, so below 58rem
@@ -2436,7 +2436,13 @@ main {
      measure was fine (Hat, on a 2560 screen). A narrower column and more
      air on both sides, same ~70 a line. A type step for big screens was
      mocked and rejected the same day — too big. */
-  main { --mcol: 16rem; --mgap: 2.5rem; --lgap: 2rem; }
+  /* 2026-11-16: the art column 6rem -> 7.5rem, room for a cover's flip back
+     (8.5rem, a shelf card's width, was tried first: too big beside the
+     prose). Below 68.5rem the figure column pays for it, 16rem -> 14.5rem,
+     so the measure stays where Hat tuned it (his pick over a narrower
+     measure); from 68.5rem the shell grows instead (below) and the figures
+     keep 16rem. */
+  main { --mcol: 14.5rem; --mgap: 2.5rem; --lgap: 2rem; --lcol: 7.5rem; }
   main:has(> .post, > .post-list, > .tag, > .subject) { max-width: none; }
   /* The shell is the viewport from here down to 58rem, so the smoke and the
      day bands stop at the body padding instead of running off-screen. */
@@ -2451,6 +2457,16 @@ main {
     margin-left: calc(var(--lcol) + var(--lgap));
     margin-right: calc(var(--mcol) + var(--mgap));
   }
+}
+
+/* 2026-11-16: where the screen has the room, the shell grows by the art
+   column's 1.5rem instead of the figures shrinking. Site-wide, so the
+   furniture keeps one width across pages. From 68.5rem, not 64.5: the smoke
+   behind a post reaches 2rem past the shell on each side (see the 64.49rem
+   container query) and needs the 4rem to stay on screen. */
+@media (min-width: 68.5rem) {
+  :root { --wide: 64.5rem; }
+  main { --mcol: 16rem; }
 }
 
 /* Where the right column comes from: each section body gives it up as
@@ -3372,3 +3388,84 @@ main:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .shelf-back, .shelf-card > *, .flip-tab > span { transition: none !important; }
 }
+
+/* Flip cards beyond the shelf (2026-11-16, Hat: from any post you should be
+   able to see how much he's written about the game). Every card that already
+   shows a subject turns over: an essay's shelf card, and a post's cover in
+   the art column (dailies, /s/ fragments, the view timelines). Hover on a
+   desktop; on a phone, or anywhere the post cover shrinks to its 3.5rem
+   tile, a tap opens the back as a popover instead (base.njk). Never in the
+   feed: it renders the plain form, and a back there would change every old
+   item nightly. */
+@media (hover: hover) {
+  .essay-card.has-back:is(:hover, :focus-visible) .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
+  .essay-card.has-back:is(:hover, :focus-visible) > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+}
+
+/* Narrow backs: a post's cover is 6rem, an essay card 6–8.5rem, against the
+   shelf's 8.5rem and up. The post cover's back is also compact (cardBackHtml
+   with no title: the heading beside it names the game). Both hang down past
+   their card when they run longer, drawing their own frame over the card's,
+   rather than clipping the weeks and the release year off the bottom; the
+   column under a card is empty. Words get a row of their own: "1,968" at
+   16px is wider than half of 96px. */
+:is(.frag > .sky-cover, .essay-card).has-back { overflow: visible; }
+/* Over the next card down (an essay's stack), which a hanging back runs into. */
+:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { z-index: 3; }
+:is(.sky-cover, .essay-card) > .shelf-back {
+  inset: -2px -2px auto;
+  min-height: calc(100% + 4px);
+  padding: 7px 6px;
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.essay-card > .shelf-back .bk-t { padding-right: 4px; }
+.bk-compact > .bk-run {
+  margin: 3px 3px 0;
+  padding-bottom: 7px;
+  font: 8px/12px var(--pixel);
+  border-bottom: 2px solid var(--dim);
+}
+:is(.sky-cover, .essay-card) > .shelf-back .bk-big { grid-template-areas: "w w" "d p" "e ."; gap: 10px 4px; padding: 8px 3px 0; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-big > :nth-child(1) { grid-area: d; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-big > :nth-child(2) { grid-area: w; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-big > :nth-child(3) { grid-area: p; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-big > :nth-child(4) { grid-area: e; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-weeks { margin: 12px 3px 0; }
+:is(.sky-cover, .essay-card) > .shelf-back .bk-rel { margin: auto 3px 2px; }
+@media (hover: hover) and (min-width: 34.01rem) {
+  .frag > .sky-cover.has-back:hover > .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
+}
+@media (max-width: 34rem) {
+  .sky-cover > .bk-compact { display: none; }
+}
+
+/* The phone's popover: one per page, filled with a copy of the tapped card's
+   back and a link through to the game, placed beside the card by the script.
+   Light dismiss (a tap anywhere else) and scrolling close it. */
+.flip-pop {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: 9.5rem;
+  padding: 0;
+  overflow: visible;
+  color: var(--ink);
+  background: var(--fill);
+  border: 2px solid var(--frame);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.flip-pop .shelf-back {
+  position: static;
+  visibility: visible;
+  opacity: 1;
+  min-height: 0;
+  border: 0;
+  box-shadow: none;
+  transition: none;
+}
+/* The back's title block, as a link: the way through to the game's page now
+   that the tap opened this instead of following the cover. */
+.flip-pop .bk-go { display: block; margin-bottom: 6px; padding: 4px 4px 8px; font: 8px/12px var(--pixel); color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--dim); text-wrap: balance; }
+.flip-pop .bk-go .bk-arrow { color: var(--muted); }
+.flip-pop .bk-go:is(:hover, :focus-visible) { color: var(--accent); }

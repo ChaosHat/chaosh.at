@@ -22,8 +22,13 @@ eleventyComputed:
       shelf: the card is one anchor. A card whose subject a ## heading names
       goes under that heading (essay.sections, config); the rest float beside
       the opening paragraph — the essay's one guaranteed image. -#}
+  {#- It turns over like a shelf card (2026-11-16): the back is the whole
+      run's numbers, `subjectBack` (empty for a subject with no day written,
+      which then doesn't flip). A tap on a phone opens it as a popover
+      instead (base.njk). -#}
   {% macro card(c) %}
-  <a class="essay-card shelf-card{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
+  {%- set bk = c.slug | subjectBack %}
+  <a class="essay-card shelf-card{% if bk %} has-back{% endif %}{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
     <span class="shelf-art">
       {% if c.coverUrl %}
       <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}{% if c.coverPixel %} is-pixel{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
@@ -37,6 +42,7 @@ eleventyComputed:
     {% if c.ratable %}{% if c.canon %}<span class="cell rating badge-g b-canon">canon</span>
     {% elif c.rating %}<span class="cell rating r-{{ c.rating.slug }}">{{ c.rating.title }}</span>
     {% else %}<span class="cell rating r-pending">pending</span>{% endif %}{% endif %}
+    {{ bk | safe }}
   </a>
   {% endmacro %}
   {#- Two or more unplaced cards would float into a ragged wall that pinches

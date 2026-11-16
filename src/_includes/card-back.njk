@@ -6,17 +6,8 @@
     one year's on the year page. "pics", not "shots": Hat couldn't tell what
     "shots" meant. Absolute inside the front's box, so a long title never
     makes one card taller than its row. -#}
-{%- from "weeks.njk" import weeks %}
+{#- Rendered by cardBackHtml in eleventy.config.js since 2026-11-16, the one
+    renderer a post cover's back shares. Same signature as before. -#}
 {%- macro back(title, stats, grid, released, year) -%}
-<span class="shelf-back" aria-hidden="true">
-  <span class="bk-t">{{ title }}<span class="bk-run">{{ stats.first | runText(stats.last) }}</span></span>
-  <span class="bk-big">
-    <span><b>{{ stats.days or "–" }}</b>days</span>
-    <span><b>{{ (stats.words | num) if stats.words else "–" }}</b>words</span>
-    <span><b>{{ stats.pics or "–" }}</b>pics</span>
-    <span><b>{{ stats.essays or "–" }}</b>essays</span>
-  </span>
-  <span class="bk-weeks">{{ weeks(grid) }}</span>
-  {%- if released %}<span class="bk-rel">released <span{% if year and released == year %} class="this-year"{% endif %}>{{ released }}</span></span>{% endif %}
-</span>
+{{ stats | cardBack(title, grid, released, year) | safe }}
 {%- endmacro -%}

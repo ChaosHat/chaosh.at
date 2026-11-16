@@ -376,5 +376,65 @@
         });
       })();
     </script>
+    {#- Flip cards on a phone (2026-11-16): a post's cover is a 3.5rem tile
+        there, too small to turn over, and nothing hovers; so a tap opens its
+        back as a popover beside it, with the title as the link through. An
+        essay card does the same wherever there's no hover. The shelf keeps
+        its own `flip` tab. Without the Popover API the tap just follows the
+        link, as it did before. -#}
+    <script>
+      document.querySelector("a.has-back") && HTMLElement.prototype.hasOwnProperty("popover") && (() => {
+        const narrow = matchMedia("(hover: none), (max-width: 34rem)");
+        const touch = matchMedia("(hover: none)");
+        const pop = document.createElement("div");
+        pop.className = "flip-pop";
+        pop.popover = "auto";
+        document.body.append(pop);
+        let from = null, closedAt = 0;
+        pop.addEventListener("toggle", (e) => {
+          if (e.newState === "closed") closedAt = performance.now();
+        });
+        addEventListener("scroll", () => pop.matches(":popover-open") && pop.hidePopover(), { passive: true });
+        document.addEventListener("click", (e) => {
+          const card = e.target.closest(".frag > a.sky-cover.has-back, a.essay-card.has-back");
+          if (!card) return;
+          if (!(card.classList.contains("essay-card") ? touch : narrow).matches) return;
+          e.preventDefault();
+          /* The tap that light-dismissed this card's popover shouldn't reopen it. */
+          if (card === from && performance.now() - closedAt < 400) { from = null; return; }
+          from = card;
+          const back = card.querySelector(".shelf-back").cloneNode(true);
+          back.removeAttribute("aria-hidden");
+          /* The title block becomes a link: the full back's .bk-t, or the
+             compact back's run under the cover's data-title. */
+          const t = back.querySelector(".bk-t");
+          const run = back.querySelector(".bk-run");
+          const title = t ? t.firstChild.textContent : card.dataset.title || "";
+          const go = document.createElement("a");
+          go.className = "bk-go";
+          go.href = card.href;
+          const arrow = document.createElement("span");
+          arrow.className = "bk-arrow";
+          arrow.textContent = " →";
+          go.append(title, arrow);
+          if (run) go.append(run);
+          if (t) t.remove();
+          back.prepend(go);
+          pop.replaceChildren(back);
+          pop.setAttribute("aria-label", title + " stats");
+          pop.showPopover();
+          /* Beside the card: right if it fits, else left, else over it;
+             kept on screen with a 12px margin. */
+          const r = card.getBoundingClientRect();
+          const w = pop.offsetWidth, h = pop.offsetHeight, m = 12;
+          let x = r.right + 8;
+          if (x + w > innerWidth - m) x = r.left - 8 - w;
+          if (x < m) x = Math.max(m, Math.min(r.left, innerWidth - m - w));
+          const y = Math.max(m, Math.min(r.top, innerHeight - m - h));
+          pop.style.left = x + "px";
+          pop.style.top = y + "px";
+        });
+      })();
+    </script>
   </body>
 </html>
