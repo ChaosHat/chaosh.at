@@ -1736,6 +1736,41 @@ export const pixelSubject = (slug, ladderHue, status, tier, { canon = false, chi
   return { px: pxUpscale(px, W, H, scale), w: W * scale, h: H * scale };
 };
 
+// The spine (2026-11-19): a slice of the subject's own sky, run down the left
+// edge of every cover that carries a status, with the status word printed at
+// its foot. It replaced the tinted status badge, which read as a stock UI
+// label. The sky already says the status (aurora while playing, a grey ghost
+// for incomplete, the moon when finished, gold for canon), so the spine says
+// it twice, and no other site could have it. Cut from the big sky at its art
+// resolution, SPINE_COLS wide where the scene is brightest (so the moon or the
+// curtain's hottest stretch lands in it), then ×2 like the chips. Below the
+// sky's 64 rows the spine carries on as its night's last step, painted by CSS
+// (.spine's background-color: NIGHT[2], or NIGHT_DONE[2] for completed).
+export const SPINE_COLS = 8;
+export const pixelSpine = (sky) => {
+  const k = PX_SKY.scale;
+  const W = sky.w / k;
+  const H = sky.h / k;
+  const at = (x, y) => (y * k * sky.w + x * k) * 4;
+  const lum = (o) => Math.max(sky.px[o], sky.px[o + 1], sky.px[o + 2]);
+  const floor = lum(at(W >> 1, H - 1)) + 25;
+  let best = 0;
+  let bestScore = -1;
+  for (let x0 = 0; x0 + SPINE_COLS <= W; x0 += 1) {
+    let s = 0;
+    for (let x = x0; x < x0 + SPINE_COLS; x += 1)
+      for (let y = 0; y <= PX_SKY.scene; y += 1) s += Math.max(0, lum(at(x, y)) - floor);
+    if (s > bestScore) [best, bestScore] = [x0, s];
+  }
+  const px = new Uint8Array(SPINE_COLS * H * 4);
+  for (let y = 0; y < H; y += 1)
+    for (let x = 0; x < SPINE_COLS; x += 1) {
+      const o = at(best + x, y);
+      px.set(sky.px.subarray(o, o + 4), (y * SPINE_COLS + x) * 4);
+    }
+  return { px: pxUpscale(px, SPINE_COLS, H, 2), w: SPINE_COLS * 2, h: H * 2 };
+};
+
 // -------------------------------------------------------------- fireworks
 //
 // A pixel fireworks finale (2026-11-14): the backdrop of a game's cleared

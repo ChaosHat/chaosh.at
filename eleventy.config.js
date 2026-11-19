@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
 import MarkdownIt from "markdown-it";
-import { pixelSubject, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf, fireworksSheet, fireworksPalette } from "./aurora.js";
+import { pixelSubject, pixelSpine, pixelBand, pixelBandForm, pixelLayers, pixelLightSheet, PIXEL_LIGHT_BELOW, starTile, dayFrame, palette, hashOf, fireworksSheet, fireworksPalette } from "./aurora.js";
 import { encodePng, encodePngIndexed } from "./png.js";
 import { buttonFiles, cometMarkSvg, wordmarkSvg } from "./button.js";
 import { sigFiles } from "./sig.js";
@@ -1616,6 +1616,20 @@ export default function (eleventyConfig) {
   const hasShelf = (g) => GROUP.get(g)?.hasShelf === true;
   const hasCanon = (g) => GROUP.get(g)?.hasCanon === true;
 
+  // The spine (2026-11-19): the status on a cover's left edge, a slice of the
+  // subject's own sky (aurora.js pixelSpine, written by registerSky) with the
+  // status word and its icon at the foot. In place of the tinted status badge,
+  // which read as a stock UI label wherever it sat. Only where the group has a
+  // shelf, as the badge was: a bandless subject has no status to show. The
+  // icon is CSS (.spine::after, the .b-<status> --ico); the night under the
+  // sky's last row is .spine's background-color.
+  const spineHtml = (slug, status, group) =>
+    hasShelf(group)
+      ? `<span class="spine b-${status}" style="background-image:url(/img/sky/spine/${slug}.png)">` +
+        `<span class="spine-word">${statusWord(status, group)}</span></span>`
+      : "";
+  eleventyConfig.addFilter("spine", (slug, status, group) => spineHtml(slug, status, group));
+
   // Tags are a curated VIEW over several subjects — /t/final-fantasy/ gathers
   // every fragment ever written about any Final Fantasy game onto one page.
   //
@@ -1803,6 +1817,10 @@ export default function (eleventyConfig) {
     // holds a "/", so the folders can't collide; tag chips get one too.
     skyFiles.set(`img/sky/${slug}.png`, encodePng(big.px, big.w, big.h, 4));
     skyFiles.set(`img/sky/chip/${slug}.png`, encodePng(chip.px, chip.w, chip.h, 4));
+    // The spine (2026-11-19, aurora.js pixelSpine): a slice of the big sky,
+    // down the left of every cover that shows a status. spineHtml names it.
+    const spine = pixelSpine(big);
+    skyFiles.set(`img/sky/spine/${slug}.png`, encodePng(spine.px, spine.w, spine.h, 4));
     return {
       skyUrl: `/img/sky/${slug}.png`,
       chipUrl: `/img/sky/chip/${slug}.png`,
@@ -1977,8 +1995,10 @@ export default function (eleventyConfig) {
   const skyTag = (slug, status, cover = slug) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
-    // A covered subject shows its cover here instead of its sky. Status is
-    // the badge sitting beside the heading, not anything in the art.
+    // A covered subject shows its cover here instead of its sky, with its
+    // status on the spine down the cover's left edge (2026-11-19; it was a
+    // badge beside the heading until then). An uncovered one shows its sky,
+    // which carries the status itself.
     //
     // Background image, not <img>, for the same reason the sky is one: an img
     // carries intrinsic height and would drive the row instead of being driven
@@ -1996,9 +2016,10 @@ export default function (eleventyConfig) {
       // numbers: the section files to that subject's page.
       const back = coverBack(slug);
       const title = back ? ` data-title="${escapeHtml(backs.get(slug).title)}"` : "";
+      const spine = spineHtml(slug, status, groupOf(subjects[slug] ?? {}));
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}" href="${subjectHref(slug)}" ` +
-        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${back}</a>`
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}${spine ? " has-spine" : ""}" href="${subjectHref(slug)}" ` +
+        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${spine}${back}</a>`
       );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
@@ -3055,15 +3076,18 @@ export default function (eleventyConfig) {
       const meta = subjects[slug] ?? {};
       const title = face || meta.title ? escapeHtml(headingTitle(slug, face)) : inner;
       const status = meta.status ?? "active";
-      // A status chip only where the group has a shelf: a bandless subject
-      // (Aurora Watch, a league) has no status to show.
-      const badge = hasShelf(groupOf(meta))
-        ? `<span class="badge b-${status}">${statusWord(status, groupOf(meta))}</span>` : "";
+      // The status is on the cover's spine (skyTag, 2026-11-19), so the
+      // heading is the title alone; it was title + a tinted badge, which read
+      // as an issue tracker's label. The cover is hidden from assistive tech,
+      // so the status is said once here, after the heading, for a screen
+      // reader. Only where the group has a shelf: a bandless subject (Aurora
+      // Watch, a league) has no status to show.
+      const said = hasShelf(groupOf(meta))
+        ? `<p class="sr-only">Status: ${statusWord(status, groupOf(meta))}.</p>` : "";
       const head =
         `<h2 class="frag-head"${attrs}${id}>` +
         `<a class="frag-subject" href="${subjectHref(slug)}">${title}</a>` +
-        badge +
-        `</h2>`;
+        `</h2>` + said;
 
       const cover = face?.cover ?? slug;
       out.push(wrapFragment(skyTag(slug, status, cover), head + rest, coverBoxOf(coverUrls.has(cover) ? cover : slug, fitOf(slug))));

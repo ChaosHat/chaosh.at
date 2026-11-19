@@ -721,7 +721,13 @@ figure,
   border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
 }
 
-/* Status icons (2026-10-19), in place of the 4px dot: pixelarticons (MIT,
+/* Status icons redrawn for the site 2026-11-19 (src/img/icons/*.svg, each
+   with its grid in a comment), on the canon star's 12px grid in place of the
+   pixelarticons below: active, shelved, incomplete and completed are one sky
+   (sun, sun clouded over, sunset, moon), backlog a ? block, owned a meeple.
+   They mostly sit on the spine now (the end of this file); the badge is left
+   on the timeline cards and the canon link.
+   Was: status icons (2026-10-19), in place of the 4px dot: pixelarticons (MIT,
    src/img/icons/LICENSE-pixelarticons.txt), drawn on a 12px lattice with
    2-unit pixels in a 24 viewBox, so at 12px one icon pixel is one device
    pixel, the 8px text's own scale. A mask in currentColor, so each takes
@@ -3182,6 +3188,9 @@ main:focus { outline: none; }
   border: 0;
   border-right: 2px solid var(--dim);
 }
+/* The bar's status cell is the word and icon in the status hue on the bar's
+   own ground, no wash (2026-11-19): the tinted badge read as a stock label. */
+.status-bar > .badge { background: none; }
 .status-bar .sb-date { color: var(--ink); }
 .status-bar .sb-note { color: var(--muted); }
 .status-bar .sb-why { color: var(--accent); text-decoration: none; }
@@ -3469,3 +3478,101 @@ main:focus { outline: none; }
 .flip-pop .bk-go { display: block; margin-bottom: 6px; padding: 4px 4px 8px; font: 8px/12px var(--pixel); color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--dim); text-wrap: balance; }
 .flip-pop .bk-go .bk-arrow { color: var(--muted); }
 .flip-pop .bk-go:is(:hover, :focus-visible) { color: var(--accent); }
+
+/* ------------------------------------------------------ the spine (2026-11-19)
+   The status on a cover's left edge, in place of the tinted status badge: the
+   badge's recipe (a 15% wash and a 42% border round an icon and a word) is the
+   stock UI label, and beside a post's heading it read as an issue tracker's.
+   The spine is a 16px slice of the subject's own sky (aurora.js pixelSpine,
+   registerSky writes /img/sky/spine/<slug>.png), so it says the status twice
+   (aurora, grey ghost, moon, gold moon) and no other site could have it. The
+   word runs down it at its foot with the status icon under it, in the status
+   hue. Below the sky's 64 rows the spine is its night's last step, the sky's
+   own colour: NIGHT[2], or NIGHT_DONE[2] for completed (aurora.js — move both
+   if either moves). Card sizes don't change: the cover gives up 18px (spine
+   and its 2px --ring line) and is cropped to fit, so the grid, the flip backs
+   and the post column's heights all stay as they were. A back is positioned
+   after the spine, so it paints over it when a card turns. */
+.spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 5px;
+  background-color: #202544;
+  background-repeat: no-repeat;
+  background-position: top center;
+  image-rendering: pixelated;
+  border-right: 2px solid var(--ring);
+  color: var(--c);
+  font: 8px/16px var(--pixel);
+  pointer-events: none;
+}
+.spine.b-completed { background-color: #14162e; }
+.spine-word { writing-mode: vertical-rl; white-space: nowrap; }
+.spine::after {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  -webkit-mask: var(--ico) center / 12px 12px no-repeat;
+  mask: var(--ico) center / 12px 12px no-repeat;
+}
+
+/* Shelf and essay cards: an <img> (or the sky tile) in a 2:3 slot, 1:1 on the
+   tabletop shelf. The slot keeps its height from the full width (100cqw) and
+   the art takes what's left beside the spine. */
+.shelf-art.has-spine { position: relative; container-type: inline-size; --ar: 2 / 3; }
+.shelf-grid.shelf-tabletop .shelf-art.has-spine { --ar: 1; }
+.shelf-art.has-spine > :is(.shelf-cover, .sky) {
+  width: calc(100% - 18px);
+  margin-left: 18px;
+  height: calc(100cqw / (var(--ar)));
+  aspect-ratio: auto;
+}
+
+/* Post and subject-page covers: a background on the link, sized to its
+   2:3 (or --box) slot, so the art moves into the content box past the spine. */
+/* No position here: .sky is already relative, and the post column sets it
+   absolute from 58rem; overriding it pushed the heading under the cover. */
+.sky-cover.has-spine {
+  padding-left: 18px;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-repeat: no-repeat;
+}
+
+/* Under 58rem a post's cover is 3rem wide: the spine keeps its sky and icon
+   and drops the word, which would run off a 3rem (48px) column. */
+@media (max-width: 57.99rem) {
+  .frag > .sky-cover.has-spine { padding-left: 14px; }
+  .frag > .sky-cover.has-spine > .spine { width: 12px; padding-bottom: 3px; background-position: top center; }
+  .frag > .sky-cover.has-spine > .spine::after { width: 8px; height: 8px; -webkit-mask-size: 8px 8px; mask-size: 8px 8px; }
+  .frag > .sky-cover.has-spine > .spine > .spine-word { display: none; }
+}
+
+/* An uncovered subject's page keeps its status as a word in the meta row:
+   its sky carries no word. The word and icon in the hue, no box. */
+.status-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 8px/1 var(--pixel);
+  color: var(--c);
+}
+.status-word::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  -webkit-mask: var(--ico) center / 12px 12px no-repeat;
+  mask: var(--ico) center / 12px 12px no-repeat;
+}
