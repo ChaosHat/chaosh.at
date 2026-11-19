@@ -1,1 +1,1 @@
-I have beaten and re-beaten this game so many times. I think I still remember how to get Biggoron’s Sword from memory. 
+One of my most played and completed single player games. The original still holds up mechanically, if a little rough graphically (but that's nothing mods can't fix). It remains a classic.

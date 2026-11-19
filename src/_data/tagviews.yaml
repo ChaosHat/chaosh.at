@@ -15,6 +15,7 @@ dragon-quest:
     - dragon-quest-v
     - dragon-quest-xi-s
     - dragon-warrior-monsters-2
+    - dragon-quest-iii
 final-fantasy:
   title: Final Fantasy
   members:
@@ -23,6 +24,7 @@ final-fantasy:
     - final-fantasy-vii-remake
     - final-fantasy-vii-rebirth
     - final-fantasy-tactics
+    - final-fantasy-vii
 jrpg:
   title: JRPG
   members:
@@ -40,6 +42,12 @@ jrpg:
     - sea-of-stars
     - dragon-warrior-monsters-2
     - super-mario-rpg
+    - final-fantasy-vii
+    - dragon-quest-iii
+    - suikoden
+    - suikoden-ii
+    - live-a-live
+    - trails-in-the-sky-1st-chapter
 atlus:
   title: Atlus
   description: Same DNA and lineage, different titles.

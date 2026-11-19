@@ -241,6 +241,17 @@ donkey-kong-country:
   aliases:
     - dkc
     - donkey kong country 1
+dragon-quest-iii:
+  title: Dragon Quest III HD-2D Remake
+  category:
+    - games
+  status: backlog
+  released: 2024
+  aliases:
+    - dq3
+    - dqiii
+    - dragon quest 3
+    - dragon quest iii
 dragon-quest-v:
   title: 'Dragon Quest V: Hand of the Heavenly Bride'
   category:
@@ -384,6 +395,16 @@ final-fantasy-vi:
     - ffvi
     - ff6
     - final fantasy 6
+final-fantasy-vii:
+  title: Final Fantasy VII
+  category:
+    - games
+  status: backlog
+  released: 1997
+  aliases:
+    - ff7
+    - ffvii
+    - final fantasy 7
 final-fantasy-vii-rebirth:
   title: Final Fantasy VII Rebirth
   category:
@@ -603,6 +624,14 @@ kotor-2:
     - kotor ii
     - the sith lords
     - sith lords
+live-a-live:
+  title: Live A Live
+  category:
+    - games
+  status: backlog
+  released: 2022
+  aliases:
+    - lal
 lufia-2:
   title: 'Lufia II: Rise of the Sinistrals'
   category:
@@ -1109,6 +1138,23 @@ stellaris:
   status: completed
   rating: loved
   released: 2016
+suikoden:
+  title: Suikoden
+  category:
+    - games
+  status: backlog
+  released: 2025
+  aliases:
+    - suikoden 1
+    - suikoden i
+suikoden-ii:
+  title: Suikoden II
+  category:
+    - games
+  status: backlog
+  released: 2025
+  aliases:
+    - suikoden 2
 super-mario-rpg:
   title: Super Mario RPG
   category:
@@ -1185,6 +1231,16 @@ the-plucky-squire:
   released: 2024
   aliases:
     - plucky squire
+trails-in-the-sky-1st-chapter:
+  title: Trails in the Sky 1st Chapter
+  category:
+    - games
+  status: backlog
+  released: 2025
+  aliases:
+    - trails in the sky
+    - trails sky
+    - sky 1st chapter
 triangle-strategy:
   title: Triangle Strategy
   category:
