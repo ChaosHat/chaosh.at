@@ -1610,8 +1610,9 @@ export default function (eleventyConfig) {
       .map((g) => `${n.get(g.id)} ${g.noun}${n.get(g.id) === 1 ? "" : "s"}`)
       .join(" · ");
   });
-  eleventyConfig.addFilter("statusWord", (status, g) =>
-    GROUP.get(g)?.statusWords?.[status] ?? status);
+  const statusWord = (status, g) =>
+    GROUP.get(g)?.statusWords?.[status] ?? status;
+  eleventyConfig.addFilter("statusWord", statusWord);
   const hasShelf = (g) => GROUP.get(g)?.hasShelf === true;
   const hasCanon = (g) => GROUP.get(g)?.hasCanon === true;
 
@@ -3057,7 +3058,7 @@ export default function (eleventyConfig) {
       // A status chip only where the group has a shelf: a bandless subject
       // (Aurora Watch, a league) has no status to show.
       const badge = hasShelf(groupOf(meta))
-        ? `<span class="badge b-${status}">${status}</span>` : "";
+        ? `<span class="badge b-${status}">${statusWord(status, groupOf(meta))}</span>` : "";
       const head =
         `<h2 class="frag-head"${attrs}${id}>` +
         `<a class="frag-subject" href="${subjectHref(slug)}">${title}</a>` +
