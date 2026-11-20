@@ -1324,7 +1324,10 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .rail-label {
   max-width: 0; opacity: 0;
   text-align: right; color: var(--muted);
-  font: 15px/18px var(--prose);
+  /* The caption face, Pixel Operator Fine Bold at 16/20 (2026-11-19): crisp
+     and nearly as narrow as the 15px Alegreya it replaced. Pixel Operator at
+     16 wrapped every title to two or three lines; at 8 it was too faint. */
+  font: 700 16px/20px var(--pixel-fine);
   transition: opacity 0.2s steps(2), max-width 0s 0.2s;
 }
 .rail-row-day .rail-label { font: 16px/20px var(--pixel); color: var(--ink); }
