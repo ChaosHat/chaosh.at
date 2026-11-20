@@ -2146,7 +2146,7 @@ a.badge { text-decoration: none; }
   background: var(--edge);
   filter: blur(0.3em);
   cursor: pointer;
-  transition: filter 0.12s ease, background-color 0.12s ease;
+  transition: filter 0.12s steps(3), background-color 0.12s steps(3);
   -webkit-tap-highlight-color: transparent;
 }
 
