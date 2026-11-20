@@ -96,6 +96,10 @@ eleventyComputed:
               of the game's own sky with the word at its foot. It replaced the
               status cell, a tinted badge that read as a stock UI label. -#}
           {{ item.slug | spine(item.status, item.group) | safe }}
+          {#- Variant: the rating at the head of the spine, like a case's title. -#}
+          {% if item.canon %}<span class="spine-top b-canon">canon</span>
+          {% elif item.rating %}<span class="spine-top r-{{ item.rating.slug }}">{{ item.rating.title }}</span>
+          {% else %}<span class="spine-top r-pending">pending</span>{% endif %}
           {% if item.coverUrl %}
           {#- A real <img>, unlike every sky on the site: the generated art is
               decoration and belongs in CSS, but a cover is content, it wants an
@@ -119,9 +123,6 @@ eleventyComputed:
           top two where English couldn't order "favorite" against "loved".
           Unrated reads "pending", dimmed: a blank beside a filled neighbour
           reads as a field someone forgot. -#}
-      {% if item.canon %}<span class="shelf-rating badge-g b-canon">canon</span>
-      {% elif item.rating %}<span class="shelf-rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
-      {% else %}<span class="shelf-rating r-pending">pending</span>{% endif %}
       <span class="shelf-caption">{{ item.title }}</span>
     </a>
     {% if flips %}<button type="button" class="flip-tab" aria-pressed="false" hidden><span>flip</span><span class="sr-only"> {{ item.title }}'s stats</span></button>{% endif %}

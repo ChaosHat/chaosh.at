@@ -3594,3 +3594,21 @@ main:focus { outline: none; }
   -webkit-mask: var(--ico) center / 12px 12px no-repeat;
   mask: var(--ico) center / 12px 12px no-repeat;
 }
+
+/* Variant: the rating at the head of the spine, outlined in night so it
+   holds over the aurora and the moon. */
+.spine-top {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 16px;
+  writing-mode: vertical-rl;
+  font: 8px/16px var(--pixel);
+  white-space: nowrap;
+  color: var(--muted);
+  filter: drop-shadow(1px 0 0 var(--ring)) drop-shadow(-1px 0 0 var(--ring)) drop-shadow(0 1px 0 var(--ring)) drop-shadow(0 -1px 0 var(--ring));
+  pointer-events: none;
+}
+.spine-top.r-favorite { color: var(--silver); }
+.spine-top.b-canon { color: var(--gold); }
+.spine-top.r-pending { color: color-mix(in srgb, var(--muted) 60%, var(--night)); }
