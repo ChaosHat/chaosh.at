@@ -33,7 +33,7 @@ eleventyComputed:
         margin column). Below 58rem it stays the cover beside the title. -#}
     {%- if subject.coverUrl %}
     {%- set spined = groupInfo[subject.group] and groupInfo[subject.group].hasShelf %}
-    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}{% if spined %} has-spine{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true">{% if spined %}{{ subject.slug | spine(subject.status, subject.group) | safe }}{% endif %}</span>
+    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}{% if spined %} has-spine{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true">{% if spined %}{%- if subject.canon %}{% set rw = "canon" %}{% set rk = "canon" %}{% elif subject.rating %}{% set rw = subject.rating.title %}{% set rk = subject.rating.slug %}{% elif groupInfo[subject.group].hasCanon %}{% set rw = "pending" %}{% set rk = "pending" %}{% else %}{% set rw = "" %}{% set rk = "" %}{% endif %}{{ subject.slug | spine(subject.status, subject.group, rw, rk) | safe }}{% endif %}</span>
     {%- else %}
     <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
     {%- endif %}

@@ -2021,7 +2021,17 @@ export default function (eleventyConfig) {
       // numbers: the section files to that subject's page.
       const back = coverBack(slug);
       const title = back ? ` data-title="${escapeHtml(backs.get(slug).title)}"` : "";
-      const spine = spineHtml(slug, status, groupOf(subjects[slug] ?? {}));
+      // The rating rides the spine too where the group has a canon (the
+      // shelf's rule): canon, the rung, or "pending" for unrated.
+      const meta = subjects[slug] ?? {};
+      const grp = groupOf(meta);
+      let rw = "";
+      let rk = "";
+      if (hasCanon(grp)) {
+        const r = canonSlugsAll.has(slug) ? null : ratingOf(slug, meta);
+        [rw, rk] = canonSlugsAll.has(slug) ? ["canon", "canon"] : r ? [r.title, r.slug] : ["pending", "pending"];
+      }
+      const spine = spineHtml(slug, status, grp, rw, rk);
       return (
         `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}${spine ? " has-spine" : ""}" href="${subjectHref(slug)}" ` +
         `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${spine}${back}</a>`
