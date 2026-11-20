@@ -3632,6 +3632,11 @@ main:focus { outline: none; }
    essay cards) would be clipped too, so the clip lifts while a back shows,
    and the hanging back takes the same corners itself. */
 :root {
+  /* The covers' ring: the windows' staircase with the corner one cell
+     thicker (cells either side of the step), which read thin on a 2px frame
+     at a cover's size (Hat, 2026-11-19). Outer loop, then the inner, joined
+     along one seam walked both ways, as --px-win-ring is. */
+  --px-cover-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 6px, 4px 6px, 4px 4px, 6px 4px, 6px 2px, calc(100% - 6px) 2px, calc(100% - 6px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 6px, calc(100% - 2px) 6px, calc(100% - 2px) calc(100% - 6px), calc(100% - 4px) calc(100% - 6px), calc(100% - 4px) calc(100% - 4px), calc(100% - 6px) calc(100% - 4px), calc(100% - 6px) calc(100% - 2px), 6px calc(100% - 2px), 6px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 6px), 2px calc(100% - 6px), 2px 6px);
   --px-out: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
 }
 :is(.shelf-card, .frag > .sky-cover, .subject-head > .sky-cover),
@@ -3645,7 +3650,7 @@ main:focus { outline: none; }
   inset: -2px;
   z-index: 3;
   background: var(--frame);
-  clip-path: var(--px-win-ring);
+  clip-path: var(--px-cover-ring);
   pointer-events: none;
 }
 :is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { clip-path: none; }
