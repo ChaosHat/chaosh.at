@@ -3609,3 +3609,8 @@ main:focus { outline: none; }
 .spine-rating.rung-favorite { color: var(--silver); }
 .spine-rating.rung-canon { color: var(--gold); }
 .spine-rating.rung-pending { color: color-mix(in srgb, var(--muted) 82%, var(--night)); }
+
+/* Essay cards are short (6.75–8.5rem wide), and the spine holds the rating
+   as well as the status there: the icon goes, giving the words its 16px.
+   The sky at the spine's head already says the status. */
+.essay-card .spine::after { display: none; }
