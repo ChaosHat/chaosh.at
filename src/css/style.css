@@ -835,7 +835,7 @@ a.badge:focus-visible { text-decoration: underline; text-underline-offset: 3px; 
 .post-list > li + li {
   margin-top: 2.75rem;
   padding-top: 2.75rem;
-  border-top: 1px solid var(--edge);
+  border-top: 2px solid var(--dim);
 }
 
 .entry-head { margin-bottom: 21px; }
@@ -1124,7 +1124,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   font: 400 16px/24px var(--pixel); /* under the 24px post title, not level with it (2026-10-26) */
   text-decoration: none;
   color: var(--ink);
-  border-bottom: 1px solid var(--muted);
+  border-bottom: 2px solid color-mix(in srgb, var(--muted) 55%, transparent);
 }
 
 .frag-subject:hover,
@@ -1264,7 +1264,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .home-toc { margin: 0 0 1.5rem; }
 .home-toc ul { max-height: 70vh; overflow-y: auto; padding-left: 34px; }
 .home-toc li { padding: 6px 0; font: 17px/24px var(--prose); }
-.home-toc li + li { border-top: 1px dashed color-mix(in srgb, var(--edge) 70%, transparent); }
+.home-toc li + li { border-top: 2px solid var(--dim); }
 .home-toc li a { display: inline; padding: 0; }
 .home-toc li a:is(:hover, :focus-visible)::before { content: none; }
 .home-toc li a:is(:hover, :focus-visible) { text-decoration: underline; }
@@ -1350,7 +1350,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .post > .post-tags {
   margin-top: 2.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--edge);
+  border-top: 2px solid var(--dim);
 }
 
 /* Previous/next day (2026-11-11): the archive row's type (16px pixel, accent
@@ -1500,7 +1500,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   align-items: baseline;
   gap: 0.75rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 2px solid var(--dim);
 }
 
 .archive-list a { font: 16px/24px var(--pixel); text-decoration: none; }
@@ -1526,7 +1526,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   align-items: center;
   gap: 0.75rem;
   padding: 10px 0;
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 2px solid var(--dim);
 }
 
 .essay-list .sky { width: 24px; }
@@ -1854,7 +1854,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   align-items: flex-start;
   padding-bottom: 1.75rem;
   margin-bottom: 2.25rem;
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 2px solid var(--dim);
 }
 
 .subject-head > .sky { width: 8rem; }
@@ -1953,7 +1953,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .section-head {
   margin: 0 0 1.75rem;
   padding-bottom: 13px;
-  border-bottom: 1px solid var(--edge);
+  border-bottom: 2px solid var(--dim);
   font: 400 8px/1 var(--pixel);
   color: var(--muted);
 }
@@ -2022,7 +2022,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   gap: 3px 1rem;
   align-items: start;
   padding-top: 18px;
-  border-top: 1px solid var(--edge);
+  border-top: 2px solid var(--dim);
 }
 .rung > .badge,
 .rung > .rating { grid-row: 1 / span 2; justify-self: start; }
@@ -2109,7 +2109,7 @@ a.badge { text-decoration: none; }
 .canon-col-head { margin: 0 0 0.5rem; font: 400 8px/16px var(--pixel); color: var(--muted); }
 
 .canon-changes { list-style: none; margin: 0; padding: 0; }
-.canon-change { padding: 10px 0; border-bottom: 1px solid var(--edge); }
+.canon-change { padding: 10px 0; border-bottom: 2px solid var(--dim); }
 .canon-change:last-child,
 .canon-col .essay-list > li:last-child { border-bottom: 0; }
 /* The date as a dateline over the change, not right-aligned beside it the
@@ -2176,7 +2176,7 @@ a.badge { text-decoration: none; }
 .site-footer {
   margin-top: 4rem;
   padding-top: 22px;
-  border-top: 1px solid var(--edge);
+  border-top: 2px solid var(--dim);
   display: flex;
   gap: 1.25rem;
   flex-wrap: wrap;
@@ -2211,11 +2211,13 @@ a.badge { text-decoration: none; }
 .button-row a { display: block; line-height: 0; }
 
 .snippet {
+  --pf: var(--dim);
   margin: 0 0 2.5rem;
-  padding: 11px 14px;
+  padding: 13px 16px;
   overflow-x: auto;
-  background: var(--deep);
-  border: 1px solid var(--edge);
+  background: var(--px-frame-cells), var(--deep);
+  box-shadow: inset 0 0 0 2px var(--pf);
+  clip-path: var(--px-out);
   font: 12px/1.6 ui-monospace, monospace;
   color: var(--muted);
 }
@@ -2247,28 +2249,42 @@ a.badge { text-decoration: none; }
 .gb-opt { opacity: 0.7; }
 .guestbook-form input,
 .guestbook-form textarea {
+  --pf: var(--dim);
   font: 1rem/1.5 var(--prose);
-  color: var(--ink); background: var(--deep);
-  border: 1px solid var(--edge); border-radius: 0; padding: 0.5rem 11px;
+  color: var(--ink); background: var(--px-frame-cells), var(--deep);
+  border: 0; border-radius: 0; padding: 10px 13px;
+  box-shadow: inset 0 0 0 2px var(--pf); clip-path: var(--px-out);
   width: 100%; box-sizing: border-box;
 }
 .guestbook-form textarea { resize: vertical; min-height: 6rem; }
 .guestbook-form input:focus-visible,
-.guestbook-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.guestbook-form textarea:focus-visible { outline: none; --pf: var(--accent); }
+/* The submit is a menu command in a window (2026-11-19): ink on the fill,
+   the ▶ cursor on hover or focus. Was a filled --accent button. */
 .guestbook-form button {
+  --pf: var(--dim);
   justify-self: start; cursor: pointer;
-  font: 8px/1 var(--pixel); color: var(--night); background: var(--accent);
-  border: 1px solid var(--accent); border-radius: 0; padding: 11px 19px;
+  display: flex; align-items: center; gap: 6px;
+  font: 16px/1 var(--pixel); color: var(--ink);
+  background: var(--px-frame-cells), var(--fill);
+  border: 0; border-radius: 0; padding: 12px 18px 12px 12px;
+  box-shadow: inset 0 0 0 2px var(--pf); clip-path: var(--px-out);
 }
-.guestbook-form button:hover { background: var(--ink); border-color: var(--ink); }
-.guestbook-form button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.guestbook-form button::before { content: ""; flex: none; width: 12px; height: 12px; }
+.guestbook-form button:is(:hover, :focus-visible) { --pf: var(--frame); outline: none; }
+.guestbook-form button:is(:hover, :focus-visible)::before {
+  background: var(--ink);
+  -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  animation: cursor-bob 0.8s steps(1) infinite;
+}
 .gb-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
 .gb-contact { color: var(--muted); max-width: var(--read); margin: -1.5rem 0 2.5rem; }
 .guestbook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; max-width: var(--read); }
 .gb-meta { margin: 0 0 5px; display: flex; gap: 13px; align-items: baseline; flex-wrap: wrap; }
 .gb-name { color: var(--ink); font-weight: 700; }
-.gb-name a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--edge); }
+.gb-name a { color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--dim); }
 .gb-name a:hover { color: var(--accent); border-color: var(--accent); }
 /* The date sits at the row's right edge, not after the name: the name is
    prose with a fractional width (76.59px for one entry), so a date set after
@@ -3116,7 +3132,7 @@ main {
 
 /* Marginalia (2026-11-13): the thing, then the note. The source line in the
    day row's pixel type, the date muted under it, the note in body type. */
-.margin-note { padding: 0 0 1.25rem; margin: 0 0 1.25rem; border-bottom: 1px solid var(--edge); }
+.margin-note { padding: 0 0 1.25rem; margin: 0 0 1.25rem; border-bottom: 2px solid var(--dim); }
 .margin-source { margin: 0; font: 16px/24px var(--pixel); }
 .margin-source a { text-decoration: none; }
 .margin-source a:hover { text-decoration: underline; }
@@ -3755,6 +3771,22 @@ main:focus { outline: none; }
 .bk-rating b { font: 400 16px/1 var(--pixel); color: var(--ink); }
 .bk-rating.rung-favorite b { color: var(--silver); }
 .bk-rating.rung-canon b { color: var(--gold); }
+
+/* A stepped frame with no pseudo-element, for form fields and anything
+   else whose ::before/::after are spoken for or can't exist (2026-11-19):
+   clip to --px-out, a 2px inset shadow in --pf for the straight runs, and
+   these four 2px cells for the inner step at each corner, which the shadow
+   leaves open. Declared on the rules that use it, not :root: a var()
+   inside a custom property resolves on the element that declares it, so a
+   :root copy would always draw :root's --pf. Use as
+   background: var(--px-frame-cells), <ground>, with --pf set on the rule. */
+.snippet, .guestbook-form input, .guestbook-form textarea, .guestbook-form button {
+  --px-frame-cells:
+    linear-gradient(var(--pf), var(--pf)) left 2px top 2px / 2px 2px no-repeat,
+    linear-gradient(var(--pf), var(--pf)) right 2px top 2px / 2px 2px no-repeat,
+    linear-gradient(var(--pf), var(--pf)) left 2px bottom 2px / 2px 2px no-repeat,
+    linear-gradient(var(--pf), var(--pf)) right 2px bottom 2px / 2px 2px no-repeat;
+}
 
 /* ------------------------------------------- stepped cover corners (2026-11-19)
    Covers take the windows' staircase corners (--px-win-ring, 2px cells), so a
