@@ -2675,8 +2675,9 @@ main {
   :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float::after {
     content: "view";
     position: absolute;
-    right: 0;
-    bottom: 0;
+    z-index: 2;
+    right: 2px;
+    bottom: 2px;
     padding: 2px 5px;
     background: var(--fill);
     border-top: 2px solid var(--frame);
@@ -2768,9 +2769,6 @@ main {
     box-shadow: none;
     background: transparent;
   }
-  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > img {
-    border: 1px solid var(--dim);
-  }
   :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > figcaption {
     padding: 6px 2px 0;
     border-top: 0;
@@ -2781,6 +2779,39 @@ main {
   }
 }
 
+
+/* Stepped picture frames (2026-11-19, the de-default pass): a post image
+   takes the windows' ring — staircase corners, the inner step too — in
+   --dim in the image column, where the 10-23 rule keeps shots lighter than
+   the covers, and in the day's --frame on a tile, where the frame is what
+   says "tap". The figure is a grid so its ::before can sit in the image's
+   own cell (grid-area 1/1) and match the picture's height whatever its
+   shape, with the caption in the row below; the image is cut to the outer
+   staircase and the ring paints over its outer 2px. Was a 1px --dim
+   line round the picture (column) and a square 2px frame (tiles). */
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float {
+  --fig-ring: var(--frame);
+  display: grid;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float::before {
+  content: "";
+  grid-area: 1 / 1;
+  z-index: 1;
+  background: var(--fig-ring);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
+}
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > img {
+  grid-area: 1 / 1;
+  clip-path: var(--px-out);
+}
+:is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > figcaption { grid-area: 2 / 1; }
+@media (min-width: 58rem) {
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float { --fig-ring: var(--dim); }
+}
 
 /* ------------------------------------------------------------- media nav
    One window, two rows (2026-11-02): the tabs — icon and word per tabbed
