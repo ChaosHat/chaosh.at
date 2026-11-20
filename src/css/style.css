@@ -1670,6 +1670,10 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   margin: 9px 0 0;
   font: 8px/16px var(--pixel);
   color: var(--muted);
+  /* The rating chips' .r-* classes draw a box; the line is the word alone. */
+  padding: 0;
+  border: 0;
+  background: none;
 }
 .shelf-rating.r-favorite { color: var(--silver); }
 .shelf-rating.b-canon { color: var(--gold); }
