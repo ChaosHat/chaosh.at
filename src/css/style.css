@@ -3620,3 +3620,33 @@ main:focus { outline: none; }
 .bk-rating b { font: 400 16px/1 var(--pixel); color: var(--ink); }
 .bk-rating.rung-favorite b { color: var(--silver); }
 .bk-rating.rung-canon b { color: var(--gold); }
+
+/* ------------------------------------------- stepped cover corners (2026-11-19)
+   Covers take the windows' staircase corners (--px-win-ring, 2px cells), so a
+   card reads as one of the site's windows rather than a framed photo. The
+   element keeps its 2px border; its outer corners are clipped to the outer
+   staircase (--px-out) and an overlay paints the ring on top, which supplies
+   the inner step a plain border lacks. The clip takes the 2px --ring and the
+   canon/favorite glow with it (box-shadow can't follow a staircase); the gold
+   and silver frames stay. A back that hangs below its card (post covers,
+   essay cards) would be clipped too, so the clip lifts while a back shows,
+   and the hanging back takes the same corners itself. */
+:root {
+  --px-out: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
+}
+:is(.shelf-card, .frag > .sky-cover, .subject-head > .sky-cover),
+:is(.sky-cover, .essay-card) > .shelf-back {
+  clip-path: var(--px-out);
+}
+:is(.shelf-card, .frag > .sky-cover, .subject-head > .sky-cover)::after,
+:is(.sky-cover, .essay-card) > .shelf-back::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 3;
+  background: var(--frame);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
+}
+:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { clip-path: none; }
+:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::after { display: none; }
