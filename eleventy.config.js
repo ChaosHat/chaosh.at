@@ -521,11 +521,13 @@ export const weeksHtml = (grid) => {
       : "<i></i>").join("");
   return `<span class="weeks${grid.clipped ? " clipped" : ""}" aria-hidden="true">${cells}</span>`;
 };
-export const cardBackHtml = ({ title = null, stats, grid, released = null, year = null }) => {
+// `marks` (2026-11-19): status and rating, already rendered, for a post
+// cover's back, the one place a post shows them (see coverBack).
+export const cardBackHtml = ({ title = null, stats, grid, released = null, year = null, marks = "" }) => {
   const run = runText(stats.first, stats.last);
-  const head = title != null
+  const head = (title != null
     ? `<span class="bk-t">${esc(title)}<span class="bk-run">${run}</span></span>`
-    : `<span class="bk-run">${run}</span>`;
+    : `<span class="bk-run">${run}</span>`) + marks;
   const big = [
     [stats.days, "days"],
     [stats.words ? fmtNum(stats.words) : 0, "words"],
@@ -1990,9 +1992,29 @@ export default function (eleventyConfig) {
   const backs = new Map();
   // A post cover's back (compact: no title), and a popover title for the
   // phone, where the cover is too small to turn over (base.njk's script).
+  // A post's status and rating live on its cover's back (2026-11-19). On the
+  // page itself they were either redundant (a new section is nearly always
+  // "active" and "pending") or anachronistic (an old post wore today's
+  // status, so "just got to Junon" read "completed"), and a 6rem cover had
+  // no room for both on a spine. Status in its hue with its icon; the rating
+  // muted, silver for favorite, gold for canon; each only where the group
+  // has the band.
+  const coverMarks = (slug) => {
+    const meta = subjects[slug] ?? {};
+    const grp = groupOf(meta);
+    const status = meta.status ?? "active";
+    let out = "";
+    if (hasShelf(grp)) out += `<span class="status-word b-${status}">${statusWord(status, grp)}</span>`;
+    if (hasCanon(grp)) {
+      const r = canonSlugsAll.has(slug) ? null : ratingOf(slug, meta);
+      const [rw, rk] = canonSlugsAll.has(slug) ? ["canon", "canon"] : r ? [r.title, r.slug] : ["pending", "pending"];
+      out += `<span class="bk-rating rung-${rk}">${escapeHtml(rw)}</span>`;
+    }
+    return out ? `<span class="bk-marks">${out}</span>` : "";
+  };
   const coverBack = (slug) => {
     const b = backs.get(slug);
-    return b ? cardBackHtml({ stats: b.stats, grid: weeksGrid(b.stats, POST_WEEKS), released: b.released }) : "";
+    return b ? cardBackHtml({ stats: b.stats, grid: weeksGrid(b.stats, POST_WEEKS), released: b.released, marks: coverMarks(slug) }) : "";
   };
 
   // `cover` is the cover file to show, the subject's own unless a face
@@ -2000,10 +2022,10 @@ export default function (eleventyConfig) {
   const skyTag = (slug, status, cover = slug) => {
     const art = skyUrls.get(slug);
     if (!art) return '<span class="sky sky-blank" aria-hidden="true"></span>';
-    // A covered subject shows its cover here instead of its sky, with its
-    // status on the spine down the cover's left edge (2026-11-19; it was a
-    // badge beside the heading until then). An uncovered one shows its sky,
-    // which carries the status itself.
+    // A covered subject shows its cover here instead of its sky; its status
+    // and rating are on the cover's back (coverBack, 2026-11-19; a badge
+    // beside the heading until then). An uncovered one shows its sky, which
+    // carries the status itself.
     //
     // Background image, not <img>, for the same reason the sky is one: an img
     // carries intrinsic height and would drive the row instead of being driven
@@ -2021,20 +2043,9 @@ export default function (eleventyConfig) {
       // numbers: the section files to that subject's page.
       const back = coverBack(slug);
       const title = back ? ` data-title="${escapeHtml(backs.get(slug).title)}"` : "";
-      // The rating rides the spine too where the group has a canon (the
-      // shelf's rule): canon, the rung, or "pending" for unrated.
-      const meta = subjects[slug] ?? {};
-      const grp = groupOf(meta);
-      let rw = "";
-      let rk = "";
-      if (hasCanon(grp)) {
-        const r = canonSlugsAll.has(slug) ? null : ratingOf(slug, meta);
-        [rw, rk] = canonSlugsAll.has(slug) ? ["canon", "canon"] : r ? [r.title, r.slug] : ["pending", "pending"];
-      }
-      const spine = spineHtml(slug, status, grp, rw, rk);
       return (
-        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}${spine ? " has-spine" : ""}" href="${subjectHref(slug)}" ` +
-        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${spine}${back}</a>`
+        `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}" href="${subjectHref(slug)}" ` +
+        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${back}</a>`
       );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
@@ -3091,18 +3102,14 @@ export default function (eleventyConfig) {
       const meta = subjects[slug] ?? {};
       const title = face || meta.title ? escapeHtml(headingTitle(slug, face)) : inner;
       const status = meta.status ?? "active";
-      // The status is on the cover's spine (skyTag, 2026-11-19), so the
-      // heading is the title alone; it was title + a tinted badge, which read
-      // as an issue tracker's label. The cover is hidden from assistive tech,
-      // so the status is said once here, after the heading, for a screen
-      // reader. Only where the group has a shelf: a bandless subject (Aurora
-      // Watch, a league) has no status to show.
-      const said = hasShelf(groupOf(meta))
-        ? `<p class="sr-only">Status: ${statusWord(status, groupOf(meta))}.</p>` : "";
+      // The heading is the title alone (2026-11-19). It was title + a tinted
+      // status badge, which read as an issue tracker's label, and the status
+      // on a post was redundant or out of date; it lives on the cover's back
+      // now (coverBack), and on the shelf and the subject page.
       const head =
         `<h2 class="frag-head"${attrs}${id}>` +
         `<a class="frag-subject" href="${subjectHref(slug)}">${title}</a>` +
-        `</h2>` + said;
+        `</h2>`;
 
       const cover = face?.cover ?? slug;
       out.push(wrapFragment(skyTag(slug, status, cover), head + rest, coverBoxOf(coverUrls.has(cover) ? cover : slug, fitOf(slug))));
