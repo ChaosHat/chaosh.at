@@ -501,13 +501,25 @@ h1,
      shelf and essay cards, covers, figures. outline paints over content, so
      the inset line would be drawn across the art. */
 
+/* Asides took the windows' staircase on 2026-11-19 (the de-default pass,
+   finished): the outer ring in --frame and the inner keyline in --dim, each
+   a stepped overlay (::after, ::before), the box cut to the outer
+   staircase. Was a square 2px border, a square outline 4px inside it and a
+   --ring shadow (lost to the clip, as on the covers). The 2px the border
+   took is padding now (.aside below). */
 .aside {
+  position: relative;
   background: var(--fill);
-  border: 2px solid var(--frame);
-  outline: 2px solid var(--dim);
-  outline-offset: -6px;
-  box-shadow: 0 0 0 2px var(--ring);
+  clip-path: var(--px-out);
 }
+.aside::after,
+.aside::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.aside::after { inset: 0; background: var(--frame); clip-path: var(--px-win-ring); }
+.aside::before { inset: 4px; background: var(--dim); clip-path: var(--px-win-ring); }
 
 /* The boxes that sit over the sky — the furniture strips, and the intro until
    it moved to the footer (2026-11-02) — which the masthead and the page
@@ -1041,7 +1053,7 @@ main figure img { cursor: zoom-in; }
    floats are overridden; they survive only for an image outside one. */
 .aside {
   margin: 1.5rem 0;
-  padding: 14px 18px;
+  padding: 16px 20px;
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -3737,12 +3749,21 @@ main:focus { outline: none; }
   inset: auto;
   margin: 0;
   width: 9.5rem;
-  padding: 0;
   overflow: visible;
   color: var(--ink);
   background: var(--fill);
-  border: 2px solid var(--frame);
-  box-shadow: 0 0 0 2px var(--ring);
+  border: 0;
+  padding: 2px;
+  clip-path: var(--px-out); /* stepped like every window (2026-11-19) */
+}
+.flip-pop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--frame);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
 }
 .flip-pop .shelf-back {
   position: static;
