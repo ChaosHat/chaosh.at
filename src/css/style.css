@@ -3637,6 +3637,11 @@ main:focus { outline: none; }
      at a cover's size (Hat, 2026-11-19). Outer loop, then the inner, joined
      along one seam walked both ways, as --px-win-ring is. */
   --px-cover-ring: polygon(evenodd, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 6px, 4px 6px, 4px 4px, 6px 4px, 6px 2px, calc(100% - 6px) 2px, calc(100% - 6px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 6px, calc(100% - 2px) 6px, calc(100% - 2px) calc(100% - 6px), calc(100% - 4px) calc(100% - 6px), calc(100% - 4px) calc(100% - 4px), calc(100% - 6px) calc(100% - 4px), calc(100% - 6px) calc(100% - 2px), 6px calc(100% - 2px), 6px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 6px), 2px calc(100% - 6px), 2px 6px);
+  /* The dark line inside the covers' frame: the 2px band just inside
+     --px-cover-ring, following its steps. With dark on both sides the frame
+     reads as heavy as the nav's, which has its fill inside and the keyline
+     outside; against bright art it read thin (2026-11-19). */
+  --px-cover-line: polygon(evenodd, 2px 6px, 4px 6px, 4px 4px, 6px 4px, 6px 2px, calc(100% - 6px) 2px, calc(100% - 6px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 6px, calc(100% - 2px) 6px, calc(100% - 2px) calc(100% - 6px), calc(100% - 4px) calc(100% - 6px), calc(100% - 4px) calc(100% - 4px), calc(100% - 6px) calc(100% - 4px), calc(100% - 6px) calc(100% - 2px), 6px calc(100% - 2px), 6px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 6px), 2px calc(100% - 6px), 2px 6px, 4px 8px, 6px 8px, 6px 6px, 8px 6px, 8px 4px, calc(100% - 8px) 4px, calc(100% - 8px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 8px, calc(100% - 4px) 8px, calc(100% - 4px) calc(100% - 8px), calc(100% - 6px) calc(100% - 8px), calc(100% - 6px) calc(100% - 6px), calc(100% - 8px) calc(100% - 6px), calc(100% - 8px) calc(100% - 4px), 8px calc(100% - 4px), 8px calc(100% - 6px), 6px calc(100% - 6px), 6px calc(100% - 8px), 4px calc(100% - 8px), 4px 8px);
   --px-out: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
 }
 :is(.shelf-card, .frag > .sky-cover, .subject-head > .sky-cover),
@@ -3653,5 +3658,15 @@ main:focus { outline: none; }
   clip-path: var(--px-cover-ring);
   pointer-events: none;
 }
+:is(.shelf-card, .frag > .sky-cover, .subject-head > .sky-cover)::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 3;
+  background: var(--night);
+  clip-path: var(--px-cover-line);
+  pointer-events: none;
+}
 :is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { clip-path: none; }
-:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::after { display: none; }
+:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::after,
+:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::before { display: none; }
