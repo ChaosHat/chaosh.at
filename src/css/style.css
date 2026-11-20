@@ -1661,6 +1661,20 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .cell.is-odd { padding-left: 8px; } /* the chips pad 7px each side */
 
 .shelf-caption { display: block; margin: 9px 0 0; font: 8px/16px var(--pixel); }
+/* The rating line, the caption's first (2026-11-19, shelf.njk): the word
+   alone, muted; silver for favorite and gold with the star for canon, the
+   colours of their cards' frames. Pending is dimmed, a placeholder. */
+.shelf-rating {
+  display: flex;
+  align-items: center;
+  margin: 9px 0 0;
+  font: 8px/16px var(--pixel);
+  color: var(--muted);
+}
+.shelf-rating.r-favorite { color: var(--silver); }
+.shelf-rating.b-canon { color: var(--gold); }
+.shelf-rating.r-pending { color: color-mix(in srgb, var(--muted) 55%, transparent); }
+.shelf-rating + .shelf-caption { margin-top: 0; }
 
 /* ------------------------------------------------- shelf sort (no script)
 

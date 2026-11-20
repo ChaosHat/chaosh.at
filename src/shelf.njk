@@ -109,18 +109,19 @@ eleventyComputed:
             inside an <a> is invalid — the parser closes the outer one early
             and the tile's layout comes apart. The rung's view is one click
             further, from the subject page. -#}
-        {#- The rating cell. Canon supersedes (ratingOf returns null for the
-            ten) and takes the cell itself, gold with the ♥, so the top of the
-            ladder is read in the same place as every other rung. The rung
-            below wears silver on the whole card: metal orders the top two
-            where English couldn't order "favorite" against "loved". Unrated
-            renders "pending" rather than an empty cell — a blank beside a
-            filled neighbour reads as a field someone forgot. -#}
-        {% if item.canon %}<span class="cell rating badge-g b-canon">canon</span>
-        {% elif item.rating %}<span class="cell rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
-        {% else %}<span class="cell rating r-pending">pending</span>{% endif %}
         {% if flips %}{{ back(item.title, item.stats, item.grid, item.released) }}{% endif %}
       </span>
+      {#- The rating line (2026-11-19): off the card, which is the cover and its
+          spine now, and into the caption as its FIRST line, so a title that
+          wraps never makes a row ragged (why a caption chip lost on 10-22).
+          Canon supersedes (ratingOf returns null for the ten), gold with the
+          star; favorite is silver, like its card's frame: metal orders the
+          top two where English couldn't order "favorite" against "loved".
+          Unrated reads "pending", dimmed: a blank beside a filled neighbour
+          reads as a field someone forgot. -#}
+      {% if item.canon %}<span class="shelf-rating badge-g b-canon">canon</span>
+      {% elif item.rating %}<span class="shelf-rating r-{{ item.rating.slug }}{% if item.rating.partial %} partial{% endif %}">{{ item.rating.title }}</span>
+      {% else %}<span class="shelf-rating r-pending">pending</span>{% endif %}
       <span class="shelf-caption">{{ item.title }}</span>
     </a>
     {% if flips %}<button type="button" class="flip-tab" aria-pressed="false" hidden><span>flip</span><span class="sr-only"> {{ item.title }}'s stats</span></button>{% endif %}
