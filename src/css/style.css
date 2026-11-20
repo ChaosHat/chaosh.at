@@ -1319,6 +1319,11 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
      when the line starts to drop (0.12s in) and bunch back when it's a line
      again on the way out, so the ticks never spread outside the window. */
   transition: height 0s 0.12s, min-height 0s 0.12s, padding 0s 0.12s, margin 0s 0.12s;
+  /* height goes to auto, which only Chrome interpolates (interpolate-size);
+     elsewhere it's a discrete change, and a discrete change ignores the
+     delay unless it's allowed to transition (Hat saw the ticks spread on
+     frame 1 in Zen, 2026-11-19). */
+  transition-behavior: allow-discrete;
 }
 .rail-row-day { height: 9px; }
 .rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); }
@@ -3600,8 +3605,8 @@ main:focus { outline: none; }
    only while the card is hovered or the tab focused. */
 .flip-tab {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   z-index: 2;
   display: flex;
   align-items: flex-start;
@@ -3635,14 +3640,15 @@ main:focus { outline: none; }
    than a picture). On the shelf it's the tab, a button; on an essay card
    and a post's cover it's a hint, decorative, in the same corner — hover
    does the flipping there, and a tap on a phone opens the back (base.njk).
-   Lit to --frame on hover. */
+   Lit to --frame on hover. The plate sits 10px in from the cover's
+   corner, clear of the stepped frame (Hat: "into the cover a bit more"). */
 .shelf-item:hover .flip-tab,
 .flip-tab:focus-visible,
 :is(.essay-card, .frag > .sky-cover):hover > .flip-hint { filter: drop-shadow(2px 0 0 var(--frame)) drop-shadow(-2px 0 0 var(--frame)) drop-shadow(0 2px 0 var(--frame)) drop-shadow(0 -2px 0 var(--frame)); }
 .flip-hint {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 8px;
+  right: 8px;
   z-index: 2;
   display: flex;
   pointer-events: none;
