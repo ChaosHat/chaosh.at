@@ -3644,7 +3644,10 @@ main:focus { outline: none; }
    card, which makes room for it in its clip (--px-out-tab). Shown on every
    front, not only on hover: so people know it's a thing they can do, and on
    a post nothing else said the cover was more than a picture (Hat). Before
-   the tab (same day) it was a little window inside the corner, over the art. */
+   the tab (same day) it was a little window inside the corner, over the art.
+   A dog-ear (the corner folded, no word) was mocked beside it and lost:
+   at 8px on a phone's cover tile it all but vanished, and big enough to see
+   it covered as much art as the old label. */
 .flip-tab > span:first-child,
 .flip-hint > span {
   display: block;
@@ -3697,38 +3700,6 @@ main:focus { outline: none; }
   --px-out-tab: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 44px) 0, calc(100% - 44px) -17px, calc(100% - 6px) -17px, calc(100% - 6px) 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
 }
 
-/* MOCK (2026-11-19, for comparison; delete whichever loses): the dog-ear,
-   on <html data-hint="dogear">. The card's top-right corner folded down: a
-   night square where the corner was, the flap a stepped triangle in the
-   frame's colour (dogear-6.svg, 6 cells at ×2 = 12px; on a phone's 56px
-   cover tile dogear-4.svg at ×2 = 8px). No word. */
-html[data-hint="dogear"] .flip-hint { top: -2px; right: -2px; }
-html[data-hint="dogear"] .flip-tab { top: 0; right: 0; }
-html[data-hint="dogear"] :is(.flip-tab > span:first-child, .flip-hint > span) {
-  position: relative;
-  width: 12px;
-  height: 12px;
-  padding: 0;
-  font-size: 0;
-  background: var(--night);
-  clip-path: none;
-}
-html[data-hint="dogear"] :is(.flip-tab > span:first-child, .flip-hint > span)::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--frame);
-  -webkit-mask: url("/img/icons/dogear-6.svg") 0 0 / 100% 100% no-repeat;
-  mask: url("/img/icons/dogear-6.svg") 0 0 / 100% 100% no-repeat;
-}
-html[data-hint="dogear"] :is(.frag > .sky-cover, .essay-card).has-back { clip-path: var(--px-out); }
-@media (max-width: 34rem) {
-  html[data-hint="dogear"] .frag > .sky-cover > .flip-hint > span { width: 8px; height: 8px; }
-  html[data-hint="dogear"] .frag > .sky-cover > .flip-hint > span::before {
-    -webkit-mask-image: url("/img/icons/dogear-4.svg");
-    mask-image: url("/img/icons/dogear-4.svg");
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .shelf-back, .shelf-card > *, .shelf-card, .essay-card, .frag > .sky-cover { transition: none !important; }
 }
