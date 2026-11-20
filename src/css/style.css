@@ -2978,12 +2978,21 @@ main {
 .med-label:hover { color: var(--ink); }
 .med-label:focus-visible { color: var(--ink); text-decoration: underline; outline: none; }
 .med-label.is-open { color: var(--ink); font-weight: 700; }
-.med-label.is-open::before {
+.med-label.is-open::before,
+.med-label:is(:hover, :focus-visible)::before {
   background: var(--ink);
   -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
   animation: cursor-bob 0.8s steps(1) infinite;
 }
+/* Pointing at a tab or a view pops the cursor onto it (2026-11-19, Hat):
+   two frames from half size, then the bob. The open tab's resting cursor
+   doesn't pop; it was already there. */
+.med-label:not(.is-open):is(:hover, :focus-visible)::before,
+.views a:not([aria-current]):is(:hover, :focus-visible)::before {
+  animation: cursor-pop 0.08s steps(2, jump-start), cursor-bob 0.8s steps(1) 0.08s infinite;
+}
+@keyframes cursor-pop { from { scale: 0.5; } }
 /* The views window, rendered only where there's one to show (navState):
    its own window since 2026-11-04, popped out of the nav rather than a
    second row inside its frame. It overlaps the nav's bottom edge, offset
@@ -3035,6 +3044,9 @@ main {
 @keyframes cursor-bob { 50% { transform: translateX(2px); } }
 @media (prefers-reduced-motion: reduce) {
   .med-label.is-open::before,
+  .med-label:is(:hover, :focus-visible)::before,
+  .med-label:not(.is-open):is(:hover, :focus-visible)::before,
+  .views a:not([aria-current]):is(:hover, :focus-visible)::before,
   .views a:hover::before,
   .views a:focus-visible::before,
   .views a[aria-current]::before { animation: none; }
