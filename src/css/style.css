@@ -3633,57 +3633,102 @@ main:focus { outline: none; }
 /* The phone's tab: a 32×28 hit area in the card's top-right corner, the
    label inside it small. Always shown where there is no hover; on a desktop
    only while the card is hovered or the tab focused. */
+/* The "flip" tab (2026-11-19, Hat: "the top right edge with the bottom of
+   flip as a tab"): an index tab standing on the card's top edge at the
+   right, 38×17, its frame the card's own --frame, so the label sits off the
+   art entirely. Drawn without a pseudo-element: the span is cut to a tab
+   shape (stepped top corners, open bottom) over a --frame ground, a night
+   plate 2px in, and the two frame cells that make the inner step. On the
+   shelf it's the button (outside the card, which doesn't turn under it);
+   on an essay card or a post's cover it's a decorative hint inside the
+   card, which makes room for it in its clip (--px-out-tab). Shown on every
+   front, not only on hover: so people know it's a thing they can do, and on
+   a post nothing else said the cover was more than a picture (Hat). Before
+   the tab (same day) it was a little window inside the corner, over the art. */
+.flip-tab > span:first-child,
+.flip-hint > span {
+  display: block;
+  box-sizing: border-box;
+  width: 38px;
+  height: 17px;
+  padding: 6px 0 0;
+  font: 8px/8px var(--pixel);
+  text-align: center;
+  color: var(--ink);
+  background:
+    linear-gradient(var(--frame), var(--frame)) left 2px top 2px / 2px 2px no-repeat,
+    linear-gradient(var(--frame), var(--frame)) right 2px top 2px / 2px 2px no-repeat,
+    linear-gradient(var(--night), var(--night)) 2px 2px / calc(100% - 4px) calc(100% - 2px) no-repeat,
+    var(--frame);
+  clip-path: polygon(0 100%, 0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% 100%);
+}
+.shelf-item:hover .flip-tab > span:first-child,
+.flip-tab:focus-visible > span:first-child,
+:is(.essay-card, .frag > .sky-cover):hover > .flip-hint > span { color: var(--accent); }
+/* The shelf's tab: the card's top edge is the item's. The button's ::after
+   stretches the tap target to 44×31 (into the card's corner), past WCAG
+   2.2's 24px floor; the drawn tab is 17px tall. */
 .flip-tab {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -17px;
+  right: 6px;
   z-index: 2;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  min-width: 32px;
-  min-height: 28px;
+  display: block;
   padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
 }
+.flip-tab::after { content: ""; position: absolute; inset: -4px -3px -10px; }
 .flip-tab[hidden] { display: none; }
-/* The label is a little window (2026-11-19): a night plate cut to the
-   windows' staircase, its --dim frame drawn by four 2px drop-shadows on the
-   button (the keyline trick: a shadow of a stepped shape is stepped; filter
-   runs before the child's clip, so it has to sit on the parent). Was a 1px
-   bordered chip. */
-.flip-tab,
-.flip-hint { filter: drop-shadow(2px 0 0 var(--dim)) drop-shadow(-2px 0 0 var(--dim)) drop-shadow(0 2px 0 var(--dim)) drop-shadow(0 -2px 0 var(--dim)); }
-.flip-tab > span:first-child,
-.flip-hint > span {
-  margin: 2px;
-  padding: 4px 5px 3px;
-  font: 8px/1 var(--pixel);
-  color: var(--ink);
-  background: var(--night);
-  clip-path: var(--px-win-in);
-}
-/* Shown on every front, not only on hover (Hat, 2026-11-19: so people know
-   it's a thing they can do; on a post nothing else said the cover was more
-   than a picture). On the shelf it's the tab, a button; on an essay card
-   and a post's cover it's a hint, decorative, in the same corner — hover
-   does the flipping there, and a tap on a phone opens the back (base.njk).
-   Lit to --frame on hover. The plate sits 4px in, tucked against the
-   frame's corner, so it covers as little of the art as it can (Hat). */
-.shelf-item:hover .flip-tab,
-.flip-tab:focus-visible,
-:is(.essay-card, .frag > .sky-cover):hover > .flip-hint { filter: drop-shadow(2px 0 0 var(--frame)) drop-shadow(-2px 0 0 var(--frame)) drop-shadow(0 2px 0 var(--frame)) drop-shadow(0 -2px 0 var(--frame)); }
+.flip-tab:focus-visible { outline: none; }
+/* Inside a post cover or essay card: positioned from the padding box, so
+   -19px / 4px land the tab's foot on the border box's top edge, 6px in from
+   the right (clear of the stepped corner). */
 .flip-hint {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  z-index: 2;
-  display: flex;
+  top: -19px;
+  right: 4px;
+  z-index: 4;
   pointer-events: none;
 }
-.flip-tab:focus-visible { outline: none; }
+/* The outer staircase with room above the top edge for the tab. */
+:root {
+  --px-out-tab: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 44px) 0, calc(100% - 44px) -17px, calc(100% - 6px) -17px, calc(100% - 6px) 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
+}
+
+/* MOCK (2026-11-19, for comparison; delete whichever loses): the dog-ear,
+   on <html data-hint="dogear">. The card's top-right corner folded down: a
+   night square where the corner was, the flap a stepped triangle in the
+   frame's colour (dogear-6.svg, 6 cells at ×2 = 12px; on a phone's 56px
+   cover tile dogear-4.svg at ×2 = 8px). No word. */
+html[data-hint="dogear"] .flip-hint { top: -2px; right: -2px; }
+html[data-hint="dogear"] .flip-tab { top: 0; right: 0; }
+html[data-hint="dogear"] :is(.flip-tab > span:first-child, .flip-hint > span) {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  font-size: 0;
+  background: var(--night);
+  clip-path: none;
+}
+html[data-hint="dogear"] :is(.flip-tab > span:first-child, .flip-hint > span)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--frame);
+  -webkit-mask: url("/img/icons/dogear-6.svg") 0 0 / 100% 100% no-repeat;
+  mask: url("/img/icons/dogear-6.svg") 0 0 / 100% 100% no-repeat;
+}
+html[data-hint="dogear"] :is(.frag > .sky-cover, .essay-card).has-back { clip-path: var(--px-out); }
+@media (max-width: 34rem) {
+  html[data-hint="dogear"] .frag > .sky-cover > .flip-hint > span { width: 8px; height: 8px; }
+  html[data-hint="dogear"] .frag > .sky-cover > .flip-hint > span::before {
+    -webkit-mask-image: url("/img/icons/dogear-4.svg");
+    mask-image: url("/img/icons/dogear-4.svg");
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .shelf-back, .shelf-card > *, .shelf-card, .essay-card, .frag > .sky-cover { transition: none !important; }
 }
@@ -3709,6 +3754,7 @@ main:focus { outline: none; }
    column under a card is empty. Words get a row of their own: "1,968" at
    16px is wider than half of 96px. */
 :is(.frag > .sky-cover, .essay-card).has-back { overflow: visible; }
+:is(.frag > .sky-cover, .essay-card).has-back { clip-path: var(--px-out-tab); }
 /* Over the next card down (an essay's stack), which a hanging back runs into. */
 :is(.frag > .sky-cover, .essay-card).has-back:is(.is-flipped, :focus-visible) { z-index: 3; }
 :is(.sky-cover, .essay-card) > .shelf-back {
@@ -3751,24 +3797,39 @@ main:focus { outline: none; }
   width: 9.5rem;
   overflow: visible;
   color: var(--ink);
-  background: var(--fill);
+  background: transparent;
   border: 0;
   padding: 2px;
-  clip-path: var(--px-out); /* stepped like every window (2026-11-19) */
+  /* It opens like the rail (2026-11-19, Hat): --open steps 0 → 1 from the
+     moment it's shown (@starting-style), a line along the top widening out
+     of the card's side, then dropping; the stats on the last frame. The
+     fill and the stepped ring are the two pseudo-elements, sized rather
+     than scaled so the 2px ring stays whole. The script sets data-side to
+     the side of the card it opened on; the line grows from the card. */
+  --open: 1;
+  transition: --open 0.24s steps(6, jump-start);
 }
-.flip-pop::before {
+@starting-style { .flip-pop:popover-open { --open: 0; } }
+.flip-pop::before,
+.flip-pop::after {
   content: "";
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: var(--frame);
-  clip-path: var(--px-win-ring);
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: max(8px, min(1, var(--open) * 2) * 100%);
+  height: max(8px, max(0, (var(--open) - 0.5) * 2) * 100%);
   pointer-events: none;
 }
+.flip-pop[data-side="left"]::before,
+.flip-pop[data-side="left"]::after { left: auto; right: 0; }
+.flip-pop::before { background: var(--fill); clip-path: var(--px-out); }
+.flip-pop::after { background: var(--frame); clip-path: var(--px-win-ring); }
+@media (prefers-reduced-motion: reduce) { .flip-pop { transition: none; } }
 .flip-pop .shelf-back {
   position: static;
   visibility: visible;
-  opacity: 1;
+  opacity: clamp(0, (var(--open) - 0.95) * 100, 1);
   scale: none;
   min-height: 0;
   border: 0;

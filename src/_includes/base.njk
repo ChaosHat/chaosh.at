@@ -70,7 +70,10 @@
         a reader that lists both shows "chaosh.at" and "chaosh.at · essays". -#}
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
     <link rel="alternate" type="application/atom+xml" href="/essays/feed.xml" title="{{ site.title }} · essays">
-  </head>
+  <script>/* TEMP (frames review, remove before merge): ?hint=dogear|tab picks the flip hint, remembered. */
+try { const q = new URLSearchParams(location.search).get("hint"); if (q) localStorage.hintDemo = q; if (localStorage.hintDemo === "dogear") document.documentElement.dataset.hint = "dogear"; } catch {}
+</script>
+</head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
       whole shell; everything else gets the narrower, centred reading column.
       The header and the furniture strips are outside main either way, so they
@@ -465,6 +468,7 @@
           if (x + w > innerWidth - m) x = r.left - 8 - w;
           if (x < m) x = Math.max(m, Math.min(r.left, innerWidth - m - w));
           const y = Math.max(m, Math.min(r.top, innerHeight - m - h));
+          pop.dataset.side = x < r.left ? "left" : "right";
           pop.style.left = x + "px";
           pop.style.top = y + "px";
         });
