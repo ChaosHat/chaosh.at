@@ -3595,22 +3595,17 @@ main:focus { outline: none; }
   mask: var(--ico) center / 12px 12px no-repeat;
 }
 
-/* Variant: the rating in the middle of the spine, centred, in the plain
-   night below the sky's scene (aurora or moon) and above the status at the
-   foot. Outlined in night for the odd star it lands on. */
-.spine-top {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 0;
-  width: 16px;
+/* The rating on the spine (the shelf, 2026-11-19): the spine column's first
+   item, with auto margins above and below, so it sits centred in whatever
+   night is left between the top of the spine and the status at its foot,
+   and can never run into the status however short the card. Muted; silver
+   for favorite and gold for canon, like their frames; pending dimmed. */
+.spine-rating {
+  margin: auto 0;
   writing-mode: vertical-rl;
-  font: 8px/16px var(--pixel);
   white-space: nowrap;
   color: var(--muted);
-  filter: drop-shadow(1px 0 0 var(--ring)) drop-shadow(-1px 0 0 var(--ring)) drop-shadow(0 1px 0 var(--ring)) drop-shadow(0 -1px 0 var(--ring));
-  pointer-events: none;
 }
-.spine-top.r-favorite { color: var(--silver); }
-.spine-top.b-canon { color: var(--gold); }
-.spine-top.r-pending { color: color-mix(in srgb, var(--muted) 60%, var(--night)); }
+.spine-rating.rung-favorite { color: var(--silver); }
+.spine-rating.rung-canon { color: var(--gold); }
+.spine-rating.rung-pending { color: color-mix(in srgb, var(--muted) 60%, var(--night)); }

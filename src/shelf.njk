@@ -95,11 +95,13 @@ eleventyComputed:
           {#- The spine (2026-11-19): status on the cover's left edge, a slice
               of the game's own sky with the word at its foot. It replaced the
               status cell, a tinted badge that read as a stock UI label. -#}
-          {{ item.slug | spine(item.status, item.group) | safe }}
-          {#- Variant: the rating at the head of the spine, like a case's title. -#}
-          {% if item.canon %}<span class="spine-top b-canon">canon</span>
-          {% elif item.rating %}<span class="spine-top r-{{ item.rating.slug }}">{{ item.rating.title }}</span>
-          {% else %}<span class="spine-top r-pending">pending</span>{% endif %}
+          {#- The rating rides the spine too, centred in the night between the
+              sky and the status (spineHtml). Canon supersedes; unrated reads
+              "pending". -#}
+          {%- if item.canon %}{% set rw = "canon" %}{% set rk = "canon" %}
+          {%- elif item.rating %}{% set rw = item.rating.title %}{% set rk = item.rating.slug %}
+          {%- else %}{% set rw = "pending" %}{% set rk = "pending" %}{% endif %}
+          {{ item.slug | spine(item.status, item.group, rw, rk) | safe }}
           {% if item.coverUrl %}
           {#- A real <img>, unlike every sky on the site: the generated art is
               decoration and belongs in CSS, but a cover is content, it wants an

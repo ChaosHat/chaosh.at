@@ -1623,12 +1623,17 @@ export default function (eleventyConfig) {
   // shelf, as the badge was: a bandless subject has no status to show. The
   // icon is CSS (.spine::after, the .b-<status> --ico); the night under the
   // sky's last row is .spine's background-color.
-  const spineHtml = (slug, status, group) =>
+  // `rating` (the word) and `rung` (its slug: canon, favorite, …, pending)
+  // put the rating on the spine as well, centred in the night between the
+  // sky and the status (the shelf, 2026-11-19). Its classes are its own
+  // (.spine-rating.rung-*), never the chips' .r-*, whose box would leak in.
+  const spineHtml = (slug, status, group, rating = "", rung = "") =>
     hasShelf(group)
       ? `<span class="spine b-${status}" style="background-image:url(/img/sky/spine/${slug}.png)">` +
+        (rating ? `<span class="spine-rating rung-${rung}">${escapeHtml(rating)}</span>` : "") +
         `<span class="spine-word">${statusWord(status, group)}</span></span>`
       : "";
-  eleventyConfig.addFilter("spine", (slug, status, group) => spineHtml(slug, status, group));
+  eleventyConfig.addFilter("spine", (slug, status, group, rating, rung) => spineHtml(slug, status, group, rating, rung));
 
   // Tags are a curated VIEW over several subjects — /t/final-fantasy/ gathers
   // every fragment ever written about any Final Fantasy game onto one page.
