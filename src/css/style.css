@@ -1315,10 +1315,13 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .rail-row {
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;
   height: 7px; overflow: hidden; text-decoration: none;
-  /* Rows change size at the window's halfway frame, both ways: they spread
-     when the line starts to drop (0.12s in) and bunch back when it's a line
-     again on the way out, so the ticks never spread outside the window. */
-  transition: height 0s 0.12s, min-height 0s 0.12s, padding 0s 0.12s, margin 0s 0.12s;
+  /* Rows change size at the window's halfway frame, both ways, measured
+     in Firefox frame by frame (2026-11-19): they spread as the line starts
+     to drop (frame 4/6, 0.12s in; the delay on the open rule below) and
+     bunch back as it becomes a line again on the way out (frame 3/6, 0.08s
+     in; this rule's delay, the one a close uses), so the ticks never show
+     spread outside the window. */
+  transition: height 0s 0.08s, min-height 0s 0.08s, padding 0s 0.08s, margin 0s 0.08s;
   /* height goes to auto, which only Chrome interpolates (interpolate-size);
      elsewhere it's a discrete change, and a discrete change ignores the
      delay unless it's allowed to transition (Hat saw the ticks spread on
@@ -1353,7 +1356,10 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
    full width; they hold it 0.24s on the way out. Was a blurred see-through panel with
    a 1px border that snapped open. */
 @property --open { syntax: "<number>"; inherits: true; initial-value: 0; }
-.rail-inner { --open: 0; transition: --open 0.24s steps(6); }
+/* steps(6, jump-start): the first frame lands on the hover itself, where
+   jump-end held 0 for 40ms (a dead frame). Frames run 1/6 … 1 opening,
+   5/6 … 0 closing. */
+.rail-inner { --open: 0; transition: --open 0.24s steps(6, jump-start); }
 /* While it drops (frames 4–6), the spread rows show only inside the window:
    a mask the window's height, so it uncovers them top to bottom (Hat,
    2026-11-19: the ticks spread before the window did). A mask, not a
@@ -1382,7 +1388,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 }
 .rail-inner::before { background: var(--fill); clip-path: var(--px-out); }
 .rail-inner::after { background: var(--dim); clip-path: var(--px-win-ring); }
-.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; }
+.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; transition-delay: 0.12s; }
 .rail-inner:is(:hover, :focus-within) .rail-row-day { min-height: 26px; margin-top: 4px; }
 .rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; transition: none; }
 
@@ -3586,7 +3592,7 @@ main:focus { outline: none; }
 .frag > .sky-cover {
   --flip: 0;
   scale: max(1 - 2 * var(--flip), 2 * var(--flip) - 1) 1;
-  transition: --flip 0.24s steps(6);
+  transition: --flip 0.24s steps(6, jump-start);
 }
 .shelf-back { opacity: clamp(0, (var(--flip) - 0.5) * 100, 1); }
 :is(.shelf-card, .essay-card, .frag > .sky-cover) > :not(.shelf-back) { opacity: clamp(0, (0.5 - var(--flip)) * 100, 1); }
@@ -3605,8 +3611,8 @@ main:focus { outline: none; }
    only while the card is hovered or the tab focused. */
 .flip-tab {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 2px;
+  right: 2px;
   z-index: 2;
   display: flex;
   align-items: flex-start;
@@ -3640,15 +3646,15 @@ main:focus { outline: none; }
    than a picture). On the shelf it's the tab, a button; on an essay card
    and a post's cover it's a hint, decorative, in the same corner — hover
    does the flipping there, and a tap on a phone opens the back (base.njk).
-   Lit to --frame on hover. The plate sits 10px in from the cover's
-   corner, clear of the stepped frame (Hat: "into the cover a bit more"). */
+   Lit to --frame on hover. The plate sits 4px in, tucked against the
+   frame's corner, so it covers as little of the art as it can (Hat). */
 .shelf-item:hover .flip-tab,
 .flip-tab:focus-visible,
 :is(.essay-card, .frag > .sky-cover):hover > .flip-hint { filter: drop-shadow(2px 0 0 var(--frame)) drop-shadow(-2px 0 0 var(--frame)) drop-shadow(0 2px 0 var(--frame)) drop-shadow(0 -2px 0 var(--frame)); }
 .flip-hint {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 2px;
+  right: 2px;
   z-index: 2;
   display: flex;
   pointer-events: none;
