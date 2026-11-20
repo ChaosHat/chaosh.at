@@ -2013,7 +2013,9 @@ export default function (eleventyConfig) {
     if (hasCanon(grp)) {
       const r = canonSlugsAll.has(slug) ? null : ratingOf(slug, meta);
       const [rw, rk] = canonSlugsAll.has(slug) ? ["canon", "canon"] : r ? [r.title, r.slug] : ["pending", "pending"];
-      out += `<span class="bk-rating rung-${rk}">${escapeHtml(rw)}</span>`;
+      // Set like the back's stats, the word over a small "rating" label, so
+      // it says what it is; unrated is "–", as an empty stat is.
+      out += `<span class="bk-rating rung-${rk}"><b>${rk === "pending" ? "–" : escapeHtml(rw)}</b>rating</span>`;
     }
     return out ? `<span class="bk-marks">${out}</span>` : "";
   };

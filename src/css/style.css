@@ -3607,16 +3607,16 @@ main:focus { outline: none; }
 .spine.no-status::after { display: none; }
 .spine.no-status > .spine-rating { margin: auto 0 0; }
 
-/* A post cover's back carries the status and rating (2026-11-19, coverBack):
-   one line each under the run, the status in its hue with its icon, the
-   rating muted, silver for favorite, gold for canon. */
+/* A post cover's back carries the rating (2026-11-19, coverBack), set like
+   the stats under it: the word at 16px over a small "rating" label; silver
+   for favorite, gold for canon, "–" when unrated. */
 .bk-marks {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 6px 3px 0;
+  margin: 8px 3px 0;
 }
-.bk-rating { font: 8px/12px var(--pixel); color: var(--muted); }
-.bk-rating.rung-favorite { color: var(--silver); }
-.bk-rating.rung-canon { color: var(--gold); }
-.bk-rating.rung-pending { color: color-mix(in srgb, var(--muted) 82%, var(--night)); }
+.bk-rating { display: flex; flex-direction: column; gap: 5px; font: 8px/1 var(--pixel); color: var(--muted); }
+.bk-rating b { font: 400 16px/1 var(--pixel); color: var(--ink); }
+.bk-rating.rung-favorite b { color: var(--silver); }
+.bk-rating.rung-canon b { color: var(--gold); }
