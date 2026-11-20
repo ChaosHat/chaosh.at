@@ -3595,11 +3595,13 @@ main:focus { outline: none; }
   mask: var(--ico) center / 12px 12px no-repeat;
 }
 
-/* Variant: the rating at the head of the spine, outlined in night so it
-   holds over the aurora and the moon. */
+/* Variant: the rating in the middle of the spine, centred, in the plain
+   night below the sky's scene (aurora or moon) and above the status at the
+   foot. Outlined in night for the odd star it lands on. */
 .spine-top {
   position: absolute;
-  top: 5px;
+  top: 50%;
+  transform: translateY(-50%);
   left: 0;
   width: 16px;
   writing-mode: vertical-rl;
