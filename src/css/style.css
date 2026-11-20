@@ -3602,10 +3602,10 @@ main:focus { outline: none; }
 .spine-rating.rung-canon { color: var(--gold); }
 .spine-rating.rung-pending { color: color-mix(in srgb, var(--muted) 82%, var(--night)); }
 
-/* Essay cards are short (6.75–8.5rem wide), and the spine holds the rating
-   as well as the status there: the icon goes, giving the words its 16px.
-   The sky at the spine's head already says the status. */
-.essay-card .spine::after { display: none; }
+/* Off the shelf the spine has no status (spineHtml words: false): no icon,
+   and the rating drops to the foot, where the status word was. */
+.spine.no-status::after { display: none; }
+.spine.no-status > .spine-rating { margin: auto 0 0; }
 
 /* A post cover's back carries the status and rating (2026-11-19, coverBack):
    one line each under the run, the status in its hue with its icon, the

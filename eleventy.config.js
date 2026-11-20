@@ -1631,13 +1631,18 @@ export default function (eleventyConfig) {
   // put the rating on the spine as well, centred in the night between the
   // sky and the status (the shelf, 2026-11-19). Its classes are its own
   // (.spine-rating.rung-*), never the chips' .r-*, whose box would leak in.
-  const spineHtml = (slug, status, group, rating = "", rung = "") =>
+  // `words: false` (2026-11-19) drops the status word and icon: the shelf is
+  // the one place the site still shows a status (Hat: status is valueless
+  // elsewhere; it's still data for now playing, the year page, Backloggd).
+  // Essay cards and the subject page show the sky and the rating, the rating
+  // at the foot. The sky still tells finished (a moon) from not.
+  const spineHtml = (slug, status, group, rating = "", rung = "", words = true) =>
     hasShelf(group)
-      ? `<span class="spine b-${status}" style="background-image:url(/img/sky/spine/${slug}.png)">` +
+      ? `<span class="spine b-${status}${words ? "" : " no-status"}" style="background-image:url(/img/sky/spine/${slug}.png)">` +
         (rating ? `<span class="spine-rating rung-${rung}">${escapeHtml(rating)}</span>` : "") +
-        `<span class="spine-word">${statusWord(status, group)}</span></span>`
+        (words ? `<span class="spine-word">${statusWord(status, group)}</span>` : "") + `</span>`
       : "";
-  eleventyConfig.addFilter("spine", (slug, status, group, rating, rung) => spineHtml(slug, status, group, rating, rung));
+  eleventyConfig.addFilter("spine", (slug, status, group, rating, rung, words = true) => spineHtml(slug, status, group, rating, rung, words));
 
   // Tags are a curated VIEW over several subjects — /t/final-fantasy/ gathers
   // every fragment ever written about any Final Fantasy game onto one page.

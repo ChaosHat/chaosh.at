@@ -33,7 +33,7 @@ eleventyComputed:
         margin column). Below 58rem it stays the cover beside the title. -#}
     {%- if subject.coverUrl %}
     {%- set spined = groupInfo[subject.group] and groupInfo[subject.group].hasShelf %}
-    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}{% if spined %} has-spine{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true">{% if spined %}{%- if subject.canon %}{% set rw = "canon" %}{% set rk = "canon" %}{% elif subject.rating %}{% set rw = subject.rating.title %}{% set rk = subject.rating.slug %}{% elif groupInfo[subject.group].hasCanon %}{% set rw = "pending" %}{% set rk = "pending" %}{% else %}{% set rw = "" %}{% set rk = "" %}{% endif %}{{ subject.slug | spine(subject.status, subject.group, rw, rk) | safe }}{% endif %}</span>
+    <span class="sky sky-cover{% if subject.coverBox %} sky-box{% endif %}{% if subject.coverPixel %} sky-pixel{% endif %}{% if spined %} has-spine{% endif %}" style="background-image:url({{ subject.coverUrl }}){% if subject.coverBox %};--box:{{ subject.coverBox }}{% endif %}" aria-hidden="true">{#- Sky alone: the rating is the linked chip beside the title, and the page shows no status (the shelf is the one place that does, 2026-11-19). -#}{% if spined %}{{ subject.slug | spine(subject.status, subject.group, "", "", false) | safe }}{% endif %}</span>
     {%- else %}
     <span class="sky" style="background-image:url({{ subject.skyUrl }})" aria-hidden="true"></span>
     {%- endif %}
@@ -61,12 +61,8 @@ eleventyComputed:
             links to /canon/ — the ten, their history, the essays about them
             — rather than to the bare /r/canon/ view. -#}
         {% if subject.canon %}<a class="badge badge-g b-canon" href="{{ g.urls.canon if g else '/canon/' }}">canon</a>{% endif %}
-        {#- Status is on the cover's spine (2026-11-19). An uncovered subject's
-            sky carries no word, so it keeps the word here, plain. The cover
-            is aria-hidden, so a covered one says it for screen readers. -#}
-        {% if g and g.hasShelf %}
-        <span class="{% if subject.coverUrl %}sr-only{% else %}status-word{% endif %} b-{{ subject.status }}">{% if subject.coverUrl %}Status: {% endif %}{{ subject.status | statusWord(subject.group) }}</span>
-        {% endif %}
+        {#- No status here since 2026-11-19: the shelf is the one place the
+            site shows one. (It was a tinted badge in this row until then.) -#}
         {% if g and g.hasCanon %}
         {#- The rating, as a chip linking to its rung's view — every game
             rated the same word, which is how the word calibrates itself. A

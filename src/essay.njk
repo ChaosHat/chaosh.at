@@ -36,7 +36,7 @@ eleventyComputed:
       {%- elif c.rating %}{% set rw = c.rating.title %}{% set rk = c.rating.slug %}
       {%- else %}{% set rw = "pending" %}{% set rk = "pending" %}{% endif %}
       {%- else %}{% set rw = "" %}{% set rk = "" %}{% endif %}
-      {% if c.shelf %}{{ c.slug | spine(c.status, c.group, rw, rk) | safe }}{% endif %}
+      {% if c.shelf %}{{ c.slug | spine(c.status, c.group, rw, rk, false) | safe }}{% endif %}
       {% if c.coverUrl %}
       <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}{% if c.coverPixel %} is-pixel{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
       {% else %}
