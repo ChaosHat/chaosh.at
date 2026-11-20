@@ -1315,7 +1315,9 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .rail-row {
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;
   height: 7px; overflow: hidden; text-decoration: none;
-  transition: height 0.2s steps(4);
+  /* Rows hold their open size until the window has folded (the close
+     plays the open backward over 0.24s), and snap open (below). */
+  transition: height 0s 0.24s, min-height 0s 0.24s, padding 0s 0.24s, margin 0s 0.24s;
 }
 .rail-row-day { height: 9px; }
 .rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); }
@@ -1328,30 +1330,40 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
      and nearly as narrow as the 15px Alegreya it replaced. Pixel Operator at
      16 wrapped every title to two or three lines; at 8 it was too faint. */
   font: 700 16px/20px var(--pixel-fine);
-  transition: opacity 0.2s steps(2), max-width 0s 0.2s;
+  opacity: clamp(0, (var(--open) - 0.95) * 100, 1);
+  transition: max-width 0s 0.24s;
 }
 .rail-row-day .rail-label { font: 16px/20px var(--pixel); color: var(--ink); }
 .rail-kind { display: block; font: 8px/12px var(--pixel); color: var(--m-essays); }
 
-/* Open, it's a window (2026-11-19): an opaque fill cut to the staircase
-   and a --dim ring, where it was a blurred see-through panel with a 1px
-   border (a blur beside pixel art is the mixed grid the 10-19 pass ruled
-   out). It snaps open, as a menu window does. */
-.rail-inner:is(:hover, :focus-within) {
-  background: var(--fill);
-  clip-path: var(--px-out);
-}
-.rail-inner:is(:hover, :focus-within)::before {
+/* Open, it's a window that opens like one (2026-11-19, Hat: the flip's
+   "window" animation, from the top): --open steps 0 → 1 in six frames;
+   a line along the top widens leftward out of the tick column (frames
+   1–3), then the window drops (4–6), and the labels show on the last.
+   The fill and the ring are ::before/::after under the rows, sized by
+   width and height rather than scaled, so the 2px ring and its stepped
+   corners stay whole on every frame. Was a blurred see-through panel with
+   a 1px border that snapped open. */
+@property --open { syntax: "<number>"; inherits: true; initial-value: 0; }
+.rail-inner { --open: 0; transition: --open 0.24s steps(6); }
+.rail-inner:is(:hover, :focus-within) { --open: 1; }
+.rail-inner::before,
+.rail-inner::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: var(--dim);
-  clip-path: var(--px-win-ring);
+  top: 0;
+  right: 0;
+  z-index: -1;
+  width: max(8px, min(1, var(--open) * 2) * 100%);
+  height: max(8px, max(0, (var(--open) - 0.5) * 2) * 100%);
+  opacity: clamp(0, var(--open) * 100, 1);
   pointer-events: none;
 }
-.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; }
+.rail-inner::before { background: var(--fill); clip-path: var(--px-out); }
+.rail-inner::after { background: var(--dim); clip-path: var(--px-win-ring); }
+.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; transition: none; }
 .rail-inner:is(:hover, :focus-within) .rail-row-day { min-height: 26px; margin-top: 4px; }
-.rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; opacity: 1; transition: opacity 0.2s steps(2) 0.05s, max-width 0s; }
+.rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; transition: none; }
 
 /* Here. */
 .rail-row:hover .rail-label, .rail-row:focus-visible .rail-label { color: var(--accent); }
@@ -1359,7 +1371,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .rail-row-day.is-active .rail-tick, .rail-day.is-active .rail-row-day .rail-tick { width: 22px; background: var(--accent); }
 .rail-row.is-active .rail-label, .rail-day.is-active .rail-row-day .rail-label { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
-  .rail-row, .rail-label, .rail-tick, .rail-inner { transition: none; }
+  .rail-row, .rail-label, .rail-tick, .rail-inner { transition: none !important; }
 }
 
 /* `.post >` outranks `.post > p`, which would otherwise zero the margin. */
