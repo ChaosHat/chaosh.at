@@ -34,7 +34,7 @@ eleventyComputed:
           (as on the shelf); a canon-only group keeps its verdict cell. -#}
       {%- if c.ratable %}{% if c.canon %}{% set rw = "canon" %}{% set rk = "canon" %}
       {%- elif c.rating %}{% set rw = c.rating.title %}{% set rk = c.rating.slug %}
-      {%- else %}{% set rw = "pending" %}{% set rk = "pending" %}{% endif %}
+      {%- else %}{% set rw = "" %}{% set rk = "" %}{% endif %}
       {%- else %}{% set rw = "" %}{% set rk = "" %}{% endif %}
       {% if c.shelf %}{{ c.slug | spine(c.status, c.group, rw, rk, false) | safe }}{% endif %}
       {% if c.coverUrl %}

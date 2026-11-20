@@ -96,11 +96,12 @@ eleventyComputed:
               of the game's own sky with the word at its foot. It replaced the
               status cell, a tinted badge that read as a stock UI label. -#}
           {#- The rating rides the spine too, centred in the night between the
-              sky and the status (spineHtml). Canon supersedes; unrated reads
-              "pending". -#}
+              sky and the status (spineHtml). Canon supersedes. Unrated is
+              blank (2026-11-19): on a spine an empty stretch is just sky, not
+              a forgotten field, and the status says why ("considering"). -#}
           {%- if item.canon %}{% set rw = "canon" %}{% set rk = "canon" %}
           {%- elif item.rating %}{% set rw = item.rating.title %}{% set rk = item.rating.slug %}
-          {%- else %}{% set rw = "pending" %}{% set rk = "pending" %}{% endif %}
+          {%- else %}{% set rw = "" %}{% set rk = "" %}{% endif %}
           {{ item.slug | spine(item.status, item.group, rw, rk) | safe }}
           {% if item.coverUrl %}
           {#- A real <img>, unlike every sky on the site: the generated art is
