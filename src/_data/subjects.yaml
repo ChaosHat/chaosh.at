@@ -1315,6 +1315,16 @@ xcom-enemy-unknown:
     - xcom
     - xcom eu
     - enemy unknown
+yakuza-like-a-dragon:
+  title: 'Yakuza: Like a Dragon'
+  category:
+    - games
+  status: backlog
+  released: 2020
+  aliases:
+    - yakuza 7
+    - ylad
+    - yakuza like a dragon
 zelda-a-link-between-worlds:
   title: 'The Legend of Zelda: A Link Between Worlds'
   category:

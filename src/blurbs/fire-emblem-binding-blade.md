@@ -1,0 +1,1 @@
+A real nostalgic throwback, it's so fun to see the characters you knew and loved from Blazing Blade grown up and how the world has changed. 
