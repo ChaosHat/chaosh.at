@@ -3567,9 +3567,12 @@ main:focus { outline: none; }
   background-repeat: no-repeat;
 }
 
-/* Under 58rem a post's cover is 3rem wide: the spine keeps its sky and icon
-   and drops the word, which would run off a 3rem (48px) column. */
-@media (max-width: 57.99rem) {
+/* On a phone a post's cover is a 3.5rem card in the right column (--mcol):
+   the spine keeps its sky and icon and drops the word, which would run off
+   it. Only there: from 34.01rem the cover is 6rem (--lcol) and keeps the
+   whole spine (the first cut used 58rem and hid the word on every tablet
+   and narrow window, where it read as missing). */
+@media (max-width: 34rem) {
   .frag > .sky-cover.has-spine { padding-left: 14px; }
   .frag > .sky-cover.has-spine > .spine { width: 12px; padding-bottom: 3px; background-position: top center; }
   .frag > .sky-cover.has-spine > .spine::after { width: 8px; height: 8px; -webkit-mask-size: 8px 8px; mask-size: 8px 8px; }
