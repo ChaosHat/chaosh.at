@@ -426,16 +426,17 @@ a { color: var(--accent); }
 img { max-width: 100%; height: auto; }
 
 /* Scene break: a pixel ornament, two twinkles and a star (scene-break.svg,
-   25×7 art px at ×2), in --muted, centred (2026-11-19, the de-default
-   pass). It was a dashed rule in a status-colour gradient fading out at
-   both ends, the stock "fancy divider". */
+   25×7 art px at ×3), in the day's --frame, centred (2026-11-19, the
+   de-default pass). At ×2 in --muted it passed for more page stars. It was
+   a dashed rule in a status-colour gradient fading out at both ends, the
+   stock "fancy divider". */
 hr {
   border: 0;
-  height: 14px;
-  margin: 35px 0;
-  background: var(--muted);
-  -webkit-mask: url("/img/icons/scene-break.svg") center / 50px 14px no-repeat;
-  mask: url("/img/icons/scene-break.svg") center / 50px 14px no-repeat;
+  height: 21px;
+  margin: 32px 0;
+  background: var(--frame);
+  -webkit-mask: url("/img/icons/scene-break.svg") center / 75px 21px no-repeat;
+  mask: url("/img/icons/scene-break.svg") center / 75px 21px no-repeat;
 }
 
 h1, h2, h3 { line-height: 1.25; }
