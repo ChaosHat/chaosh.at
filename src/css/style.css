@@ -3608,4 +3608,4 @@ main:focus { outline: none; }
 }
 .spine-rating.rung-favorite { color: var(--silver); }
 .spine-rating.rung-canon { color: var(--gold); }
-.spine-rating.rung-pending { color: color-mix(in srgb, var(--muted) 60%, var(--night)); }
+.spine-rating.rung-pending { color: color-mix(in srgb, var(--muted) 82%, var(--night)); }
