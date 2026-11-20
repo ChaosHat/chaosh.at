@@ -78,7 +78,7 @@ layout: base.njk
       <p class="post-list-subdate">{{ e.date | readableDate }}</p>
     </div>
     <div class="post-body"><p>{{ e.blurb }}</p></div>
-    <a class="more" href="{{ e.url }}">read the rest →</a>
+    <a class="more" href="{{ e.url }}">read the rest</a>
   </li>
   {% else %}
   {% set post = entry.post %}
@@ -104,5 +104,5 @@ layout: base.njk
 </ul>
 
 {% if collections.stream | length > 5 %}
-<p class="all-link"><a href="/archive/">all posts →</a></p>
+<p class="all-link"><a href="/archive/">all posts</a></p>
 {% endif %}
