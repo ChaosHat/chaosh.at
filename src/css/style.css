@@ -1216,42 +1216,70 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
    pixel face, a chevron that turns; open, the sections list in the prose
    face. Chrome animates the open (::details-content + interpolate-size);
    elsewhere it snaps. */
-.day-toc { margin: 1rem 0 0; border-block: 1px solid var(--edge); interpolate-size: allow-keywords; }
+/* A menu window since 2026-11-19 (the de-default pass): the covers' build
+   — the element cut to the outer staircase (--px-out), a ::before ring in
+   --dim on top — on an opaque fill. The ▶ before the label turns to ▼ when
+   it's open, and the open steps rather than eases. Was ruled top and bottom
+   in 1px with a CSS chevron that turned, the count in a tinted chip: a
+   stock accordion. */
+.day-toc {
+  position: relative;
+  margin: 1rem 0 0;
+  background: var(--fill);
+  clip-path: var(--px-out);
+  interpolate-size: allow-keywords;
+}
+.day-toc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--dim);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
+}
 .day-toc summary {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 2px; list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px 11px; list-style: none; cursor: pointer;
   font: 16px/20px var(--pixel); color: var(--muted);
 }
 .day-toc summary::-webkit-details-marker { display: none; }
-.day-toc summary::after {
-  content: ""; margin-left: auto; width: 7px; height: 7px;
-  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
-  transform: translateY(-2px) rotate(45deg); transition: transform 0.2s;
+.day-toc summary::before {
+  content: ""; flex: none; width: 12px; height: 12px;
+  background: currentColor;
+  -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
 }
-.day-toc[open] summary::after { transform: translateY(2px) rotate(-135deg); }
-.day-toc summary:hover, .day-toc summary:focus-visible { color: var(--accent); }
-.day-toc-count {
-  padding: 4px 6px; font: 8px/1 var(--pixel); color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.day-toc::details-content { block-size: 0; overflow: hidden; transition: block-size 0.25s ease-out, content-visibility 0.25s allow-discrete; }
+.day-toc[open] summary::before { transform: rotate(90deg); }
+.day-toc summary:hover, .day-toc summary:focus-visible, .day-toc[open] summary { color: var(--ink); }
+.day-toc-count { font: 8px/1 var(--pixel); color: var(--muted); }
+.day-toc-count::before { content: "· "; }
+.day-toc::details-content { block-size: 0; overflow: hidden; transition: block-size 0.2s steps(4), content-visibility 0.2s allow-discrete; }
 .day-toc[open]::details-content { block-size: auto; }
-.day-toc ul { list-style: none; margin: 0; padding: 2px 0 12px 12px; }
+.day-toc ul { list-style: none; margin: 0; padding: 0 14px 14px 34px; }
 .day-toc li { margin: 0; }
-.day-toc li a { display: block; padding: 6px 0; font: 17px/22px var(--prose); color: var(--accent); text-decoration: none; }
-.day-toc li a:hover, .day-toc li a:focus-visible { text-decoration: underline; }
+.day-toc li a { position: relative; display: block; padding: 6px 0; font: 17px/22px var(--prose); color: var(--accent); text-decoration: none; }
+/* The cursor hangs in the gutter, under the summary's. */
+.day-toc li a:is(:hover, :focus-visible)::before {
+  content: ""; position: absolute; left: -20px; top: 11px; width: 12px; height: 12px;
+  background: var(--ink);
+  -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+}
+.day-toc li a:is(:hover, :focus-visible) { color: var(--ink); outline: none; }
 @media (prefers-reduced-motion: reduce) {
-  .day-toc::details-content, .day-toc summary::after { transition: none; }
+  .day-toc::details-content { transition: none; }
 }
 /* The home page's bar (index.njk): a line per date, its subjects wrapping
    after it with dot separators, the date in the pixel face. Capped at 70vh
    with its own scroll so a heavy week can't run the list off the screen. */
 .home-toc { margin: 0 0 1.5rem; }
-.home-toc ul { max-height: 70vh; overflow-y: auto; padding-left: 2px; }
+.home-toc ul { max-height: 70vh; overflow-y: auto; padding-left: 34px; }
 .home-toc li { padding: 6px 0; font: 17px/24px var(--prose); }
 .home-toc li + li { border-top: 1px dashed color-mix(in srgb, var(--edge) 70%, transparent); }
 .home-toc li a { display: inline; padding: 0; }
+.home-toc li a:is(:hover, :focus-visible)::before { content: none; }
+.home-toc li a:is(:hover, :focus-visible) { text-decoration: underline; }
 /* The dot hangs off the end of the subject before it, so a wrap leaves it at
    a line's end rather than opening the next one. */
 .home-toc li a:not(.home-toc-date):not(:last-child)::after { content: "\00a0\00a0·"; margin-right: 0.5em; color: var(--muted); }
@@ -1280,38 +1308,46 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
     position: sticky; top: 1.5rem; align-self: flex-start;
     max-height: calc(100vh - 3rem); overflow-y: auto; scrollbar-width: none;
     padding: 8px 6px 8px 10px; pointer-events: auto;
-    border: 1px solid transparent;
-    transition: background-color 0.2s, border-color 0.2s;
   }
 }
 .rail-day { padding: 5px 0; }
 .rail-row {
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;
   height: 7px; overflow: hidden; text-decoration: none;
-  transition: height 0.25s ease-out;
+  transition: height 0.2s steps(4);
 }
 .rail-row-day { height: 9px; }
-.rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); transition: background-color 0.15s, width 0.15s; }
+.rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); }
 .rail-row-day .rail-tick { width: 18px; background: var(--muted); }
 .rail-row-essay .rail-tick { background: color-mix(in srgb, var(--m-essays) 55%, transparent); }
 .rail-label {
   max-width: 0; opacity: 0;
   text-align: right; color: var(--muted);
   font: 15px/18px var(--prose);
-  transition: opacity 0.2s, max-width 0s 0.25s;
+  transition: opacity 0.2s steps(2), max-width 0s 0.2s;
 }
 .rail-row-day .rail-label { font: 16px/20px var(--pixel); color: var(--ink); }
 .rail-kind { display: block; font: 8px/12px var(--pixel); color: var(--m-essays); }
 
-/* Open. Labels stagger in by row, like the original. */
+/* Open, it's a window (2026-11-19): an opaque fill cut to the staircase
+   and a --dim ring, where it was a blurred see-through panel with a 1px
+   border (a blur beside pixel art is the mixed grid the 10-19 pass ruled
+   out). It snaps open, as a menu window does. */
 .rail-inner:is(:hover, :focus-within) {
-  background: color-mix(in srgb, var(--night) 92%, transparent);
-  backdrop-filter: blur(8px);
-  border-color: var(--edge);
+  background: var(--fill);
+  clip-path: var(--px-out);
+}
+.rail-inner:is(:hover, :focus-within)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--dim);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
 }
 .rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; }
 .rail-inner:is(:hover, :focus-within) .rail-row-day { min-height: 26px; margin-top: 4px; }
-.rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; opacity: 1; transition: opacity 0.2s 0.05s, max-width 0s; }
+.rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; opacity: 1; transition: opacity 0.2s steps(2) 0.05s, max-width 0s; }
 
 /* Here. */
 .rail-row:hover .rail-label, .rail-row:focus-visible .rail-label { color: var(--accent); }
@@ -1778,9 +1814,13 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 /* Focus lives on the label, since the input it belongs to is clipped. */
 .shelf-sort input:focus-visible + label { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) { .shelf-sort input:checked + label::before { animation: none; } }
+/* A phone gets the views window's item grid: three columns of whole
+   cells, the label dropped (the legend still names the group). */
 @media (max-width: 34rem) {
   .shelf-sort { width: auto; }
-  .shelf-sort > .win-in { gap: 4px 14px; padding: 8px 12px 8px 10px; }
+  .shelf-sort > .win-in { display: grid; grid-template-columns: repeat(3, max-content); gap: 0 18px; padding: 2px 10px; }
+  .shelf-sort-label { display: none; }
+  .shelf-sort label { padding: 10px 0; }
 }
 
 /* ---------------------------------------------------- shelf canon + silver
