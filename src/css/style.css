@@ -1315,9 +1315,10 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .rail-row {
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;
   height: 7px; overflow: hidden; text-decoration: none;
-  /* Rows hold their open size until the window has folded (the close
-     plays the open backward over 0.24s), and snap open (below). */
-  transition: height 0s 0.24s, min-height 0s 0.24s, padding 0s 0.24s, margin 0s 0.24s;
+  /* Rows change size at the window's halfway frame, both ways: they spread
+     when the line starts to drop (0.12s in) and bunch back when it's a line
+     again on the way out, so the ticks never spread outside the window. */
+  transition: height 0s 0.12s, min-height 0s 0.12s, padding 0s 0.12s, margin 0s 0.12s;
 }
 .rail-row-day { height: 9px; }
 .rail-tick { flex: none; width: 10px; height: 2px; background: var(--edge); }
@@ -1342,10 +1343,25 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
    1–3), then the window drops (4–6), and the labels show on the last.
    The fill and the ring are ::before/::after under the rows, sized by
    width and height rather than scaled, so the 2px ring and its stepped
-   corners stay whole on every frame. Was a blurred see-through panel with
+   corners stay whole on every frame. The labels keep their width from
+   the first frame (max-width snaps), so the line widens to the window's
+   full width; they hold it 0.24s on the way out. Was a blurred see-through panel with
    a 1px border that snapped open. */
 @property --open { syntax: "<number>"; inherits: true; initial-value: 0; }
 .rail-inner { --open: 0; transition: --open 0.24s steps(6); }
+/* While it drops (frames 4–6), the spread rows show only inside the window:
+   a mask the window's height, so it uncovers them top to bottom (Hat,
+   2026-11-19: the ticks spread before the window did). A mask, not a
+   clip-path, because a clip also cuts hit-testing, and a pointer low on
+   the ticks would fall outside it mid-drop and loop the open. Before the
+   halfway frame the mask is the whole box. */
+@media (min-width: 85rem) {
+  .rail-inner {
+    --drop: clamp(0, (var(--open) - 0.5) * 1000, 1);
+    -webkit-mask: linear-gradient(#000, #000) 0 0 / 100% calc(100% - (100% - max(8px, max(0, (var(--open) - 0.5) * 2) * 100%)) * var(--drop)) no-repeat;
+    mask: linear-gradient(#000, #000) 0 0 / 100% calc(100% - (100% - max(8px, max(0, (var(--open) - 0.5) * 2) * 100%)) * var(--drop)) no-repeat;
+  }
+}
 .rail-inner:is(:hover, :focus-within) { --open: 1; }
 .rail-inner::before,
 .rail-inner::after {
@@ -1361,7 +1377,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 }
 .rail-inner::before { background: var(--fill); clip-path: var(--px-out); }
 .rail-inner::after { background: var(--dim); clip-path: var(--px-win-ring); }
-.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; transition: none; }
+.rail-inner:is(:hover, :focus-within) .rail-row { height: auto; min-height: 22px; padding: 2px 0; }
 .rail-inner:is(:hover, :focus-within) .rail-row-day { min-height: 26px; margin-top: 4px; }
 .rail-inner:is(:hover, :focus-within) .rail-label { max-width: 10rem; transition: none; }
 
