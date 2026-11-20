@@ -707,15 +707,16 @@ figure,
 
 /* ------------------------------------------------------- badges and tags */
 
+/* Status and rating are words, not chips (2026-11-19, the de-default pass,
+   finishing what 11-19's status pass began on the timeline bars): the badge
+   is its icon and word in the status hue, the rating its word, a tag its
+   #word; no wash, no 1px box. A box hugging a word was the stock part. */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 7px;
   font: 8px/1 var(--pixel);
   color: var(--c);
-  background: color-mix(in srgb, var(--c) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c) 42%, transparent);
 }
 
 /* Status icons redrawn for the site 2026-11-19 (src/img/icons/*.svg, each
@@ -768,29 +769,24 @@ figure,
 .rating {
   display: inline-flex;
   align-items: center;
-  padding: 5px 7px;
   font: 8px/1 var(--pixel);
   white-space: nowrap;
   text-decoration: none;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+  color: var(--ink);
 }
 
 a.rating:hover,
-a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
+a.rating:focus-visible,
+a.badge:hover,
+a.badge:focus-visible { text-decoration: underline; text-underline-offset: 3px; outline: none; }
 
-.r-favorite { color: var(--silver); border-color: color-mix(in srgb, var(--silver) 55%, transparent); }
+.r-favorite { color: var(--silver); }
 
 /* Pending is a placeholder, not a fifth rung: dimmer and dashed, so it reads
    as "nothing here yet" rather than as a verdict called "pending". Rendered
    rather than omitted because a blank cell beside a filled neighbour reads as
    a field somebody forgot. */
-.r-pending {
-  color: color-mix(in srgb, var(--muted) 55%, transparent);
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--muted) 30%, transparent);
-}
+.r-pending { color: color-mix(in srgb, var(--muted) 55%, transparent); }
 
 /* Canon: a gold star, in gold on the word and border as well as the card's
    frame (2026-10-19; was a muted word with a ♥ from a fallback font, since
@@ -810,15 +806,12 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
   mask: url("/img/icons/canon.svg") center / 12px 12px no-repeat;
 }
 .badge-g.badge { gap: 0; }
-.rating.b-canon {
-  color: var(--gold);
-  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
-}
+.rating.b-canon { color: var(--gold); }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -826,16 +819,14 @@ a.rating:focus-visible { color: var(--ink); border-color: var(--muted); }
 
 .tag-link {
   display: inline-block;
-  padding: 5px 7px;
-  background: var(--deep);
-  border: 1px solid var(--edge);
+  padding: 4px 0;
   font: 8px/1 var(--pixel);
   color: var(--muted);
   text-decoration: none;
 }
 
 .tag-link:hover,
-.tag-link:focus-visible { color: var(--accent); border-color: var(--accent); }
+.tag-link:focus-visible { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; outline: none; }
 
 /* --------------------------------------------------------- daily stream */
 
@@ -1943,7 +1934,7 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
 .subject-meta {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px 14px;
   flex-wrap: wrap;
   margin: 0;
 }
@@ -3312,8 +3303,6 @@ main:focus { outline: none; }
   padding: 0 12px 0 0;
   font: 8px/1 var(--pixel);
   background: var(--fill);
-  border: 2px solid var(--frame);
-  box-shadow: 0 0 0 2px var(--ring);
 }
 .status-bar > .badge,
 .status-bar > .rating {
@@ -3329,7 +3318,7 @@ main:focus { outline: none; }
 .status-bar .sb-note { color: var(--muted); }
 .status-bar .sb-why { color: var(--accent); text-decoration: none; }
 .status-bar .sb-why:hover { text-decoration: underline; }
-.status-bar.is-canon { border-color: var(--gold); }
+.status-bar.is-canon { --tl-ring: var(--gold); }
 .status-bar.is-canon > .rating { border-right-color: color-mix(in srgb, var(--gold) 35%, var(--night)); }
 .status-bar.is-canon .sb-to { color: var(--gold); }
 
@@ -3365,8 +3354,6 @@ main:focus { outline: none; }
   min-height: 120px;
   overflow: hidden;
   background: url("/img/aurora/stars.png") repeat, var(--night);
-  border: 2px solid var(--frame);
-  box-shadow: 0 0 0 2px var(--ring);
 }
 .finish.f-incomplete { --c: var(--st-incomplete); }
 .finish > * { position: relative; z-index: 1; }
@@ -3443,6 +3430,31 @@ main:focus { outline: none; }
 @media (max-width: 34rem) {
   .finish { flex-direction: column; }
   .finish-head { padding-bottom: 4px; }
+}
+
+/* Stepped corners on the timeline cards (2026-11-19, the de-default pass):
+   the windows' ring in the day's --frame (gold on a canon bar), drawn by an
+   ::after over the card's outer 2px, the card cut to the outer staircase.
+   The cards were square 2px boxes with a --ring shadow, the one framed
+   thing on a subject page not cut like the covers beside it. 2px of
+   padding keeps the ring off the cells (the finish card's overflow:hidden
+   would clip a ring hung outside it). */
+.status-bar,
+.finish {
+  position: relative;
+  padding: 2px;
+  clip-path: var(--px-out);
+}
+.status-bar { padding-right: 14px; }
+.status-bar::after,
+.finish::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: var(--tl-ring, var(--frame));
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
 }
 
 /* --------------------------------------------- flip cards (2026-11-14) */
