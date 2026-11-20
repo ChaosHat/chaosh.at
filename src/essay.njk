@@ -30,7 +30,13 @@ eleventyComputed:
   {%- set bk = c.slug | subjectBack %}
   <a class="essay-card shelf-card{% if bk %} has-back{% endif %}{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
     <span class="shelf-art{% if c.shelf %} has-spine{% endif %}">
-      {% if c.shelf %}{{ c.slug | spine(c.status, c.group) | safe }}{% endif %}
+      {#- The rating rides the spine with the status where the group has both
+          (as on the shelf); a canon-only group keeps its verdict cell. -#}
+      {%- if c.ratable %}{% if c.canon %}{% set rw = "canon" %}{% set rk = "canon" %}
+      {%- elif c.rating %}{% set rw = c.rating.title %}{% set rk = c.rating.slug %}
+      {%- else %}{% set rw = "pending" %}{% set rk = "pending" %}{% endif %}
+      {%- else %}{% set rw = "" %}{% set rk = "" %}{% endif %}
+      {% if c.shelf %}{{ c.slug | spine(c.status, c.group, rw, rk) | safe }}{% endif %}
       {% if c.coverUrl %}
       <img class="shelf-cover{% if c.coverBox %} is-box{% endif %}{% if c.coverPixel %} is-pixel{% endif %}" src="{{ c.coverUrl }}" alt="{{ c.title }} cover art" decoding="async">
       {% else %}
@@ -40,7 +46,7 @@ eleventyComputed:
     {#- The marks follow the group's bands: a status spine where it has a
         shelf (above), a verdict cell where it has a canon, the cover alone
         where it has neither. -#}
-    {% if c.ratable %}{% if c.canon %}<span class="cell rating badge-g b-canon">canon</span>
+    {% if c.ratable and not c.shelf %}{% if c.canon %}<span class="cell rating badge-g b-canon">canon</span>
     {% elif c.rating %}<span class="cell rating r-{{ c.rating.slug }}">{{ c.rating.title }}</span>
     {% else %}<span class="cell rating r-pending">pending</span>{% endif %}{% endif %}
     {{ bk | safe }}
