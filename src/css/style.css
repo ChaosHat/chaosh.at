@@ -3491,8 +3491,7 @@ main:focus { outline: none; }
   outline: 2px solid var(--dim);
   outline-offset: -6px;
   visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.12s steps(2), visibility 0s 0.12s;
+  transition: visibility 0s 0.24s;
 }
 .bk-t {
   display: block;
@@ -3513,14 +3512,41 @@ main:focus { outline: none; }
 .bk-rel span.this-year { color: var(--accent); }
 .bk-rel span.this-year::after { content: " ✦"; }
 
+/* The flip (2026-11-19, the de-default pass; a 2-step opacity swap before).
+   One registered number, --flip, steps 0 → 1 on the card in six frames
+   (0.24s, 40ms a frame, sprite pace), and everything reads it, so the
+   reverse plays itself when the pointer leaves. Two readings, chosen on
+   <html data-flip>:
+   - window (default): the back opens like an RPG menu window, a line that
+     widens (frames 1–3), then opens downward (4–6), its text on the last
+     frame. The back is a menu window already; this is how one arrives.
+   - turn: the whole card squashes edge-on and comes back the other face,
+     the sprite card turn. Scale is the individual `scale` property, so it
+     never fights the shelf hover's translate.
+   Visibility still gates the back (it's hidden from assistive tech until
+   shown), dropping 0.24s after the flip back. */
+@property --flip { syntax: "<number>"; inherits: true; initial-value: 0; }
+.shelf-card,
+.essay-card,
+.frag > .sky-cover { --flip: 0; transition: --flip 0.24s steps(6); }
+.shelf-back {
+  scale: max(0.02, min(1, var(--flip) * 2)) max(0.03, min(1, (var(--flip) - 0.5) * 2));
+}
+.shelf-back > * { opacity: clamp(0, (var(--flip) - 0.95) * 100, 1); }
+.shelf-card > :not(.shelf-back),
+.essay-card > :not(.shelf-back) { opacity: clamp(0, (1 - var(--flip)) * 100, 1); }
+html[data-flip="turn"] :is(.shelf-card, .essay-card, .frag > .sky-cover) { scale: max(1 - 2 * var(--flip), 2 * var(--flip) - 1) 1; }
+html[data-flip="turn"] .shelf-back { scale: none; opacity: clamp(0, (var(--flip) - 0.5) * 100, 1); }
+html[data-flip="turn"] .shelf-back > * { opacity: 1; }
+html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opacity: clamp(0, (0.5 - var(--flip)) * 100, 1); }
 /* Flipped: on hover (no delay), keyboard focus, or the tab. */
-.shelf-item.flipped .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
-.shelf-item.flipped .shelf-card > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+.shelf-item.flipped .shelf-card { --flip: 1; }
+.shelf-item.flipped .shelf-back { visibility: visible; transition: none; }
 @media (hover: hover) {
   /* On the item, not the link: the tab sits outside the link, and pointing
      at it must not turn the card back over. */
-  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
-  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-card > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-card { --flip: 1; }
+  .shelf-item.has-back:is(:hover, :has(a:focus-visible)) .shelf-back { visibility: visible; transition: none; }
 }
 
 /* The phone's tab: a 32×28 hit area in the card's top-right corner, the
@@ -3564,7 +3590,7 @@ main:focus { outline: none; }
 .flip-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 @media (hover: none) { .flip-tab > span:first-child { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .shelf-back, .shelf-card > *, .flip-tab > span { transition: none !important; }
+  .shelf-back, .shelf-card > *, .flip-tab > span, .shelf-card, .essay-card, .frag > .sky-cover { transition: none !important; }
 }
 
 /* Flip cards beyond the shelf (2026-11-16, Hat: from any post you should be
@@ -3576,8 +3602,8 @@ main:focus { outline: none; }
    feed: it renders the plain form, and a back there would change every old
    item nightly. */
 @media (hover: hover) {
-  .essay-card.has-back:is(:hover, :focus-visible) .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
-  .essay-card.has-back:is(:hover, :focus-visible) > :not(.shelf-back) { opacity: 0; transition: opacity 0.12s steps(2); }
+  .essay-card.has-back:is(:hover, :focus-visible) { --flip: 1; }
+  .essay-card.has-back:is(:hover, :focus-visible) .shelf-back { visibility: visible; transition: none; }
 }
 
 /* Narrow backs: a post's cover is 6rem, an essay card 6–8.5rem, against the
@@ -3612,7 +3638,8 @@ main:focus { outline: none; }
 :is(.sky-cover, .essay-card) > .shelf-back .bk-weeks { margin: 12px 3px 0; }
 :is(.sky-cover, .essay-card) > .shelf-back .bk-rel { margin: auto 3px 2px; }
 @media (hover: hover) and (min-width: 34.01rem) {
-  .frag > .sky-cover.has-back:hover > .shelf-back { visibility: visible; opacity: 1; transition: opacity 0.12s steps(2); }
+  .frag > .sky-cover.has-back:hover { --flip: 1; }
+  .frag > .sky-cover.has-back:hover > .shelf-back { visibility: visible; transition: none; }
 }
 @media (max-width: 34rem) {
   .sky-cover > .bk-compact { display: none; }
@@ -3622,6 +3649,7 @@ main:focus { outline: none; }
    back and a link through to the game, placed beside the card by the script.
    Light dismiss (a tap anywhere else) and scrolling close it. */
 .flip-pop {
+  --flip: 1; /* a copied back, shown whole: no card here to flip */
   position: fixed;
   inset: auto;
   margin: 0;
@@ -3637,6 +3665,7 @@ main:focus { outline: none; }
   position: static;
   visibility: visible;
   opacity: 1;
+  scale: none;
   min-height: 0;
   border: 0;
   box-shadow: none;

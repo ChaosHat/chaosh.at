@@ -70,7 +70,10 @@
         a reader that lists both shows "chaosh.at" and "chaosh.at · essays". -#}
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
     <link rel="alternate" type="application/atom+xml" href="/essays/feed.xml" title="{{ site.title }} · essays">
-  </head>
+  <script>/* TEMP (de-default review, remove before merge): ?flip=turn|window picks the flip animation, remembered. */
+try { const q = new URLSearchParams(location.search).get("flip"); if (q) localStorage.flipDemo = q; if (localStorage.flipDemo === "turn") document.documentElement.dataset.flip = "turn"; } catch {}
+</script>
+</head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
       whole shell; everything else gets the narrower, centred reading column.
       The header and the furniture strips are outside main either way, so they
