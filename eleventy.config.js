@@ -532,7 +532,9 @@ export const cardBackHtml = ({ title = null, stats, grid, released = null, year 
     [stats.days, "days"],
     [stats.words ? fmtNum(stats.words) : 0, "words"],
     [stats.pics, "pics"],
-    [stats.essays, "essays"],
+    // Essays only when there are some (2026-11-19): most games have none,
+    // and a "–" row made every back a line taller for nothing.
+    ...(stats.essays ? [[stats.essays, "essays"]] : []),
   ].map(([v, label]) => `<span><b>${v || "–"}</b>${label}</span>`).join("");
   const rel = released
     ? `<span class="bk-rel">released <span${year && released == year ? ' class="this-year"' : ""}>${esc(released)}</span></span>`
@@ -1992,19 +1994,17 @@ export default function (eleventyConfig) {
   const backs = new Map();
   // A post cover's back (compact: no title), and a popover title for the
   // phone, where the cover is too small to turn over (base.njk's script).
-  // A post's status and rating live on its cover's back (2026-11-19). On the
-  // page itself they were either redundant (a new section is nearly always
-  // "active" and "pending") or anachronistic (an old post wore today's
-  // status, so "just got to Junon" read "completed"), and a 6rem cover had
-  // no room for both on a spine. Status in its hue with its icon; the rating
-  // muted, silver for favorite, gold for canon; each only where the group
-  // has the band.
+  // A post's rating lives on its cover's back (2026-11-19). On the page
+  // itself status and rating were either redundant (a new section is nearly
+  // always "active" and "pending") or anachronistic (an old post wore today's
+  // status, so "just got to Junon" read "completed"). The status was on the
+  // back for a day and came off: Hat, "status is valueless" on a post. The
+  // rating is muted, silver for favorite, gold for canon, and only where the
+  // group has a canon.
   const coverMarks = (slug) => {
     const meta = subjects[slug] ?? {};
     const grp = groupOf(meta);
-    const status = meta.status ?? "active";
     let out = "";
-    if (hasShelf(grp)) out += `<span class="status-word b-${status}">${statusWord(status, grp)}</span>`;
     if (hasCanon(grp)) {
       const r = canonSlugsAll.has(slug) ? null : ratingOf(slug, meta);
       const [rw, rk] = canonSlugsAll.has(slug) ? ["canon", "canon"] : r ? [r.title, r.slug] : ["pending", "pending"];
