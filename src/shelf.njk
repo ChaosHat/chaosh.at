@@ -38,8 +38,13 @@ eleventyComputed:
     inside one element for the checked state to reach the tiles. -#}
 <div class="shelf-sorter">
 {% if items | length > 5 %}
-<fieldset class="shelf-sort">
-  <legend>sort</legend>
+{#- A menu window, the views window's kind (2026-11-19): the ▶ cursor marks
+    the sort in force, every word in ink. Was a row of bordered buttons with
+    the checked one filled, a stock button group. -#}
+<fieldset class="shelf-sort win">
+  <legend class="sr-only">sort</legend>
+  <div class="win-in">
+  <span class="shelf-sort-label" aria-hidden="true">sort</span>
   <input type="radio" name="shelf-sort" id="sort-status" checked>
   <label for="sort-status">status</label>
   <input type="radio" name="shelf-sort" id="sort-az">
@@ -50,6 +55,7 @@ eleventyComputed:
   <label for="sort-canon">canon</label>
   <input type="radio" name="shelf-sort" id="sort-rating">
   <label for="sort-rating">rating</label>
+  </div>
 </fieldset>
 {% endif %}
 {% if items | length > 5 %}
