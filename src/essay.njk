@@ -29,6 +29,7 @@ eleventyComputed:
   {% macro card(c) %}
   {%- set bk = c.slug | subjectBack %}
   <a class="essay-card shelf-card{% if bk %} has-back{% endif %}{% if c.canon %} is-canon{% elif c.rating and c.rating.slug == "favorite" %} is-favorite{% endif %}" href="/s/{{ c.slug }}/">
+    {% if bk %}<span class="flip-hint" aria-hidden="true"><span>flip</span></span>{% endif %}
     <span class="shelf-art{% if c.shelf %} has-spine{% endif %}">
       {#- The rating rides the spine with the status where the group has both
           (as on the shelf); a canon-only group keeps its verdict cell. -#}

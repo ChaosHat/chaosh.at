@@ -978,13 +978,26 @@ figcaption {
    (2026-11-11: column images show a 640px thumbnail; the box still opens
    the full file, from the image's data-full — see base.njk.) */
 main figure img { cursor: zoom-in; }
+/* Stepped like every other window since 2026-11-19: cut to the outer
+   staircase, the ring an ::before over its outer 2px (2px of padding keeps
+   it off the picture). Was a square 2px border. */
 .lightbox {
   max-width: none;
   max-height: none;
-  padding: 0;
-  border: 2px solid var(--frame);
+  padding: 2px;
+  border: 0;
   background: var(--fill);
+  clip-path: var(--px-out);
   cursor: zoom-out;
+}
+.lightbox::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--frame);
+  clip-path: var(--px-win-ring);
+  pointer-events: none;
 }
 .lightbox::backdrop { background: color-mix(in oklab, var(--night) 88%, transparent); }
 .lightbox img {
@@ -2796,7 +2809,9 @@ main {
    own cell (grid-area 1/1) and match the picture's height whatever its
    shape, with the caption in the row below; the image is cut to the outer
    staircase and the ring paints over its outer 2px. Was a 1px --dim
-   line round the picture (column) and a square 2px frame (tiles). */
+   line round the picture (column) and a square 2px frame (tiles). The
+   column's ring is --frame at 45% into night, a step over --dim's 30%
+   (Hat, 2026-11-19: "slightly brighter"). */
 :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float {
   --fig-ring: var(--frame);
   display: grid;
@@ -2818,7 +2833,7 @@ main {
 }
 :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float > figcaption { grid-area: 2 / 1; }
 @media (min-width: 58rem) {
-  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float { --fig-ring: var(--dim); }
+  :is(.frag-body, .fragment, .essay-page, .essay-row-body) > .fig-float { --fig-ring: color-mix(in oklab, var(--frame) 45%, var(--night)); }
 }
 
 /* ------------------------------------------------------------- media nav
@@ -3512,33 +3527,33 @@ main:focus { outline: none; }
 .bk-rel span.this-year { color: var(--accent); }
 .bk-rel span.this-year::after { content: " ✦"; }
 
-/* The flip (2026-11-19, the de-default pass; a 2-step opacity swap before).
-   One registered number, --flip, steps 0 → 1 on the card in six frames
-   (0.24s, 40ms a frame, sprite pace), and everything reads it, so the
-   reverse plays itself when the pointer leaves. Two readings, chosen on
-   <html data-flip>:
-   - window (default): the back opens like an RPG menu window, a line that
-     widens (frames 1–3), then opens downward (4–6), its text on the last
-     frame. The back is a menu window already; this is how one arrives.
-   - turn: the whole card squashes edge-on and comes back the other face,
-     the sprite card turn. Scale is the individual `scale` property, so it
-     never fights the shelf hover's translate.
-   Visibility still gates the back (it's hidden from assistive tech until
-   shown), dropping 0.24s after the flip back. */
+/* The flip (2026-11-19, the de-default pass; a 2-step opacity swap
+   before): the sprite card turn. One registered number, --flip, steps
+   0 → 1 on the card in six frames (0.24s, 40ms a frame, sprite pace); the
+   card's width is |1 − 2·flip| (1, ⅔, ⅓, edge-on, ⅓, ⅔, 1) and the faces
+   swap at the edge, so the reverse plays itself when the pointer leaves.
+   Scale is the individual `scale` property, so it never fights the shelf
+   hover's translate. Mocked against "window" (the back opening like an RPG
+   menu window, a line that widens then drops); Hat picked the turn
+   (2026-11-19). Visibility still gates the back (hidden from assistive
+   tech until shown), dropping 0.24s after the flip back.
+   Essay cards and post covers flip on .is-flipped, set by a script in
+   base.njk, not on :hover: they are the hovered element AND the one that
+   turns, so at the edge-on frame (0px wide) the pointer fell off, the turn
+   reversed, the card widened back under it, and it looped (Hat, 2026-11-19:
+   "stuck continually flipping"). The script holds the flip until the
+   pointer leaves the card's full-size box. Shelf cards hover on their
+   .shelf-item, which doesn't turn, so plain :hover is safe there. */
 @property --flip { syntax: "<number>"; inherits: true; initial-value: 0; }
 .shelf-card,
 .essay-card,
-.frag > .sky-cover { --flip: 0; transition: --flip 0.24s steps(6); }
-.shelf-back {
-  scale: max(0.02, min(1, var(--flip) * 2)) max(0.03, min(1, (var(--flip) - 0.5) * 2));
+.frag > .sky-cover {
+  --flip: 0;
+  scale: max(1 - 2 * var(--flip), 2 * var(--flip) - 1) 1;
+  transition: --flip 0.24s steps(6);
 }
-.shelf-back > * { opacity: clamp(0, (var(--flip) - 0.95) * 100, 1); }
-.shelf-card > :not(.shelf-back),
-.essay-card > :not(.shelf-back) { opacity: clamp(0, (1 - var(--flip)) * 100, 1); }
-html[data-flip="turn"] :is(.shelf-card, .essay-card, .frag > .sky-cover) { scale: max(1 - 2 * var(--flip), 2 * var(--flip) - 1) 1; }
-html[data-flip="turn"] .shelf-back { scale: none; opacity: clamp(0, (var(--flip) - 0.5) * 100, 1); }
-html[data-flip="turn"] .shelf-back > * { opacity: 1; }
-html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opacity: clamp(0, (0.5 - var(--flip)) * 100, 1); }
+.shelf-back { opacity: clamp(0, (var(--flip) - 0.5) * 100, 1); }
+:is(.shelf-card, .essay-card, .frag > .sky-cover) > :not(.shelf-back) { opacity: clamp(0, (0.5 - var(--flip)) * 100, 1); }
 /* Flipped: on hover (no delay), keyboard focus, or the tab. */
 .shelf-item.flipped .shelf-card { --flip: 1; }
 .shelf-item.flipped .shelf-back { visibility: visible; transition: none; }
@@ -3573,24 +3588,37 @@ html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opaci
    button (the keyline trick: a shadow of a stepped shape is stepped; filter
    runs before the child's clip, so it has to sit on the parent). Was a 1px
    bordered chip. */
-.flip-tab { filter: drop-shadow(2px 0 0 var(--dim)) drop-shadow(-2px 0 0 var(--dim)) drop-shadow(0 2px 0 var(--dim)) drop-shadow(0 -2px 0 var(--dim)); }
-.flip-tab > span:first-child {
+.flip-tab,
+.flip-hint { filter: drop-shadow(2px 0 0 var(--dim)) drop-shadow(-2px 0 0 var(--dim)) drop-shadow(0 2px 0 var(--dim)) drop-shadow(0 -2px 0 var(--dim)); }
+.flip-tab > span:first-child,
+.flip-hint > span {
   margin: 2px;
   padding: 4px 5px 3px;
   font: 8px/1 var(--pixel);
   color: var(--ink);
   background: var(--night);
   clip-path: var(--px-win-in);
-  opacity: 0;
-  transition: opacity 0.1s steps(2);
 }
-.shelf-item:hover .flip-tab > span:first-child,
-.flip-tab:focus-visible > span:first-child,
-.shelf-item.flipped .flip-tab > span:first-child { opacity: 1; }
-.flip-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-@media (hover: none) { .flip-tab > span:first-child { opacity: 1; } }
+/* Shown on every front, not only on hover (Hat, 2026-11-19: so people know
+   it's a thing they can do; on a post nothing else said the cover was more
+   than a picture). On the shelf it's the tab, a button; on an essay card
+   and a post's cover it's a hint, decorative, in the same corner — hover
+   does the flipping there, and a tap on a phone opens the back (base.njk).
+   Lit to --frame on hover. */
+.shelf-item:hover .flip-tab,
+.flip-tab:focus-visible,
+:is(.essay-card, .frag > .sky-cover):hover > .flip-hint { filter: drop-shadow(2px 0 0 var(--frame)) drop-shadow(-2px 0 0 var(--frame)) drop-shadow(0 2px 0 var(--frame)) drop-shadow(0 -2px 0 var(--frame)); }
+.flip-hint {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: flex;
+  pointer-events: none;
+}
+.flip-tab:focus-visible { outline: none; }
 @media (prefers-reduced-motion: reduce) {
-  .shelf-back, .shelf-card > *, .flip-tab > span, .shelf-card, .essay-card, .frag > .sky-cover { transition: none !important; }
+  .shelf-back, .shelf-card > *, .shelf-card, .essay-card, .frag > .sky-cover { transition: none !important; }
 }
 
 /* Flip cards beyond the shelf (2026-11-16, Hat: from any post you should be
@@ -3602,8 +3630,8 @@ html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opaci
    feed: it renders the plain form, and a back there would change every old
    item nightly. */
 @media (hover: hover) {
-  .essay-card.has-back:is(:hover, :focus-visible) { --flip: 1; }
-  .essay-card.has-back:is(:hover, :focus-visible) .shelf-back { visibility: visible; transition: none; }
+  .essay-card.has-back:is(.is-flipped, :focus-visible) { --flip: 1; }
+  .essay-card.has-back:is(.is-flipped, :focus-visible) .shelf-back { visibility: visible; transition: none; }
 }
 
 /* Narrow backs: a post's cover is 6rem, an essay card 6–8.5rem, against the
@@ -3615,7 +3643,7 @@ html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opaci
    16px is wider than half of 96px. */
 :is(.frag > .sky-cover, .essay-card).has-back { overflow: visible; }
 /* Over the next card down (an essay's stack), which a hanging back runs into. */
-:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { z-index: 3; }
+:is(.frag > .sky-cover, .essay-card).has-back:is(.is-flipped, :focus-visible) { z-index: 3; }
 :is(.sky-cover, .essay-card) > .shelf-back {
   inset: -2px -2px auto;
   min-height: calc(100% + 4px);
@@ -3638,8 +3666,8 @@ html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opaci
 :is(.sky-cover, .essay-card) > .shelf-back .bk-weeks { margin: 12px 3px 0; }
 :is(.sky-cover, .essay-card) > .shelf-back .bk-rel { margin: auto 3px 2px; }
 @media (hover: hover) and (min-width: 34.01rem) {
-  .frag > .sky-cover.has-back:hover { --flip: 1; }
-  .frag > .sky-cover.has-back:hover > .shelf-back { visibility: visible; transition: none; }
+  .frag > .sky-cover.has-back.is-flipped { --flip: 1; }
+  .frag > .sky-cover.has-back.is-flipped > .shelf-back { visibility: visible; transition: none; }
 }
 @media (max-width: 34rem) {
   .sky-cover > .bk-compact { display: none; }
@@ -3863,6 +3891,6 @@ html[data-flip="turn"] :is(.shelf-card, .essay-card) > :not(.shelf-back) { opaci
   clip-path: var(--px-cover-line);
   pointer-events: none;
 }
-:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible) { clip-path: none; }
-:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::after,
-:is(.frag > .sky-cover, .essay-card).has-back:is(:hover, :focus-visible)::before { display: none; }
+:is(.frag > .sky-cover, .essay-card).has-back:is(.is-flipped, :focus-visible) { clip-path: none; }
+:is(.frag > .sky-cover, .essay-card).has-back:is(.is-flipped, :focus-visible)::after,
+:is(.frag > .sky-cover, .essay-card).has-back:is(.is-flipped, :focus-visible)::before { display: none; }

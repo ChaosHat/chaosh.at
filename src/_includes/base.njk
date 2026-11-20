@@ -70,10 +70,7 @@
         a reader that lists both shows "chaosh.at" and "chaosh.at · essays". -#}
     <link rel="alternate" type="application/atom+xml" href="/feed.xml" title="{{ site.title }}">
     <link rel="alternate" type="application/atom+xml" href="/essays/feed.xml" title="{{ site.title }} · essays">
-  <script>/* TEMP (de-default review, remove before merge): ?flip=turn|window picks the flip animation, remembered. */
-try { const q = new URLSearchParams(location.search).get("flip"); if (q) localStorage.flipDemo = q; if (localStorage.flipDemo === "turn") document.documentElement.dataset.flip = "turn"; } catch {}
-</script>
-</head>
+  </head>
   {#- Grid pages set `wide: true` in their front matter and let <main> take the
       whole shell; everything else gets the narrower, centred reading column.
       The header and the furniture strips are outside main either way, so they
@@ -385,6 +382,40 @@ try { const q = new URLSearchParams(location.search).get("flip"); if (q) localSt
         essay card does the same wherever there's no hover. The shelf keeps
         its own `flip` tab. Without the Popover API the tap just follows the
         link, as it did before. -#}
+    <script>
+      /* The hover flip for essay cards and post covers (2026-11-19). These
+         turn edge-on (style.css → the flip), so :hover on the card itself
+         dropped at the 0px frame and looped. Flip on entering; turn back
+         only when the pointer leaves the card's full-size box (its layout
+         width about its centre, which the turn never moves) and isn't over
+         the card's own back, which hangs below it. */
+      matchMedia("(hover: hover)").matches && document.querySelector("a.has-back") && (() => {
+        const SEL = ".frag > a.sky-cover.has-back, a.essay-card.has-back";
+        const narrow = matchMedia("(max-width: 34rem)");
+        let cur = null, box = null;
+        const measure = (el) => {
+          const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, w = el.offsetWidth;
+          return { l: cx - w / 2, r: cx + w / 2, t: r.top, b: r.bottom };
+        };
+        const drop = () => { if (cur) cur.classList.remove("is-flipped"); cur = null; };
+        document.addEventListener("pointerover", (e) => {
+          const card = e.target.closest(SEL);
+          if (!card || card === cur) return;
+          if (card.classList.contains("sky-cover") && narrow.matches) return;
+          drop();
+          cur = card;
+          box = measure(card);
+          card.classList.add("is-flipped");
+        });
+        document.addEventListener("pointermove", (e) => {
+          if (!cur) return;
+          const inBox = e.clientX >= box.l && e.clientX < box.r && e.clientY >= box.t && e.clientY < box.b;
+          if (!inBox && !cur.contains(e.target)) drop();
+        }, { passive: true });
+        document.documentElement.addEventListener("pointerleave", drop);
+        addEventListener("scroll", () => { if (cur) box = measure(cur); }, { passive: true });
+      })();
+    </script>
     <script>
       document.querySelector("a.has-back") && HTMLElement.prototype.hasOwnProperty("popover") && (() => {
         const narrow = matchMedia("(hover: none), (max-width: 34rem)");

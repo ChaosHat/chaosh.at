@@ -2052,7 +2052,7 @@ export default function (eleventyConfig) {
       const title = back ? ` data-title="${escapeHtml(backs.get(slug).title)}"` : "";
       return (
         `<a class="sky sky-cover${box ? " sky-box" : ""}${coverPixels.has(stem) ? " sky-pixel" : ""}${back ? " has-back" : ""}" href="${subjectHref(slug)}" ` +
-        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${back}</a>`
+        `style="background-image:url(${coverUrl})"${title} aria-hidden="true" tabindex="-1">${back ? `<span class="flip-hint"><span>flip</span></span>${back}` : ""}</a>`
       );
     }
     const cls = status === "completed" ? "sky sky-done" : "sky";
