@@ -732,7 +732,7 @@ figure,
   mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
 }
 .now-toggle:hover, .now-toggle:focus-visible { color: var(--ink); }
-.now-count { font: 8px/1 var(--pixel); color: var(--muted); }
+.now-count { color: var(--muted); } /* the label's own 16px (Hat, 2026-11-21; 8px was too faint) */
 .now-count::before { content: "("; }
 .now-count::after { content: ")"; }
 .now-toggle:focus-visible { outline: 1px dotted currentColor; outline-offset: 3px; }
