@@ -399,7 +399,7 @@ final-fantasy-vii:
   title: Final Fantasy VII
   category:
     - games
-  status: backlog
+  status: active
   released: 1997
   aliases:
     - ff7
@@ -1319,7 +1319,7 @@ yakuza-like-a-dragon:
   title: 'Yakuza: Like a Dragon'
   category:
     - games
-  status: backlog
+  status: active
   released: 2020
   aliases:
     - yakuza 7

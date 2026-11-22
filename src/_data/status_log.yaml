@@ -235,3 +235,9 @@
 - date: 2026-11-17
   slug: zelda-ocarina-of-time
   status: [active, completed]
+- date: 2026-11-21
+  slug: final-fantasy-vii
+  status: [backlog, active]
+- date: 2026-11-21
+  slug: yakuza-like-a-dragon
+  status: [backlog, active]

@@ -22,7 +22,7 @@ groups:
       - shelf
     covers: bgg
     cover_fit: true
-    now_playing: status
+    now_playing: recent
     color: "#ecafaf"
     aliases:
       - boardgames
