@@ -244,7 +244,7 @@
         scrolling by hand. Reduced-motion readers get the plain scroll row.
         The site's second script, after the lightbox.
         2026-11-21: when the row doesn't fit, the label becomes a button
-        (▶ now playing) that stops the ticker and wraps the row open, every
+        (▶ now playing (N)) that stops the ticker and wraps the row open, every
         title at once, and back. Hat wanted to check a status change and had
         to wait for the loop to come round. Open pushes the page down by the
         extra lines rather than covering the nav; the move is the reader's
@@ -263,8 +263,8 @@
         toggle.type = "button";
         toggle.className = "now-label now-toggle";
         toggle.textContent = label.textContent;
-        /* The count says there's more than the line shows, as the day's
-           contents do ("▶ on this page · 4"). */
+        /* The count says there's more than the line shows: "(5)" (Hat,
+           2026-11-21; the day's contents' "· 4" first). */
         const count = document.createElement("span");
         count.className = "now-count";
         count.textContent = row.children.length;

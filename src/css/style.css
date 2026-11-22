@@ -733,7 +733,8 @@ figure,
 }
 .now-toggle:hover, .now-toggle:focus-visible { color: var(--ink); }
 .now-count { font: 8px/1 var(--pixel); color: var(--muted); }
-.now-count::before { content: "· "; }
+.now-count::before { content: "("; }
+.now-count::after { content: ")"; }
 .now-toggle:focus-visible { outline: 1px dotted currentColor; outline-offset: 3px; }
 .now.open { align-items: flex-start; }
 .now.open .now-toggle { margin-top: 4px; } /* (24px item − 16px label) / 2 */
