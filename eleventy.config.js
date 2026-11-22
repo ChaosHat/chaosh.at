@@ -1005,7 +1005,7 @@ export default function (eleventyConfig) {
   // keeps its now playing (movies kept `recent` when it moved into etc).
   // One site-wide window; per group only if a second `recent` group ever
   // needs its own.
-  const NOW_PLAYING_DAYS = 14;
+  const NOW_PLAYING_DAYS = 7; // 14 until 2026-11-21 (Hat: a week)
   // Returned tabs first in tab order, then the other groups in site.yaml
   // order; most recently written about first within a group (Hat,
   // 2026-11-02: recency, not the alphabet — the row says what's current, and
