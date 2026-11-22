@@ -998,9 +998,11 @@ export default function (eleventyConfig) {
   // Now Playing is derived, never curated. Each group says how (2026-11-03,
   // `now_playing:` in site.yaml): `status` lists its subjects at `status:
   // active` — the same status that groups the shelves, so the two cannot
-  // drift apart — and `recent` lists the one subject most recently written
-  // about, while that writing is under NOW_PLAYING_DAYS old (movies' rule:
-  // a film has no `active`, it is watched in an evening). `off`, the
+  // drift apart — and `recent` lists those too, plus every subject written
+  // about in the last NOW_PLAYING_DAYS (movies' and tabletop's rule: a film
+  // is watched in an evening and a board game night is one night, but a
+  // campaign set `active` stays; Hat, 2026-11-21 — until then `recent` was
+  // the one most recent subject, movies only). `off`, the
   // default, lists nothing. Placement doesn't enter into it: a demoted group
   // keeps its now playing (movies kept `recent` when it moved into etc).
   // One site-wide window; per group only if a second `recent` group ever
@@ -1024,10 +1026,9 @@ export default function (eleventyConfig) {
           .filter((s) => s.status === "active")
           .sort((a, b) => (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || String(a.title).localeCompare(String(b.title))));
       } else if (g.nowPlaying === "recent") {
-        const top = here
-          .filter((s) => s.lastWrote && s.lastWrote >= since)
-          .sort((a, b) => b.lastWrote - a.lastWrote)[0];
-        if (top) list.push(top);
+        list.push(...here
+          .filter((s) => s.status === "active" || (s.lastWrote && s.lastWrote >= since))
+          .sort((a, b) => (b.lastWrote ?? 0) - (a.lastWrote ?? 0) || String(a.title).localeCompare(String(b.title))));
       }
     }
     return list.map((s, i) => ({ ...s, groupFirst: i === 0 || list[i - 1].group !== s.group }));
@@ -1502,7 +1503,7 @@ export default function (eleventyConfig) {
   // a canon+shelf group with the rules it had.
   const LEGACY_GROUPS = {
     games: { noun: "game", covers: "steamgriddb", now_playing: "status", color: "#9bd8f3" },
-    tabletop: { noun: "tabletop game", covers: "bgg", cover_fit: true, now_playing: "status", color: "#ecafaf", aliases: ["boardgames"] },
+    tabletop: { noun: "tabletop game", covers: "bgg", cover_fit: true, now_playing: "recent", color: "#ecafaf", aliases: ["boardgames"] },
     movies: { noun: "movie", covers: "tmdb", now_playing: "recent", color: "#d2a7ce", statuses: ["completed", "backlog"], status_words: { completed: "watched" } },
     shows: { noun: "show", covers: "tmdb-tv", now_playing: "status", color: "#a4a9db" },
     books: { noun: "book", covers: "hardcover", now_playing: "status", color: "#a2d6b3" },
