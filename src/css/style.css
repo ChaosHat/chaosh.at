@@ -717,6 +717,46 @@ figure,
   .now-item:last-child { padding-right: 2rem; }
 }
 
+/* Open (2026-11-21, the script in base.njk): when the row doesn't fit,
+   the label is a button, ▶ before it like the day's contents, turning to ▼.
+   Open, the row wraps with no fade and the label sits on its first line. */
+.now-toggle {
+  display: flex; align-items: center; gap: 6px;
+  margin: 0; padding: 0; border: 0; background: none;
+  cursor: pointer;
+}
+.now-toggle::before {
+  content: ""; flex: none; width: 12px; height: 12px;
+  background: currentColor;
+  -webkit-mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+  mask: url("/img/icons/cursor.svg") center / 12px 12px no-repeat;
+}
+.now-toggle:hover, .now-toggle:focus-visible { color: var(--ink); }
+.now-count { font: 8px/1 var(--pixel); color: var(--muted); }
+.now-count::before { content: "· "; }
+.now-toggle:focus-visible { outline: 1px dotted currentColor; outline-offset: 3px; }
+.now.open { align-items: flex-start; }
+.now.open .now-toggle { margin-top: 4px; } /* (24px item − 16px label) / 2 */
+.now.open .now-toggle::before { transform: rotate(90deg); }
+.now.open .now-items {
+  flex-wrap: wrap;
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.now .now-items.sliding { overflow: hidden; }
+/* On a phone, open, the list goes under the label at full width and a long
+   title wraps: beside the label it had ~180px and the phone row's flex: none
+   ran Zelda off the panel. */
+@media (max-width: 34rem) {
+  .now.open { flex-direction: column; gap: 10px; }
+  .now.open .now-toggle { margin-top: 0; }
+  .now.open .now-items { width: 100%; }
+  .now.open .now-item { flex: 0 1 auto; min-width: 0; }
+  .now.open .now-item:last-child { padding-right: 0; }
+  .now.open .now-item:not(:has(.mico)) { padding-left: 32px; } /* under its group's icon: 24px + the 8px gap */
+}
+
 /* ------------------------------------------------------- badges and tags */
 
 /* Status and rating are words, not chips (2026-11-19, the de-default pass,

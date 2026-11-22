@@ -111,7 +111,7 @@
               campaign, a show, a book — and an icon on each cost ~32px a title.
               The script at the end of the page turns this row into the ticker
               when it overflows. -#}
-          <div class="now-items">
+          <div class="now-items" id="now-items">
             {%- for item in playing %}
             <a class="now-item" href="/s/{{ item.slug }}/">{% if item.groupFirst %}<span class="mico m-{{ item.group }}" role="img" aria-label="{{ item.group | groupNoun }}"></span>{% endif %}{{ item.title }}</a>
             {%- endfor %}
@@ -242,41 +242,96 @@
         the row (a drag of more than 6px swallows the click it would have
         landed on a title). A CSS marquee was rejected: it fights a reader
         scrolling by hand. Reduced-motion readers get the plain scroll row.
-        The site's second script, after the lightbox. -#}
+        The site's second script, after the lightbox.
+        2026-11-21: when the row doesn't fit, the label becomes a button
+        (▶ now playing) that stops the ticker and wraps the row open, every
+        title at once, and back. Hat wanted to check a status change and had
+        to wait for the loop to come round. Open pushes the page down by the
+        extra lines rather than covering the nav; the move is the reader's
+        own click, and it steps open like the day's contents. Not remembered
+        across pages. Reduced-motion readers get it too (their phone row
+        scrolls sideways), without the steps. -#}
     <script>
       (() => {
         const SPEED = 24; /* px/s; 40 read as hurried (Hat, 2026-11-02) */
         const row = document.querySelector(".now.playing .now-items");
-        if (!row || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (!row) return;
+        const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const panel = row.parentElement;
+        const label = panel.querySelector(".now-label");
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "now-label now-toggle";
+        toggle.textContent = label.textContent;
+        /* The count says there's more than the line shows, as the day's
+           contents do ("▶ on this page · 4"). */
+        const count = document.createElement("span");
+        count.className = "now-count";
+        count.textContent = row.children.length;
+        toggle.append(count);
+        toggle.setAttribute("aria-controls", row.id);
+        toggle.setAttribute("aria-expanded", "false");
         const items = [...row.children];
         const track = document.createElement("div");
         track.className = "track";
         const copy = document.createElement("div");
         copy.className = "track";
         copy.setAttribute("aria-hidden", "true");
-        let on = false, idle = 0, last = 0, lastAuto = 0, pos = 0, armedW = -1;
+        let on = false, open = false, closedH = 0, idle = 0, last = 0, lastAuto = 0, pos = 0, armedW = -1;
         const arm = () => {
+          armedW = row.clientWidth;
+          if (open) return;
           /* 2026-11-11: rebuilding moves every item, which resets the scroll
              and drops focus; keep both across it. */
           const sl = row.scrollLeft, focused = items.find((a) => a === document.activeElement);
           row.classList.add("tick");
           track.replaceChildren(...items);
           row.replaceChildren(track);
-          if (track.scrollWidth <= row.clientWidth) {
-            row.classList.remove("tick");
-            row.replaceChildren(...items);
-            on = false;
-          } else {
+          let over = track.scrollWidth > row.clientWidth;
+          if (over && !still) {
             /* tabindex -1: the aria-hidden copy is for the loop's look only; keyboard users get the row once. */
             copy.replaceChildren(...items.map((a) => { const c = a.cloneNode(true); c.tabIndex = -1; return c; }));
             row.append(copy);
             row.scrollLeft = sl % track.offsetWidth;
             pos = row.scrollLeft;
             on = true;
+          } else {
+            row.classList.remove("tick");
+            row.replaceChildren(...items);
+            on = false;
+            over = row.scrollWidth > row.clientWidth; /* the reduced-motion phone row */
           }
-          armedW = row.clientWidth;
+          /* The toggle only where something is out of sight. */
+          if (over) label.isConnected && label.replaceWith(toggle);
+          else toggle.isConnected && toggle.replaceWith(label);
           if (focused) focused.focus({ preventScroll: true });
         };
+        const slide = (from, to, done) => {
+          if (still || from === to) return done?.();
+          row.classList.add("sliding");
+          const a = row.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 200, easing: "steps(4)" });
+          a.onfinish = a.oncancel = () => { row.classList.remove("sliding"); done?.(); };
+        };
+        toggle.addEventListener("click", () => {
+          row.getAnimations().forEach((a) => a.finish());
+          if (!open) {
+            closedH = row.offsetHeight;
+            open = true; on = false;
+            panel.classList.add("open");
+            toggle.setAttribute("aria-expanded", "true");
+            row.classList.remove("tick");
+            row.replaceChildren(...items);
+            row.scrollLeft = 0;
+            slide(closedH, row.offsetHeight);
+          } else {
+            toggle.setAttribute("aria-expanded", "false");
+            slide(row.offsetHeight, closedH, () => {
+              open = false;
+              panel.classList.remove("open");
+              arm();
+            });
+          }
+        });
         const hold = (ms) => { idle = performance.now() + ms; };
         for (const e of ["pointerenter", "pointerdown", "wheel", "touchstart", "focusin"]) row.addEventListener(e, () => hold(3000), { passive: true });
         row.addEventListener("pointerleave", () => hold(800));
