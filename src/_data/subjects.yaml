@@ -1995,6 +1995,15 @@ the-legend-of-korra:
     - korra
     - lok
     - atlok
+bad-blood:
+  title: Bad Blood
+  category:
+    - books
+  status: active
+  released: 2018
+  aliases:
+    - bad blood
+    - 'bad blood: secrets and lies in a silicon valley startup'
 sausage:
   title: Aurora Watch
   category:
