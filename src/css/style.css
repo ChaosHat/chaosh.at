@@ -1623,6 +1623,19 @@ blockquote:not(.aside) > :last-child { margin-bottom: 0; }
   color: var(--muted);
 }
 
+/* The archive by month (2026-11-26): a muted month head over its rows, the
+   day number in a narrow column so titles line up, wrapped lines staying
+   under the title on a phone. An essay's kicker and title are one inline
+   run, or the kicker became a column of its own on a phone. */
+.archive-count { margin: -0.5rem 0 1.5rem; font: 16px/1 var(--pixel); color: var(--muted); }
+.archive-month { margin: 0 0 2rem; }
+.archive-month-head { margin: 0 0 0.25rem; padding-bottom: 0.25rem; font: 16px/24px var(--pixel); color: var(--muted); border-bottom: 2px solid var(--dim); text-transform: lowercase; }
+.archive-month .archive-list > li { padding: 0.35rem 0; border-bottom: 1px solid var(--dim); }
+.archive-day { flex: 0 0 2ch; font: 16px/24px var(--pixel); color: var(--muted); text-align: right; }
+.archive-entry { flex: 1 1 0; min-width: 0; }
+.archive-entry .archive-kind { margin-right: 0.5ch; }
+@media (max-width: 34rem) { .archive-month .archive-list > li { flex-wrap: nowrap; } }
+
 /* The essays index — the archive list wearing chips, since every essay has a
    subject to show its sky. */
 /* The name Hat calls them, under the title the site uses (2026-11-02). */

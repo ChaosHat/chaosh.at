@@ -217,6 +217,10 @@
       <p>{{ site.author }}</p>
       {% if site.bluesky %}<p><a href="https://bsky.app/profile/{{ site.bluesky }}" rel="me">bluesky</a></p>{% endif %}
       {% if site.fediverse %}<p><a href="{{ site.fediverse }}" rel="me">fediverse</a></p>{% endif %}
+      {#- The archive (2026-11-26): in the footer, on every page, so a reader
+          who lands on one post has a way to the rest; it was only under the
+          home page's last post before. -#}
+      <p><a href="/archive/">archive</a></p>
       <p><a href="/feed.xml">feed</a></p>
       {#- The IndieWeb Webring (2026-11-02), joined by signing in with the
           Bluesky handle. Their snippet as given: the ring now resolves

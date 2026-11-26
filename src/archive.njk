@@ -1,40 +1,36 @@
 ---
 layout: base.njk
-pagination:
-  data: collections.stream
-  size: 20
-  alias: posts
-permalink: "{% if pagination.pageNumber == 0 %}/archive/{% else %}/archive/page-{{ pagination.pageNumber + 1 }}/{% endif %}"
-eleventyComputed:
-  title: "Archive{% if pagination.pageNumber > 0 %}, page {{ pagination.pageNumber + 1 }}{% endif %}"
+permalink: /archive/
+title: Archive
 ---
-{#- Each page its own <title> (2026-11-11); all six were "Archive". -#}
+{#- One page, by month (2026-11-26; 20 a page with the pager before). Each
+    way through the writing has one job: skimming backward is the home
+    stream's pager, a topic is the shelf and subject pages, and the archive
+    is time and titles. One page so Ctrl-F finds a title; a year of dailies
+    is ~365 short rows, so split by year only when that stops being true.
+    Reached from the footer on every page. -#}
 <h1>Archive</h1>
-
+{% set oldest = collections.stream | last %}
+<p class="archive-count">{{ collections.stream | length }} posts since {{ (oldest.essay or oldest.post).date | readableDate }}</p>
+{% for entry in collections.stream %}
+{% set item = entry.essay or entry.post %}
+{% set ds = item.date | dateSlug %}
+{% set m = ds.slice(0, 7) %}
+{% set prev = collections.stream[loop.index0 - 1] if not loop.first %}
+{% if loop.first or ((prev.essay or prev.post).date | dateSlug).slice(0, 7) != m %}
+{% if not loop.first %}</ul></section>{% endif %}
+{% set rd = item.date | readableDate %}
+<section class="archive-month">
+<h2 class="archive-month-head">{{ rd.split(" ").slice(1).join(" ") }}</h2>
 <ul class="archive-list">
-  {% for entry in posts %}
-  {% if entry.kind == "essay" %}
+{% endif %}
   <li>
-    <a href="{{ entry.essay.url }}">{{ entry.essay.title }}</a>
-    <span class="archive-kind">deep thoughts</span>
-    <span class="archive-note">{{ entry.date | readableDate }}</span>
+    <span class="archive-day">{{ ds.slice(8) | int }}</span>
+    {% if entry.kind == "essay" %}
+    <span class="archive-entry"><span class="archive-kind">deep thoughts</span> <a href="{{ item.url }}">{{ item.title }}</a></span>
+    {% else %}
+    <a href="{{ item.url }}">{{ item.data.title or (item.date | readableDate) }}</a>
+    {% endif %}
   </li>
-  {% else %}
-  {% set post = entry.post %}
-  <li>
-    <a href="{{ post.url }}">{{ post.data.title or (post.date | readableDate) }}</a>
-    {% if post.data.title %}<span class="archive-note">{{ post.date | readableDate }}</span>{% endif %}
-  </li>
-  {% endif %}
-  {% endfor %}
-</ul>
-
-{#- The views' pager since 2026-11-11 (pager.njk), so there is one. -#}
-{%- set pager = {
-  number: pagination.pageNumber + 1,
-  total: pagination.pages | length,
-  first: "/archive/",
-  previous: pagination.href.previous,
-  next: pagination.href.next
-} %}
-{% include "pager.njk" %}
+{% if loop.last %}</ul></section>{% endif %}
+{% endfor %}

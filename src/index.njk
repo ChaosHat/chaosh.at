@@ -125,6 +125,4 @@ eleventyComputed:
   next: pagination.href.next
 } %}
 {% include "pager.njk" %}
-{% if pagination.pages | length > 1 %}
-<p class="all-link"><a href="/archive/">all posts</a></p>
-{% endif %}
+{#- "all posts" went 2026-11-26: the archive is in the footer on every page. -#}
