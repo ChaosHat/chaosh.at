@@ -2813,6 +2813,7 @@ export default function (eleventyConfig) {
   // pages exist.
   const pageClashes = (api) => {
     const bases = new Set([
+      "/", // the home stream's /page-N/ (index.njk, 2026-11-26)
       ...LIVE.flatMap((g) => [g.urls.home, g.urls.log]),
       ...buildTagPages(api).map((t) => `/t/${t.slug}/`),
       ...buildRatingPages(api).map((r) => `/r/${r.slug}/`),

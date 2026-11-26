@@ -1,9 +1,23 @@
 ---
 layout: base.njk
+pagination:
+  data: collections.stream
+  size: 5
+  alias: posts
+permalink: "{% if pagination.pageNumber == 0 %}/{% else %}/page-{{ pagination.pageNumber + 1 }}/{% endif %}"
+eleventyComputed:
+  title: "{% if pagination.pageNumber > 0 %}Page {{ pagination.pageNumber + 1 }}{% endif %}"
 ---
+{#- The home stream paginates (2026-11-26): five posts a page, whole, page 1
+    at / and the rest at /page-N/, so a reader can skim backward the
+    traditional way instead of dropping from five full posts onto the
+    archive's title list. The archive stays the index. `/` is a view base in
+    pageClashes (eleventy.config.js), so nothing else may claim /page-N/. -#}
+{%- set firstPage = pagination.pageNumber == 0 %}
 {#- The newest entry wears no band (2026-11-04): the masthead stands in for
     it, daily or essay. It stays tonight's sky, not that post's — nothing
-    here claims they're the same. Every entry after keeps its band. -#}
+    here claims they're the same. Every entry after keeps its band, and on
+    page 2 onward every entry does. -#}
 {#- The page's one h1 (2026-11-11): the site name is a wordmark image link in
     the header, so a heading for it is read aloud only. -#}
 <h1 class="sr-only">{{ site.title }}</h1>
@@ -16,7 +30,7 @@ layout: base.njk
       against the shell's left edge; hover or focus opens the labels (CSS,
       "the rail"). Rows group by day: an essay on a day that also has a daily
       joins that day's group, so a group opens on a new date only. -#}
-  {% set five = collections.stream | limit(5) %}
+  {% set five = posts %}
   {% for entry in five %}
   {% set item = entry.essay or entry.post %}
   {% set d = item.date | dateSlug %}
@@ -65,14 +79,14 @@ layout: base.njk
   });
 </script>
 <ul class="post-list">
-  {% for entry in collections.stream | limit(5) %}
+  {% for entry in posts %}
   {% if entry.kind == "essay" %}
   {#- An essay in the stream is its lede and a link, never the text: the
       full piece has one home. The kicker marks it as the other kind of post,
       since a titled daily wears the same head. -#}
   {% set e = entry.essay %}
   <li class="stream-essay" id="essay-{{ e.date | dateSlug }}">
-    <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ e.date | daySky }})"{% endif %}>
+    <div class="entry-head"{% if not (firstPage and loop.first) %} style="--day-sky:url({{ e.date | daySky }})"{% endif %}>
       <span class="entry-kind">deep thoughts</span>
       <a class="post-list-title" href="{{ e.url }}">{{ e.title }}</a>
       <p class="post-list-subdate">{{ e.date | readableDate }}</p>
@@ -87,7 +101,7 @@ layout: base.njk
       limit filter). -#}
   {% set d = post.date | dateSlug %}
   <li id="{{ d }}">
-    <div class="entry-head"{% if not loop.first %} style="--day-sky:url({{ post.date | daySky }})"{% endif %}>
+    <div class="entry-head"{% if not (firstPage and loop.first) %} style="--day-sky:url({{ post.date | daySky }})"{% endif %}>
       {% if post.data.title %}
       <a class="post-list-title" href="{{ post.url }}">{{ post.data.title }}</a>
       <p class="post-list-subdate">{{ post.date | readableDate }}</p>
@@ -103,6 +117,14 @@ layout: base.njk
   {% endfor %}
 </ul>
 
-{% if collections.stream | length > 5 %}
+{%- set pager = {
+  number: pagination.pageNumber + 1,
+  total: pagination.pages | length,
+  first: "/",
+  previous: pagination.href.previous,
+  next: pagination.href.next
+} %}
+{% include "pager.njk" %}
+{% if pagination.pages | length > 1 %}
 <p class="all-link"><a href="/archive/">all posts</a></p>
 {% endif %}
